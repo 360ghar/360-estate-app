@@ -1,0 +1,99 @@
+{
+  "@@locale": "en",
+  "appName": "360 Estate",
+
+  "commonContinue": "Continue",
+  "commonBack": "Back",
+  "commonRetry": "Retry",
+  "commonCancel": "Cancel",
+  "commonSave": "Save",
+  "commonSearch": "Search",
+  "commonSignOut": "Sign out",
+
+  "errorSomethingWentWrong": "Something went wrong",
+  "errorOfflineHint": "You appear to be offline. Check your connection and try again.",
+  "errorMissingConfigTitle": "App configuration missing",
+  "errorMissingConfigBody": "Set SUPABASE_URL and SUPABASE_ANON_KEY with --dart-define to enable authentication.",
+
+  "enterPhoneTitle": "Enter phone number",
+  "phoneNumberLabel": "Phone number",
+  "phoneNumberHint": "+91XXXXXXXXXX",
+  "validationPhoneRequired": "Phone number is required",
+  "validationPhoneInternational": "Use international format, e.g. +91...",
+  "validationPhoneTooShort": "Phone number looks too short",
+
+  "loginTitle": "Login",
+  "signupTitle": "Sign up",
+  "passwordLabel": "Password",
+  "validationPasswordRequired": "Password is required",
+  "validationPasswordTooShort": "Password must be at least 6 characters",
+  "signInCta": "Sign in",
+  "createAccountCta": "Create account",
+  "alreadyHaveAccountCta": "Already have an account?",
+  "authPhoneSummary": "Phone: {phone}",
+  "@authPhoneSummary": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+
+  "homeTitle": "Home",
+  "settingsTitle": "Settings",
+
+  "homeToday": "Today is {date}",
+  "@homeToday": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMd"
+      }
+    }
+  },
+  "homeOutstandingRent": "Outstanding rent: {amount}",
+  "@homeOutstandingRent": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+
+  "propertiesDemoTitle": "Properties (pagination demo)",
+  "propertiesDemoSubtitle": "Infinite scroll with pull-to-refresh",
+
+  "propertiesTitle": "Properties",
+  "propertiesSearchHint": "Search properties",
+  "propertiesCount": "{count, plural, =0{No properties} =1{1 property} other{{count} properties}}",
+  "@propertiesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "themeSectionTitle": "Theme",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+
+  "languageSectionTitle": "Language",
+  "languageSystem": "System default",
+  "languageEnglish": "English",
+  "languageHindi": "Hindi",
+
+  "emptyTitle": "Nothing here yet",
+  "emptyBody": "Try adjusting your filters or refresh.",
+
+  "publicApplicationTitle": "Application",
+  "publicApplicationSlug": "Public application: {slug}",
+  "@publicApplicationSlug": {
+    "placeholders": {
+      "slug": {
+        "type": "String"
+      }
+    }
+  }
+}
