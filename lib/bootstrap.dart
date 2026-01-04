@@ -13,33 +13,33 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> bootstrap() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  final envLoaded = await EnvLoader.load();
-
-  final config = AppConfig.fromEnvironment();
-  AppLogger.init(config);
-  if (!envLoaded) {
-    AppLogger.w('No .env asset found; falling back to --dart-define values');
-  }
-
-  final preferences = await AppPreferences.create();
-  final secureStore = SecureKvStore();
-
-  final CrashReporter crashReporter = config.enableCrashReporting
-      ? ConsoleCrashReporter()
-      : NoopCrashReporter();
-  await crashReporter.init();
-  CrashReporterGuard(crashReporter).install();
-
-  Get
-    ..put<AppConfig>(config, permanent: true)
-    ..put<AppPreferences>(preferences, permanent: true)
-    ..put<SecureKvStore>(secureStore, permanent: true)
-    ..put<CrashReporter>(crashReporter, permanent: true);
-
-  await runZonedGuarded(
+  return runZonedGuarded(
     () async {
+      WidgetsFlutterBinding.ensureInitialized();
+
+      final envLoaded = await EnvLoader.load();
+
+      final config = AppConfig.fromEnvironment();
+      AppLogger.init(config);
+      if (!envLoaded) {
+        AppLogger.w('No .env asset found; falling back to --dart-define values');
+      }
+
+      final preferences = await AppPreferences.create();
+      final secureStore = SecureKvStore();
+
+      final CrashReporter crashReporter = config.enableCrashReporting
+          ? ConsoleCrashReporter()
+          : NoopCrashReporter();
+      await crashReporter.init();
+      CrashReporterGuard(crashReporter).install();
+
+      Get
+        ..put<AppConfig>(config, permanent: true)
+        ..put<AppPreferences>(preferences, permanent: true)
+        ..put<SecureKvStore>(secureStore, permanent: true)
+        ..put<CrashReporter>(crashReporter, permanent: true);
+
       if (config.isSupabaseConfigured) {
         await Supabase.initialize(
           url: config.supabaseUrl,
@@ -56,14 +56,7 @@ Future<void> bootstrap() async {
       runApp(const App());
     },
     (error, stackTrace) {
-      unawaited(
-        crashReporter.recordError(
-          error,
-          stackTrace,
-          fatal: true,
-          reason: 'runZonedGuarded',
-        ),
-      );
+      AppLogger.e('Bootstrap error', error: error, stackTrace: stackTrace);
     },
   );
 }

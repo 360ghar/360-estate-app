@@ -46,16 +46,65 @@ final class _FakePropertiesRepository implements PropertiesRepository {
     return const paging.Page<Property>(
       items: [
         Property(
-          id: 'prop_1',
+          id: 1,
           title: 'Property 1',
           city: 'Mumbai',
           addressLine: 'Address',
           monthlyRentInr: 25000,
+          propertyType: PropertyType.apartment,
+          propertyCategory: PropertyCategory.residential,
+          managementStatus: ManagementStatus.active,
         ),
       ],
       page: 1,
       limit: 20,
       hasMore: false,
     );
+  }
+
+  @override
+  Future<Property> getPropertyById(int id) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Property> createProperty({
+    required String title,
+    String? nickname,
+    required String addressLine,
+    required String city,
+    String? state,
+    String? pincode,
+    String country = 'India',
+    required String propertyType,
+    required String propertyCategory,
+    int? bedroomCount,
+    int? bathroomCount,
+    int? balconyCount,
+    double? floorAreaSqft,
+    int monthlyRentInr = 0,
+    double? securityDeposit,
+    double? maintenanceCharges,
+    String managementStatus = 'active',
+    int paymentDueDay = 1,
+    String? notes,
+    List<String> images = const [],
+  }) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Property> updateProperty(int id, Map<String, dynamic> updates) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> deleteProperty(int id) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String> uploadPropertyImage(String filePath) async {
+    return 'https://example.com/image.jpg';
   }
 }

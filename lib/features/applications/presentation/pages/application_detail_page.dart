@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/errors/failure_localization.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/state/view_state.dart';
 import 'package:estate_app/core/presentation/widgets/app_button.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loader.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
@@ -280,72 +280,69 @@ class _HeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 30,
-              backgroundColor: application.status.color.withValues(alpha: 0.1),
-              child: Text(
-                application.applicantName.isNotEmpty
-                    ? application.applicantName[0].toUpperCase()
-                    : '?',
-                style: TextStyle(
-                  fontSize: 24,
-                  color: application.status.color,
-                  fontWeight: FontWeight.bold,
-                ),
+    return AppCard(
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 30,
+            backgroundColor: application.status.color.withOpacity(0.1),
+            child: Text(
+              application.applicantName.isNotEmpty
+                  ? application.applicantName[0].toUpperCase()
+                  : '?',
+              style: TextStyle(
+                fontSize: 24,
+                color: application.status.color,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    application.applicantName,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  application.applicantName,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: application.status.color.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          application.status.icon,
-                          size: 14,
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: application.status.color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        application.status.icon,
+                        size: 14,
+                        color: application.status.color,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        application.status.displayName,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
                           color: application.status.color,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          application.status.displayName,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: application.status.color,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -362,10 +359,8 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
+    return Obx(() => AppCard(
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (application.canReview)
@@ -404,7 +399,7 @@ class _ActionCard extends StatelessWidget {
               ],
             ),
           ),
-        ));
+      );
   }
 
   void _showDecisionDialog(BuildContext context, {required bool isApprove}) {
@@ -477,23 +472,19 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 12),
-            ...children,
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+          ...children,
+        ],
       ),
     );
   }
@@ -517,24 +508,22 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: Colors.grey[600]),
+          Icon(icon, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(width: 8),
           SizedBox(
             width: 100,
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey[600],
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
@@ -551,56 +540,53 @@ class _ReferencesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'References',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
-            ...references.map((ref) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        ref.name,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                        ),
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'References',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 12),
+          ...references.map((ref) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      ref.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
                       ),
-                      Text(
-                        ref.relationship,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          Icon(Icons.phone, size: 14, color: AppColors.brand),
-                          const SizedBox(width: 4),
-                          Text(
-                            ref.phone,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: AppColors.brand,
-                            ),
+                    ),
+                    Text(
+                      ref.relationship,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                )),
-          ],
-        ),
+                    ),
+                    Row(
+                      children: [
+                        Icon(Icons.phone,
+                            size: 14,
+                            color: Theme.of(context).colorScheme.primary,),
+                        const SizedBox(width: 4),
+                        Text(
+                          ref.phone,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),),
+        ],
       ),
     );
   }

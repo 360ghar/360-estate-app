@@ -1,7 +1,5 @@
-import 'dart:async';
-
 import 'package:estate_app/app/routes/app_routes.dart';
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/features/reports/domain/entities/report.dart';
 import 'package:flutter/material.dart';
@@ -21,112 +19,144 @@ class ReportsPage extends StatelessWidget {
         children: [
           Text(
             'Select a report to view',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 16),
-          ...ReportType.values.map((type) => _ReportCard(reportType: type)),
+          _ReportCategory(
+            title: 'Financial Reports',
+            reports: [
+              _ReportItem(
+                title: 'Rent Roll',
+                subtitle: 'Current rent status for all properties',
+                icon: Icons.payments_outlined,
+                onTap: () => Get.toNamed<void>(
+                  Routes.reportDetail,
+                  arguments: {'reportType': ReportType.rentRoll},
+                ),
+              ),
+              _ReportItem(
+                title: 'Income Report',
+                subtitle: 'Revenue breakdown by source',
+                icon: Icons.receipt_long_outlined,
+                onTap: () => Get.toNamed<void>(
+                  Routes.reportDetail,
+                  arguments: {'reportType': ReportType.income},
+                ),
+              ),
+              _ReportItem(
+                title: 'Expenses Report',
+                subtitle: 'Expense breakdown by category',
+                icon: Icons.money_off_outlined,
+                onTap: () => Get.toNamed<void>(
+                  Routes.reportDetail,
+                  arguments: {'reportType': ReportType.expenses},
+                ),
+              ),
+              _ReportItem(
+                title: 'Profit & Loss',
+                subtitle: 'Overall financial performance',
+                icon: Icons.analytics_outlined,
+                onTap: () => Get.toNamed<void>(
+                  Routes.reportDetail,
+                  arguments: {'reportType': ReportType.profitAndLoss},
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          _ReportCategory(
+            title: 'Operational Reports',
+            reports: [
+              _ReportItem(
+                title: 'Occupancy Report',
+                subtitle: 'Units status and availability',
+                icon: Icons.business_outlined,
+                onTap: () => Get.toNamed<void>(
+                  Routes.reportDetail,
+                  arguments: {'reportType': ReportType.occupancy},
+                ),
+              ),
+              _ReportItem(
+                title: 'Maintenance Summary',
+                subtitle: 'Track maintenance requests status',
+                icon: Icons.build_outlined,
+                onTap: () => Get.toNamed<void>(
+                  Routes.reportDetail,
+                  arguments: {'reportType': ReportType.maintenance},
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 }
 
-class _ReportCard extends StatelessWidget {
-  const _ReportCard({required this.reportType});
+class _ReportCategory extends StatelessWidget {
+  const _ReportCategory({
+    required this.title,
+    required this.reports,
+  });
 
-  final ReportType reportType;
+  final String title;
+  final List<_ReportItem> reports;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: () => unawaited(Get.toNamed<void>(
-          Routes.reportDetail.replaceFirst(':type', reportType.apiValue),
-          arguments: {'reportType': reportType},
-        )),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).primaryColor,
+                ),
+          ),
+        ),
+        AppCard(
+          padding: EdgeInsets.zero,
+          child: Column(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.brand.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  reportType.icon,
-                  color: AppColors.brand,
-                  size: 28,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      reportType.displayName,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      reportType.description,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    if (reportType.requiresDateRange) ...[
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.date_range,
-                              size: 14,
-                              color: Colors.blue[700],
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Requires date range',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.blue[700],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.chevron_right,
-                color: Colors.grey,
-              ),
+              for (var i = 0; i < reports.length; i++) ...[
+                reports[i],
+                if (i < reports.length - 1)
+                  const Divider(height: 1, indent: 56),
+              ],
             ],
           ),
         ),
-      ),
+      ],
+    );
+  }
+}
+
+class _ReportItem extends StatelessWidget {
+  const _ReportItem({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant),
+      title: Text(title),
+      subtitle: Text(subtitle),
+      trailing: const Icon(Icons.chevron_right, size: 20),
+      onTap: onTap,
     );
   }
 }

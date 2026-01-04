@@ -22,6 +22,9 @@ class InspectionsController extends GetxController {
   bool _hasMore = true;
   static const int _pageSize = 20;
 
+  // Public getter for hasMore
+  RxBool get hasMore => _hasMore.obs;
+
   @override
   void onInit() {
     super.onInit();

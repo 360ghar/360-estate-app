@@ -73,7 +73,7 @@ final class MaintenanceRepositoryImpl implements MaintenanceRepository {
 
   @override
   Future<MaintenanceRequest> updateRequest(
-      int id, Map<String, dynamic> updates) async {
+      int id, Map<String, dynamic> updates,) async {
     final dto = await _remoteDataSource.updateRequest(id, updates);
     return dto.toEntity();
   }

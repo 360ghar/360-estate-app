@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/errors/failure_localization.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/state/view_state.dart';
@@ -68,11 +68,11 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
             Obx(() => Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  color: AppColors.brand.withValues(alpha: 0.05),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
                   child: Row(
                     children: [
                       const Icon(Icons.calendar_today,
-                          size: 16, color: Colors.grey),
+                          size: 16, color: Colors.grey,),
                       const SizedBox(width: 8),
                       Text(
                         '${dateFormat.format(controller.startDate.value!)} - ${dateFormat.format(controller.endDate.value!)}',
@@ -88,7 +88,7 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
                       ),
                     ],
                   ),
-                )),
+                ),),
           // Report content
           Expanded(child: _buildReportContent()),
         ],
@@ -100,27 +100,27 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
     switch (reportType) {
       case ReportType.rentRoll:
         return _RentRollReportView(
-            controller: controller, currencyFormat: currencyFormat);
+            controller: controller, currencyFormat: currencyFormat,);
       case ReportType.income:
         return _IncomeReportView(
             controller: controller,
             currencyFormat: currencyFormat,
-            monthFormat: monthFormat);
+            monthFormat: monthFormat,);
       case ReportType.expenses:
         return _ExpensesReportView(
             controller: controller,
             currencyFormat: currencyFormat,
-            monthFormat: monthFormat);
+            monthFormat: monthFormat,);
       case ReportType.profitAndLoss:
         return _PnLReportView(
             controller: controller,
             currencyFormat: currencyFormat,
-            monthFormat: monthFormat);
+            monthFormat: monthFormat,);
       case ReportType.occupancy:
         return _OccupancyReportView(controller: controller);
       case ReportType.maintenance:
         return _MaintenanceReportView(
-            controller: controller, currencyFormat: currencyFormat);
+            controller: controller, currencyFormat: currencyFormat,);
     }
   }
 
@@ -232,7 +232,7 @@ class _RentRollReportView extends StatelessWidget {
               ...report.items.map((item) => _RentRollItemCard(
                     item: item,
                     currencyFormat: currencyFormat,
-                  )),
+                  ),),
             ],
           );
       }
@@ -272,11 +272,9 @@ class _RentRollItemCard extends StatelessWidget {
         statusIcon = Icons.circle;
     }
 
-    return Card(
+    return AppCard(
       margin: const EdgeInsets.only(bottom: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
+      child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(statusIcon, color: statusColor, size: 20),
@@ -321,14 +319,13 @@ class _RentRollItemCard extends StatelessWidget {
                     'Due: ${currencyFormat.format(item.amountDue)}',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.red[700],
+                      color: Theme.of(context).colorScheme.error,
                     ),
                   ),
               ],
             ),
           ],
         ),
-      ),
     );
   }
 }
@@ -389,7 +386,7 @@ class _IncomeReportView extends StatelessWidget {
                     percentage: cat.percentage,
                     currencyFormat: currencyFormat,
                     color: Colors.green,
-                  )),
+                  ),),
               const SizedBox(height: 24),
 
               // By Month
@@ -401,7 +398,7 @@ class _IncomeReportView extends StatelessWidget {
               ...report.byMonth.map((month) => _MonthRow(
                     month: monthFormat.format(month.month),
                     amount: currencyFormat.format(month.amount),
-                  )),
+                  ),),
             ],
           );
       }
@@ -463,7 +460,7 @@ class _ExpensesReportView extends StatelessWidget {
                     percentage: cat.percentage,
                     currencyFormat: currencyFormat,
                     color: Colors.red,
-                  )),
+                  ),),
               const SizedBox(height: 24),
 
               const Text(
@@ -474,7 +471,7 @@ class _ExpensesReportView extends StatelessWidget {
               ...report.byMonth.map((month) => _MonthRow(
                     month: monthFormat.format(month.month),
                     amount: currencyFormat.format(month.amount),
-                  )),
+                  ),),
             ],
           );
       }
@@ -568,49 +565,50 @@ class _PnLReportView extends StatelessWidget {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              ...report.byMonth.map((month) => Card(
+              ...report.byMonth.map((month) => AppCard(
                     margin: const EdgeInsets.only(bottom: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            monthFormat.format(month.month),
-                            style: const TextStyle(fontWeight: FontWeight.w600),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          monthFormat.format(month.month),
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  'Income: ${currencyFormat.format(month.income)}',
-                                  style: const TextStyle(
-                                      fontSize: 13, color: Colors.green),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Income: ${currencyFormat.format(month.income)}',
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: Colors.green,
                                 ),
                               ),
-                              Expanded(
-                                child: Text(
-                                  'Expenses: ${currencyFormat.format(month.expenses)}',
-                                  style: const TextStyle(
-                                      fontSize: 13, color: Colors.red),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Net: ${currencyFormat.format(month.netIncome)}',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: month.netIncome >= 0
-                                  ? Colors.green[700]
-                                  : Colors.red[700],
                             ),
+                            Expanded(
+                              child: Text(
+                                'Expenses: ${currencyFormat.format(month.expenses)}',
+                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Net: ${currencyFormat.format(month.netIncome)}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: month.netIncome >= 0
+                                ? Colors.green
+                                : Colors.red,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   )),
             ],
@@ -699,51 +697,49 @@ class _OccupancyReportView extends StatelessWidget {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              ...report.byPropertyType.map((type) => Card(
+              ...report.byPropertyType.map((type) => AppCard(
                     margin: const EdgeInsets.only(bottom: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  type.propertyType,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w600),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                type.propertyType,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
                                 ),
-                                Text(
-                                  '${type.occupied}/${type.total} occupied',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _getOccupancyColor(type.occupancyRate)
-                                  .withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Text(
-                              '${type.occupancyRate.toStringAsFixed(0)}%',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: _getOccupancyColor(type.occupancyRate),
                               ),
+                              Text(
+                                '${type.occupied}/${type.total} occupied',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _getOccupancyColor(type.occupancyRate)
+                                .withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(
+                            '${type.occupancyRate.toStringAsFixed(0)}%',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: _getOccupancyColor(type.occupancyRate),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   )),
               const SizedBox(height: 24),
@@ -753,8 +749,9 @@ class _OccupancyReportView extends StatelessWidget {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              ...report.items.map((item) => Card(
+              ...report.items.map((item) => AppCard(
                     margin: const EdgeInsets.only(bottom: 8),
+                    padding: EdgeInsets.zero,
                     child: ListTile(
                       leading: Icon(
                         item.isOccupied ? Icons.home : Icons.home_outlined,
@@ -769,8 +766,8 @@ class _OccupancyReportView extends StatelessWidget {
                                 : 'Vacant',
                         style: TextStyle(
                           color: item.isOccupied
-                              ? Colors.grey[600]
-                              : Colors.orange[700],
+                              ? Theme.of(context).colorScheme.onSurfaceVariant
+                              : Colors.orange,
                         ),
                       ),
                       trailing: Container(
@@ -780,7 +777,7 @@ class _OccupancyReportView extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: (item.isOccupied ? Colors.green : Colors.grey)
-                              .withValues(alpha: 0.1),
+                              .withOpacity(0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -895,7 +892,7 @@ class _MaintenanceReportView extends StatelessWidget {
                     currencyFormat: NumberFormat.decimalPattern(),
                     color: _getPriorityColor(p.priority),
                     showAsCount: true,
-                  )),
+                  ),),
               const SizedBox(height: 24),
 
               const Text(
@@ -903,42 +900,39 @@ class _MaintenanceReportView extends StatelessWidget {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              ...report.byCategory.map((cat) => Card(
+              ...report.byCategory.map((cat) => AppCard(
                     margin: const EdgeInsets.only(bottom: 8),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  cat.category,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w600),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                cat.category,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600,),
+                              ),
+                              Text(
+                                '${cat.count} requests',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 ),
-                                Text(
-                                  '${cat.count} requests',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                          Text(
-                            currencyFormat.format(cat.totalCost),
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey[700],
-                            ),
+                        ),
+                        Text(
+                          currencyFormat.format(cat.totalCost),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  )),
+                  ),),
             ],
           );
       }
@@ -977,38 +971,38 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = color ?? AppColors.brand;
+    final effectiveColor = color ?? Theme.of(context).colorScheme.primary;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, size: 20, color: effectiveColor),
-                const SizedBox(width: 8),
-                Text(
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 20, color: effectiveColor),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
                   label,
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.grey[600],
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: effectiveColor,
               ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: effectiveColor,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

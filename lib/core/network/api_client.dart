@@ -27,7 +27,8 @@ final class ApiClient {
                sendTimeout: const Duration(seconds: 30),
                receiveTimeout: const Duration(seconds: 30),
                validateStatus: (status) =>
-                   status != null && status >= 200 && status < 300,
+                   status != null && status >= 200 && status < 400,
+               followRedirects: true,
                headers: const {'Accept': 'application/json'},
              ),
            ) {

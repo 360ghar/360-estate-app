@@ -52,7 +52,11 @@ class PropertyDetailController extends GetxController {
       final property = await _repository.updateProperty(_propertyId, updates);
       state.value = ViewState.success(property);
       return true;
+    } on Failure catch (f) {
+      Get.snackbar('Update Failed', f.message);
+      return false;
     } catch (e) {
+      Get.snackbar('Update Failed', 'An unexpected error occurred');
       return false;
     }
   }
@@ -61,7 +65,11 @@ class PropertyDetailController extends GetxController {
     try {
       await _repository.deleteProperty(_propertyId);
       return true;
+    } on Failure catch (f) {
+      Get.snackbar('Deletion Failed', f.message);
+      return false;
     } catch (e) {
+      Get.snackbar('Deletion Failed', 'An unexpected error occurred');
       return false;
     }
   }

@@ -8,5 +8,10 @@ abstract interface class TenantsRepository {
     required String query,
   });
 
-  Future<Tenant> getTenantByUserId(String tenantUserId);
+  Future<Tenant> getTenantById(String id);
+
+  /// Get current tenant's own data (for tenant view)
+  Future<Tenant> getMyTenantData();
+
+  Future<Tenant> createTenant(Map<String, dynamic> data);
 }

@@ -9,16 +9,16 @@ import 'package:get/get.dart';
 class TenantDetailController extends GetxController {
   TenantDetailController({
     required TenantsRepository repository,
-    required String tenantUserId,
+    required String tenantId,
   })  : _repository = repository,
-        _tenantUserId = tenantUserId;
+        _tenantId = tenantId;
 
   final TenantsRepository _repository;
-  final String _tenantUserId;
+  final String _tenantId;
 
   final Rx<ViewState<Tenant>> state = const ViewState<Tenant>.idle().obs;
 
-  String get tenantUserId => _tenantUserId;
+  String get tenantId => _tenantId;
 
   @override
   void onInit() {
@@ -30,7 +30,7 @@ class TenantDetailController extends GetxController {
     state.value = const ViewState.loading();
 
     try {
-      final tenant = await _repository.getTenantByUserId(_tenantUserId);
+      final tenant = await _repository.getTenantById(_tenantId);
       state.value = ViewState.success(tenant);
     } on Failure catch (f) {
       state.value = ViewState.error(f);

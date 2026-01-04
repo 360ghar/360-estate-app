@@ -7,15 +7,18 @@ class AppCard extends StatelessWidget {
     super.key,
     required this.child,
     this.padding = AppInsets.card,
+    this.margin,
   });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? margin;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
+      margin: margin,
       padding: padding,
       decoration: BoxDecoration(
         color: scheme.surface,

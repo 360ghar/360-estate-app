@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/widgets/app_button.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/features/documents/domain/entities/document.dart';
@@ -43,12 +42,12 @@ class _DocumentUploadView extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: file != null ? AppColors.brand : Colors.grey.shade300,
+                  color: file != null ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
                   width: file != null ? 2 : 1,
                 ),
                 borderRadius: BorderRadius.circular(12),
                 color: file != null
-                    ? AppColors.brand.withValues(alpha: 0.05)
+                    ? Theme.of(context).colorScheme.primary.withOpacity(0.05)
                     : null,
               ),
               child: Column(
@@ -57,7 +56,7 @@ class _DocumentUploadView extends StatelessWidget {
                     Icon(
                       _getFileIcon(file.path),
                       size: 48,
-                      color: AppColors.brand,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -149,13 +148,13 @@ class _DocumentUploadView extends StatelessWidget {
                     ),
                     selected: isSelected,
                     onSelected: (_) => controller.setDocumentType(type),
-                    selectedColor: AppColors.brand,
+                    selectedColor: Theme.of(context).colorScheme.primary,
                     labelStyle: TextStyle(
                       color: isSelected ? Colors.white : Colors.black,
                     ),
                   );
                 }).toList(),
-              )),
+              ),),
           const SizedBox(height: 24),
 
           // Property selector (if not preset)
@@ -216,7 +215,7 @@ class _DocumentUploadView extends StatelessWidget {
                     ],
                   ),
                 ),
-              )),
+              ),),
           const SizedBox(height: 32),
 
           // Upload button
@@ -224,7 +223,7 @@ class _DocumentUploadView extends StatelessWidget {
                 label: 'Upload Document',
                 isLoading: controller.isUploading.value,
                 onPressed: controller.canSubmit ? controller.upload : null,
-              )),
+              ),),
 
           const SizedBox(height: 24),
         ],
@@ -345,14 +344,13 @@ class _PropertySelectorState extends State<_PropertySelector> {
         ),
         const SizedBox(height: 8),
         Obx(() => DropdownButtonFormField<int>(
-              value: widget.controller.selectedPropertyId.value,
+              initialValue: widget.controller.selectedPropertyId.value,
               decoration: const InputDecoration(
                 hintText: 'Select a property',
                 prefixIcon: Icon(Icons.apartment),
               ),
               items: [
                 const DropdownMenuItem(
-                  value: null,
                   child: Text('No property'),
                 ),
                 ..._properties.map((prop) {
@@ -363,7 +361,7 @@ class _PropertySelectorState extends State<_PropertySelector> {
                 }),
               ],
               onChanged: (value) => widget.controller.setPropertyId(value),
-            )),
+            ),),
         const SizedBox(height: 16),
       ],
     );

@@ -1,14 +1,16 @@
 import 'dart:async';
 
 import 'package:estate_app/app/routes/app_routes.dart';
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/config/feature_flags.dart';
 import 'package:estate_app/core/presentation/errors/failure_localization.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/widgets/app_button.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_empty_state.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loader.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/widgets/feature_coming_soon.dart';
 import 'package:estate_app/features/maintenance/domain/entities/maintenance_request.dart';
 import 'package:estate_app/features/maintenance/presentation/controllers/maintenance_controller.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +22,17 @@ class MaintenancePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Show coming soon if feature is disabled
+    if (!FeatureFlags.maintenanceEnabled) {
+      return AppScaffold(
+        appBar: AppBar(title: const Text('Maintenance')),
+        body: const FeatureComingSoon(
+          featureName: 'Maintenance Requests',
+          icon: Icons.build,
+          description: 'Create and track maintenance requests, assign technicians, and manage repairs.',
+        ),
+      );
+    }
     return const _MaintenanceView();
   }
 }
@@ -78,6 +91,7 @@ class _MaintenanceViewState extends State<_MaintenanceView> {
           ],
         ),
         floatingActionButton: FloatingActionButton(
+          heroTag: 'maintenance_fab',
           onPressed: () async {
             final result =
                 await Get.toNamed<MaintenanceRequest>(Routes.maintenanceCreate);
@@ -85,8 +99,7 @@ class _MaintenanceViewState extends State<_MaintenanceView> {
               unawaited(controller.refresh());
             }
           },
-          backgroundColor: AppColors.brand,
-          child: const Icon(Icons.add, color: Colors.white),
+          child: const Icon(Icons.add),
         ),
         body: Builder(
           builder: (_) {
@@ -255,7 +268,7 @@ class _MaintenanceViewState extends State<_MaintenanceView> {
           ),
         ),
       ),
-    ));
+    ),);
   }
 }
 
@@ -269,9 +282,9 @@ class _StatsBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         border: Border(
-          bottom: BorderSide(color: Colors.grey.shade200),
+          bottom: BorderSide(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5)),
         ),
       ),
       child: Row(
@@ -324,9 +337,8 @@ class _StatItem extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
       ],
@@ -351,8 +363,8 @@ class _FilterChip extends StatelessWidget {
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => onTap(),
-      selectedColor: AppColors.brand.withValues(alpha: 0.2),
-      checkmarkColor: AppColors.brand,
+      selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+      checkmarkColor: Theme.of(context).colorScheme.primary,
     );
   }
 }
@@ -370,11 +382,11 @@ class _MaintenanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('MMM d, yyyy');
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -385,7 +397,7 @@ class _MaintenanceCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: request.category.color.withValues(alpha: 0.1),
+                      color: request.category.color.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -401,19 +413,18 @@ class _MaintenanceCard extends StatelessWidget {
                       children: [
                         Text(
                           request.title,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
-                          ),
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
                         Text(
                           request.category.displayName,
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 13,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            fontSize: 12,
                           ),
                         ),
                       ],
@@ -425,9 +436,9 @@ class _MaintenanceCard extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 request.description,
-                style: TextStyle(
-                  color: Colors.grey[700],
-                  fontSize: 14,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 13,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -441,14 +452,13 @@ class _MaintenanceCard extends StatelessWidget {
                     Icon(
                       Icons.calendar_today_outlined,
                       size: 14,
-                      color: Colors.grey[500],
+                      color: Theme.of(context).colorScheme.outline,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       dateFormat.format(request.createdAt!),
-                      style: TextStyle(
-                        color: Colors.grey[500],
-                        fontSize: 12,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.outline,
                       ),
                     ),
                   ],
@@ -461,15 +471,15 @@ class _MaintenanceCard extends StatelessWidget {
                     Icon(
                       Icons.event_outlined,
                       size: 14,
-                      color: Colors.blue[600],
+                      color: Colors.blue,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       'Scheduled: ${dateFormat.format(request.scheduledDate!)}',
-                      style: TextStyle(
-                        color: Colors.blue[600],
+                      style: const TextStyle(
+                        color: Colors.blue,
                         fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],

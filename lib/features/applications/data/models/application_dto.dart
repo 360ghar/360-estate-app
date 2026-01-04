@@ -73,7 +73,7 @@ final class ApplicationFormDto {
           (json['property'] as Map<String, dynamic>?)?['address'] as String?,
       customFields: (json['custom_fields'] as List<dynamic>?)
               ?.map((e) =>
-                  ApplicationFormFieldDto.fromJson(e as Map<String, dynamic>))
+                  ApplicationFormFieldDto.fromJson(e as Map<String, dynamic>),)
               .toList() ??
           [],
       createdAt: json['created_at'] != null
@@ -215,7 +215,7 @@ final class ApplicationDto {
       emergencyContactPhone: json['emergency_contact_phone'] as String?,
       references: (json['references'] as List<dynamic>?)
               ?.map((e) =>
-                  ApplicationReferenceDto.fromJson(e as Map<String, dynamic>))
+                  ApplicationReferenceDto.fromJson(e as Map<String, dynamic>),)
               .toList() ??
           [],
       customFieldResponses:

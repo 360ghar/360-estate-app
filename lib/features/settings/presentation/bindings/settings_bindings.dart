@@ -1,7 +1,11 @@
+import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/core/storage/app_preferences.dart';
 import 'package:estate_app/features/settings/data/datasources/settings_local_data_source.dart';
+import 'package:estate_app/features/settings/data/datasources/user_profile_data_source.dart';
 import 'package:estate_app/features/settings/data/repositories/settings_repository_impl.dart';
+import 'package:estate_app/features/settings/data/repositories/user_profile_repository_impl.dart';
 import 'package:estate_app/features/settings/domain/repositories/settings_repository.dart';
+import 'package:estate_app/features/settings/domain/repositories/user_profile_repository.dart';
 import 'package:estate_app/features/settings/domain/usecases/get_locale_usecase.dart';
 import 'package:estate_app/features/settings/domain/usecases/get_theme_mode_usecase.dart';
 import 'package:estate_app/features/settings/domain/usecases/set_locale_usecase.dart';
@@ -19,12 +23,23 @@ class SettingsBindings extends Bindings {
       Get.lazyPut<T>(builder, fenix: true);
     }
 
+    // Settings local data source
     lazyPutIfAbsent<SettingsLocalDataSource>(
       () => SettingsLocalDataSourceImpl(Get.find<AppPreferences>()),
     );
     lazyPutIfAbsent<SettingsRepository>(
       () => SettingsRepositoryImpl(Get.find<SettingsLocalDataSource>()),
     );
+
+    // User profile data source (backend API)
+    lazyPutIfAbsent<UserProfileDataSource>(
+      () => UserProfileDataSourceImpl(apiClient: Get.find<ApiClient>()),
+    );
+    lazyPutIfAbsent<UserProfileRepository>(
+      () => UserProfileRepositoryImpl(Get.find<UserProfileDataSource>()),
+    );
+
+    // Use cases
     lazyPutIfAbsent<GetThemeModeUseCase>(
       () => GetThemeModeUseCase(Get.find<SettingsRepository>()),
     );
@@ -45,6 +60,7 @@ class SettingsBindings extends Bindings {
           setThemeMode: Get.find<SetThemeModeUseCase>(),
           getLocale: Get.find<GetLocaleUseCase>(),
           setLocale: Get.find<SetLocaleUseCase>(),
+          profileRepository: Get.find<UserProfileRepository>(),
         ),
         permanent: true,
       );

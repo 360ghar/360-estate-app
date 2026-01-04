@@ -23,6 +23,7 @@ void main() {
       supabaseAnonKey: '',
       enableCrashReporting: false,
       enableDebugLogs: true,
+      useMockApi: false,
       featureFlags: FeatureFlags(
         enablePublicApplications: true,
       ),

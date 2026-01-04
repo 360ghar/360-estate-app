@@ -25,6 +25,8 @@ final class Property {
     this.paymentDueDay = 1,
     this.notes,
     this.monthlyRentInr = 0,
+    this.securityDeposit,
+    this.maintenanceCharges,
     this.activeLease,
     this.createdAt,
     this.updatedAt,
@@ -49,6 +51,8 @@ final class Property {
   final int paymentDueDay;
   final String? notes;
   final int monthlyRentInr;
+  final double? securityDeposit;
+  final double? maintenanceCharges;
   final ActiveLease? activeLease;
   final DateTime? createdAt;
   final DateTime? updatedAt;

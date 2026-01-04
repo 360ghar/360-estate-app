@@ -95,6 +95,16 @@ final class RentRollReportDto {
         totalOutstanding: totalOutstanding,
         items: items.map((e) => e.toEntity()).toList(),
       );
+
+  /// Returns an empty report for fallback when PM endpoints are unavailable
+  factory RentRollReportDto.empty() => RentRollReportDto(
+        generatedAt: DateTime.now(),
+        totalProperties: 0,
+        totalMonthlyRent: 0,
+        totalCollected: 0,
+        totalOutstanding: 0,
+        items: [],
+      );
 }
 
 // Income Report DTOs
@@ -207,11 +217,11 @@ final class IncomeReportDto {
       totalIncome: (json['total_income'] as num).toDouble(),
       byCategory: (json['by_category'] as List<dynamic>)
           .map((e) =>
-              IncomeCategoryBreakdownDto.fromJson(e as Map<String, dynamic>))
+              IncomeCategoryBreakdownDto.fromJson(e as Map<String, dynamic>),)
           .toList(),
       byMonth: (json['by_month'] as List<dynamic>)
           .map((e) =>
-              IncomeMonthlyBreakdownDto.fromJson(e as Map<String, dynamic>))
+              IncomeMonthlyBreakdownDto.fromJson(e as Map<String, dynamic>),)
           .toList(),
       items: (json['items'] as List<dynamic>)
           .map((e) => IncomeItemDto.fromJson(e as Map<String, dynamic>))
@@ -235,6 +245,17 @@ final class IncomeReportDto {
         byCategory: byCategory.map((e) => e.toEntity()).toList(),
         byMonth: byMonth.map((e) => e.toEntity()).toList(),
         items: items.map((e) => e.toEntity()).toList(),
+      );
+
+  /// Returns an empty report for fallback when PM endpoints are unavailable
+  factory IncomeReportDto.empty() => IncomeReportDto(
+        generatedAt: DateTime.now(),
+        startDate: DateTime.now(),
+        endDate: DateTime.now(),
+        totalIncome: 0,
+        byCategory: [],
+        byMonth: [],
+        items: [],
       );
 }
 
@@ -352,11 +373,11 @@ final class ExpensesReportDto {
       totalExpenses: (json['total_expenses'] as num).toDouble(),
       byCategory: (json['by_category'] as List<dynamic>)
           .map((e) =>
-              ExpenseCategoryBreakdownDto.fromJson(e as Map<String, dynamic>))
+              ExpenseCategoryBreakdownDto.fromJson(e as Map<String, dynamic>),)
           .toList(),
       byMonth: (json['by_month'] as List<dynamic>)
           .map((e) =>
-              ExpenseMonthlyBreakdownDto.fromJson(e as Map<String, dynamic>))
+              ExpenseMonthlyBreakdownDto.fromJson(e as Map<String, dynamic>),)
           .toList(),
       items: (json['items'] as List<dynamic>)
           .map((e) => ExpenseItemDto.fromJson(e as Map<String, dynamic>))
@@ -380,6 +401,17 @@ final class ExpensesReportDto {
         byCategory: byCategory.map((e) => e.toEntity()).toList(),
         byMonth: byMonth.map((e) => e.toEntity()).toList(),
         items: items.map((e) => e.toEntity()).toList(),
+      );
+
+  /// Returns an empty report for fallback when PM endpoints are unavailable
+  factory ExpensesReportDto.empty() => ExpensesReportDto(
+        generatedAt: DateTime.now(),
+        startDate: DateTime.now(),
+        endDate: DateTime.now(),
+        totalExpenses: 0,
+        byCategory: [],
+        byMonth: [],
+        items: [],
       );
 }
 
@@ -439,11 +471,11 @@ final class ProfitAndLossReportDto {
       profitMargin: (json['profit_margin'] as num).toDouble(),
       incomeBreakdown: (json['income_breakdown'] as List<dynamic>)
           .map((e) =>
-              IncomeCategoryBreakdownDto.fromJson(e as Map<String, dynamic>))
+              IncomeCategoryBreakdownDto.fromJson(e as Map<String, dynamic>),)
           .toList(),
       expenseBreakdown: (json['expense_breakdown'] as List<dynamic>)
           .map((e) =>
-              ExpenseCategoryBreakdownDto.fromJson(e as Map<String, dynamic>))
+              ExpenseCategoryBreakdownDto.fromJson(e as Map<String, dynamic>),)
           .toList(),
       byMonth: (json['by_month'] as List<dynamic>)
           .map((e) => PnLMonthlyBreakdownDto.fromJson(e as Map<String, dynamic>))
@@ -473,6 +505,20 @@ final class ProfitAndLossReportDto {
         incomeBreakdown: incomeBreakdown.map((e) => e.toEntity()).toList(),
         expenseBreakdown: expenseBreakdown.map((e) => e.toEntity()).toList(),
         byMonth: byMonth.map((e) => e.toEntity()).toList(),
+      );
+
+  /// Returns an empty report for fallback when PM endpoints are unavailable
+  factory ProfitAndLossReportDto.empty() => ProfitAndLossReportDto(
+        generatedAt: DateTime.now(),
+        startDate: DateTime.now(),
+        endDate: DateTime.now(),
+        totalIncome: 0,
+        totalExpenses: 0,
+        netIncome: 0,
+        profitMargin: 0,
+        incomeBreakdown: [],
+        expenseBreakdown: [],
+        byMonth: [],
       );
 }
 
@@ -609,6 +655,18 @@ final class OccupancyReportDto {
         byPropertyType: byPropertyType.map((e) => e.toEntity()).toList(),
         items: items.map((e) => e.toEntity()).toList(),
       );
+
+  /// Returns an empty report for fallback when PM endpoints are unavailable
+  factory OccupancyReportDto.empty() => OccupancyReportDto(
+        generatedAt: DateTime.now(),
+        totalProperties: 0,
+        occupiedProperties: 0,
+        vacantProperties: 0,
+        occupancyRate: 0,
+        averageVacancyDays: 0,
+        byPropertyType: [],
+        items: [],
+      );
 }
 
 // Maintenance Report DTOs
@@ -743,15 +801,15 @@ final class MaintenanceReportDto {
       averageCompletionDays: (json['average_completion_days'] as num).toDouble(),
       byPriority: (json['by_priority'] as List<dynamic>)
           .map((e) =>
-              MaintenanceByPriorityDto.fromJson(e as Map<String, dynamic>))
+              MaintenanceByPriorityDto.fromJson(e as Map<String, dynamic>),)
           .toList(),
       byCategory: (json['by_category'] as List<dynamic>)
           .map((e) =>
-              MaintenanceByCategoryDto.fromJson(e as Map<String, dynamic>))
+              MaintenanceByCategoryDto.fromJson(e as Map<String, dynamic>),)
           .toList(),
       items: (json['items'] as List<dynamic>)
           .map((e) =>
-              MaintenanceReportItemDto.fromJson(e as Map<String, dynamic>))
+              MaintenanceReportItemDto.fromJson(e as Map<String, dynamic>),)
           .toList(),
     );
   }
@@ -776,5 +834,18 @@ final class MaintenanceReportDto {
         byPriority: byPriority.map((e) => e.toEntity()).toList(),
         byCategory: byCategory.map((e) => e.toEntity()).toList(),
         items: items.map((e) => e.toEntity()).toList(),
+      );
+
+  /// Returns an empty report for fallback when PM endpoints are unavailable
+  factory MaintenanceReportDto.empty() => MaintenanceReportDto(
+        generatedAt: DateTime.now(),
+        totalRequests: 0,
+        openRequests: 0,
+        completedRequests: 0,
+        totalCost: 0,
+        averageCompletionDays: 0,
+        byPriority: [],
+        byCategory: [],
+        items: [],
       );
 }

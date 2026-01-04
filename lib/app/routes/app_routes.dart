@@ -18,6 +18,7 @@ abstract final class Routes {
   // Tenants
   static const tenants = '/tenants';
   static const tenantDetail = '/tenants/:id';
+  static const tenantCreate = '/tenants/create';
 
   // Leases
   static const leases = '/leases';

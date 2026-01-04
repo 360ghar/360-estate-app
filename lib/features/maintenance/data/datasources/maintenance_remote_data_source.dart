@@ -2,6 +2,8 @@ import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/core/pagination/page.dart';
 import 'package:estate_app/features/maintenance/data/models/maintenance_request_dto.dart';
 
+/// Remote data source for maintenance requests.
+/// NOTE: The PM maintenance endpoints (/pm/maintenance/*) do not yet exist in the backend.
 abstract interface class MaintenanceRemoteDataSource {
   Future<Page<MaintenanceRequestDto>> getRequests({
     required int page,
@@ -16,14 +18,14 @@ abstract interface class MaintenanceRemoteDataSource {
 
   Future<MaintenanceRequestDto> createRequest(Map<String, dynamic> data);
 
-  Future<MaintenanceRequestDto> updateRequest(
-      int id, Map<String, dynamic> updates);
+  Future<MaintenanceRequestDto> updateRequest(int id, Map<String, dynamic> updates);
 
   Future<void> updateStatus(int id, String status);
 }
 
-final class ApiMaintenanceRemoteDataSource
-    implements MaintenanceRemoteDataSource {
+/// Stub implementation that returns empty data since PM maintenance endpoints
+/// are not available in the current backend.
+final class ApiMaintenanceRemoteDataSource implements MaintenanceRemoteDataSource {
   ApiMaintenanceRemoteDataSource(this._apiClient);
 
   final ApiClient _apiClient;
@@ -37,74 +39,45 @@ final class ApiMaintenanceRemoteDataSource
     String? priority,
     String? category,
   }) async {
-    final offset = (page - 1) * limit;
-    final queryParams = <String, dynamic>{
-      'limit': limit,
-      'offset': offset,
-      if (propertyId != null) 'property_id': propertyId,
-      if (status != null) 'request_status': status,
-      if (priority != null) 'priority': priority,
-      if (category != null) 'category': category,
-    };
-
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      '/pm/maintenance/requests',
-      queryParameters: queryParams,
-    );
-
-    final data = response.data!;
-    final items = (data['items'] as List<dynamic>? ??
-            data['data'] as List<dynamic>? ??
-            [])
-        .map((e) => MaintenanceRequestDto.fromJson(e as Map<String, dynamic>))
-        .toList();
-
-    final total = data['total'] as int? ?? items.length;
-    final hasMore = offset + items.length < total;
-
+    print('[MAINTENANCE] WARNING: PM maintenance endpoint not available');
     return Page<MaintenanceRequestDto>(
-      items: items,
+      items: [],
       page: page,
       limit: limit,
-      hasMore: hasMore,
+      hasMore: false,
     );
   }
 
   @override
   Future<MaintenanceRequestDto> getRequestById(int id) async {
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      '/pm/maintenance/requests/$id',
+    print('[MAINTENANCE] WARNING: PM maintenance endpoint not available');
+    throw UnsupportedError(
+      'Maintenance requests are not yet available. PM module pending backend implementation.',
     );
-
-    return MaintenanceRequestDto.fromJson(response.data!);
   }
 
   @override
   Future<MaintenanceRequestDto> createRequest(Map<String, dynamic> data) async {
-    final response = await _apiClient.post<Map<String, dynamic>>(
-      '/pm/maintenance/requests',
-      data: data,
+    print('[MAINTENANCE] WARNING: PM maintenance endpoint not available');
+    throw UnsupportedError(
+      'Maintenance request creation is not yet available. PM module pending backend implementation.',
     );
-
-    return MaintenanceRequestDto.fromJson(response.data!);
   }
 
   @override
-  Future<MaintenanceRequestDto> updateRequest(
-      int id, Map<String, dynamic> updates) async {
-    final response = await _apiClient.patch<Map<String, dynamic>>(
-      '/pm/maintenance/requests/$id',
-      data: updates,
+  Future<MaintenanceRequestDto> updateRequest(int id, Map<String, dynamic> updates) async {
+    print('[MAINTENANCE] WARNING: PM maintenance endpoint not available');
+    throw UnsupportedError(
+      'Maintenance request update is not yet available. PM module pending backend implementation.',
     );
-
-    return MaintenanceRequestDto.fromJson(response.data!);
   }
 
   @override
   Future<void> updateStatus(int id, String status) async {
-    await _apiClient.patch<void>(
-      '/pm/maintenance/requests/$id',
-      data: {'request_status': status},
+    print('[MAINTENANCE] WARNING: PM maintenance endpoint not available');
+    throw UnsupportedError(
+      'Maintenance status update is not yet available. PM module pending backend implementation.',
     );
   }
 }
+

@@ -52,9 +52,13 @@ final class PropertiesRepositoryImpl implements PropertiesRepository {
     int? bathroomCount,
     int? balconyCount,
     double? floorAreaSqft,
+    int monthlyRentInr = 0,
+    double? securityDeposit,
+    double? maintenanceCharges,
     String managementStatus = 'active',
     int paymentDueDay = 1,
     String? notes,
+    List<String> images = const [],
   }) async {
     final dto = PropertyDto(
       id: 0, // Will be assigned by server
@@ -71,9 +75,13 @@ final class PropertiesRepositoryImpl implements PropertiesRepository {
       bathroomCount: bathroomCount,
       balconyCount: balconyCount,
       floorAreaSqft: floorAreaSqft,
+      monthlyRentInr: monthlyRentInr,
+      securityDeposit: securityDeposit,
+      maintenanceCharges: maintenanceCharges,
       managementStatus: managementStatus,
       paymentDueDay: paymentDueDay,
       notes: notes,
+      images: images,
     );
 
     final result = await _dataSource.createProperty(dto);
@@ -89,5 +97,10 @@ final class PropertiesRepositoryImpl implements PropertiesRepository {
   @override
   Future<void> deleteProperty(int id) async {
     await _dataSource.deleteProperty(id);
+  }
+
+  @override
+  Future<String> uploadPropertyImage(String filePath) {
+    return _dataSource.uploadPropertyImage(filePath);
   }
 }

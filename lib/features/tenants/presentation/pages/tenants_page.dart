@@ -1,15 +1,17 @@
 import 'dart:async';
 
 import 'package:estate_app/app/routes/app_routes.dart';
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/config/feature_flags.dart';
 import 'package:estate_app/core/presentation/errors/failure_localization.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/widgets/app_button.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_empty_state.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loader.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/app_text_field.dart';
+import 'package:estate_app/core/presentation/widgets/feature_coming_soon.dart';
 import 'package:estate_app/features/tenants/domain/entities/tenant.dart';
 import 'package:estate_app/features/tenants/presentation/controllers/tenants_controller.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +22,17 @@ class TenantsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Show coming soon if feature is disabled
+    if (!FeatureFlags.tenantsEnabled) {
+      return AppScaffold(
+        appBar: AppBar(title: const Text('Tenants')),
+        body: const FeatureComingSoon(
+          featureName: 'Tenant Management',
+          icon: Icons.people,
+          description: 'Manage your tenants, track leases, and handle tenant communications.',
+        ),
+      );
+    }
     return const _TenantsView();
   }
 }
@@ -224,47 +237,88 @@ class _TenantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      child: ListTile(
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: InkWell(
         onTap: onTap,
-        leading: CircleAvatar(
-          backgroundColor: AppColors.brand.withValues(alpha: 0.1),
-          child: Text(
-            tenant.initials,
-            style: const TextStyle(
-              color: AppColors.brand,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        title: Text(tenant.displayName),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (tenant.contactInfo != null) Text(tenant.contactInfo!),
-            if (tenant.hasActiveLease)
-              Text(
-                'Active lease: ${tenant.currentLease!.propertyTitle}',
-                style: TextStyle(
-                  color: Colors.green[700],
-                  fontSize: 12,
-                ),
-              )
-            else
-              Text(
-                'No active lease',
-                style: TextStyle(
-                  color: Colors.orange[700],
-                  fontSize: 12,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                child: Text(
+                  tenant.initials,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-          ],
-        ),
-        isThreeLine: true,
-        trailing: const Icon(
-          Icons.chevron_right,
-          color: AppColors.brand,
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      tenant.displayName,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (tenant.contactInfo != null)
+                      Text(
+                        tenant.contactInfo!,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    const SizedBox(height: 4),
+                    if (tenant.hasActiveLease)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          tenant.currentLease!.propertyTitle,
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'NO ACTIVE LEASE',
+                          style: TextStyle(
+                            color: Colors.orange,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ],
+          ),
         ),
       ),
     );

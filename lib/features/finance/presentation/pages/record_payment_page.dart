@@ -128,7 +128,7 @@ class RecordPaymentPage extends GetView<RecordPaymentController> {
                       controller.setPaymentDate(date);
                     }
                   },
-                )),
+                ),),
             const SizedBox(height: 16),
 
             // Payment method
@@ -148,7 +148,7 @@ class RecordPaymentPage extends GetView<RecordPaymentController> {
                       onSelected: (_) => controller.setPaymentMethod(method),
                     );
                   }).toList(),
-                )),
+                ),),
             const SizedBox(height: 16),
 
             // Reference number
@@ -186,7 +186,7 @@ class RecordPaymentPage extends GetView<RecordPaymentController> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Text('Record Payment'),
-                )),
+                ),),
           ],
         ),
       ),

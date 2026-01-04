@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:estate_app/app/routes/app_routes.dart';
+import 'package:estate_app/core/config/feature_flags.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
+import 'package:estate_app/core/presentation/widgets/feature_coming_soon.dart';
 import 'package:estate_app/features/finance/domain/entities/expense.dart';
 import 'package:estate_app/features/finance/domain/entities/rent_charge.dart';
 import 'package:estate_app/features/finance/domain/entities/rent_payment.dart';
@@ -36,6 +39,18 @@ class _FinancePageState extends State<FinancePage>
 
   @override
   Widget build(BuildContext context) {
+    // Show coming soon if feature is disabled
+    if (!FeatureFlags.financeEnabled) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Finance')),
+        body: const FeatureComingSoon(
+          featureName: 'Finance Management',
+          icon: Icons.account_balance_wallet,
+          description: 'Track rent payments, generate charges, and manage property expenses.',
+        ),
+      );
+    }
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Finance'),
@@ -77,6 +92,7 @@ class _FinancePageState extends State<FinancePage>
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'finance_fab',
         onPressed: () => _onFabPressed(context),
         backgroundColor: Theme.of(context).primaryColor,
         child: const Icon(Icons.add, color: Colors.white),
@@ -117,7 +133,7 @@ class _FinancePageState extends State<FinancePage>
           ),
         ],
       ),
-    ));
+    ),);
   }
 }
 
@@ -210,7 +226,7 @@ class _RentChargesTab extends GetView<RentChargesController> {
                     controller.filterStatus.value == status ? null : status,
                   ),
                 ),
-              )),
+              ),),
         ],
       ),
     );
@@ -226,11 +242,11 @@ class _RentChargeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(symbol: '₹', decimalDigits: 0);
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: InkWell(
         onTap: () => _showChargeActions(context),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -241,7 +257,7 @@ class _RentChargeCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       charge.propertyTitle,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                     ),
@@ -252,8 +268,8 @@ class _RentChargeCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 charge.tenantName,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
               ),
               const SizedBox(height: 12),
@@ -265,11 +281,14 @@ class _RentChargeCard extends StatelessWidget {
                       children: [
                         Text(
                           'Period',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey[500],
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
                               ),
                         ),
-                        Text(charge.periodLabel),
+                        Text(
+                          charge.periodLabel,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
                       ],
                     ),
                   ),
@@ -279,14 +298,14 @@ class _RentChargeCard extends StatelessWidget {
                       children: [
                         Text(
                           'Due Date',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey[500],
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
                               ),
                         ),
                         Text(
                           DateFormat.yMMMd().format(charge.dueDate),
-                          style: TextStyle(
-                            color: charge.isOverdue ? Colors.red : null,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: charge.isOverdue ? Theme.of(context).colorScheme.error : null,
                           ),
                         ),
                       ],
@@ -295,60 +314,26 @@ class _RentChargeCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              const Divider(height: 1),
+              Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Total Due',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[500],
-                            ),
-                      ),
-                      Text(
-                        currencyFormat.format(charge.totalDue),
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                    ],
+                  _AmountInfo(
+                    label: 'Total Due',
+                    amount: currencyFormat.format(charge.totalDue),
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Paid',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[500],
-                            ),
-                      ),
-                      Text(
-                        currencyFormat.format(charge.amountPaid),
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: Colors.green,
-                            ),
-                      ),
-                    ],
+                  _AmountInfo(
+                    label: 'Paid',
+                    amount: currencyFormat.format(charge.amountPaid),
+                    color: Colors.green,
                   ),
-                  Column(
+                  _AmountInfo(
+                    label: 'Balance',
+                    amount: currencyFormat.format(charge.balance),
+                    color: charge.balance > 0 ? Colors.red : Colors.green,
+                    isBold: true,
                     crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Balance',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[500],
-                            ),
-                      ),
-                      Text(
-                        currencyFormat.format(charge.balance),
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: charge.balance > 0 ? Colors.red : Colors.green,
-                            ),
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -386,7 +371,45 @@ class _RentChargeCard extends StatelessWidget {
           ],
         ),
       ),
-    ));
+    ),);
+  }
+}
+
+class _AmountInfo extends StatelessWidget {
+  const _AmountInfo({
+    required this.label,
+    required this.amount,
+    this.color,
+    this.isBold = false,
+    this.crossAxisAlignment = CrossAxisAlignment.start,
+  });
+
+  final String label;
+  final String amount;
+  final Color? color;
+  final bool isBold;
+  final CrossAxisAlignment crossAxisAlignment;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: crossAxisAlignment,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.outline,
+              ),
+        ),
+        Text(
+          amount,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+                color: color,
+              ),
+        ),
+      ],
+    );
   }
 }
 
@@ -493,8 +516,8 @@ class _RentPaymentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(symbol: '₹', decimalDigits: 0);
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -503,12 +526,12 @@ class _RentPaymentCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.green[50],
-                borderRadius: BorderRadius.circular(8),
+                color: Colors.green.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.check_circle,
-                color: Colors.green[600],
+                color: Colors.green,
               ),
             ),
             const SizedBox(width: 16),
@@ -518,44 +541,39 @@ class _RentPaymentCard extends StatelessWidget {
                 children: [
                   Text(
                     currencyFormat.format(payment.amount),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Text(
                     DateFormat.yMMMd().format(payment.paymentDate),
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                   ),
                   if (payment.referenceNumber != null) ...[
                     const SizedBox(height: 2),
                     Text(
                       'Ref: ${payment.referenceNumber}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[500],
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context).colorScheme.outline,
                           ),
                     ),
                   ],
                 ],
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    payment.paymentMethod.displayName,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-              ],
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                payment.paymentMethod.displayName,
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
             ),
           ],
         ),
@@ -655,7 +673,7 @@ class _ExpensesTab extends GetView<ExpensesController> {
                         : category,
                   ),
                 ),
-              )),
+               ),),
         ],
       ),
     );
@@ -671,8 +689,8 @@ class _ExpenseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(symbol: '₹', decimalDigits: 0);
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: InkWell(
         onTap: () async {
           final result = await Get.toNamed<Expense>(
@@ -683,7 +701,7 @@ class _ExpenseCard extends StatelessWidget {
             unawaited(Get.find<ExpensesController>().loadExpenses());
           }
         },
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -692,8 +710,8 @@ class _ExpenseCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: expense.category.color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+                  color: expense.category.color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   expense.category.icon,
@@ -713,19 +731,19 @@ class _ExpenseCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       expense.category.displayName,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                     if (expense.propertyTitle != null) ...[
                       const SizedBox(height: 2),
                       Text(
                         expense.propertyTitle!,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[500],
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Theme.of(context).colorScheme.outline,
                             ),
                       ),
                     ],
@@ -737,15 +755,15 @@ class _ExpenseCard extends StatelessWidget {
                 children: [
                   Text(
                     currencyFormat.format(expense.amount),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     DateFormat.yMMMd().format(expense.expenseDate),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[500],
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
                         ),
                   ),
                 ],

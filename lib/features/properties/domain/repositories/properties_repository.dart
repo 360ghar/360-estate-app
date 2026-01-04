@@ -24,10 +24,16 @@ abstract interface class PropertiesRepository {
     int? bathroomCount,
     int? balconyCount,
     double? floorAreaSqft,
+    int monthlyRentInr = 0,
+    double? securityDeposit,
+    double? maintenanceCharges,
     String managementStatus = 'active',
     int paymentDueDay = 1,
     String? notes,
+    List<String> images = const [],
   });
+
+  Future<String> uploadPropertyImage(String filePath);
 
   Future<Property> updateProperty(int id, Map<String, dynamic> updates);
 

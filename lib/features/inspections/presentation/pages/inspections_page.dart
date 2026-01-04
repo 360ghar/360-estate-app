@@ -1,13 +1,8 @@
 import 'dart:async';
 
 import 'package:estate_app/app/routes/app_routes.dart';
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
-import 'package:estate_app/core/presentation/errors/failure_localization.dart';
-import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
-import 'package:estate_app/core/presentation/widgets/app_button.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_empty_state.dart';
-import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
-import 'package:estate_app/core/presentation/widgets/app_loader.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/features/inspections/domain/entities/inspection.dart';
 import 'package:estate_app/features/inspections/presentation/controllers/inspections_controller.dart';
@@ -24,339 +19,148 @@ class InspectionsPage extends StatelessWidget {
   }
 }
 
-class _InspectionsView extends StatefulWidget {
+class _InspectionsView extends GetView<InspectionsController> {
   const _InspectionsView();
 
   @override
-  State<_InspectionsView> createState() => _InspectionsViewState();
-}
-
-class _InspectionsViewState extends State<_InspectionsView> {
-  late final InspectionsController controller;
-  late final ScrollController scrollController;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = Get.find<InspectionsController>();
-    scrollController = ScrollController()..addListener(_onScroll);
-  }
-
-  void _onScroll() {
-    if (!scrollController.hasClients) return;
-    if (scrollController.position.extentAfter < 250) {
-      unawaited(controller.loadMore());
-    }
-  }
-
-  @override
-  void dispose() {
-    scrollController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final items = controller.items;
-      final isLoading = controller.isLoading.value && items.isEmpty;
-      final failure = controller.failure.value;
+    return AppScaffold(
+      appBar: AppBar(
+        title: const Text('Inspections'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: () => _showFilterSheet(context),
+          ),
+        ],
+      ),
+      body: Obx(() {
+        if (controller.isLoading.value && controller.items.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-      return AppScaffold(
-        appBar: AppBar(
-          title: const Text('Inspections'),
-          actions: [
-            if (controller.hasActiveFilters)
-              IconButton(
-                icon: const Icon(Icons.filter_alt_off),
-                onPressed: controller.clearFilters,
-              ),
-            IconButton(
-              icon: const Icon(Icons.filter_list),
-              onPressed: () => _showFilterSheet(context),
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            final result =
-                await Get.toNamed<Inspection>(Routes.inspectionCreate);
-            if (result != null) {
-              unawaited(controller.refresh());
-            }
-          },
-          backgroundColor: AppColors.brand,
-          child: const Icon(Icons.add, color: Colors.white),
-        ),
-        body: Builder(
-          builder: (_) {
-            if (isLoading) {
-              return const Center(child: AppLoader());
-            }
-
-            if (failure != null && items.isEmpty) {
-              return AppErrorView(
-                title: context.l10n.errorSomethingWentWrong,
-                message: failure.localizedMessage(context.l10n),
-                retryLabel: context.l10n.commonRetry,
-                onRetry: () => unawaited(controller.loadInspections()),
-              );
-            }
-
-            if (items.isEmpty) {
-              return AppEmptyState(
-                icon: Icons.checklist_outlined,
-                title: 'No Inspections',
-                message:
-                    'No inspections found. Schedule an inspection to get started.',
-                action: AppButton(
-                  label: 'Schedule Inspection',
-                  onPressed: () =>
-                      Get.toNamed<void>(Routes.inspectionCreate),
-                ),
-              );
-            }
-
-            return Column(
+        if (controller.failure.value != null && controller.items.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Stats bar
-                _StatsBar(controller: controller),
-                // List
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: controller.refresh,
-                    child: ListView.builder(
-                      controller: scrollController,
-                      padding: const EdgeInsets.all(16),
-                      itemCount: items.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index == items.length) {
-                          if (controller.isLoadingMore.value) {
-                            return const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              child: Center(child: AppLoader()),
-                            );
-                          }
-                          return const SizedBox(height: 16);
-                        }
-
-                        final inspection = items[index];
-                        return _InspectionCard(
-                          inspection: inspection,
-                          onTap: () async {
-                            final result = await Get.toNamed<Inspection>(
-                              Routes.inspectionDetail
-                                  .replaceFirst(':id', '${inspection.id}'),
-                            );
-                            if (result != null) {
-                              unawaited(controller.refresh());
-                            }
-                          },
-                        );
-                      },
-                    ),
-                  ),
+                Text(
+                  controller.failure.value!.message,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: controller.loadInspections,
+                  child: const Text('Retry'),
                 ),
               ],
-            );
-          },
-        ),
-      );
-    });
+            ),
+          );
+        }
+
+        if (controller.items.isEmpty) {
+          return const AppEmptyState(
+            icon: Icons.fact_check_outlined,
+            title: 'No inspections found',
+            message: 'Schedule your first property inspection',
+          );
+        }
+
+        return RefreshIndicator(
+          onRefresh: controller.loadInspections,
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount:
+                controller.items.length + (controller.hasMore.value ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == controller.items.length) {
+                unawaited(controller.loadMore());
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+
+              final inspection = controller.items[index];
+              return _InspectionCard(inspection: inspection);
+            },
+          ),
+        );
+      }),
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'inspections_fab',
+        onPressed: () => Get.toNamed<void>(Routes.inspectionCreate),
+        backgroundColor: Theme.of(context).primaryColor,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
   }
 
   void _showFilterSheet(BuildContext context) {
     unawaited(showModalBottomSheet<void>(
       context: context,
-      isScrollControlled: true,
       builder: (context) => SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
+              Text(
+                'Filter by Status',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 8,
                 children: [
-                  Text(
-                    'Filter Inspections',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: () {
-                      controller.clearFilters();
+                  ChoiceChip(
+                    label: const Text('All'),
+                    selected: controller.filterStatus.value == null,
+                    onSelected: (_) {
+                      controller.setStatusFilter(null);
                       Navigator.pop(context);
                     },
-                    child: const Text('Clear All'),
                   ),
+                  ...InspectionStatus.values.map((status) {
+                    return ChoiceChip(
+                      label: Text(status.displayName),
+                      selected: controller.filterStatus.value == status,
+                      onSelected: (_) {
+                        controller.setStatusFilter(status);
+                        Navigator.pop(context);
+                      },
+                    );
+                  }),
                 ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Type',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: InspectionType.values.map((type) {
-                  return _FilterChip(
-                    label: type.displayName,
-                    isSelected: controller.filterType.value == type,
-                    onTap: () {
-                      controller.setTypeFilter(type);
-                      Navigator.pop(context);
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Status',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: InspectionStatus.values.map((status) {
-                  return _FilterChip(
-                    label: status.displayName,
-                    isSelected: controller.filterStatus.value == status,
-                    onTap: () {
-                      controller.setStatusFilter(status);
-                      Navigator.pop(context);
-                    },
-                  );
-                }).toList(),
               ),
               const SizedBox(height: 24),
             ],
           ),
         ),
       ),
-    ));
-  }
-}
-
-class _StatsBar extends StatelessWidget {
-  const _StatsBar({required this.controller});
-
-  final InspectionsController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      color: Colors.grey.shade100,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _StatItem(
-            label: 'Scheduled',
-            value: controller.scheduledCount.toString(),
-            color: InspectionStatus.scheduled.color,
-          ),
-          _StatItem(
-            label: 'In Progress',
-            value: controller.inProgressCount.toString(),
-            color: InspectionStatus.inProgress.color,
-          ),
-          _StatItem(
-            label: 'Review',
-            value: controller.pendingReviewCount.toString(),
-            color: InspectionStatus.pendingReview.color,
-          ),
-          _StatItem(
-            label: 'Completed',
-            value: controller.completedCount.toString(),
-            color: InspectionStatus.completed.color,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatItem extends StatelessWidget {
-  const _StatItem({
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  final String label;
-  final String value;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            color: Colors.grey[600],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  const _FilterChip({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return FilterChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (_) => onTap(),
-      selectedColor: AppColors.brand.withValues(alpha: 0.2),
-      checkmarkColor: AppColors.brand,
-    );
+    ),);
   }
 }
 
 class _InspectionCard extends StatelessWidget {
-  const _InspectionCard({
-    required this.inspection,
-    required this.onTap,
-  });
+  const _InspectionCard({required this.inspection});
 
   final Inspection inspection;
-  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('MMM d, yyyy');
-
-    return Card(
+    return AppCard(
+      padding: EdgeInsets.zero,
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        onTap: () => Get.toNamed<void>(
+          Routes.inspectionDetail.replaceFirst(':id', inspection.id.toString()),
+          arguments: inspection,
+        ),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -364,145 +168,57 @@ class _InspectionCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: inspection.inspectionType.color
-                          .withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      inspection.inspectionType.icon,
-                      color: inspection.inspectionType.color,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          inspection.inspectionType.displayName,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
+                    child: Text(
+                      inspection.propertyTitle ?? 'No Title',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
-                        ),
-                        if (inspection.propertyTitle != null)
-                          Text(
-                            inspection.propertyTitle!,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[600],
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                      ],
                     ),
                   ),
                   _StatusBadge(status: inspection.status),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   Icon(
-                    Icons.calendar_today,
+                    Icons.event_outlined,
                     size: 14,
-                    color: Colors.grey[500],
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    dateFormat.format(inspection.scheduledDate),
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  if (inspection.inspectorName != null) ...[
-                    const SizedBox(width: 16),
-                    Icon(
-                      Icons.person,
-                      size: 14,
-                      color: Colors.grey[500],
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        inspection.inspectorName!,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600],
+                    DateFormat.yMMMd().format(inspection.scheduledDate),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
+                  ),
+                  const SizedBox(width: 16),
+                  Icon(
+                    Icons.assignment_ind_outlined,
+                    size: 14,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    inspection.inspectorName ?? 'Not Assigned',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                  ),
                 ],
               ),
-              if (inspection.itemsCount > 0) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.checklist,
-                      size: 14,
-                      color: Colors.grey[500],
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${inspection.itemsCount} items',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[600],
+              if (inspection.notes != null && inspection.notes!.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Text(
+                  inspection.notes!,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.outline,
+                        fontStyle: FontStyle.italic,
                       ),
-                    ),
-                    if (inspection.issueItemsCount > 0) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          '${inspection.issueItemsCount} issues',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.red,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-              if (!inspection.isFullySigned && inspection.isPendingReview) ...[
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.pending_actions,
-                      size: 14,
-                      color: Colors.orange,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Awaiting signatures',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.orange[700],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ],
@@ -520,30 +236,27 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final (color, bgColor) = switch (status) {
+      InspectionStatus.scheduled => (Colors.blue[700]!, Colors.blue[50]!),
+      InspectionStatus.completed => (Colors.green[700]!, Colors.green[50]!),
+      InspectionStatus.cancelled => (Colors.red[700]!, Colors.red[50]!),
+      InspectionStatus.inProgress => (Colors.orange[700]!, Colors.orange[50]!),
+      InspectionStatus.pendingReview => (Colors.purple[700]!, Colors.purple[50]!),
+    };
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: status.color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(6),
+        color: bgColor,
+        borderRadius: BorderRadius.circular(4),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            status.icon,
-            size: 12,
-            color: status.color,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            status.displayName,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: status.color,
-            ),
-          ),
-        ],
+      child: Text(
+        status.displayName,
+        style: TextStyle(
+          color: color,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }

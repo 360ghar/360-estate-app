@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:estate_app/app/routes/app_routes.dart';
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/errors/failure_localization.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/widgets/app_button.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_empty_state.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loader.dart';
@@ -89,6 +89,7 @@ class _ApplicationsViewState extends State<_ApplicationsView>
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'applications_fab',
         onPressed: () async {
           final result = await Get.toNamed<ApplicationForm>(
             Routes.applicationFormCreate,
@@ -97,8 +98,7 @@ class _ApplicationsViewState extends State<_ApplicationsView>
             unawaited(controller.loadForms());
           }
         },
-        backgroundColor: AppColors.brand,
-        child: const Icon(Icons.add, color: Colors.white),
+        child: const Icon(Icons.add),
       ),
       body: TabBarView(
         controller: tabController,
@@ -165,7 +165,7 @@ class _ApplicationsViewState extends State<_ApplicationsView>
           ),
         ),
       ),
-    ));
+    ),);
   }
 }
 
@@ -200,7 +200,6 @@ class _ApplicationsTab extends StatelessWidget {
 
       if (items.isEmpty) {
         return const AppEmptyState(
-          icon: Icons.inbox_outlined,
           title: 'No Applications',
           message: 'No applications received yet.',
         );
@@ -329,7 +328,7 @@ class _FormsTab extends StatelessWidget {
           ),
         ],
       ),
-    ));
+    ),);
   }
 }
 
@@ -342,7 +341,7 @@ class _StatsBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      color: Colors.grey.shade100,
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -398,9 +397,8 @@ class _StatItem extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 11,
-            color: Colors.grey[600],
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
       ],
@@ -425,8 +423,8 @@ class _FilterChip extends StatelessWidget {
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => onTap(),
-      selectedColor: AppColors.brand.withValues(alpha: 0.2),
-      checkmarkColor: AppColors.brand,
+      selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+      checkmarkColor: Theme.of(context).colorScheme.primary,
     );
   }
 }
@@ -444,11 +442,11 @@ class _ApplicationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('MMM d, yyyy');
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -457,7 +455,7 @@ class _ApplicationCard extends StatelessWidget {
               Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: application.status.color.withValues(alpha: 0.1),
+                    backgroundColor: application.status.color.withOpacity(0.1),
                     child: Text(
                       application.applicantName.isNotEmpty
                           ? application.applicantName[0].toUpperCase()
@@ -475,17 +473,15 @@ class _ApplicationCard extends StatelessWidget {
                       children: [
                         Text(
                           application.applicantName,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                          ),
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                         Text(
                           application.applicantEmail,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[600],
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                       ],
                     ),
@@ -500,16 +496,15 @@ class _ApplicationCard extends StatelessWidget {
                     Icon(
                       Icons.apartment,
                       size: 14,
-                      color: Colors.grey[500],
+                      color: Theme.of(context).colorScheme.outline,
                     ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         application.propertyTitle!,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                        ),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -524,15 +519,15 @@ class _ApplicationCard extends StatelessWidget {
                     Icon(
                       Icons.calendar_today,
                       size: 14,
-                      color: Colors.grey[500],
+                      color: Theme.of(context).colorScheme.outline,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       'Applied ${dateFormat.format(application.submittedAt!)}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[500],
-                      ),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context).colorScheme.outline,
+                            fontSize: 10,
+                          ),
                     ),
                   ],
                 ),
@@ -556,8 +551,8 @@ class _FormCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -568,12 +563,12 @@ class _FormCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.brand.withValues(alpha: 0.1),
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
                     Icons.description,
-                    color: AppColors.brand,
+                    color: Theme.of(context).colorScheme.primary,
                     size: 24,
                   ),
                 ),
@@ -584,18 +579,16 @@ class _FormCard extends StatelessWidget {
                     children: [
                       Text(
                         form.propertyTitle ?? 'Application Form',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                        ),
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       if (form.propertyAddress != null)
                         Text(
                           form.propertyAddress!,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[600],
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -609,14 +602,14 @@ class _FormCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.1),
+                      color: Colors.red.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Text(
                       'Expired',
                       style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
                         color: Colors.red,
                       ),
                     ),
@@ -628,14 +621,14 @@ class _FormCard extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.1),
+                      color: Colors.green.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Text(
                       'Active',
                       style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
                         color: Colors.green,
                       ),
                     ),
@@ -653,6 +646,7 @@ class _FormCard extends StatelessWidget {
                       Get.snackbar(
                         'Copied',
                         'Application link copied to clipboard',
+                        snackPosition: SnackPosition.BOTTOM,
                       );
                     },
                     icon: const Icon(Icons.copy, size: 18),

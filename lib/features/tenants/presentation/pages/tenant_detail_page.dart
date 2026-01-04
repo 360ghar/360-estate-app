@@ -1,8 +1,8 @@
 import 'package:estate_app/app/routes/app_routes.dart';
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/errors/failure_localization.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/state/view_state.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_empty_state.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loader.dart';
@@ -77,12 +77,12 @@ class _TenantDetailContent extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 48,
-                  backgroundColor: AppColors.brand.withValues(alpha: 0.1),
+                  backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                   child: Text(
                     tenant.initials,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 32,
-                      color: AppColors.brand,
+                      color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -102,10 +102,8 @@ class _TenantDetailContent extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Contact info card
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
+          AppCard(
+            child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -132,7 +130,7 @@ class _TenantDetailContent extends StatelessWidget {
                     Text(
                       'Emergency Contact',
                       style: theme.textTheme.titleSmall?.copyWith(
-                        color: Colors.grey[600],
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -151,7 +149,6 @@ class _TenantDetailContent extends StatelessWidget {
                 ],
               ),
             ),
-          ),
           const SizedBox(height: 16),
 
           // ID Documents card
@@ -228,13 +225,13 @@ class _TenantDetailContent extends StatelessWidget {
                             Icon(
                               Icons.description_outlined,
                               size: 48,
-                              color: Colors.grey[400],
+                              color: theme.colorScheme.outlineVariant,
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'No active lease',
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: Colors.grey,
+                                color: theme.colorScheme.outline,
                               ),
                             ),
                           ],
@@ -309,20 +306,21 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = status == TenantStatus.active ? Colors.green : Colors.grey;
+    final color = status == TenantStatus.active
+        ? Theme.of(context).colorScheme.primary
+        : Theme.of(context).colorScheme.outline;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         status.name.toUpperCase(),
-        style: TextStyle(
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
           color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -346,7 +344,11 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: Colors.grey[600]),
+          Icon(
+            icon,
+            size: 20,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -354,16 +356,14 @@ class _InfoRow extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
                 Text(
                   value,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
@@ -396,10 +396,14 @@ class _LeaseCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isHistory ? Colors.grey[50] : AppColors.brand.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(8),
+        color: isHistory
+            ? Theme.of(context).colorScheme.surfaceContainerLow
+            : Theme.of(context).colorScheme.primary.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isHistory ? Colors.grey[300]! : AppColors.brand.withValues(alpha: 0.2),
+          color: isHistory
+              ? Theme.of(context).colorScheme.outlineVariant
+              : Theme.of(context).colorScheme.primary.withOpacity(0.2),
         ),
       ),
       child: Column(
@@ -407,9 +411,8 @@ class _LeaseCard extends StatelessWidget {
         children: [
           Text(
             lease.propertyTitle,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 8),
@@ -421,18 +424,16 @@ class _LeaseCard extends StatelessWidget {
                   children: [
                     Text(
                       '${dateFormat.format(lease.startDate)} - ${dateFormat.format(lease.endDate)}',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       '${currencyFormat.format(lease.monthlyRent)}/month',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 13,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ],
                 ),
@@ -444,20 +445,20 @@ class _LeaseCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.amber.withValues(alpha: 0.1),
+                    color: Colors.orange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.warning, size: 14, color: Colors.amber),
+                      const Icon(Icons.warning, size: 14, color: Colors.orange),
                       const SizedBox(width: 4),
                       Text(
                         '${lease.daysRemaining} days left',
                         style: const TextStyle(
-                          color: Colors.amber,
+                          color: Colors.orange,
                           fontSize: 11,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],

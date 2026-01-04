@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:estate_app/app/routes/app_routes.dart';
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/errors/failure_localization.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/state/view_state.dart';
@@ -122,7 +122,7 @@ class _PropertyDetailContent extends StatelessWidget {
   void _editProperty(BuildContext context) {
     unawaited(Get.toNamed<void>(
       Routes.propertyEdit.replaceFirst(':id', property.id.toString()),
-    ));
+    ),);
   }
 
   void _handleMenuAction(BuildContext context, String action) {
@@ -160,7 +160,7 @@ class _PropertyDetailContent extends StatelessWidget {
           ),
         ],
       ),
-    ));
+    ),);
   }
 }
 
@@ -196,8 +196,8 @@ class _OverviewTab extends StatelessWidget {
                       property.images[index],
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Container(
-                        color: Colors.grey[200],
-                        child: const Icon(Icons.image, size: 64),
+                        color: theme.colorScheme.surfaceContainerHighest,
+                        child: Icon(Icons.image, size: 64, color: theme.colorScheme.outlineVariant),
                       ),
                     ),
                   );
@@ -226,11 +226,8 @@ class _OverviewTab extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // Property info card
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
+          AppCard(
+            child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -257,14 +254,10 @@ class _OverviewTab extends StatelessWidget {
                 ],
               ),
             ),
-          ),
           const SizedBox(height: 16),
 
-          // Financial info
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
+          AppCard(
+            child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -285,15 +278,12 @@ class _OverviewTab extends StatelessWidget {
                 ],
               ),
             ),
-          ),
           const SizedBox(height: 16),
 
           // Notes
           if (property.notes != null && property.notes!.isNotEmpty)
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
+            AppCard(
+              child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -307,7 +297,6 @@ class _OverviewTab extends StatelessWidget {
                   ],
                 ),
               ),
-            ),
         ],
       ),
     );
@@ -334,7 +323,7 @@ class _LeaseTab extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.description_outlined, size: 64, color: Colors.grey[400]),
+            Icon(Icons.description_outlined, size: 64, color: Theme.of(context).colorScheme.outlineVariant),
             const SizedBox(height: 16),
             Text(
               'No Active Lease',
@@ -344,7 +333,7 @@ class _LeaseTab extends StatelessWidget {
             Text(
               'This property is currently vacant',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.grey,
+                color: theme.colorScheme.outline,
               ),
             ),
             const SizedBox(height: 24),
@@ -363,50 +352,48 @@ class _LeaseTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Active Lease',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+        AppCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Active Lease',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    if (lease.isExpiringSoon)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.amber.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.warning, size: 16, color: Colors.amber),
-                            SizedBox(width: 4),
-                            Text(
-                              'Expiring Soon',
-                              style: TextStyle(
-                                color: Colors.amber,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
+                  ),
+                  if (lease.isExpiringSoon)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
                       ),
-                  ],
-                ),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.warning, size: 16, color: Colors.orange),
+                          SizedBox(width: 4),
+                          Text(
+                            'Expiring Soon',
+                            style: TextStyle(
+                              color: Colors.orange,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
                 const Divider(height: 24),
                 _InfoRow(label: 'Tenant', value: lease.tenantName),
                 _InfoRow(label: 'Start Date', value: dateFormat.format(lease.startDate)),
@@ -425,7 +412,6 @@ class _LeaseTab extends StatelessWidget {
               ],
             ),
           ),
-        ),
         const SizedBox(height: 16),
         Row(
           children: [
@@ -503,12 +489,12 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final displayLabel = label ?? status?.name ?? '';
-    final displayColor = color ?? _getStatusColor(status);
+    final displayColor = color ?? _getStatusColor(context, status);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: displayColor.withValues(alpha: 0.1),
+        color: displayColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
@@ -522,12 +508,12 @@ class _StatusBadge extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(ManagementStatus? status) {
+  Color _getStatusColor(BuildContext context, ManagementStatus? status) {
     return switch (status) {
-      ManagementStatus.active => AppColors.brand,
-      ManagementStatus.inactive => Colors.grey,
+      ManagementStatus.active => Theme.of(context).colorScheme.primary,
+      ManagementStatus.inactive => Theme.of(context).colorScheme.outline,
       ManagementStatus.sold => Colors.purple,
-      null => Colors.grey,
+      null => Theme.of(context).colorScheme.outline,
     };
   }
 }
@@ -544,27 +530,24 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              label,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
-              ),
+          Text(
+            label,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/widgets/app_button.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/features/inspections/domain/entities/inspection.dart';
@@ -31,7 +30,7 @@ class _InspectionFormView extends StatelessWidget {
       appBar: AppBar(
         title: Text(controller.isEditing
             ? 'Edit Inspection'
-            : 'Schedule Inspection'),
+            : 'Schedule Inspection',),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -70,13 +69,13 @@ class _InspectionFormView extends StatelessWidget {
                     ),
                     selected: isSelected,
                     onSelected: (_) => controller.setInspectionType(type),
-                    selectedColor: AppColors.brand,
+                    selectedColor: Theme.of(context).colorScheme.primary,
                     labelStyle: TextStyle(
                       color: isSelected ? Colors.white : Colors.black,
                     ),
                   );
                 }).toList(),
-              )),
+              ),),
           const SizedBox(height: 24),
 
           // Scheduled Date
@@ -115,7 +114,7 @@ class _InspectionFormView extends StatelessWidget {
                     ],
                   ),
                 ),
-              )),
+              ),),
           const SizedBox(height: 24),
 
           // Inspector Name
@@ -157,7 +156,7 @@ class _InspectionFormView extends StatelessWidget {
                         }
                       }
                     : null,
-              )),
+              ),),
 
           const SizedBox(height: 24),
         ],
@@ -240,7 +239,7 @@ class _PropertySelectorState extends State<_PropertySelector> {
         ),
         const SizedBox(height: 8),
         Obx(() => DropdownButtonFormField<int>(
-              value: widget.controller.selectedPropertyId.value,
+              initialValue: widget.controller.selectedPropertyId.value,
               decoration: const InputDecoration(
                 hintText: 'Select a property',
                 prefixIcon: Icon(Icons.apartment),
@@ -258,7 +257,7 @@ class _PropertySelectorState extends State<_PropertySelector> {
                 }
                 return null;
               },
-            )),
+            ),),
         const SizedBox(height: 24),
       ],
     );

@@ -1,3 +1,5 @@
+import 'package:estate_app/core/config/app_config.dart';
+import 'package:estate_app/core/mocks/mock_dashboard_data_source.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/features/home/data/datasources/dashboard_remote_data_source.dart';
 import 'package:estate_app/features/home/data/repositories/dashboard_repository_impl.dart';
@@ -12,8 +14,12 @@ class HomeBindings extends Bindings {
 
   @override
   void dependencies() {
+    final config = Get.find<AppConfig>();
+
     Get.lazyPut<DashboardRemoteDataSource>(
-      () => ApiDashboardRemoteDataSource(Get.find<ApiClient>()),
+      () => config.useMockApi
+          ? MockDashboardRemoteDataSource()
+          : ApiDashboardRemoteDataSource(Get.find<ApiClient>()),
     );
 
     Get.lazyPut<DashboardRepository>(
@@ -38,3 +44,4 @@ class HomeBindings extends Bindings {
     );
   }
 }
+

@@ -31,7 +31,7 @@ class ReportsController extends GetxController {
     super.onInit();
     // Set default date range to current month
     final now = DateTime.now();
-    startDate.value = DateTime(now.year, now.month, 1);
+    startDate.value = DateTime(now.year, now.month);
     endDate.value = DateTime(now.year, now.month + 1, 0);
   }
 

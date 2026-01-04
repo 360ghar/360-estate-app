@@ -42,7 +42,7 @@ class ExpenseFormPage extends GetView<ExpenseFormController> {
                       onSelected: (_) => controller.setCategory(category),
                     );
                   }).toList(),
-                )),
+                ),),
             const SizedBox(height: 24),
 
             // Amount
@@ -93,7 +93,7 @@ class ExpenseFormPage extends GetView<ExpenseFormController> {
                       controller.setExpenseDate(date);
                     }
                   },
-                )),
+                ),),
             const SizedBox(height: 16),
 
             // Vendor
@@ -131,7 +131,7 @@ class ExpenseFormPage extends GetView<ExpenseFormController> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : Text(controller.isEditing ? 'Update Expense' : 'Create Expense'),
-                )),
+                ),),
           ],
         ),
       ),

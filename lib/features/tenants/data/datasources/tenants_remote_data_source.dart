@@ -9,7 +9,12 @@ abstract interface class TenantsRemoteDataSource {
     required String query,
   });
 
-  Future<TenantDto> getTenantByUserId(String tenantUserId);
+  Future<TenantDto> getTenantById(String id);
+
+  /// Get current tenant's own data (for tenant view)
+  Future<TenantDto> getMyTenantData();
+
+  Future<TenantDto> createTenant(Map<String, dynamic> data);
 }
 
 final class ApiTenantsRemoteDataSource implements TenantsRemoteDataSource {
@@ -23,40 +28,43 @@ final class ApiTenantsRemoteDataSource implements TenantsRemoteDataSource {
     required int limit,
     required String query,
   }) async {
-    final offset = (page - 1) * limit;
-    final queryParams = <String, dynamic>{
-      'limit': limit,
-      'offset': offset,
-      if (query.isNotEmpty) 'q': query,
-    };
-
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      '/pm/tenants',
-      queryParameters: queryParams,
-    );
-
-    final data = response.data!;
-    final items = (data['items'] as List<dynamic>? ?? data['data'] as List<dynamic>? ?? [])
-        .map((e) => TenantDto.fromJson(e as Map<String, dynamic>))
-        .toList();
-
-    final total = data['total'] as int? ?? items.length;
-    final hasMore = offset + items.length < total;
-
+    // NOTE: /pm/tenants endpoint does NOT exist in the current backend
+    // This is a placeholder implementation until the PM module is added
+    print('[TENANTS] WARNING: /pm/tenants endpoint not available in backend');
+    print('[TENANTS] Returning empty list - PM module pending implementation');
+    
     return Page<TenantDto>(
-      items: items,
+      items: [],
       page: page,
       limit: limit,
-      hasMore: hasMore,
+      hasMore: false,
     );
   }
 
   @override
-  Future<TenantDto> getTenantByUserId(String tenantUserId) async {
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      '/pm/tenants/$tenantUserId',
+  Future<TenantDto> getTenantById(String id) async {
+    // NOTE: /pm/tenants/{id} endpoint does NOT exist
+    print('[TENANTS] WARNING: /pm/tenants/$id endpoint not available');
+    throw UnsupportedError(
+      'Tenant management is not yet available. PM module pending backend implementation.',
     );
+  }
 
-    return TenantDto.fromJson(response.data!);
+  @override
+  Future<TenantDto> getMyTenantData() async {
+    // NOTE: /pm/tenants/me endpoint does NOT exist
+    print('[TENANTS] WARNING: /pm/tenants/me endpoint not available');
+    throw UnsupportedError(
+      'Tenant profile is not yet available. PM module pending backend implementation.',
+    );
+  }
+
+  @override
+  Future<TenantDto> createTenant(Map<String, dynamic> data) async {
+    // NOTE: POST /pm/tenants endpoint does NOT exist
+    print('[TENANTS] WARNING: POST /pm/tenants endpoint not available');
+    throw UnsupportedError(
+      'Tenant creation is not yet available. PM module pending backend implementation.',
+    );
   }
 }

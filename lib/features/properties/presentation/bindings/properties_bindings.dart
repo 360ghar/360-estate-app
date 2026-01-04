@@ -1,9 +1,12 @@
+import 'package:estate_app/core/config/app_config.dart';
+import 'package:estate_app/core/mocks/mock_properties_data_source.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/features/properties/data/datasources/properties_remote_data_source.dart';
 import 'package:estate_app/features/properties/data/repositories/properties_repository_impl.dart';
 import 'package:estate_app/features/properties/domain/repositories/properties_repository.dart';
 import 'package:estate_app/features/properties/domain/usecases/get_properties_page_usecase.dart';
 import 'package:estate_app/features/properties/presentation/controllers/properties_controller.dart';
+import 'package:estate_app/features/properties/presentation/controllers/property_create_controller.dart';
 import 'package:get/get.dart';
 
 class PropertiesBindings extends Bindings {
@@ -16,8 +19,12 @@ class PropertiesBindings extends Bindings {
       Get.lazyPut<T>(builder, fenix: true);
     }
 
+    final config = Get.find<AppConfig>();
+
     lazyPutIfAbsent<PropertiesRemoteDataSource>(
-      () => ApiPropertiesRemoteDataSource(Get.find<ApiClient>()),
+      () => config.useMockApi
+          ? MockPropertiesRemoteDataSource()
+          : ApiPropertiesRemoteDataSource(Get.find<ApiClient>()),
     );
 
     lazyPutIfAbsent<PropertiesRepository>(
@@ -37,5 +44,13 @@ class PropertiesBindings extends Bindings {
         ),
       );
     }
+    
+    Get.lazyPut<PropertyCreateController>(
+      () => PropertyCreateController(
+        repository: Get.find<PropertiesRepository>(),
+      ),
+      fenix: true,
+    );
   }
 }
+

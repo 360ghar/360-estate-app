@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:estate_app/core/config/app_config.dart';
 import 'package:estate_app/core/errors/failure.dart';
+import 'package:estate_app/core/network/auth_token_provider.dart';
 import 'package:estate_app/core/presentation/state/view_state.dart';
 import 'package:estate_app/features/auth/domain/entities/auth_user.dart';
 import 'package:estate_app/features/auth/domain/usecases/sign_in_with_phone_password_usecase.dart';
@@ -14,11 +15,14 @@ class LoginController extends GetxController {
   LoginController({
     required AppConfig config,
     required SignInWithPhonePasswordUseCase signIn,
+    required AuthTokenProvider tokenProvider,
   }) : _config = config,
-       _signIn = signIn;
+       _signIn = signIn,
+       _tokenProvider = tokenProvider;
 
   final AppConfig _config;
   final SignInWithPhonePasswordUseCase _signIn;
+  final AuthTokenProvider _tokenProvider;
 
   late final String phone;
 
@@ -62,6 +66,19 @@ class LoginController extends GetxController {
         phone: phone,
         password: passwordController.text,
       );
+
+      // After successful Supabase login, also log in to the backend API
+      try {
+        await _tokenProvider.onLoginSuccess(
+          phone: phone,
+          password: passwordController.text,
+        );
+      } catch (e) {
+        // Backend login failed, but don't fail the entire login flow
+        // The app will still work with Supabase, just won't have backend API access
+        print('[LOGIN] Backend login failed: $e');
+      }
+
       state.value = ViewState<AuthUser>.success(user);
     } on Failure catch (f) {
       state.value = ViewState<AuthUser>.error(f);

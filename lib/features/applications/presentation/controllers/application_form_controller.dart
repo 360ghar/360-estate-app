@@ -43,7 +43,7 @@ class ApplicationFormController extends GetxController {
       fieldType: fieldType,
       isRequired: isRequired,
       options: options ?? [],
-    ));
+    ),);
   }
 
   void removeCustomField(int index) {

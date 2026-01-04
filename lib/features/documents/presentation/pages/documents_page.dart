@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:estate_app/app/routes/app_routes.dart';
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/errors/failure_localization.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/widgets/app_button.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_empty_state.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loader.dart';
@@ -79,14 +79,14 @@ class _DocumentsViewState extends State<_DocumentsView> {
           ],
         ),
         floatingActionButton: FloatingActionButton(
+          heroTag: 'documents_fab',
           onPressed: () async {
             final result = await Get.toNamed<Document>(Routes.documentUpload);
             if (result != null) {
               unawaited(controller.refresh());
             }
           },
-          backgroundColor: AppColors.brand,
-          child: const Icon(Icons.upload, color: Colors.white),
+          child: const Icon(Icons.upload),
         ),
         body: Builder(
           builder: (_) {
@@ -181,7 +181,7 @@ class _DocumentsViewState extends State<_DocumentsView> {
           ),
         ],
       ),
-    ));
+    ),);
   }
 
   void _showFilterSheet(BuildContext context) {
@@ -236,7 +236,7 @@ class _DocumentsViewState extends State<_DocumentsView> {
           ),
         ),
       ),
-    ));
+    ),);
   }
 }
 
@@ -257,8 +257,8 @@ class _FilterChip extends StatelessWidget {
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => onTap(),
-      selectedColor: AppColors.brand.withValues(alpha: 0.2),
-      checkmarkColor: AppColors.brand,
+      selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+      checkmarkColor: Theme.of(context).colorScheme.primary,
     );
   }
 }
@@ -278,11 +278,11 @@ class _DocumentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('MMM d, yyyy');
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -290,7 +290,7 @@ class _DocumentCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: document.documentType.color.withValues(alpha: 0.1),
+                  color: document.documentType.color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -310,10 +310,9 @@ class _DocumentCard extends StatelessWidget {
                   children: [
                     Text(
                       document.fileName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                      ),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -326,16 +325,15 @@ class _DocumentCard extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: document.documentType.color
-                                .withValues(alpha: 0.1),
+                            color: document.documentType.color.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             document.documentType.displayName,
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 10,
                               color: document.documentType.color,
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
@@ -343,30 +341,28 @@ class _DocumentCard extends StatelessWidget {
                           const SizedBox(width: 8),
                           Text(
                             document.formattedFileSize,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
                       ],
                     ),
                     if (document.propertyTitle != null) ...[
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       Row(
                         children: [
                           Icon(
                             Icons.apartment,
                             size: 14,
-                            color: Colors.grey[500],
+                            color: Theme.of(context).colorScheme.outline,
                           ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               document.propertyTitle!,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -379,9 +375,9 @@ class _DocumentCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         'Uploaded ${dateFormat.format(document.uploadedAt!)}',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey[500],
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                          fontSize: 10,
                         ),
                       ),
                     ],
@@ -395,12 +391,12 @@ class _DocumentCard extends StatelessWidget {
                             color: Colors.red,
                           ),
                           const SizedBox(width: 4),
-                          Text(
+                          const Text(
                             'Expired',
                             style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.red[700],
-                              fontWeight: FontWeight.w500,
+                              fontSize: 11,
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
@@ -415,12 +411,12 @@ class _DocumentCard extends StatelessWidget {
                             color: Colors.orange,
                           ),
                           const SizedBox(width: 4),
-                          Text(
+                          const Text(
                             'Expiring soon',
                             style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.orange[700],
-                              fontWeight: FontWeight.w500,
+                              fontSize: 11,
+                              color: Colors.orange,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],

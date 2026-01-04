@@ -1,12 +1,13 @@
 import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:estate_app/core/network/api_client.dart';
-import 'package:estate_app/core/pagination/page.dart' as app_page;
+import 'package:estate_app/core/pagination/page.dart';
 import 'package:estate_app/features/documents/data/models/document_dto.dart';
 
+/// Remote data source for document management.
+/// NOTE: The PM documents endpoints (/pm/documents/*) do not yet exist in the backend.
 abstract interface class DocumentsRemoteDataSource {
-  Future<app_page.Page<DocumentDto>> getDocuments({
+  Future<Page<DocumentDto>> getDocuments({
     required int page,
     required int limit,
     int? propertyId,
@@ -32,58 +33,36 @@ abstract interface class DocumentsRemoteDataSource {
   Future<String> getDownloadUrl(int id);
 }
 
+/// Stub implementation that returns empty data since PM documents endpoints
+/// are not available in the current backend.
 final class ApiDocumentsRemoteDataSource implements DocumentsRemoteDataSource {
   ApiDocumentsRemoteDataSource(this._apiClient);
 
   final ApiClient _apiClient;
 
   @override
-  Future<app_page.Page<DocumentDto>> getDocuments({
+  Future<Page<DocumentDto>> getDocuments({
     required int page,
     required int limit,
     int? propertyId,
     int? leaseId,
     String? documentType,
   }) async {
-    final offset = (page - 1) * limit;
-    final queryParams = <String, dynamic>{
-      'limit': limit,
-      'offset': offset,
-      if (propertyId != null) 'property_id': propertyId,
-      if (leaseId != null) 'lease_id': leaseId,
-      if (documentType != null) 'document_type': documentType,
-    };
-
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      '/pm/documents',
-      queryParameters: queryParams,
-    );
-
-    final data = response.data!;
-    final items = (data['items'] as List<dynamic>? ??
-            data['data'] as List<dynamic>? ??
-            [])
-        .map((e) => DocumentDto.fromJson(e as Map<String, dynamic>))
-        .toList();
-
-    final total = data['total'] as int? ?? items.length;
-    final hasMore = offset + items.length < total;
-
-    return app_page.Page<DocumentDto>(
-      items: items,
+    print('[DOCUMENTS] WARNING: PM documents endpoint not available');
+    return Page<DocumentDto>(
+      items: [],
       page: page,
       limit: limit,
-      hasMore: hasMore,
+      hasMore: false,
     );
   }
 
   @override
   Future<DocumentDto> getDocumentById(int id) async {
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      '/pm/documents/$id',
+    print('[DOCUMENTS] WARNING: PM documents endpoint not available');
+    throw UnsupportedError(
+      'Document management is not yet available. PM module pending backend implementation.',
     );
-
-    return DocumentDto.fromJson(response.data!);
   }
 
   @override
@@ -95,48 +74,34 @@ final class ApiDocumentsRemoteDataSource implements DocumentsRemoteDataSource {
     String? description,
     String? expiryDate,
   }) async {
-    final fileName = file.path.split('/').last;
-    final formData = FormData.fromMap({
-      'file': await MultipartFile.fromFile(file.path, filename: fileName),
-      'document_type': documentType,
-      if (propertyId != null) 'property_id': propertyId,
-      if (leaseId != null) 'lease_id': leaseId,
-      if (description != null) 'description': description,
-      if (expiryDate != null) 'expiry_date': expiryDate,
-    });
-
-    final response = await _apiClient.upload<Map<String, dynamic>>(
-      '/pm/documents/upload',
-      data: formData,
+    print('[DOCUMENTS] WARNING: PM documents endpoint not available');
+    throw UnsupportedError(
+      'Document upload is not yet available. PM module pending backend implementation.',
     );
-
-    return DocumentDto.fromJson(response.data!);
   }
 
   @override
-  Future<DocumentDto> updateDocument(
-    int id,
-    Map<String, dynamic> updates,
-  ) async {
-    final response = await _apiClient.patch<Map<String, dynamic>>(
-      '/pm/documents/$id',
-      data: updates,
+  Future<DocumentDto> updateDocument(int id, Map<String, dynamic> updates) async {
+    print('[DOCUMENTS] WARNING: PM documents endpoint not available');
+    throw UnsupportedError(
+      'Document update is not yet available. PM module pending backend implementation.',
     );
-
-    return DocumentDto.fromJson(response.data!);
   }
 
   @override
   Future<void> deleteDocument(int id) async {
-    await _apiClient.delete<void>('/pm/documents/$id');
+    print('[DOCUMENTS] WARNING: PM documents endpoint not available');
+    throw UnsupportedError(
+      'Document deletion is not yet available. PM module pending backend implementation.',
+    );
   }
 
   @override
   Future<String> getDownloadUrl(int id) async {
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      '/pm/documents/$id/download',
+    print('[DOCUMENTS] WARNING: PM documents endpoint not available');
+    throw UnsupportedError(
+      'Document download is not yet available. PM module pending backend implementation.',
     );
-
-    return response.data!['url'] as String? ?? response.data!['download_url'] as String;
   }
 }
+

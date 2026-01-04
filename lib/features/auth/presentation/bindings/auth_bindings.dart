@@ -1,4 +1,5 @@
 import 'package:estate_app/core/config/app_config.dart';
+import 'package:estate_app/core/network/auth_token_provider.dart';
 import 'package:estate_app/core/services/deep_link_service.dart';
 import 'package:estate_app/features/auth/data/datasources/supabase_auth_data_source.dart';
 import 'package:estate_app/features/auth/data/repositories/auth_repository_impl.dart';
@@ -76,6 +77,7 @@ class AuthBindings extends Bindings {
       () => LoginController(
         config: Get.find<AppConfig>(),
         signIn: Get.find<SignInWithPhonePasswordUseCase>(),
+        tokenProvider: Get.find<AuthTokenProvider>(),
       ),
     );
     lazyPutIfAbsent<SignupController>(

@@ -64,6 +64,7 @@ class ShellPage extends StatelessWidget {
           ],
         ),
         floatingActionButton: FloatingActionButton(
+          heroTag: 'shell_fab',
           onPressed: () => _showQuickActions(context),
           backgroundColor: AppColors.brand,
           foregroundColor: Colors.white,
@@ -76,110 +77,143 @@ class ShellPage extends StatelessWidget {
   void _showQuickActions(BuildContext context) {
     unawaited(showModalBottomSheet<void>(
       context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (context) => SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    Text(
-                      'Quick Actions',
-                      style: Theme.of(context).textTheme.titleLarge,
+              Row(
+                children: [
+                  Text(
+                    'Quick Actions',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
-                    const Spacer(),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close),
+                  ),
+                  const Spacer(),
+                  IconButton.filledTonal(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Flexible(
+                child: GridView.count(
+                  crossAxisCount: 3,
+                  shrinkWrap: true,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  children: [
+                    _QuickActionItem(
+                      icon: Icons.apartment,
+                      label: 'Add Property',
+                      color: Colors.blue,
+                      onTap: () {
+                        Navigator.pop(context);
+                        unawaited(Get.toNamed<void>(Routes.propertyCreate));
+                      },
+                    ),
+                    _QuickActionItem(
+                      icon: Icons.description,
+                      label: 'Create Lease',
+                      color: Colors.green,
+                      onTap: () {
+                        Navigator.pop(context);
+                        unawaited(Get.toNamed<void>(Routes.leaseCreate));
+                      },
+                    ),
+                    _QuickActionItem(
+                      icon: Icons.receipt_long,
+                      label: 'Generate Rent',
+                      color: Colors.orange,
+                      onTap: () {
+                        Navigator.pop(context);
+                        unawaited(Get.toNamed<void>(Routes.finance));
+                      },
+                    ),
+                    _QuickActionItem(
+                      icon: Icons.payments,
+                      label: 'Record Pay',
+                      color: Colors.purple,
+                      onTap: () {
+                        Navigator.pop(context);
+                        unawaited(Get.toNamed<void>(Routes.recordPayment));
+                      },
+                    ),
+                    _QuickActionItem(
+                      icon: Icons.money_off,
+                      label: 'Add Expense',
+                      color: Colors.red,
+                      onTap: () {
+                        Navigator.pop(context);
+                        unawaited(Get.toNamed<void>(Routes.expenseCreate));
+                      },
+                    ),
+                    _QuickActionItem(
+                      icon: Icons.build,
+                      label: 'Maintenance',
+                      color: Colors.amber,
+                      onTap: () {
+                        Navigator.pop(context);
+                        unawaited(Get.toNamed<void>(Routes.maintenanceCreate));
+                      },
                     ),
                   ],
                 ),
-              ),
-              const Divider(),
-              _QuickActionTile(
-                icon: Icons.apartment,
-                label: 'Add Property',
-                onTap: () {
-                  Navigator.pop(context);
-                  unawaited(Get.toNamed<void>(Routes.propertyCreate));
-                },
-              ),
-              _QuickActionTile(
-                icon: Icons.description,
-                label: 'Create Lease',
-                onTap: () {
-                  Navigator.pop(context);
-                  unawaited(Get.toNamed<void>(Routes.leaseCreate));
-                },
-              ),
-              _QuickActionTile(
-                icon: Icons.receipt_long,
-                label: 'Generate Rent Charges',
-                onTap: () {
-                  Navigator.pop(context);
-                  unawaited(Get.toNamed<void>(Routes.rentChargeGenerate));
-                },
-              ),
-              _QuickActionTile(
-                icon: Icons.payments,
-                label: 'Record Payment',
-                onTap: () {
-                  Navigator.pop(context);
-                  unawaited(Get.toNamed<void>(Routes.recordPayment));
-                },
-              ),
-              _QuickActionTile(
-                icon: Icons.money_off,
-                label: 'Add Expense',
-                onTap: () {
-                  Navigator.pop(context);
-                  unawaited(Get.toNamed<void>(Routes.expenseCreate));
-                },
-              ),
-              _QuickActionTile(
-                icon: Icons.build,
-                label: 'Create Maintenance Request',
-                onTap: () {
-                  Navigator.pop(context);
-                  unawaited(Get.toNamed<void>(Routes.maintenanceCreate));
-                },
-              ),
-              _QuickActionTile(
-                icon: Icons.upload_file,
-                label: 'Upload Document',
-                onTap: () {
-                  Navigator.pop(context);
-                  unawaited(Get.toNamed<void>(Routes.documentUpload));
-                },
               ),
             ],
           ),
         ),
       ),
-    ));
+    ),);
   }
 }
 
-class _QuickActionTile extends StatelessWidget {
-  const _QuickActionTile({
+class _QuickActionItem extends StatelessWidget {
+  const _QuickActionItem({
     required this.icon,
     required this.label,
+    required this.color,
     required this.onTap,
   });
 
   final IconData icon;
   final String label;
+  final Color color;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon, color: AppColors.brand),
-      title: Text(label),
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, color: color, size: 28),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

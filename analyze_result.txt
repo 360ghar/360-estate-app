@@ -1,0 +1,404 @@
+﻿Analyzing 360-estate-app...                                     
+
+   info - Missing a required trailing comma - lib\app\bindings\initial_bindings.dart:27:8 - require_trailing_commas
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_auth_data_source.dart:19:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_auth_data_source.dart:25:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_auth_data_source.dart:34:11 - inference_failure_on_instance_creation
+   info - The value of the argument is redundant because it matches the default value - lib\core\mocks\mock_auth_data_source.dart:53:14 - avoid_redundant_argument_values
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_auth_data_source.dart:67:11 - inference_failure_on_instance_creation
+   info - The value of the argument is redundant because it matches the default value - lib\core\mocks\mock_auth_data_source.dart:82:14 - avoid_redundant_argument_values
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_auth_data_source.dart:91:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_auth_data_source.dart:97:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_auth_data_source.dart:105:11 - inference_failure_on_instance_creation
+  error - Target of URI doesn't exist: 'package:estate_app/features/home/data/datasources/dashboard_remote_data_source.dart' - lib\core\mocks\mock_dashboard_data_source.dart:5:8 - uri_does_not_exist
+  error - Classes and mixins can only implement other classes and mixins - lib\core\mocks\mock_dashboard_data_source.dart:9:54 - implements_non_class
+warning - The method doesn't override an inherited method - lib\core\mocks\mock_dashboard_data_source.dart:13:32 - override_on_non_overriding_member
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_dashboard_data_source.dart:15:11 - inference_failure_on_instance_creation
+warning - The method doesn't override an inherited method - lib\core\mocks\mock_dashboard_data_source.dart:22:33 - override_on_non_overriding_member
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_dashboard_data_source.dart:24:11 - inference_failure_on_instance_creation
+warning - The value of the field '_random' isn't used - lib\core\mocks\mock_data_factory.dart:10:23 - unused_field
+warning - The value of the local variable 'now' isn't used - lib\core\mocks\mock_data_factory.dart:355:11 - unused_local_variable
+warning - The value of the local variable 'currentMonthCharges' isn't used - lib\core\mocks\mock_data_factory.dart:639:11 - unused_local_variable
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_finance_data_source.dart:36:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_finance_data_source.dart:75:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_finance_data_source.dart:129:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_finance_data_source.dart:164:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_finance_data_source.dart:209:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_finance_data_source.dart:250:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_finance_data_source.dart:298:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_finance_data_source.dart:331:11 - inference_failure_on_instance_creation
+  error - Target of URI doesn't exist: 'package:estate_app/features/leases/data/datasources/leases_remote_data_source.dart' - lib\core\mocks\mock_leases_data_source.dart:6:8 - uri_does_not_exist
+  error - Classes and mixins can only implement other classes and mixins - lib\core\mocks\mock_leases_data_source.dart:9:51 - implements_non_class
+warning - The method doesn't override an inherited method - lib\core\mocks\mock_leases_data_source.dart:19:26 - override_on_non_overriding_member
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_leases_data_source.dart:25:11 - inference_failure_on_instance_creation
+warning - The method doesn't override an inherited method - lib\core\mocks\mock_leases_data_source.dart:60:20 - override_on_non_overriding_member
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_leases_data_source.dart:61:11 - inference_failure_on_instance_creation
+warning - The method doesn't override an inherited method - lib\core\mocks\mock_leases_data_source.dart:72:20 - override_on_non_overriding_member
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_leases_data_source.dart:73:11 - inference_failure_on_instance_creation
+warning - The method doesn't override an inherited method - lib\core\mocks\mock_leases_data_source.dart:116:20 - override_on_non_overriding_member
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_leases_data_source.dart:117:11 - inference_failure_on_instance_creation
+warning - The method doesn't override an inherited method - lib\core\mocks\mock_leases_data_source.dart:134:20 - override_on_non_overriding_member
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_leases_data_source.dart:135:11 - inference_failure_on_instance_creation
+warning - The method doesn't override an inherited method - lib\core\mocks\mock_leases_data_source.dart:177:16 - override_on_non_overriding_member
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_leases_data_source.dart:178:11 - inference_failure_on_instance_creation
+  error - Target of URI doesn't exist: 'package:estate_app/features/maintenance/data/datasources/maintenance_remote_data_source.dart' - lib\core\mocks\mock_maintenance_data_source.dart:6:8 - uri_does_not_exist
+  error - Classes and mixins can only implement other classes and mixins - lib\core\mocks\mock_maintenance_data_source.dart:9:56 - implements_non_class
+warning - The method doesn't override an inherited method - lib\core\mocks\mock_maintenance_data_source.dart:19:39 - override_on_non_overriding_member
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_maintenance_data_source.dart:27:11 - inference_failure_on_instance_creation
+warning - The method doesn't override an inherited method - lib\core\mocks\mock_maintenance_data_source.dart:68:33 - override_on_non_overriding_member
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_maintenance_data_source.dart:69:11 - inference_failure_on_instance_creation
+warning - The method doesn't override an inherited method - lib\core\mocks\mock_maintenance_data_source.dart:80:33 - override_on_non_overriding_member
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_maintenance_data_source.dart:81:11 - inference_failure_on_instance_creation
+warning - The method doesn't override an inherited method - lib\core\mocks\mock_maintenance_data_source.dart:126:33 - override_on_non_overriding_member
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_maintenance_data_source.dart:130:11 - inference_failure_on_instance_creation
+warning - The method doesn't override an inherited method - lib\core\mocks\mock_maintenance_data_source.dart:161:16 - override_on_non_overriding_member
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_properties_data_source.dart:25:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_properties_data_source.dart:57:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_properties_data_source.dart:69:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_properties_data_source.dart:105:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_properties_data_source.dart:129:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_properties_data_source.dart:141:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_tenants_data_source.dart:19:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_tenants_data_source.dart:51:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_tenants_data_source.dart:63:11 - inference_failure_on_instance_creation
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\core\mocks\mock_tenants_data_source.dart:96:11 - inference_failure_on_instance_creation
+   info - 'Future'-returning calls in a non-'async' function - lib\core\network\auth_token_provider.dart:17:37 - discarded_futures
+   info - Don't invoke 'print' in production code - lib\core\network\auth_token_provider.dart:41:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\auth_token_provider.dart:49:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\auth_token_provider.dart:55:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\auth_token_provider.dart:56:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\auth_token_provider.dart:60:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\auth_token_provider.dart:65:7 - avoid_print
+   info - The 'if' statement could be replaced by a null-aware assignment - lib\core\network\auth_token_provider.dart:74:7 - prefer_conditional_assignment
+   info - Don't invoke 'print' in production code - lib\core\network\auth_token_provider.dart:78:7 - avoid_print
+   info - The 'if' statement could be replaced by a null-aware assignment - lib\core\network\auth_token_provider.dart:93:5 - prefer_conditional_assignment
+   info - Don't invoke 'print' in production code - lib\core\network\auth_token_provider.dart:100:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\auth_token_provider.dart:105:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\auth_token_provider.dart:111:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\auth_token_provider.dart:121:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\auth_token_provider.dart:125:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\auth_token_provider.dart:136:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\auth_token_provider.dart:139:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\auth_token_provider.dart:143:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\auth_token_provider.dart:164:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\auth_token_provider.dart:168:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:26:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:30:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:45:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:46:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:47:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:56:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:57:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:59:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:64:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:74:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:75:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:76:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:77:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:78:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:79:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:80:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:91:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:94:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:101:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:106:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\network\interceptors\auth_interceptor.dart:107:5 - avoid_print
+   info - The value of the argument is redundant because it matches the default value - lib\core\presentation\design_system\app_colors.dart:64:12 - avoid_redundant_argument_values
+   info - The value of the argument is redundant because it matches the default value - lib\core\presentation\design_system\app_colors.dart:65:10 - avoid_redundant_argument_values
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\presentation\design_system\app_text_styles.dart:85:27 - deprecated_member_use
+   info - 'Future'-returning calls in a non-'async' function - lib\core\presentation\widgets\app_button.dart:56:23 - discarded_futures
+   info - 'Future'-returning calls in a non-'async' function - lib\core\presentation\widgets\app_button.dart:61:21 - discarded_futures
+   info - 'Future'-returning calls in a non-'async' function - lib\core\presentation\widgets\app_button.dart:65:21 - discarded_futures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\presentation\widgets\app_button.dart:128:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\presentation\widgets\app_button.dart:134:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\presentation\widgets\app_button.dart:145:63 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\presentation\widgets\app_button.dart:174:61 - deprecated_member_use
+   info - 'Future'-returning calls in a non-'async' function - lib\core\presentation\widgets\app_text_field.dart:69:23 - discarded_futures
+   info - 'Future'-returning calls in a non-'async' function - lib\core\presentation\widgets\app_text_field.dart:71:23 - discarded_futures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\presentation\widgets\app_text_field.dart:91:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\presentation\widgets\app_text_field.dart:101:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\presentation\widgets\app_text_field.dart:129:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\presentation\widgets\app_text_field.dart:138:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\presentation\widgets\app_text_field.dart:148:66 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\presentation\widgets\app_text_field.dart:160:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\presentation\widgets\app_text_field.dart:188:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\presentation\widgets\app_text_field.dart:192:50 - deprecated_member_use
+  error - Target of URI doesn't exist: 'package:estate_app/features/applications/data/datasources/applications_remote_data_source.dart' - lib\features\applications\data\repositories\applications_repository_impl.dart:2:8 - uri_does_not_exist
+  error - Undefined class 'ApplicationsRemoteDataSource' - lib\features\applications\data\repositories\applications_repository_impl.dart:7:40 - undefined_class
+  error - Undefined class 'ApplicationsRemoteDataSource' - lib\features\applications\data\repositories\applications_repository_impl.dart:10:9 - undefined_class
+warning - The type of dto can't be inferred; a type must be explicitly provided - lib\features\applications\data\repositories\applications_repository_impl.dart:27:29 - inference_failure_on_untyped_parameter
+warning - The type of dto can't be inferred; a type must be explicitly provided - lib\features\applications\data\repositories\applications_repository_impl.dart:105:36 - inference_failure_on_untyped_parameter
+  error - Target of URI doesn't exist: 'package:estate_app/features/applications/data/datasources/applications_remote_data_source.dart' - lib\features\applications\presentation\bindings\applications_bindings.dart:2:8 - uri_does_not_exist
+  error - The name 'ApplicationsRemoteDataSource' isn't a type, so it can't be used as a type argument - lib\features\applications\presentation\bindings\applications_bindings.dart:11:17 - non_type_as_type_argument
+  error - The method 'ApiApplicationsRemoteDataSource' isn't defined for the type 'ApplicationsBindings' - lib\features\applications\presentation\bindings\applications_bindings.dart:12:13 - undefined_method
+  error - The name 'ApplicationsRemoteDataSource' isn't a type, so it can't be used as a type argument - lib\features\applications\presentation\bindings\applications_bindings.dart:17:30 - non_type_as_type_argument
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\pages\application_detail_page.dart:288:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\pages\application_detail_page.dart:319:53 - deprecated_member_use
+   info - Missing a required trailing comma - lib\features\applications\presentation\pages\application_detail_page.dart:444:18 - require_trailing_commas
+   info - Missing a required trailing comma - lib\features\applications\presentation\pages\application_detail_page.dart:450:18 - require_trailing_commas
+   info - Missing a required trailing comma - lib\features\applications\presentation\pages\application_detail_page.dart:460:6 - require_trailing_commas
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\pages\applications_page.dart:426:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\pages\applications_page.dart:458:63 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\pages\applications_page.dart:566:66 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\pages\applications_page.dart:605:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\applications\presentation\pages\applications_page.dart:624:43 - deprecated_member_use
+   info - 'Future'-returning calls in a non-'async' function - lib\features\applications\presentation\pages\applications_page.dart:645:33 - discarded_futures
+   info - 'Future'-returning calls in a non-'async' function - lib\features\auth\data\datasources\backend_auth_data_source.dart:32:37 - discarded_futures
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:48:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:49:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:50:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:51:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:52:7 - avoid_print
+   info - Missing a required trailing comma - lib\features\auth\data\datasources\backend_auth_data_source.dart:60:8 - require_trailing_commas
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:66:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:73:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:74:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:78:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:94:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:95:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:96:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:100:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:108:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:109:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:113:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:114:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:115:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:116:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:121:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:125:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:128:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:129:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:148:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\data\datasources\backend_auth_data_source.dart:157:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\presentation\controllers\login_controller.dart:79:9 - avoid_print
+   info - Missing a required trailing comma - lib\features\auth\presentation\pages\enter_phone_page.dart:43:6 - require_trailing_commas
+   info - 'Future'-returning calls in a non-'async' function - lib\features\auth\presentation\pages\enter_phone_page.dart:52:21 - discarded_futures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\enter_phone_page.dart:129:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\enter_phone_page.dart:166:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\enter_phone_page.dart:171:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\enter_phone_page.dart:198:40 - deprecated_member_use
+   info - Missing a required trailing comma - lib\features\auth\presentation\pages\login_page.dart:44:6 - require_trailing_commas
+   info - 'Future'-returning calls in a non-'async' function - lib\features\auth\presentation\pages\login_page.dart:53:21 - discarded_futures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\login_page.dart:121:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\login_page.dart:147:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\login_page.dart:184:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\login_page.dart:189:51 - deprecated_member_use
+   info - Missing a required trailing comma - lib\features\auth\presentation\pages\login_page.dart:205:65 - require_trailing_commas
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\login_page.dart:216:63 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\login_page.dart:256:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\login_page.dart:266:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\login_page.dart:273:42 - deprecated_member_use
+   info - Missing a required trailing comma - lib\features\auth\presentation\pages\signup_page.dart:44:6 - require_trailing_commas
+   info - 'Future'-returning calls in a non-'async' function - lib\features\auth\presentation\pages\signup_page.dart:53:21 - discarded_futures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\signup_page.dart:121:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\signup_page.dart:147:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\signup_page.dart:184:59 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\signup_page.dart:189:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\signup_page.dart:202:55 - deprecated_member_use
+   info - Missing a required trailing comma - lib\features\auth\presentation\pages\signup_page.dart:233:65 - require_trailing_commas
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\signup_page.dart:244:63 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\signup_page.dart:284:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\signup_page.dart:294:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\signup_page.dart:301:42 - deprecated_member_use
+   info - 'Future'-returning calls in a non-'async' function - lib\features\auth\presentation\pages\splash_page.dart:40:21 - discarded_futures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\splash_page.dart:83:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\pages\splash_page.dart:119:38 - deprecated_member_use
+  error - Target of URI doesn't exist: 'package:estate_app/features/documents/data/datasources/documents_remote_data_source.dart' - lib\features\documents\data\repositories\documents_repository_impl.dart:4:8 - uri_does_not_exist
+  error - Undefined class 'DocumentsRemoteDataSource' - lib\features\documents\data\repositories\documents_repository_impl.dart:11:9 - undefined_class
+warning - The type of dto can't be inferred; a type must be explicitly provided - lib\features\documents\data\repositories\documents_repository_impl.dart:30:33 - inference_failure_on_untyped_parameter
+  error - Target of URI doesn't exist: 'package:estate_app/features/documents/data/datasources/documents_remote_data_source.dart' - lib\features\documents\presentation\bindings\documents_bindings.dart:2:8 - uri_does_not_exist
+  error - The name 'DocumentsRemoteDataSource' isn't a type, so it can't be used as a type argument - lib\features\documents\presentation\bindings\documents_bindings.dart:11:17 - non_type_as_type_argument
+  error - The method 'ApiDocumentsRemoteDataSource' isn't defined for the type 'DocumentsBindings' - lib\features\documents\presentation\bindings\documents_bindings.dart:12:13 - undefined_method
+  error - The name 'DocumentsRemoteDataSource' isn't a type, so it can't be used as a type argument - lib\features\documents\presentation\bindings\documents_bindings.dart:16:46 - non_type_as_type_argument
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\documents\presentation\pages\document_upload_page.dart:50:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\documents\presentation\pages\documents_page.dart:260:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\documents\presentation\pages\documents_page.dart:293:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\documents\presentation\pages\documents_page.dart:328:64 - deprecated_member_use
+warning - The value of the field '_apiClient' isn't used - lib\features\finance\data\datasources\finance_remote_data_source.dart:53:19 - unused_field
+   info - Don't invoke 'print' in production code - lib\features\finance\data\datasources\finance_remote_data_source.dart:65:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\finance\data\datasources\finance_remote_data_source.dart:66:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\finance\data\datasources\finance_remote_data_source.dart:79:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\finance\data\datasources\finance_remote_data_source.dart:93:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\finance\data\datasources\finance_remote_data_source.dart:94:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\finance\data\datasources\finance_remote_data_source.dart:107:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\finance\data\datasources\finance_remote_data_source.dart:119:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\finance\data\datasources\finance_remote_data_source.dart:135:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\finance\data\datasources\finance_remote_data_source.dart:136:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\finance\data\datasources\finance_remote_data_source.dart:149:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\finance\data\datasources\finance_remote_data_source.dart:158:5 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\finance\presentation\pages\finance_page.dart:515:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\finance\presentation\pages\finance_page.dart:699:49 - deprecated_member_use
+  error - Target of URI doesn't exist: 'package:estate_app/features/home/data/datasources/dashboard_remote_data_source.dart' - lib\features\home\data\repositories\dashboard_repository_impl.dart:1:8 - uri_does_not_exist
+  error - Undefined class 'DashboardRemoteDataSource' - lib\features\home\data\repositories\dashboard_repository_impl.dart:8:14 - undefined_class
+  error - Undefined class 'DashboardRemoteDataSource' - lib\features\home\data\repositories\dashboard_repository_impl.dart:11:9 - undefined_class
+warning - The type of d can't be inferred; a type must be explicitly provided - lib\features\home\data\repositories\dashboard_repository_impl.dart:22:22 - inference_failure_on_untyped_parameter
+  error - Target of URI doesn't exist: 'package:estate_app/features/home/data/datasources/dashboard_remote_data_source.dart' - lib\features\home\presentation\bindings\home_bindings.dart:4:8 - uri_does_not_exist
+  error - The name 'DashboardRemoteDataSource' isn't a type, so it can't be used as a type argument - lib\features\home\presentation\bindings\home_bindings.dart:19:17 - non_type_as_type_argument
+  error - The method 'ApiDashboardRemoteDataSource' isn't defined for the type 'HomeBindings' - lib\features\home\presentation\bindings\home_bindings.dart:22:13 - undefined_method
+  error - The name 'DashboardRemoteDataSource' isn't a type, so it can't be used as a type argument - lib\features\home\presentation\bindings\home_bindings.dart:27:30 - non_type_as_type_argument
+   info - Missing a required trailing comma - lib\features\home\presentation\pages\rm_dashboard_page.dart:279:59 - require_trailing_commas
+  error - Target of URI doesn't exist: 'package:estate_app/features/inspections/data/datasources/inspections_remote_data_source.dart' - lib\features\inspections\data\repositories\inspections_repository_impl.dart:2:8 - uri_does_not_exist
+  error - Undefined class 'InspectionsRemoteDataSource' - lib\features\inspections\data\repositories\inspections_repository_impl.dart:7:39 - undefined_class
+  error - Undefined class 'InspectionsRemoteDataSource' - lib\features\inspections\data\repositories\inspections_repository_impl.dart:10:9 - undefined_class
+warning - The type of dto can't be inferred; a type must be explicitly provided - lib\features\inspections\data\repositories\inspections_repository_impl.dart:29:35 - inference_failure_on_untyped_parameter
+  error - Target of URI doesn't exist: 'package:estate_app/features/inspections/data/datasources/inspections_remote_data_source.dart' - lib\features\inspections\presentation\bindings\inspections_bindings.dart:2:8 - uri_does_not_exist
+  error - The name 'InspectionsRemoteDataSource' isn't a type, so it can't be used as a type argument - lib\features\inspections\presentation\bindings\inspections_bindings.dart:11:17 - non_type_as_type_argument
+  error - The method 'ApiInspectionsRemoteDataSource' isn't defined for the type 'InspectionsBindings' - lib\features\inspections\presentation\bindings\inspections_bindings.dart:12:13 - undefined_method
+  error - The name 'InspectionsRemoteDataSource' isn't a type, so it can't be used as a type argument - lib\features\inspections\presentation\bindings\inspections_bindings.dart:17:30 - non_type_as_type_argument
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\inspections\presentation\pages\inspection_detail_page.dart:276:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\inspections\presentation\pages\inspection_detail_page.dart:304:52 - deprecated_member_use
+   info - Missing a required trailing comma - lib\features\inspections\presentation\pages\inspection_detail_page.dart:417:16 - require_trailing_commas
+   info - Missing a required trailing comma - lib\features\inspections\presentation\pages\inspection_detail_page.dart:423:6 - require_trailing_commas
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\inspections\presentation\pages\inspection_detail_page.dart:656:42 - deprecated_member_use
+  error - Target of URI doesn't exist: 'package:estate_app/features/leases/data/datasources/leases_remote_data_source.dart' - lib\features\leases\data\repositories\leases_repository_impl.dart:2:8 - uri_does_not_exist
+  error - Undefined class 'LeasesRemoteDataSource' - lib\features\leases\data\repositories\leases_repository_impl.dart:8:14 - undefined_class
+  error - Undefined class 'LeasesRemoteDataSource' - lib\features\leases\data\repositories\leases_repository_impl.dart:11:9 - undefined_class
+warning - The type of d can't be inferred; a type must be explicitly provided - lib\features\leases\data\repositories\leases_repository_impl.dart:28:33 - inference_failure_on_untyped_parameter
+  error - Target of URI doesn't exist: 'package:estate_app/features/leases/data/datasources/leases_remote_data_source.dart' - lib\features\leases\presentation\bindings\leases_bindings.dart:4:8 - uri_does_not_exist
+  error - The name 'LeasesRemoteDataSource' isn't a type, so it can't be used as a type argument - lib\features\leases\presentation\bindings\leases_bindings.dart:20:21 - non_type_as_type_argument
+  error - The method 'ApiLeasesRemoteDataSource' isn't defined for the type 'LeasesBindings' - lib\features\leases\presentation\bindings\leases_bindings.dart:23:13 - undefined_method
+  error - The name 'LeasesRemoteDataSource' isn't a type, so it can't be used as a type argument - lib\features\leases\presentation\bindings\leases_bindings.dart:28:30 - non_type_as_type_argument
+   info - 'Future'-returning calls in a non-'async' function - lib\features\leases\presentation\controllers\lease_create_controller.dart:53:5 - discarded_futures
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\features\leases\presentation\pages\lease_create_page.dart:76:11 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\leases\presentation\pages\lease_create_page.dart:81:66 - deprecated_member_use
+   info - Missing a required trailing comma - lib\features\leases\presentation\pages\lease_create_page.dart:103:10 - require_trailing_commas
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\features\leases\presentation\pages\lease_create_page.dart:108:11 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\leases\presentation\pages\lease_create_page.dart:113:66 - deprecated_member_use
+   info - Missing a required trailing comma - lib\features\leases\presentation\pages\lease_create_page.dart:130:10 - require_trailing_commas
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\leases\presentation\pages\lease_create_page.dart:146:74 - deprecated_member_use
+   info - Missing a required trailing comma - lib\features\leases\presentation\pages\lease_create_page.dart:159:16 - require_trailing_commas
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\leases\presentation\pages\lease_create_page.dart:170:74 - deprecated_member_use
+   info - Missing a required trailing comma - lib\features\leases\presentation\pages\lease_create_page.dart:183:16 - require_trailing_commas
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\leases\presentation\pages\lease_create_page.dart:228:72 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\leases\presentation\pages\lease_create_page.dart:241:72 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\features\leases\presentation\pages\lease_create_page.dart:250:15 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\leases\presentation\pages\lease_create_page.dart:255:70 - deprecated_member_use
+   info - Missing a required trailing comma - lib\features\leases\presentation\pages\lease_create_page.dart:268:14 - require_trailing_commas
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\leases\presentation\pages\lease_create_page.dart:297:68 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\leases\presentation\pages\lease_create_page.dart:310:68 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\leases\presentation\pages\lease_create_page.dart:328:66 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\leases\presentation\pages\lease_create_page.dart:340:66 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\leases\presentation\pages\lease_detail_page.dart:272:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\leases\presentation\pages\lease_detail_page.dart:316:72 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\leases\presentation\pages\lease_detail_page.dart:340:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\leases\presentation\pages\lease_detail_page.dart:512:22 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\leases\presentation\pages\leases_page.dart:236:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\leases\presentation\pages\leases_page.dart:330:45 - deprecated_member_use
+  error - Target of URI doesn't exist: 'package:estate_app/features/maintenance/data/datasources/maintenance_remote_data_source.dart' - lib\features\maintenance\data\repositories\maintenance_repository_impl.dart:2:8 - uri_does_not_exist
+  error - Undefined class 'MaintenanceRemoteDataSource' - lib\features\maintenance\data\repositories\maintenance_repository_impl.dart:9:9 - undefined_class
+warning - The type of dto can't be inferred; a type must be explicitly provided - lib\features\maintenance\data\repositories\maintenance_repository_impl.dart:30:33 - inference_failure_on_untyped_parameter
+  error - Target of URI doesn't exist: 'package:estate_app/features/maintenance/data/datasources/maintenance_remote_data_source.dart' - lib\features\maintenance\presentation\bindings\maintenance_bindings.dart:4:8 - uri_does_not_exist
+  error - The name 'MaintenanceRemoteDataSource' isn't a type, so it can't be used as a type argument - lib\features\maintenance\presentation\bindings\maintenance_bindings.dart:15:17 - non_type_as_type_argument
+  error - The method 'ApiMaintenanceRemoteDataSource' isn't defined for the type 'MaintenanceBindings' - lib\features\maintenance\presentation\bindings\maintenance_bindings.dart:18:13 - undefined_method
+  error - The name 'MaintenanceRemoteDataSource' isn't a type, so it can't be used as a type argument - lib\features\maintenance\presentation\bindings\maintenance_bindings.dart:22:48 - non_type_as_type_argument
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\maintenance\presentation\pages\maintenance_detail_page.dart:109:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\maintenance\presentation\pages\maintenance_detail_page.dart:449:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\maintenance\presentation\pages\maintenance_detail_page.dart:451:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\maintenance\presentation\pages\maintenance_detail_page.dart:475:31 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\maintenance\presentation\pages\maintenance_page.dart:274:82 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\maintenance\presentation\pages\maintenance_page.dart:353:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\maintenance\presentation\pages\maintenance_page.dart:387:53 - deprecated_member_use
+   info - Missing a required trailing comma - lib\features\notifications\data\datasources\notifications_remote_data_source.dart:51:39 - require_trailing_commas
+   info - 'Future'-returning calls in a non-'async' function - lib\features\properties\presentation\controllers\property_create_controller.dart:55:5 - discarded_futures
+warning - The type argument(s) of the constructor 'Future.delayed' can't be inferred - lib\features\properties\presentation\controllers\property_create_controller.dart:65:15 - inference_failure_on_instance_creation
+warning - The type argument(s) of the function 'back' can't be inferred - lib\features\properties\presentation\controllers\property_create_controller.dart:66:13 - inference_failure_on_function_invocation
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\properties\presentation\pages\properties_page.dart:198:75 - deprecated_member_use
+   info - 'Future'-returning calls in a non-'async' function - lib\features\properties\presentation\pages\property_create_page.dart:33:26 - discarded_futures
+   info - Sort directive sections alphabetically - lib\features\properties\presentation\pages\property_detail_page.dart:5:1 - directives_ordering
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\properties\presentation\pages\property_detail_page.dart:376:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\properties\presentation\pages\property_detail_page.dart:497:29 - deprecated_member_use
+  error - Target of URI doesn't exist: 'package:estate_app/features/reports/data/datasources/reports_remote_data_source.dart' - lib\features\reports\data\repositories\reports_repository_impl.dart:1:8 - uri_does_not_exist
+  error - Undefined class 'ReportsRemoteDataSource' - lib\features\reports\data\repositories\reports_repository_impl.dart:6:35 - undefined_class
+  error - Undefined class 'ReportsRemoteDataSource' - lib\features\reports\data\repositories\reports_repository_impl.dart:9:9 - undefined_class
+  error - Target of URI doesn't exist: 'package:estate_app/features/reports/data/datasources/reports_remote_data_source.dart' - lib\features\reports\presentation\bindings\reports_bindings.dart:2:8 - uri_does_not_exist
+  error - The name 'ReportsRemoteDataSource' isn't a type, so it can't be used as a type argument - lib\features\reports\presentation\bindings\reports_bindings.dart:11:17 - non_type_as_type_argument
+  error - The method 'ReportsRemoteDataSourceImpl' isn't defined for the type 'ReportsBindings' - lib\features\reports\presentation\bindings\reports_bindings.dart:12:13 - undefined_method
+  error - The name 'ReportsRemoteDataSource' isn't a type, so it can't be used as a type argument - lib\features\reports\presentation\bindings\reports_bindings.dart:16:56 - non_type_as_type_argument
+   info - Sort directive sections alphabetically - lib\features\reports\presentation\pages\report_detail_page.dart:4:1 - directives_ordering
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\reports\presentation\pages\report_detail_page.dart:71:64 - deprecated_member_use
+   info - Missing a required trailing comma - lib\features\reports\presentation\pages\report_detail_page.dart:613:20 - require_trailing_commas
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\reports\presentation\pages\report_detail_page.dart:731:34 - deprecated_member_use
+   info - Missing a required trailing comma - lib\features\reports\presentation\pages\report_detail_page.dart:744:20 - require_trailing_commas
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\reports\presentation\pages\report_detail_page.dart:780:32 - deprecated_member_use
+   info - Missing a required trailing comma - lib\features\reports\presentation\pages\report_detail_page.dart:792:20 - require_trailing_commas
+   info - Don't invoke 'print' in production code - lib\features\settings\data\datasources\user_profile_data_source.dart:33:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\settings\data\datasources\user_profile_data_source.dart:44:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\settings\data\datasources\user_profile_data_source.dart:54:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\settings\data\datasources\user_profile_data_source.dart:55:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\settings\data\datasources\user_profile_data_source.dart:56:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\settings\data\datasources\user_profile_data_source.dart:59:7 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:222:64 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:246:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:252:62 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:259:62 - deprecated_member_use
+   info - 'Future'-returning calls in a non-'async' function - lib\features\settings\presentation\pages\settings_page.dart:288:5 - discarded_futures
+   info - 'Future'-returning calls in a non-'async' function - lib\features\settings\presentation\pages\settings_page.dart:342:5 - discarded_futures
+   info - 'Future'-returning calls in a non-'async' function - lib\features\settings\presentation\pages\settings_page.dart:357:15 - discarded_futures
+   info - 'Future'-returning calls in a non-'async' function - lib\features\settings\presentation\pages\settings_page.dart:378:5 - discarded_futures
+   info - Local variables should be final - lib\features\settings\presentation\pages\settings_page.dart:428:5 - prefer_final_locals
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:442:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:459:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:519:45 - deprecated_member_use
+   info - 'Future'-returning calls in a non-'async' function - lib\features\settings\presentation\pages\settings_page.dart:537:31 - discarded_futures
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:548:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:566:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:572:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:581:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:588:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:603:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:612:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:618:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:691:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:710:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:718:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:748:85 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:819:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:824:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\shell\presentation\pages\more_page.dart:114:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\shell\presentation\pages\shell_page.dart:202:28 - deprecated_member_use
+warning - The value of the field '_apiClient' isn't used - lib\features\tenants\data\datasources\tenants_remote_data_source.dart:23:19 - unused_field
+   info - Don't invoke 'print' in production code - lib\features\tenants\data\datasources\tenants_remote_data_source.dart:33:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\tenants\data\datasources\tenants_remote_data_source.dart:34:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\tenants\data\datasources\tenants_remote_data_source.dart:47:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\tenants\data\datasources\tenants_remote_data_source.dart:56:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\tenants\data\datasources\tenants_remote_data_source.dart:65:5 - avoid_print
+   info - Missing a required trailing comma - lib\features\tenants\presentation\pages\tenant_create_page.dart:28:16 - require_trailing_commas
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\tenants\presentation\pages\tenant_create_page.dart:67:33 - deprecated_member_use
+   info - 'Future'-returning calls in a non-'async' function - lib\features\tenants\presentation\pages\tenant_create_page.dart:102:38 - discarded_futures
+   info - The value of the argument is redundant because it matches the default value - lib\features\tenants\presentation\pages\tenant_create_page.dart:144:20 - avoid_redundant_argument_values
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\features\tenants\presentation\pages\tenant_create_page.dart:377:17 - deprecated_member_use
+   info - Missing a required trailing comma - lib\features\tenants\presentation\pages\tenant_create_page.dart:391:16 - require_trailing_commas
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\tenants\presentation\pages\tenant_create_page.dart:447:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\tenants\presentation\pages\tenant_detail_page.dart:80:74 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\tenants\presentation\pages\tenant_detail_page.dart:316:22 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\tenants\presentation\pages\tenant_detail_page.dart:401:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\tenants\presentation\pages\tenant_detail_page.dart:406:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\tenants\presentation\pages\tenant_detail_page.dart:448:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\tenants\presentation\pages\tenants_page.dart:238:72 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\tenants\presentation\pages\tenants_page.dart:270:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\tenants\presentation\pages\tenants_page.dart:288:48 - deprecated_member_use
+   info - Dependencies not sorted alphabetically - pubspec.yaml:47:3 - sort_pub_dependencies
+
+flutter : 378 
+issues found. (ran 
+in 6.1s)
+At line:1 char:1
++ flutter analyze 
+2>&1 | Out-File 
+-FilePath "analyze_
+result.txt" -Encod 
+...
++ ~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo 
+             : No  
+  tSpecified: (3   
+ 78 issues foun    
+d. (ran in 6.1    
+s):String) [],     
+RemoteExcepti    on
+    + FullyQualifi 
+   edErrorId : Na  
+  tiveCommandErr   
+ or
+ 

@@ -26,6 +26,12 @@ abstract interface class FinanceRemoteDataSource {
 
   Future<RentPaymentDto> recordPayment(Map<String, dynamic> data);
 
+  // Tenant Payment Intent
+  Future<RentPaymentDto> submitTenantPaymentIntent({
+    required int rentChargeId,
+    required Map<String, dynamic> data,
+  });
+
   // Expenses
   Future<Page<ExpenseDto>> getExpenses({
     required int page,
@@ -54,48 +60,25 @@ final class ApiFinanceRemoteDataSource implements FinanceRemoteDataSource {
     int? leaseId,
     String? status,
   }) async {
-    final offset = (page - 1) * limit;
-    final queryParams = <String, dynamic>{
-      'limit': limit,
-      'offset': offset,
-      if (propertyId != null) 'property_id': propertyId,
-      if (leaseId != null) 'lease_id': leaseId,
-      if (status != null) 'status': status,
-    };
-
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      '/pm/rent/charges',
-      queryParameters: queryParams,
-    );
-
-    final data = response.data!;
-    final items = (data['items'] as List<dynamic>? ??
-            data['data'] as List<dynamic>? ??
-            [])
-        .map((e) => RentChargeDto.fromJson(e as Map<String, dynamic>))
-        .toList();
-
-    final total = data['total'] as int? ?? items.length;
-    final hasMore = offset + items.length < total;
+    // NOTE: /pm/rent/charges endpoint does NOT exist in the current backend
+    // This is a placeholder implementation until the PM module is added
+    print('[FINANCE] WARNING: /pm/rent/charges endpoint not available in backend');
+    print('[FINANCE] Returning empty list - PM module pending implementation');
 
     return Page<RentChargeDto>(
-      items: items,
+      items: [],
       page: page,
       limit: limit,
-      hasMore: hasMore,
+      hasMore: false,
     );
   }
 
   @override
   Future<void> generateRentCharges({DateTime? forMonth}) async {
-    final data = <String, dynamic>{};
-    if (forMonth != null) {
-      data['for_month'] = forMonth.toIso8601String().split('T')[0];
-    }
-
-    await _apiClient.post<void>(
-      '/pm/rent/charges/generate',
-      data: data,
+    // NOTE: /pm/rent/charges/generate endpoint does NOT exist
+    print('[FINANCE] WARNING: /pm/rent/charges/generate endpoint not available');
+    throw UnsupportedError(
+      'Rent charge generation is not yet available. PM module pending backend implementation.',
     );
   }
 
@@ -106,45 +89,37 @@ final class ApiFinanceRemoteDataSource implements FinanceRemoteDataSource {
     int? leaseId,
     int? rentChargeId,
   }) async {
-    final offset = (page - 1) * limit;
-    final queryParams = <String, dynamic>{
-      'limit': limit,
-      'offset': offset,
-      if (leaseId != null) 'lease_id': leaseId,
-      if (rentChargeId != null) 'rent_charge_id': rentChargeId,
-    };
-
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      '/pm/rent/payments',
-      queryParameters: queryParams,
-    );
-
-    final data = response.data!;
-    final items = (data['items'] as List<dynamic>? ??
-            data['data'] as List<dynamic>? ??
-            [])
-        .map((e) => RentPaymentDto.fromJson(e as Map<String, dynamic>))
-        .toList();
-
-    final total = data['total'] as int? ?? items.length;
-    final hasMore = offset + items.length < total;
+    // NOTE: /pm/rent/payments endpoint does NOT exist
+    print('[FINANCE] WARNING: /pm/rent/payments endpoint not available in backend');
+    print('[FINANCE] Returning empty list - PM module pending implementation');
 
     return Page<RentPaymentDto>(
-      items: items,
+      items: [],
       page: page,
       limit: limit,
-      hasMore: hasMore,
+      hasMore: false,
     );
   }
 
   @override
   Future<RentPaymentDto> recordPayment(Map<String, dynamic> data) async {
-    final response = await _apiClient.post<Map<String, dynamic>>(
-      '/pm/rent/payments',
-      data: data,
+    // NOTE: POST /pm/rent/payments endpoint does NOT exist
+    print('[FINANCE] WARNING: POST /pm/rent/payments endpoint not available');
+    throw UnsupportedError(
+      'Payment recording is not yet available. PM module pending backend implementation.',
     );
+  }
 
-    return RentPaymentDto.fromJson(response.data!);
+  @override
+  Future<RentPaymentDto> submitTenantPaymentIntent({
+    required int rentChargeId,
+    required Map<String, dynamic> data,
+  }) async {
+    // NOTE: /pm/rent/charges/{id}/tenant-payment-intent endpoint does NOT exist
+    print('[FINANCE] WARNING: Tenant payment intent endpoint not available');
+    throw UnsupportedError(
+      'Payment intent submission is not yet available. PM module pending backend implementation.',
+    );
   }
 
   @override
@@ -156,56 +131,34 @@ final class ApiFinanceRemoteDataSource implements FinanceRemoteDataSource {
     DateTime? startDate,
     DateTime? endDate,
   }) async {
-    final offset = (page - 1) * limit;
-    final queryParams = <String, dynamic>{
-      'limit': limit,
-      'offset': offset,
-      if (propertyId != null) 'property_id': propertyId,
-      if (category != null) 'category': category,
-      if (startDate != null) 'start': startDate.toIso8601String().split('T')[0],
-      if (endDate != null) 'end': endDate.toIso8601String().split('T')[0],
-    };
-
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      '/pm/expenses',
-      queryParameters: queryParams,
-    );
-
-    final data = response.data!;
-    final items = (data['items'] as List<dynamic>? ??
-            data['data'] as List<dynamic>? ??
-            [])
-        .map((e) => ExpenseDto.fromJson(e as Map<String, dynamic>))
-        .toList();
-
-    final total = data['total'] as int? ?? items.length;
-    final hasMore = offset + items.length < total;
+    // NOTE: /pm/expenses endpoint does NOT exist
+    print('[FINANCE] WARNING: /pm/expenses endpoint not available in backend');
+    print('[FINANCE] Returning empty list - PM module pending implementation');
 
     return Page<ExpenseDto>(
-      items: items,
+      items: [],
       page: page,
       limit: limit,
-      hasMore: hasMore,
+      hasMore: false,
     );
   }
 
   @override
   Future<ExpenseDto> createExpense(Map<String, dynamic> data) async {
-    final response = await _apiClient.post<Map<String, dynamic>>(
-      '/pm/expenses',
-      data: data,
+    // NOTE: POST /pm/expenses endpoint does NOT exist
+    print('[FINANCE] WARNING: POST /pm/expenses endpoint not available');
+    throw UnsupportedError(
+      'Expense creation is not yet available. PM module pending backend implementation.',
     );
-
-    return ExpenseDto.fromJson(response.data!);
   }
 
   @override
   Future<ExpenseDto> updateExpense(int id, Map<String, dynamic> updates) async {
-    final response = await _apiClient.patch<Map<String, dynamic>>(
-      '/pm/expenses/$id',
-      data: updates,
+    // NOTE: PATCH /pm/expenses/{id} endpoint does NOT exist
+    print('[FINANCE] WARNING: PATCH /pm/expenses/$id endpoint not available');
+    throw UnsupportedError(
+      'Expense update is not yet available. PM module pending backend implementation.',
     );
-
-    return ExpenseDto.fromJson(response.data!);
   }
 }
+

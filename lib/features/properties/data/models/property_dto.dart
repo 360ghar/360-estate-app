@@ -21,6 +21,8 @@ final class PropertyDto {
     this.paymentDueDay = 1,
     this.notes,
     this.monthlyRentInr = 0,
+    this.securityDeposit,
+    this.maintenanceCharges,
     this.activeLease,
     this.createdAt,
     this.updatedAt,
@@ -45,6 +47,8 @@ final class PropertyDto {
   final int paymentDueDay;
   final String? notes;
   final int monthlyRentInr;
+  final double? securityDeposit;
+  final double? maintenanceCharges;
   final ActiveLeaseDto? activeLease;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -83,7 +87,9 @@ final class PropertyDto {
     final managementStatus = (json['management_status'] ?? 'active').toString();
     final paymentDueDay = _parseInt(json['payment_due_day'] ?? 1);
     final notes = json['notes'] as String?;
-    final monthlyRentInr = _parseInt(json['monthly_rent_inr'] ?? json['rent'] ?? 0);
+    final monthlyRentInr = _parseInt(json['monthly_rent_inr'] ?? json['rent'] ?? json['monthly_rent'] ?? 0);
+    final securityDeposit = _parseDoubleOrNull(json['security_deposit']);
+    final maintenanceCharges = _parseDoubleOrNull(json['maintenance_charges']);
 
     final activeLeaseJson = json['active_lease'];
     final activeLease = activeLeaseJson is Map<String, dynamic>
@@ -113,6 +119,8 @@ final class PropertyDto {
       paymentDueDay: paymentDueDay,
       notes: notes,
       monthlyRentInr: monthlyRentInr,
+      securityDeposit: securityDeposit,
+      maintenanceCharges: maintenanceCharges,
       activeLease: activeLease,
       createdAt: createdAt,
       updatedAt: updatedAt,
@@ -136,6 +144,14 @@ final class PropertyDto {
     'management_status': managementStatus,
     'payment_due_day': paymentDueDay,
     if (notes != null) 'notes': notes,
+    if (images.isNotEmpty)
+      'images': images.map((url) => {
+        'image_url': url,
+        'is_main_image': images.first == url, // Simple logic: first is main
+      },).toList(),
+    if (monthlyRentInr > 0) 'monthly_rent': monthlyRentInr, // Backend expects 'monthly_rent' (float) in Create
+    if (securityDeposit != null) 'security_deposit': securityDeposit,
+    if (maintenanceCharges != null) 'maintenance_charges': maintenanceCharges,
   };
 
   Property toEntity() => Property(
@@ -158,6 +174,8 @@ final class PropertyDto {
     paymentDueDay: paymentDueDay,
     notes: notes,
     monthlyRentInr: monthlyRentInr,
+    securityDeposit: securityDeposit,
+    maintenanceCharges: maintenanceCharges,
     activeLease: activeLease?.toEntity(),
     createdAt: createdAt,
     updatedAt: updatedAt,

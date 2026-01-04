@@ -61,7 +61,7 @@ final class ApplicationsRepositoryImpl implements ApplicationsRepository {
                   'field_type': f.fieldType,
                   'is_required': f.isRequired,
                   if (f.options.isNotEmpty) 'options': f.options,
-                })
+                },)
             .toList(),
       if (expiresAt != null)
         'expires_at': expiresAt.toIso8601String().split('T')[0],

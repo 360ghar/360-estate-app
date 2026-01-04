@@ -1,332 +1,489 @@
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'dart:io';
+
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
-import 'package:estate_app/features/properties/domain/repositories/properties_repository.dart';
+import 'package:estate_app/features/properties/presentation/controllers/property_create_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class PropertyCreatePage extends StatefulWidget {
+class PropertyCreatePage extends StatelessWidget {
   const PropertyCreatePage({super.key});
 
   @override
-  State<PropertyCreatePage> createState() => _PropertyCreatePageState();
-}
-
-class _PropertyCreatePageState extends State<PropertyCreatePage> {
-  final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _nicknameController = TextEditingController();
-  final _addressController = TextEditingController();
-  final _cityController = TextEditingController();
-  final _stateController = TextEditingController();
-  final _pincodeController = TextEditingController();
-  final _bedroomsController = TextEditingController();
-  final _bathroomsController = TextEditingController();
-  final _areaController = TextEditingController();
-  final _notesController = TextEditingController();
-
-  String _propertyType = 'apartment';
-  String _propertyCategory = 'residential';
-  bool _isLoading = false;
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _nicknameController.dispose();
-    _addressController.dispose();
-    _cityController.dispose();
-    _stateController.dispose();
-    _pincodeController.dispose();
-    _bedroomsController.dispose();
-    _bathroomsController.dispose();
-    _areaController.dispose();
-    _notesController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final controller = Get.find<PropertyCreateController>();
+
     return AppScaffold(
       appBar: AppBar(
         title: const Text('Add Property'),
-        actions: [
-          TextButton(
-            onPressed: _isLoading ? null : _submit,
-            child: _isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Save'),
-          ),
-        ],
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            // Basic Info Section
-            _SectionHeader(title: 'Basic Information'),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Property Title *',
-                hintText: 'e.g., 2BHK Apartment in Koramangala',
-                border: OutlineInputBorder(),
-              ),
-              validator: (String? value) {
-                if (value == null || value.isEmpty) {
-                  return 'Title is required';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _nicknameController,
-              decoration: const InputDecoration(
-                labelText: 'Nickname (optional)',
-                hintText: 'A short name for quick reference',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Property Type Section
-            _SectionHeader(title: 'Property Type'),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              value: _propertyType,
-              decoration: const InputDecoration(
-                labelText: 'Type',
-                border: OutlineInputBorder(),
-              ),
-              items: const [
-                DropdownMenuItem(value: 'apartment', child: Text('Apartment')),
-                DropdownMenuItem(value: 'house', child: Text('House')),
-                DropdownMenuItem(value: 'villa', child: Text('Villa')),
-                DropdownMenuItem(value: 'commercial', child: Text('Commercial')),
-                DropdownMenuItem(value: 'land', child: Text('Land')),
-                DropdownMenuItem(value: 'other', child: Text('Other')),
-              ],
-              onChanged: (String? value) {
-                if (value != null) {
-                  setState(() => _propertyType = value);
-                }
-              },
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: _propertyCategory,
-              decoration: const InputDecoration(
-                labelText: 'Category',
-                border: OutlineInputBorder(),
-              ),
-              items: const [
-                DropdownMenuItem(value: 'residential', child: Text('Residential')),
-                DropdownMenuItem(value: 'commercial', child: Text('Commercial')),
-              ],
-              onChanged: (String? value) {
-                if (value != null) {
-                  setState(() => _propertyCategory = value);
-                }
-              },
-            ),
-            const SizedBox(height: 24),
-
-            // Location Section
-            _SectionHeader(title: 'Location'),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _addressController,
-              decoration: const InputDecoration(
-                labelText: 'Address Line *',
-                hintText: 'Street address',
-                border: OutlineInputBorder(),
-              ),
-              validator: (String? value) {
-                if (value == null || value.isEmpty) {
-                  return 'Address is required';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _cityController,
-                    decoration: const InputDecoration(
-                      labelText: 'City *',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (String? value) {
-                      if (value == null || value.isEmpty) {
-                        return 'City is required';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextFormField(
-                    controller: _stateController,
-                    decoration: const InputDecoration(
-                      labelText: 'State',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _pincodeController,
-              decoration: const InputDecoration(
-                labelText: 'Pincode',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 24),
-
-            // Specifications Section
-            _SectionHeader(title: 'Specifications'),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _bedroomsController,
-                    decoration: const InputDecoration(
-                      labelText: 'Bedrooms',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: TextFormField(
-                    controller: _bathroomsController,
-                    decoration: const InputDecoration(
-                      labelText: 'Bathrooms',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _areaController,
-              decoration: const InputDecoration(
-                labelText: 'Floor Area (sq.ft)',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 24),
-
-            // Notes Section
-            _SectionHeader(title: 'Additional Notes'),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _notesController,
-              decoration: const InputDecoration(
-                labelText: 'Notes',
-                hintText: 'Any additional information',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-            const SizedBox(height: 32),
-
-            // Submit Button
-            FilledButton(
-              onPressed: _isLoading ? null : _submit,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.brand,
-                minimumSize: const Size.fromHeight(48),
-              ),
-              child: _isLoading
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
+      body: Obx(() {
+        return Stepper(
+          currentStep: controller.currentStep.value,
+          onStepTapped: (index) {
+             if (controller.validateStep(controller.currentStep.value)) {
+               controller.currentStep.value = index;
+             }
+          },
+          onStepContinue: () {
+            if (controller.currentStep.value < 3) {
+              if (controller.validateStep(controller.currentStep.value)) {
+                controller.currentStep.value++;
+              }
+            } else {
+              controller.submit();
+            }
+          },
+          onStepCancel: () {
+            if (controller.currentStep.value > 0) {
+              controller.currentStep.value--;
+            }
+          },
+          controlsBuilder: (context, details) {
+            final isLastStep = controller.currentStep.value == 3;
+            return Padding(
+              padding: const EdgeInsets.only(top: 32),
+              child: Row(
+                children: [
+                   Expanded(
+                     child: FilledButton(
+                      onPressed: controller.isLoading.value ? null : details.onStepContinue,
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(56),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                    )
-                  : const Text('Create Property'),
+                      child: controller.isLoading.value
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Text(isLastStep ? 'SUBMIT PROPERTY' : 'CONTINUE'),
+                     ),
+                   ),
+                   if (controller.currentStep.value > 0) ...[
+                     const SizedBox(width: 12),
+                     Expanded(
+                       child: OutlinedButton(
+                        onPressed: controller.isLoading.value ? null : details.onStepCancel,
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(56),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text('BACK'),
+                      ),
+                     ),
+                   ],
+                ],
+              ),
+            );
+          },
+          steps: [
+            Step(
+              title: const Text('Basic Information'),
+              state: _getStepState(0, controller.currentStep.value),
+              isActive: controller.currentStep.value >= 0,
+              content: _BasicInfoForm(controller: controller),
             ),
-            const SizedBox(height: 32),
+            Step(
+              title: const Text('Location'),
+              state: _getStepState(1, controller.currentStep.value),
+              isActive: controller.currentStep.value >= 1,
+              content: _LocationForm(controller: controller),
+            ),
+            Step(
+              title: const Text('Specifications'),
+              state: _getStepState(2, controller.currentStep.value),
+              isActive: controller.currentStep.value >= 2,
+              content: _SpecsForm(controller: controller),
+            ),
+             Step(
+              title: const Text('Media'),
+              state: _getStepState(3, controller.currentStep.value),
+              isActive: controller.currentStep.value >= 3,
+              content: _MediaForm(controller: controller),
+            ),
           ],
-        ),
-      ),
+        );
+      }),
     );
   }
 
-  Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
-
-    try {
-      final repository = Get.find<PropertiesRepository>();
-      await repository.createProperty(
-        title: _titleController.text.trim(),
-        nickname: _nicknameController.text.trim().isNotEmpty
-            ? _nicknameController.text.trim()
-            : null,
-        addressLine: _addressController.text.trim(),
-        city: _cityController.text.trim(),
-        state: _stateController.text.trim().isNotEmpty
-            ? _stateController.text.trim()
-            : null,
-        pincode: _pincodeController.text.trim().isNotEmpty
-            ? _pincodeController.text.trim()
-            : null,
-        propertyType: _propertyType,
-        propertyCategory: _propertyCategory,
-        bedroomCount: int.tryParse(_bedroomsController.text),
-        bathroomCount: int.tryParse(_bathroomsController.text),
-        floorAreaSqft: double.tryParse(_areaController.text),
-        notes: _notesController.text.trim().isNotEmpty
-            ? _notesController.text.trim()
-            : null,
-      );
-
-      Get.back<void>();
-      Get.snackbar('Success', 'Property created successfully');
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to create property: $e');
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+  StepState _getStepState(int index, int currentIndex) {
+    if (currentIndex > index) return StepState.complete;
+    if (currentIndex == index) return StepState.editing;
+    return StepState.indexed;
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title});
+class _BasicInfoForm extends StatelessWidget {
+  const _BasicInfoForm({required this.controller});
 
-  final String title;
+  final PropertyCreateController controller;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.bold,
-        color: AppColors.brand,
+    return Form(
+      key: controller.formKeyBasic,
+      child: Column(
+        children: [
+          TextFormField(
+            controller: controller.titleController,
+            decoration: const InputDecoration(
+              labelText: 'Property Title *',
+              hintText: 'e.g., 2BHK Apartment in Koramangala',
+              border: OutlineInputBorder(),
+            ),
+            validator: (String? value) {
+              if (value == null || value.isEmpty) {
+                return 'Title is required';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: controller.nicknameController,
+            decoration: const InputDecoration(
+              labelText: 'Nickname (optional)',
+              hintText: 'A short name for quick reference',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          DropdownButtonFormField<String>(
+            initialValue: controller.propertyType.value,
+            decoration: const InputDecoration(
+              labelText: 'Type',
+              border: OutlineInputBorder(),
+            ),
+            items: const [
+              DropdownMenuItem(value: 'apartment', child: Text('Apartment')),
+              DropdownMenuItem(value: 'house', child: Text('House')),
+              DropdownMenuItem(value: 'villa', child: Text('Villa')),
+              DropdownMenuItem(value: 'commercial', child: Text('Commercial')),
+              DropdownMenuItem(value: 'land', child: Text('Land')),
+              DropdownMenuItem(value: 'other', child: Text('Other')),
+            ],
+            onChanged: (String? value) {
+              if (value != null) {
+                controller.propertyType.value = value;
+              }
+            },
+          ),
+          const SizedBox(height: 16),
+          DropdownButtonFormField<String>(
+            initialValue: controller.propertyCategory.value,
+            decoration: const InputDecoration(
+              labelText: 'Category',
+              border: OutlineInputBorder(),
+            ),
+            items: const [
+              DropdownMenuItem(value: 'residential', child: Text('Residential')),
+              DropdownMenuItem(value: 'commercial', child: Text('Commercial')),
+            ],
+            onChanged: (String? value) {
+              if (value != null) {
+                controller.propertyCategory.value = value;
+              }
+            },
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class _LocationForm extends StatelessWidget {
+  const _LocationForm({required this.controller});
+
+  final PropertyCreateController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: controller.formKeyAddress,
+      child: Column(
+        children: [
+          TextFormField(
+            controller: controller.addressController,
+            decoration: const InputDecoration(
+              labelText: 'Address Line *',
+              hintText: 'Street address',
+              border: OutlineInputBorder(),
+            ),
+            validator: (String? value) {
+              if (value == null || value.isEmpty) {
+                return 'Address is required';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: controller.cityController,
+                  decoration: const InputDecoration(
+                    labelText: 'City *',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (String? value) {
+                    if (value == null || value.isEmpty) {
+                      return 'City is required';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFormField(
+                  controller: controller.stateController,
+                  decoration: const InputDecoration(
+                    labelText: 'State',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: controller.pincodeController,
+            decoration: const InputDecoration(
+              labelText: 'Pincode',
+              border: OutlineInputBorder(),
+            ),
+            keyboardType: TextInputType.number,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SpecsForm extends StatelessWidget {
+  const _SpecsForm({required this.controller});
+
+  final PropertyCreateController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: controller.formKeySpecs,
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: controller.bedroomController,
+                  decoration: const InputDecoration(
+                    labelText: 'Bedrooms',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFormField(
+                  controller: controller.bathroomController,
+                  decoration: const InputDecoration(
+                    labelText: 'Bathrooms',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+           Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: controller.balconyController,
+                  decoration: const InputDecoration(
+                    labelText: 'Balconies',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFormField(
+                  controller: controller.areaController,
+                  decoration: const InputDecoration(
+                    labelText: 'Area (sq.ft)',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          const Divider(),
+          const SizedBox(height: 16),
+           Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: controller.rentController,
+                  decoration: const InputDecoration(
+                    labelText: 'Monthly Rent (₹)',
+                    border: OutlineInputBorder(),
+                    prefixText: '₹ ',
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFormField(
+                  controller: controller.paymentDayController,
+                  decoration: const InputDecoration(
+                    labelText: 'Rent Due Day',
+                    hintText: '1-31',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: controller.depositController,
+                  decoration: const InputDecoration(
+                    labelText: 'Security Deposit (₹)',
+                    border: OutlineInputBorder(),
+                    prefixText: '₹ ',
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                     if (value != null && value.isNotEmpty && double.tryParse(value) == null) {
+                       return 'Invalid amount';
+                     }
+                     return null;
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextFormField(
+                  controller: controller.maintenanceController,
+                  decoration: const InputDecoration(
+                    labelText: 'Maintenance (₹)',
+                    border: OutlineInputBorder(),
+                    prefixText: '₹ ',
+                  ),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                     if (value != null && value.isNotEmpty && double.tryParse(value) == null) {
+                       return 'Invalid amount';
+                     }
+                     return null;
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: controller.notesController,
+            decoration: const InputDecoration(
+              labelText: 'Notes',
+              border: OutlineInputBorder(),
+            ),
+            maxLines: 3,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MediaForm extends StatelessWidget {
+  const _MediaForm({required this.controller});
+
+  final PropertyCreateController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        OutlinedButton.icon(
+          onPressed: controller.pickImages,
+          icon: const Icon(Icons.add_photo_alternate),
+          label: const Text('Add Photos'),
+        ),
+        const SizedBox(height: 16),
+        Obx(() {
+          if (controller.selectedFiles.isEmpty) {
+            return const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text('No images selected'),
+            );
+          }
+          return Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: controller.selectedFiles.map((file) {
+              return Stack(
+                children: [
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: file.path != null
+                          ? Image.file(
+                              File(file.path!),
+                              fit: BoxFit.cover,
+                            )
+                          : const Icon(Icons.image),
+                    ),
+                  ),
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: () => controller.removeImage(file),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.black54,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+          );
+        }),
+      ],
     );
   }
 }

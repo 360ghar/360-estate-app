@@ -58,7 +58,15 @@ class DashboardController extends GetxController {
   Future<void> _loadOverview() async {
     try {
       final overview = await _getDashboardOverview();
-      overviewState.value = ViewState.success(overview);
+      // Check if dashboard is empty (all zeros)
+      if (overview.totalProperties == 0 &&
+          overview.occupiedProperties == 0 &&
+          overview.vacantProperties == 0 &&
+          overview.monthlyRevenueCurrent == 0) {
+        overviewState.value = const ViewState.empty();
+      } else {
+        overviewState.value = ViewState.success(overview);
+      }
     } on Failure catch (f) {
       overviewState.value = ViewState.error(f);
     } catch (e) {

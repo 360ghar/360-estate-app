@@ -5,12 +5,12 @@ import 'package:get/get.dart';
 class TenantDetailBindings extends Bindings {
   @override
   void dependencies() {
-    final tenantUserId = Get.parameters['id'] ?? '';
+    final tenantId = Get.parameters['id'] ?? '';
 
     Get.lazyPut<TenantDetailController>(
       () => TenantDetailController(
         repository: Get.find<TenantsRepository>(),
-        tenantUserId: tenantUserId,
+        tenantId: tenantId,
       ),
     );
   }

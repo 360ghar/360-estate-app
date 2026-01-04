@@ -1,14 +1,16 @@
 import 'dart:async';
 
 import 'package:estate_app/app/routes/app_routes.dart';
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/config/feature_flags.dart';
 import 'package:estate_app/core/presentation/errors/failure_localization.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/widgets/app_button.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_empty_state.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loader.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/widgets/feature_coming_soon.dart';
 import 'package:estate_app/features/leases/domain/entities/lease.dart';
 import 'package:estate_app/features/leases/presentation/controllers/leases_controller.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +22,17 @@ class LeasesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Show coming soon if feature is disabled
+    if (!FeatureFlags.leasesEnabled) {
+      return AppScaffold(
+        appBar: AppBar(title: const Text('Leases')),
+        body: const FeatureComingSoon(
+          featureName: 'Lease Management',
+          icon: Icons.description,
+          description: 'Create and manage lease agreements, track renewals, and handle terminations.',
+        ),
+      );
+    }
     return const _LeasesView();
   }
 }
@@ -73,12 +86,12 @@ class _LeasesViewState extends State<_LeasesView> {
           ],
         ),
         floatingActionButton: FloatingActionButton(
+          heroTag: 'leases_fab',
           onPressed: () async {
             await Get.toNamed<void>(Routes.leaseCreate);
             unawaited(controller.refresh());
           },
-          backgroundColor: AppColors.brand,
-          child: const Icon(Icons.add, color: Colors.white),
+          child: const Icon(Icons.add),
         ),
         body: Builder(
           builder: (_) {
@@ -212,7 +225,7 @@ class _LeasesViewState extends State<_LeasesView> {
           ),
         ),
       ),
-    ));
+    ),);
   }
 }
 
@@ -233,8 +246,8 @@ class _FilterChip extends StatelessWidget {
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => onTap(),
-      selectedColor: AppColors.brand.withValues(alpha: 0.2),
-      checkmarkColor: AppColors.brand,
+      selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+      checkmarkColor: Theme.of(context).colorScheme.primary,
     );
   }
 }
@@ -257,11 +270,11 @@ class _LeaseCard extends StatelessWidget {
       decimalDigits: 0,
     );
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+    return AppCard(
+      padding: EdgeInsets.zero,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -272,10 +285,9 @@ class _LeaseCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       lease.propertyTitle,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ),
                   _StatusBadge(lease: lease),
@@ -284,15 +296,21 @@ class _LeaseCard extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(Icons.person_outline, size: 16, color: Colors.grey),
+                  Icon(
+                    Icons.person_outline,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     lease.tenantName,
-                    style: TextStyle(color: Colors.grey[600]),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
@@ -301,17 +319,16 @@ class _LeaseCard extends StatelessWidget {
                       children: [
                         Text(
                           '${dateFormat.format(lease.startDate)} - ${dateFormat.format(lease.endDate)}',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 13,
-                          ),
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${currencyFormat.format(lease.monthlyRent)}/month',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                       ],
                     ),
@@ -323,7 +340,7 @@ class _LeaseCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.amber.withValues(alpha: 0.1),
+                        color: Colors.amber.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -340,7 +357,7 @@ class _LeaseCard extends StatelessWidget {
                             style: const TextStyle(
                               color: Colors.amber,
                               fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],

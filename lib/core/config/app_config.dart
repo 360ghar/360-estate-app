@@ -45,6 +45,7 @@ final class AppConfig {
     required this.supabaseAnonKey,
     required this.enableCrashReporting,
     required this.enableDebugLogs,
+    required this.useMockApi,
     required this.featureFlags,
   });
 
@@ -54,6 +55,7 @@ final class AppConfig {
   final String supabaseAnonKey;
   final bool enableCrashReporting;
   final bool enableDebugLogs;
+  final bool useMockApi;
   final FeatureFlags featureFlags;
 
   bool get isProd => environment == AppEnvironment.prod;
@@ -119,6 +121,19 @@ final class AppConfig {
         ) ??
         enableDebugLogsDefault;
 
+    // USE_MOCK_API: Optional fallback for isolated dev/test scenarios.
+    // DISABLED BY DEFAULT - Real API is the primary data source.
+    // Set explicitly to 'true' in .env only for local testing without backend.
+    // Must NEVER be enabled in production builds.
+    const useMockApiDefine = String.fromEnvironment('USE_MOCK_API');
+    final useMockApi =
+        _parseBool(
+          useMockApiDefine.trim().isNotEmpty
+              ? useMockApiDefine
+              : dotenv.env['USE_MOCK_API'],
+        ) ??
+        false; // DEFAULT: API-first, mock is opt-in only
+
     final featureFlags = FeatureFlags.fromEnvironment(environment);
 
     return AppConfig(
@@ -128,6 +143,7 @@ final class AppConfig {
       supabaseAnonKey: supabaseAnonKey,
       enableCrashReporting: enableCrashReporting,
       enableDebugLogs: enableDebugLogs,
+      useMockApi: useMockApi,
       featureFlags: featureFlags,
     );
   }

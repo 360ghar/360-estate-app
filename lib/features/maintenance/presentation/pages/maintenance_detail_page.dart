@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:estate_app/app/routes/app_routes.dart';
 import 'package:estate_app/core/presentation/state/view_state.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loader.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
@@ -96,10 +97,8 @@ class _DetailContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header card
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
+          AppCard(
+            child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
@@ -107,7 +106,7 @@ class _DetailContent extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: request.category.color.withValues(alpha: 0.1),
+                          color: request.category.color.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -123,16 +122,15 @@ class _DetailContent extends StatelessWidget {
                           children: [
                             Text(
                               request.title,
-                              style: const TextStyle(
-                                fontSize: 18,
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
                               request.category.displayName,
-                              style: TextStyle(
-                                color: Colors.grey[600],
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -151,14 +149,11 @@ class _DetailContent extends StatelessWidget {
                 ],
               ),
             ),
-          ),
           const SizedBox(height: 16),
 
           // Property info
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
+          AppCard(
+            child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
@@ -172,12 +167,14 @@ class _DetailContent extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.apartment, color: Colors.grey),
+                      Icon(Icons.apartment, color: Theme.of(context).colorScheme.onSurfaceVariant),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           request.propertyTitle,
-                          style: const TextStyle(fontSize: 16),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
@@ -186,11 +183,13 @@ class _DetailContent extends StatelessWidget {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        const Icon(Icons.person_outline, color: Colors.grey),
+                        Icon(Icons.person_outline, color: Theme.of(context).colorScheme.onSurfaceVariant),
                         const SizedBox(width: 8),
                         Text(
                           request.tenantName!,
-                          style: const TextStyle(fontSize: 16),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
@@ -198,14 +197,11 @@ class _DetailContent extends StatelessWidget {
                 ],
               ),
             ),
-          ),
           const SizedBox(height: 16),
 
           // Description
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
+          AppCard(
+            child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
@@ -219,19 +215,16 @@ class _DetailContent extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     request.description,
-                    style: const TextStyle(fontSize: 15),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
               ),
             ),
-          ),
           const SizedBox(height: 16),
 
           // Details
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
+          AppCard(
+            child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
@@ -282,22 +275,18 @@ class _DetailContent extends StatelessWidget {
                 ],
               ),
             ),
-          ),
 
           if (request.notes != null && request.notes!.isNotEmpty) ...[
             const SizedBox(height: 16),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
+            AppCard(
+              child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Notes',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -308,7 +297,6 @@ class _DetailContent extends StatelessWidget {
                   ],
                 ),
               ),
-            ),
           ],
 
           const SizedBox(height: 24),
@@ -403,7 +391,7 @@ class _DetailContent extends StatelessWidget {
           ),
         ],
       ),
-    ));
+    ),);
   }
 }
 
@@ -428,13 +416,17 @@ class _DetailRow extends StatelessWidget {
           const SizedBox(width: 12),
           Text(
             '$label:',
-            style: TextStyle(color: Colors.grey[600]),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontWeight: FontWeight.w500),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
               textAlign: TextAlign.right,
             ),
           ),
@@ -454,9 +446,9 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: status.color.withValues(alpha: 0.1),
+        color: status.color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: status.color.withValues(alpha: 0.3)),
+        border: Border.all(color: status.color.withOpacity(0.3)),
       ),
       child: Text(
         status.displayName,
@@ -480,7 +472,7 @@ class _PriorityBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: priority.color.withValues(alpha: 0.1),
+        color: priority.color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(

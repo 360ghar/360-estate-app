@@ -81,7 +81,7 @@ class _ApplicationFormCreateView extends StatelessWidget {
                     ],
                   ),
                 ),
-              )),
+              ),),
           const SizedBox(height: 24),
 
           // Custom Fields Section
@@ -173,7 +173,7 @@ class _ApplicationFormCreateView extends StatelessWidget {
                         }
                       }
                     : null,
-              )),
+              ),),
 
           const SizedBox(height: 24),
         ],
@@ -268,7 +268,7 @@ class _ApplicationFormCreateView extends StatelessWidget {
               const Text('Field Type'),
               const SizedBox(height: 8),
               Obx(() => DropdownButtonFormField<String>(
-                    value: selectedType.value,
+                    initialValue: selectedType.value,
                     items: const [
                       DropdownMenuItem(value: 'text', child: Text('Text')),
                       DropdownMenuItem(value: 'email', child: Text('Email')),
@@ -285,7 +285,7 @@ class _ApplicationFormCreateView extends StatelessWidget {
                       ),
                     ],
                     onChanged: (value) => selectedType.value = value!,
-                  )),
+                  ),),
               Obx(() {
                 if (selectedType.value == 'select') {
                   return Column(
@@ -310,7 +310,7 @@ class _ApplicationFormCreateView extends StatelessWidget {
                     value: isRequired.value,
                     onChanged: (value) => isRequired.value = value!,
                     contentPadding: EdgeInsets.zero,
-                  )),
+                  ),),
             ],
           ),
         ),
@@ -349,7 +349,7 @@ class _ApplicationFormCreateView extends StatelessWidget {
           ),
         ],
       ),
-    ));
+    ),);
   }
 }
 
@@ -412,7 +412,7 @@ class _PropertySelectorState extends State<_PropertySelector> {
         ),
         const SizedBox(height: 8),
         Obx(() => DropdownButtonFormField<int>(
-              value: widget.controller.selectedPropertyId.value,
+              initialValue: widget.controller.selectedPropertyId.value,
               decoration: const InputDecoration(
                 hintText: 'Select a property',
                 prefixIcon: Icon(Icons.apartment),
@@ -430,7 +430,7 @@ class _PropertySelectorState extends State<_PropertySelector> {
                 }
                 return null;
               },
-            )),
+            ),),
         const SizedBox(height: 24),
       ],
     );

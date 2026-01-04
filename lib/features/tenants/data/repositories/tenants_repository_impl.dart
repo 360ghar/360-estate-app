@@ -31,8 +31,20 @@ final class TenantsRepositoryImpl implements TenantsRepository {
   }
 
   @override
-  Future<Tenant> getTenantByUserId(String tenantUserId) async {
-    final dto = await _dataSource.getTenantByUserId(tenantUserId);
+  Future<Tenant> getTenantById(String id) async {
+    final dto = await _dataSource.getTenantById(id);
+    return dto.toEntity();
+  }
+
+  @override
+  Future<Tenant> getMyTenantData() async {
+    final dto = await _dataSource.getMyTenantData();
+    return dto.toEntity();
+  }
+
+  @override
+  Future<Tenant> createTenant(Map<String, dynamic> data) async {
+    final dto = await _dataSource.createTenant(data);
     return dto.toEntity();
   }
 }

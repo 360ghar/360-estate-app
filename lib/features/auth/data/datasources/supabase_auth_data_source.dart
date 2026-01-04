@@ -32,13 +32,46 @@ final class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
     }
   }
 
-  AuthUser _mapUser(User user) =>
-      AuthUser(id: user.id, phone: user.phone, email: user.email);
+  Future<AuthUser> _mapUser(User user) async {
+    final role = await _fetchUserRole(user.id);
+    return AuthUser(
+      id: user.id,
+      phone: user.phone,
+      email: user.email,
+      role: role,
+    );
+  }
+
+  Future<UserRole> _fetchUserRole(String userId) async {
+    final client = _clientOrNull();
+    if (client == null) {
+      return UserRole.unknown;
+    }
+
+    try {
+      // Query users table by supabase_user_id (the correct column based on testing)
+      final response = await client
+          .from('users')
+          .select('role')
+          .eq('supabase_user_id', userId)
+          .maybeSingle();
+
+      if (response != null) {
+        final roleStr = response['role'] as String?;
+        return UserRole.parse(roleStr);
+      }
+
+      return UserRole.unknown;
+    } catch (e) {
+      // Non-critical: fail gracefully to unknown role
+      return UserRole.unknown;
+    }
+  }
 
   Failure _mapAuthException(AuthException exception) {
     final message = exception.message.trim().isEmpty
-        ? 'Authentication failed'
-        : exception.message.trim();
+        ? 'Authentication failed: ${exception.code ?? "Unknown error"}'
+        : '${exception.message.trim()} (Code: ${exception.code ?? "unknown"})';
     return ValidationFailure(message, cause: exception);
   }
 
@@ -46,7 +79,7 @@ final class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
   Future<AuthUser?> getCurrentUser() async {
     final client = _clientOrNull();
     final user = client?.auth.currentUser;
-    return user == null ? null : _mapUser(user);
+    return user == null ? null : await _mapUser(user);
   }
 
   @override
@@ -57,13 +90,15 @@ final class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
       return;
     }
 
-    yield client.auth.currentUser == null
-        ? null
-        : _mapUser(client.auth.currentUser!);
+    if (client.auth.currentUser != null) {
+      yield await _mapUser(client.auth.currentUser!);
+    } else {
+      yield null;
+    }
 
     await for (final state in client.auth.onAuthStateChange) {
       final user = state.session?.user ?? client.auth.currentUser;
-      yield user == null ? null : _mapUser(user);
+      yield user == null ? null : await _mapUser(user);
     }
   }
 
@@ -74,7 +109,9 @@ final class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
   }) async {
     final client = _clientOrNull();
     if (client == null) {
-      throw const UnknownFailure('Supabase is not initialized');
+      throw const UnknownFailure(
+        'Supabase is not initialized. Please check your configuration.',
+      );
     }
 
     try {
@@ -87,11 +124,14 @@ final class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
       if (user == null) {
         throw const UnknownFailure('Login succeeded but user is missing');
       }
-      return _mapUser(user);
+      return await _mapUser(user);
     } on AuthException catch (e) {
       throw _mapAuthException(e);
     } catch (e) {
-      throw UnknownFailure('Authentication failed', cause: e);
+      throw UnknownFailure(
+        'Authentication failed: ${e.toString()}',
+        cause: e,
+      );
     }
   }
 
@@ -115,7 +155,7 @@ final class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
       if (user == null) {
         throw const UnknownFailure('Sign up succeeded but user is missing');
       }
-      return _mapUser(user);
+      return await _mapUser(user);
     } on AuthException catch (e) {
       throw _mapAuthException(e);
     } catch (e) {
@@ -137,7 +177,7 @@ final class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
 
     try {
       final rows = await client
-          .from('profiles')
+          .from('users')
           .select('id')
           .eq('phone', phone)
           .limit(1);

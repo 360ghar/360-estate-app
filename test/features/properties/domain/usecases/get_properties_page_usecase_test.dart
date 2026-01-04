@@ -20,11 +20,14 @@ void main() {
     final expected = Page<Property>(
       items: const [
         Property(
-          id: 'prop_1',
+          id: 1,
           title: 'Property 1',
           city: 'Mumbai',
           addressLine: 'Address',
           monthlyRentInr: 25000,
+          propertyType: PropertyType.apartment,
+          propertyCategory: PropertyCategory.residential,
+          managementStatus: ManagementStatus.active,
         ),
       ],
       page: 1,

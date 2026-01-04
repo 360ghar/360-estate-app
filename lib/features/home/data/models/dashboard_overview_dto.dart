@@ -13,19 +13,23 @@ final class DashboardOverviewDto {
   });
 
   factory DashboardOverviewDto.fromJson(Map<String, dynamic> json) {
+    // Handle backend PM API format:
+    // { total_properties, occupied_units, vacant_units, outstanding_rent, monthly_revenue, upcoming_expenses }
     return DashboardOverviewDto(
       totalProperties: (json['total_properties'] as num?)?.toInt() ?? 0,
-      occupiedProperties: (json['occupied_properties'] as num?)?.toInt() ?? 0,
-      vacantProperties: (json['vacant_properties'] as num?)?.toInt() ?? 0,
+      occupiedProperties: (json['occupied_units'] as num?)?.toInt() ??
+          (json['occupied_properties'] as num?)?.toInt() ?? 0,
+      vacantProperties: (json['vacant_units'] as num?)?.toInt() ??
+          (json['vacant_properties'] as num?)?.toInt() ?? 0,
       underMaintenanceProperties:
           (json['under_maintenance_properties'] as num?)?.toInt() ?? 0,
-      monthlyRevenueCurrent:
+      monthlyRevenueCurrent: (json['monthly_revenue'] as num?)?.toDouble() ??
           (json['monthly_revenue_current'] as num?)?.toDouble() ?? 0,
       monthlyRevenuePrevious:
           (json['monthly_revenue_previous'] as num?)?.toDouble() ?? 0,
-      outstandingRentTotal:
+      outstandingRentTotal: (json['outstanding_rent'] as num?)?.toDouble() ??
           (json['outstanding_rent_total'] as num?)?.toDouble() ?? 0,
-      upcomingExpensesTotal:
+      upcomingExpensesTotal: (json['upcoming_expenses'] as num?)?.toDouble() ??
           (json['upcoming_expenses_total'] as num?)?.toDouble() ?? 0,
     );
   }

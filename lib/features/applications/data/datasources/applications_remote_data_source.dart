@@ -1,8 +1,10 @@
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/features/applications/data/models/application_dto.dart';
 
+/// Remote data source for tenant applications.
+/// NOTE: The PM applications endpoints (/pm/applications/*) do not yet exist in the backend.
+/// This implementation provides graceful fallbacks until the PM module is added.
 abstract interface class ApplicationsRemoteDataSource {
-  // Forms
   Future<List<ApplicationFormDto>> getApplicationForms({
     required int limit,
     required int offset,
@@ -18,12 +20,11 @@ abstract interface class ApplicationsRemoteDataSource {
 
   Future<ApplicationFormDto> updateApplicationForm(
     int id,
-    Map<String, dynamic> data,
+    Map<String, dynamic> updates,
   );
 
   Future<void> deactivateApplicationForm(int id);
 
-  // Applications
   Future<List<ApplicationDto>> getApplications({
     required int limit,
     required int offset,
@@ -41,6 +42,8 @@ abstract interface class ApplicationsRemoteDataSource {
   Future<ApplicationDto> rejectApplication(int id, {String? notes});
 }
 
+/// Stub implementation that returns empty data since PM applications endpoints
+/// are not available in the current backend.
 final class ApiApplicationsRemoteDataSource
     implements ApplicationsRemoteDataSource {
   ApiApplicationsRemoteDataSource({required ApiClient apiClient})
@@ -55,87 +58,52 @@ final class ApiApplicationsRemoteDataSource
     int? propertyId,
     bool? isActive,
   }) async {
-    final queryParams = <String, dynamic>{
-      'limit': limit,
-      'offset': offset,
-      if (propertyId != null) 'property_id': propertyId,
-      if (isActive != null) 'is_active': isActive,
-    };
-
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      '/pm/applications/forms',
-      queryParameters: queryParams,
-    );
-
-    final data = response.data!;
-    final items =
-        data['items'] as List<dynamic>? ?? data['data'] as List<dynamic>? ?? [];
-
-    return items
-        .map((e) => ApplicationFormDto.fromJson(e as Map<String, dynamic>))
-        .toList();
+    // NOTE: /pm/applications/forms endpoint does NOT exist
+    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    return [];
   }
 
   @override
   Future<ApplicationFormDto> getApplicationFormById(int id) async {
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      '/pm/applications/forms/$id',
+    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    throw UnsupportedError(
+      'Application forms are not yet available. PM module pending backend implementation.',
     );
-
-    final data = response.data!;
-    final form = data['data'] as Map<String, dynamic>? ?? data;
-
-    return ApplicationFormDto.fromJson(form);
   }
 
   @override
   Future<ApplicationFormDto> getApplicationFormBySlug(String slug) async {
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      '/public/applications/forms/$slug',
+    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    throw UnsupportedError(
+      'Application forms are not yet available. PM module pending backend implementation.',
     );
-
-    final data = response.data!;
-    final form = data['data'] as Map<String, dynamic>? ?? data;
-
-    return ApplicationFormDto.fromJson(form);
   }
 
   @override
   Future<ApplicationFormDto> createApplicationForm(
-    Map<String, dynamic> data,
-  ) async {
-    final response = await _apiClient.post<Map<String, dynamic>>(
-      '/pm/applications/forms',
-      data: data,
+      Map<String, dynamic> data) async {
+    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    throw UnsupportedError(
+      'Application form creation is not yet available. PM module pending backend implementation.',
     );
-
-    final responseData = response.data!;
-    final form = responseData['data'] as Map<String, dynamic>? ?? responseData;
-
-    return ApplicationFormDto.fromJson(form);
   }
 
   @override
   Future<ApplicationFormDto> updateApplicationForm(
     int id,
-    Map<String, dynamic> data,
+    Map<String, dynamic> updates,
   ) async {
-    final response = await _apiClient.patch<Map<String, dynamic>>(
-      '/pm/applications/forms/$id',
-      data: data,
+    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    throw UnsupportedError(
+      'Application form update is not yet available. PM module pending backend implementation.',
     );
-
-    final responseData = response.data!;
-    final form = responseData['data'] as Map<String, dynamic>? ?? responseData;
-
-    return ApplicationFormDto.fromJson(form);
   }
 
   @override
   Future<void> deactivateApplicationForm(int id) async {
-    await _apiClient.patch<Map<String, dynamic>>(
-      '/pm/applications/forms/$id',
-      data: {'is_active': false},
+    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    throw UnsupportedError(
+      'Application form deactivation is not yet available. PM module pending backend implementation.',
     );
   }
 
@@ -147,81 +115,40 @@ final class ApiApplicationsRemoteDataSource
     int? formId,
     String? status,
   }) async {
-    final queryParams = <String, dynamic>{
-      'limit': limit,
-      'offset': offset,
-      if (propertyId != null) 'property_id': propertyId,
-      if (formId != null) 'form_id': formId,
-      if (status != null) 'status': status,
-    };
-
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      '/pm/applications',
-      queryParameters: queryParams,
-    );
-
-    final data = response.data!;
-    final items =
-        data['items'] as List<dynamic>? ?? data['data'] as List<dynamic>? ?? [];
-
-    return items
-        .map((e) => ApplicationDto.fromJson(e as Map<String, dynamic>))
-        .toList();
+    // NOTE: /pm/applications endpoint does NOT exist
+    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    return [];
   }
 
   @override
   Future<ApplicationDto> getApplicationById(int id) async {
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      '/pm/applications/$id',
+    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    throw UnsupportedError(
+      'Application details are not yet available. PM module pending backend implementation.',
     );
-
-    final data = response.data!;
-    final application = data['data'] as Map<String, dynamic>? ?? data;
-
-    return ApplicationDto.fromJson(application);
   }
 
   @override
   Future<ApplicationDto> reviewApplication(int id) async {
-    final response = await _apiClient.post<Map<String, dynamic>>(
-      '/pm/applications/$id/review',
+    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    throw UnsupportedError(
+      'Application review is not yet available. PM module pending backend implementation.',
     );
-
-    final data = response.data!;
-    final application = data['data'] as Map<String, dynamic>? ?? data;
-
-    return ApplicationDto.fromJson(application);
   }
 
   @override
   Future<ApplicationDto> approveApplication(int id, {String? notes}) async {
-    final response = await _apiClient.post<Map<String, dynamic>>(
-      '/pm/applications/$id/decision',
-      data: {
-        'decision': 'approved',
-        if (notes != null) 'notes': notes,
-      },
+    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    throw UnsupportedError(
+      'Application approval is not yet available. PM module pending backend implementation.',
     );
-
-    final data = response.data!;
-    final application = data['data'] as Map<String, dynamic>? ?? data;
-
-    return ApplicationDto.fromJson(application);
   }
 
   @override
   Future<ApplicationDto> rejectApplication(int id, {String? notes}) async {
-    final response = await _apiClient.post<Map<String, dynamic>>(
-      '/pm/applications/$id/decision',
-      data: {
-        'decision': 'rejected',
-        if (notes != null) 'notes': notes,
-      },
+    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    throw UnsupportedError(
+      'Application rejection is not yet available. PM module pending backend implementation.',
     );
-
-    final data = response.data!;
-    final application = data['data'] as Map<String, dynamic>? ?? data;
-
-    return ApplicationDto.fromJson(application);
   }
 }

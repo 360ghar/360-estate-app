@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:estate_app/app/routes/app_routes.dart';
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/errors/failure_localization.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/state/view_state.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_empty_state.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loader.dart';
@@ -170,7 +170,7 @@ class LeaseDetailPage extends StatelessWidget {
           ),
         ],
       ),
-    ));
+    ),);
   }
 
   void _showTerminateDialog(
@@ -225,7 +225,7 @@ class LeaseDetailPage extends StatelessWidget {
           ),
         ],
       ),
-    ));
+    ),);
   }
 }
 
@@ -254,10 +254,8 @@ class _LeaseDetailContent extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           // Status and timing card
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
+          AppCard(
+            child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
@@ -271,7 +269,7 @@ class _LeaseDetailContent extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.amber.withValues(alpha: 0.1),
+                            color: Colors.orange.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
@@ -280,14 +278,14 @@ class _LeaseDetailContent extends StatelessWidget {
                               const Icon(
                                 Icons.warning,
                                 size: 16,
-                                color: Colors.amber,
+                                color: Colors.orange,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 '${lease.daysRemaining} days remaining',
                                 style: const TextStyle(
-                                  color: Colors.amber,
-                                  fontWeight: FontWeight.w600,
+                                  color: Colors.orange,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ],
@@ -308,15 +306,15 @@ class _LeaseDetailContent extends StatelessWidget {
                 ],
               ),
             ),
-          ),
           const SizedBox(height: 16),
 
           // Property card
-          Card(
+          AppCard(
+            padding: EdgeInsets.zero,
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: AppColors.brand.withValues(alpha: 0.1),
-                child: const Icon(Icons.apartment, color: AppColors.brand),
+                backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                child: Icon(Icons.apartment, color: Theme.of(context).colorScheme.primary),
               ),
               title: Text(
                 lease.propertyTitle,
@@ -335,10 +333,11 @@ class _LeaseDetailContent extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Tenant card
-          Card(
+          AppCard(
+            padding: EdgeInsets.zero,
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: Colors.blue.withValues(alpha: 0.1),
+                backgroundColor: Colors.blue.withOpacity(0.1),
                 child: const Icon(Icons.person, color: Colors.blue),
               ),
               title: Text(
@@ -443,14 +442,14 @@ class _LeaseDetailContent extends StatelessWidget {
                         child: Column(
                           children: [
                             Icon(
-                              Icons.upload_file,
-                              size: 48,
-                              color: Colors.grey[400],
-                            ),
+                                Icons.upload_file,
+                                size: 48,
+                                color: Theme.of(context).colorScheme.outlineVariant, // Changed color
+                              ),
                             const SizedBox(height: 8),
                             Text(
                               'No signed document uploaded',
-                              style: TextStyle(color: Colors.grey[600]),
+                              style: TextStyle(color: Theme.of(context).colorScheme.outline),
                             ),
                           ],
                         ),
@@ -464,22 +463,19 @@ class _LeaseDetailContent extends StatelessWidget {
 
           // Notes
           if (lease.notes != null && lease.notes!.isNotEmpty)
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Notes',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+            AppCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Notes',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(height: 8),
-                    Text(lease.notes!),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(lease.notes!),
+                ],
               ),
             ),
           const SizedBox(height: 32),
@@ -506,22 +502,21 @@ class _StatusBadge extends StatelessWidget {
       color = Colors.red;
       label = 'EXPIRED';
     } else {
-      color = Colors.grey;
+      color = Theme.of(context).colorScheme.outline;
       label = lease.status?.toUpperCase() ?? 'PENDING';
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
         label,
-        style: TextStyle(
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
           color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -548,18 +543,16 @@ class _InfoRow extends StatelessWidget {
             width: 140,
             child: Text(
               label,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),

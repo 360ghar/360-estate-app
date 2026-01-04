@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter build apk:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(cat:*)",
+      "Bash(flutter install:*)",
+      "Bash(flutter clean:*)",
+      "Bash(powershell:*)",
+      "WebSearch",
+      "Bash(flutter pub add:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)"
+    ]
+  }
+}

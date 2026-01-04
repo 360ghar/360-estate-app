@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:estate_app/app/routes/app_routes.dart';
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/errors/failure_localization.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/state/view_state.dart';
 import 'package:estate_app/core/presentation/widgets/app_button.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loader.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
@@ -223,7 +223,7 @@ class _InspectionDetailView extends StatelessWidget {
     unawaited(Get.toNamed<Inspection>(
       Routes.inspectionCreate,
       arguments: {'inspection': inspection},
-    ));
+    ),);
   }
 
   void _confirmCancel(
@@ -252,7 +252,7 @@ class _InspectionDetailView extends StatelessWidget {
           ),
         ],
       ),
-    ));
+    ),);
   }
 }
 
@@ -267,70 +267,67 @@ class _HeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: inspection.inspectionType.color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                inspection.inspectionType.icon,
-                color: inspection.inspectionType.color,
-                size: 32,
-              ),
+    return AppCard(
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: inspection.inspectionType.color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    inspection.inspectionType.displayName,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+            child: Icon(
+              inspection.inspectionType.icon,
+              color: inspection.inspectionType.color,
+              size: 32,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  inspection.inspectionType.displayName,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: inspection.status.color.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          inspection.status.icon,
-                          size: 14,
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: inspection.status.color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        inspection.status.icon,
+                        size: 14,
+                        color: inspection.status.color,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        inspection.status.displayName,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
                           color: inspection.status.color,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          inspection.status.displayName,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: inspection.status.color,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -347,10 +344,8 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
+    return Obx(() => AppCard(
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (inspection.canStart)
@@ -375,7 +370,7 @@ class _ActionCard extends StatelessWidget {
                       leading: const Icon(Icons.draw, size: 18),
                       isLoading: controller.isActionLoading.value,
                       onPressed: () =>
-                          _showSignatureDialog(context, 'tenant'),
+                          _showSignatureDialog(context, controller, 'tenant'),
                     ),
                   if (inspection.hasTenantSignature &&
                       !inspection.hasLandlordSignature) ...[
@@ -385,17 +380,22 @@ class _ActionCard extends StatelessWidget {
                       leading: const Icon(Icons.draw, size: 18),
                       isLoading: controller.isActionLoading.value,
                       onPressed: () =>
-                          _showSignatureDialog(context, 'landlord'),
+                          _showSignatureDialog(context, controller, 'landlord'),
                     ),
                   ],
                 ],
               ],
             ),
           ),
-        ));
+      );
   }
+}
 
-  void _showSignatureDialog(BuildContext context, String type) {
+void _showSignatureDialog(
+  BuildContext context,
+  InspectionDetailController controller,
+  String type,
+) {
     unawaited(showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -422,7 +422,6 @@ class _ActionCard extends StatelessWidget {
       ),
     ));
   }
-}
 
 class _InfoCard extends StatelessWidget {
   const _InfoCard({
@@ -435,23 +434,19 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 12),
-            ...children,
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+          ...children,
+        ],
       ),
     );
   }
@@ -474,24 +469,22 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: Colors.grey[600]),
+          Icon(icon, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(width: 8),
           SizedBox(
             width: 80,
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey[600],
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
@@ -508,31 +501,27 @@ class _SignaturesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Signatures',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Signatures',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 12),
-            _SignatureRow(
-              label: 'Tenant',
-              isSigned: inspection.hasTenantSignature,
-            ),
-            const SizedBox(height: 8),
-            _SignatureRow(
-              label: 'Landlord',
-              isSigned: inspection.hasLandlordSignature,
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+          _SignatureRow(
+            label: 'Tenant',
+            isSigned: inspection.hasTenantSignature,
+          ),
+          const SizedBox(height: 8),
+          _SignatureRow(
+            label: 'Landlord',
+            isSigned: inspection.hasLandlordSignature,
+          ),
+        ],
       ),
     );
   }
@@ -595,52 +584,47 @@ class _ItemsSection extends StatelessWidget {
       itemsByArea.putIfAbsent(item.area, () => []).add(item);
     }
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Text(
-                  'Inspection Items',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  '${inspection.itemsCount} items',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ...itemsByArea.entries.map((entry) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    entry.key,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.brand,
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Inspection Items',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
+              ),
+              const Spacer(),
+              Text(
+                '${inspection.itemsCount} items',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...itemsByArea.entries.map((entry) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  entry.key,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
-                  const SizedBox(height: 8),
-                  ...entry.value.map((item) => _InspectionItemRow(item: item)),
-                  const SizedBox(height: 12),
-                ],
-              );
-            }),
-          ],
-        ),
+                ),
+                const SizedBox(height: 8),
+                ...entry.value.map((item) => _InspectionItemRow(item: item)),
+                const SizedBox(height: 12),
+              ],
+            );
+          }),
+        ],
       ),
     );
   }
@@ -669,7 +653,7 @@ class _InspectionItemRow extends StatelessWidget {
               vertical: 4,
             ),
             decoration: BoxDecoration(
-              color: item.conditionColor.withValues(alpha: 0.1),
+              color: item.conditionColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
