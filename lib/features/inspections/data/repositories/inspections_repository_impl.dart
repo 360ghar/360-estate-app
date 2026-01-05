@@ -63,7 +63,8 @@ final class InspectionsRepositoryImpl implements InspectionsRepository {
   }
 
   @override
-  Future<Inspection> updateInspection(int id, Map<String, dynamic> updates) async {
+  Future<Inspection> updateInspection(
+      int id, Map<String, dynamic> updates) async {
     final dto = await _dataSource.updateInspection(id, updates);
     return dto.toEntity();
   }
@@ -81,7 +82,8 @@ final class InspectionsRepositoryImpl implements InspectionsRepository {
   }
 
   @override
-  Future<Inspection> signInspection(int id, {
+  Future<Inspection> signInspection(
+    int id, {
     required String signatureType,
     required String signature,
   }) async {
@@ -99,7 +101,8 @@ final class InspectionsRepositoryImpl implements InspectionsRepository {
   }
 
   @override
-  Future<Inspection> addInspectionItem(int inspectionId, {
+  Future<Inspection> addInspectionItem(
+    int inspectionId, {
     required String area,
     required String item,
     required String condition,

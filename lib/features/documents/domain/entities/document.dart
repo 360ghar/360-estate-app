@@ -148,7 +148,8 @@ final class Document {
   final DateTime? uploadedAt;
   final DateTime? expiryDate;
 
-  bool get isExpired => expiryDate != null && expiryDate!.isBefore(DateTime.now());
+  bool get isExpired =>
+      expiryDate != null && expiryDate!.isBefore(DateTime.now());
 
   bool get isExpiringSoon {
     if (expiryDate == null) return false;
@@ -159,7 +160,8 @@ final class Document {
   String get formattedFileSize {
     if (fileSize == null) return '';
     if (fileSize! < 1024) return '$fileSize B';
-    if (fileSize! < 1024 * 1024) return '${(fileSize! / 1024).toStringAsFixed(1)} KB';
+    if (fileSize! < 1024 * 1024)
+      return '${(fileSize! / 1024).toStringAsFixed(1)} KB';
     return '${(fileSize! / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 

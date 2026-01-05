@@ -47,41 +47,43 @@ class _ApplicationFormCreateView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Obx(() => InkWell(
-                onTap: () => _selectExpiryDate(context, controller),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.event, color: Colors.grey),
-                      const SizedBox(width: 12),
-                      Text(
-                        controller.expiryDate.value != null
-                            ? dateFormat.format(controller.expiryDate.value!)
-                            : 'No expiry date',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: controller.expiryDate.value != null
-                              ? Colors.black
-                              : Colors.grey,
-                        ),
-                      ),
-                      const Spacer(),
-                      if (controller.expiryDate.value != null)
-                        IconButton(
-                          icon: const Icon(Icons.clear, size: 20),
-                          onPressed: () => controller.setExpiryDate(null),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                        ),
-                    ],
-                  ),
+          Obx(
+            () => InkWell(
+              onTap: () => _selectExpiryDate(context, controller),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              ),),
+                child: Row(
+                  children: [
+                    const Icon(Icons.event, color: Colors.grey),
+                    const SizedBox(width: 12),
+                    Text(
+                      controller.expiryDate.value != null
+                          ? dateFormat.format(controller.expiryDate.value!)
+                          : 'No expiry date',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: controller.expiryDate.value != null
+                            ? Colors.black
+                            : Colors.grey,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (controller.expiryDate.value != null)
+                      IconButton(
+                        icon: const Icon(Icons.clear, size: 20),
+                        onPressed: () => controller.setExpiryDate(null),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           const SizedBox(height: 24),
 
           // Custom Fields Section
@@ -162,18 +164,20 @@ class _ApplicationFormCreateView extends StatelessWidget {
           const SizedBox(height: 32),
 
           // Submit button
-          Obx(() => AppButton(
-                label: 'Create Application Form',
-                isLoading: controller.isSubmitting.value,
-                onPressed: controller.canSubmit
-                    ? () async {
-                        final result = await controller.submit();
-                        if (result != null) {
-                          Get.back<ApplicationForm>(result: result);
-                        }
+          Obx(
+            () => AppButton(
+              label: 'Create Application Form',
+              isLoading: controller.isSubmitting.value,
+              onPressed: controller.canSubmit
+                  ? () async {
+                      final result = await controller.submit();
+                      if (result != null) {
+                        Get.back<ApplicationForm>(result: result);
                       }
-                    : null,
-              ),),
+                    }
+                  : null,
+            ),
+          ),
 
           const SizedBox(height: 24),
         ],
@@ -248,26 +252,28 @@ class _ApplicationFormCreateView extends StatelessWidget {
     final isRequired = false.obs;
     final optionsController = TextEditingController();
 
-    unawaited(showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Custom Field'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: labelController,
-                decoration: const InputDecoration(
-                  labelText: 'Field Label',
-                  hintText: 'e.g., Previous Landlord Reference',
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Add Custom Field'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: labelController,
+                  decoration: const InputDecoration(
+                    labelText: 'Field Label',
+                    hintText: 'e.g., Previous Landlord Reference',
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              const Text('Field Type'),
-              const SizedBox(height: 8),
-              Obx(() => DropdownButtonFormField<String>(
+                const SizedBox(height: 16),
+                const Text('Field Type'),
+                const SizedBox(height: 8),
+                Obx(
+                  () => DropdownButtonFormField<String>(
                     initialValue: selectedType.value,
                     items: const [
                       DropdownMenuItem(value: 'text', child: Text('Text')),
@@ -285,71 +291,75 @@ class _ApplicationFormCreateView extends StatelessWidget {
                       ),
                     ],
                     onChanged: (value) => selectedType.value = value!,
-                  ),),
-              Obx(() {
-                if (selectedType.value == 'select') {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: optionsController,
-                        decoration: const InputDecoration(
-                          labelText: 'Options (comma separated)',
-                          hintText: 'e.g., Option 1, Option 2, Option 3',
+                  ),
+                ),
+                Obx(() {
+                  if (selectedType.value == 'select') {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: optionsController,
+                          decoration: const InputDecoration(
+                            labelText: 'Options (comma separated)',
+                            hintText: 'e.g., Option 1, Option 2, Option 3',
+                          ),
                         ),
-                      ),
-                    ],
-                  );
-                }
-                return const SizedBox.shrink();
-              }),
-              const SizedBox(height: 16),
-              Obx(() => CheckboxListTile(
+                      ],
+                    );
+                  }
+                  return const SizedBox.shrink();
+                }),
+                const SizedBox(height: 16),
+                Obx(
+                  () => CheckboxListTile(
                     title: const Text('Required field'),
                     value: isRequired.value,
                     onChanged: (value) => isRequired.value = value!,
                     contentPadding: EdgeInsets.zero,
-                  ),),
-            ],
+                  ),
+                ),
+              ],
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (labelController.text.isEmpty) {
+                  Get.snackbar('Error', 'Please enter a field label');
+                  return;
+                }
+
+                List<String>? options;
+                if (selectedType.value == 'select' &&
+                    optionsController.text.isNotEmpty) {
+                  options = optionsController.text
+                      .split(',')
+                      .map((e) => e.trim())
+                      .where((e) => e.isNotEmpty)
+                      .toList();
+                }
+
+                controller.addCustomField(
+                  label: labelController.text,
+                  fieldType: selectedType.value,
+                  isRequired: isRequired.value,
+                  options: options,
+                );
+
+                Navigator.pop(context);
+              },
+              child: const Text('Add'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              if (labelController.text.isEmpty) {
-                Get.snackbar('Error', 'Please enter a field label');
-                return;
-              }
-
-              List<String>? options;
-              if (selectedType.value == 'select' &&
-                  optionsController.text.isNotEmpty) {
-                options = optionsController.text
-                    .split(',')
-                    .map((e) => e.trim())
-                    .where((e) => e.isNotEmpty)
-                    .toList();
-              }
-
-              controller.addCustomField(
-                label: labelController.text,
-                fieldType: selectedType.value,
-                isRequired: isRequired.value,
-                options: options,
-              );
-
-              Navigator.pop(context);
-            },
-            child: const Text('Add'),
-          ),
-        ],
       ),
-    ),);
+    );
   }
 }
 
@@ -411,26 +421,28 @@ class _PropertySelectorState extends State<_PropertySelector> {
           ),
         ),
         const SizedBox(height: 8),
-        Obx(() => DropdownButtonFormField<int>(
-              initialValue: widget.controller.selectedPropertyId.value,
-              decoration: const InputDecoration(
-                hintText: 'Select a property',
-                prefixIcon: Icon(Icons.apartment),
-              ),
-              items: _properties.map((prop) {
-                return DropdownMenuItem(
-                  value: prop.id,
-                  child: Text(prop.title),
-                );
-              }).toList(),
-              onChanged: (value) => widget.controller.setPropertyId(value),
-              validator: (value) {
-                if (value == null) {
-                  return 'Please select a property';
-                }
-                return null;
-              },
-            ),),
+        Obx(
+          () => DropdownButtonFormField<int>(
+            initialValue: widget.controller.selectedPropertyId.value,
+            decoration: const InputDecoration(
+              hintText: 'Select a property',
+              prefixIcon: Icon(Icons.apartment),
+            ),
+            items: _properties.map((prop) {
+              return DropdownMenuItem(
+                value: prop.id,
+                child: Text(prop.title),
+              );
+            }).toList(),
+            onChanged: (value) => widget.controller.setPropertyId(value),
+            validator: (value) {
+              if (value == null) {
+                return 'Please select a property';
+              }
+              return null;
+            },
+          ),
+        ),
         const SizedBox(height: 24),
       ],
     );

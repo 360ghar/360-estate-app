@@ -17,9 +17,8 @@ final class RentPaymentDto {
   factory RentPaymentDto.fromJson(Map<String, dynamic> json) {
     return RentPaymentDto(
       id: json['id'] as int,
-      rentChargeId: json['rent_charge_id'] as int? ??
-          json['rentChargeId'] as int? ??
-          0,
+      rentChargeId:
+          json['rent_charge_id'] as int? ?? json['rentChargeId'] as int? ?? 0,
       leaseId: json['lease_id'] as int? ?? json['leaseId'] as int? ?? 0,
       amount: _parseDouble(json['amount']),
       paymentDate: DateTime.parse(

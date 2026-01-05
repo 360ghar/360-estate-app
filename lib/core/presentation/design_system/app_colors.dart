@@ -18,10 +18,10 @@ abstract final class AppColors {
   static const Color gradientTeal = Color(0xFF06B6D4);
   static const Color gradientCyan = Color(0xFF22D3EE);
 
-  // Dark theme gradients
-  static const Color darkGradientStart = Color(0xFF1A1A2E);
-  static const Color darkGradientMiddle = Color(0xFF16213E);
-  static const Color darkGradientEnd = Color(0xFF0F3460);
+  // Dark theme gradients - Aesthetic Dark Blue
+  static const Color darkGradientStart = Color(0xFF0D1B2A);
+  static const Color darkGradientMiddle = Color(0xFF1B263B);
+  static const Color darkGradientEnd = Color(0xFF1B3A5F);
 
   // Light theme gradients
   static const Color lightGradientStart = Color(0xFFE0E7FF);
@@ -30,6 +30,25 @@ abstract final class AppColors {
   // Glassmorphism colors
   static const Color glassWhite = Color(0x40FFFFFF);
   static const Color glassDark = Color(0x30000000);
+
+  // ===== NEW AUTH THEME COLORS =====
+  // Pure black background for modern auth UI
+  static const Color authBackground = Color(0xFF000000);
+
+  // Amber/Gold accent color (primary action color)
+  static const Color authAccent = Color(0xFFFFC107);
+  static const Color authAccentDark = Color(0xFFE5AC00);
+  static const Color authAccentLight = Color(0xFFFFD54F);
+
+  // Dark cards and inputs
+  static const Color authCardBackground = Color(0xFF1A1A1A);
+  static const Color authInputBackground = Color(0xFF2A2A2A);
+  static const Color authInputBorder = Color(0xFFFFC107);
+
+  // Text colors for auth
+  static const Color authTextPrimary = Color(0xFFFFFFFF);
+  static const Color authTextSecondary = Color(0xFFB0B0B0);
+  static const Color authTextHint = Color(0xFF808080);
 
   /// Primary gradient for auth pages and premium UI elements
   static const LinearGradient primaryGradient = LinearGradient(
@@ -64,6 +83,13 @@ abstract final class AppColors {
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
     colors: [brand, brandLight],
+  );
+
+  /// Amber button gradient for auth pages
+  static const LinearGradient authButtonGradient = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [authAccent, authAccentLight],
   );
 
   static ColorScheme lightScheme() {

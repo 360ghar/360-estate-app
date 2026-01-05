@@ -35,12 +35,15 @@ final class DocumentDto {
     return DocumentDto(
       id: json['id'] as int,
       documentType: json['document_type'] as String? ?? 'other',
-      fileName: json['file_name'] as String? ?? json['filename'] as String? ?? '',
+      fileName:
+          json['file_name'] as String? ?? json['filename'] as String? ?? '',
       fileUrl: json['file_url'] as String? ?? json['url'] as String? ?? '',
       propertyId: json['property_id'] as int?,
-      propertyTitle: json['property_title'] as String? ?? json['property']?['title'] as String?,
+      propertyTitle: json['property_title'] as String? ??
+          json['property']?['title'] as String?,
       leaseId: json['lease_id'] as int?,
-      tenantName: json['tenant_name'] as String? ?? json['tenant']?['name'] as String?,
+      tenantName:
+          json['tenant_name'] as String? ?? json['tenant']?['name'] as String?,
       description: json['description'] as String?,
       fileSize: json['file_size'] as int?,
       mimeType: json['mime_type'] as String? ?? json['content_type'] as String?,
@@ -64,7 +67,8 @@ final class DocumentDto {
       if (propertyId != null) 'property_id': propertyId,
       if (leaseId != null) 'lease_id': leaseId,
       if (description != null) 'description': description,
-      if (expiryDate != null) 'expiry_date': expiryDate!.toIso8601String().split('T')[0],
+      if (expiryDate != null)
+        'expiry_date': expiryDate!.toIso8601String().split('T')[0],
     };
   }
 

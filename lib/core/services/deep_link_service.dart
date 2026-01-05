@@ -28,18 +28,15 @@ final class DeepLinkService {
     );
 
     unawaited(
-      _appLinks
-          .getInitialLink()
-          .then((uri) {
-            if (uri != null) _handle(uri);
-          })
-          .catchError((Object error, StackTrace stackTrace) {
-            AppLogger.w(
-              'Initial deep link error',
-              error: error,
-              stackTrace: stackTrace,
-            );
-          }),
+      _appLinks.getInitialLink().then((uri) {
+        if (uri != null) _handle(uri);
+      }).catchError((Object error, StackTrace stackTrace) {
+        AppLogger.w(
+          'Initial deep link error',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }),
     );
   }
 

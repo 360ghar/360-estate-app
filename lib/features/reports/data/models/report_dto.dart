@@ -216,12 +216,16 @@ final class IncomeReportDto {
       endDate: DateTime.parse(json['end_date'] as String),
       totalIncome: (json['total_income'] as num).toDouble(),
       byCategory: (json['by_category'] as List<dynamic>)
-          .map((e) =>
-              IncomeCategoryBreakdownDto.fromJson(e as Map<String, dynamic>),)
+          .map(
+            (e) =>
+                IncomeCategoryBreakdownDto.fromJson(e as Map<String, dynamic>),
+          )
           .toList(),
       byMonth: (json['by_month'] as List<dynamic>)
-          .map((e) =>
-              IncomeMonthlyBreakdownDto.fromJson(e as Map<String, dynamic>),)
+          .map(
+            (e) =>
+                IncomeMonthlyBreakdownDto.fromJson(e as Map<String, dynamic>),
+          )
           .toList(),
       items: (json['items'] as List<dynamic>)
           .map((e) => IncomeItemDto.fromJson(e as Map<String, dynamic>))
@@ -372,12 +376,16 @@ final class ExpensesReportDto {
       endDate: DateTime.parse(json['end_date'] as String),
       totalExpenses: (json['total_expenses'] as num).toDouble(),
       byCategory: (json['by_category'] as List<dynamic>)
-          .map((e) =>
-              ExpenseCategoryBreakdownDto.fromJson(e as Map<String, dynamic>),)
+          .map(
+            (e) =>
+                ExpenseCategoryBreakdownDto.fromJson(e as Map<String, dynamic>),
+          )
           .toList(),
       byMonth: (json['by_month'] as List<dynamic>)
-          .map((e) =>
-              ExpenseMonthlyBreakdownDto.fromJson(e as Map<String, dynamic>),)
+          .map(
+            (e) =>
+                ExpenseMonthlyBreakdownDto.fromJson(e as Map<String, dynamic>),
+          )
           .toList(),
       items: (json['items'] as List<dynamic>)
           .map((e) => ExpenseItemDto.fromJson(e as Map<String, dynamic>))
@@ -470,15 +478,20 @@ final class ProfitAndLossReportDto {
       netIncome: (json['net_income'] as num).toDouble(),
       profitMargin: (json['profit_margin'] as num).toDouble(),
       incomeBreakdown: (json['income_breakdown'] as List<dynamic>)
-          .map((e) =>
-              IncomeCategoryBreakdownDto.fromJson(e as Map<String, dynamic>),)
+          .map(
+            (e) =>
+                IncomeCategoryBreakdownDto.fromJson(e as Map<String, dynamic>),
+          )
           .toList(),
       expenseBreakdown: (json['expense_breakdown'] as List<dynamic>)
-          .map((e) =>
-              ExpenseCategoryBreakdownDto.fromJson(e as Map<String, dynamic>),)
+          .map(
+            (e) =>
+                ExpenseCategoryBreakdownDto.fromJson(e as Map<String, dynamic>),
+          )
           .toList(),
       byMonth: (json['by_month'] as List<dynamic>)
-          .map((e) => PnLMonthlyBreakdownDto.fromJson(e as Map<String, dynamic>))
+          .map(
+              (e) => PnLMonthlyBreakdownDto.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
   }
@@ -798,18 +811,22 @@ final class MaintenanceReportDto {
       openRequests: json['open_requests'] as int,
       completedRequests: json['completed_requests'] as int,
       totalCost: (json['total_cost'] as num).toDouble(),
-      averageCompletionDays: (json['average_completion_days'] as num).toDouble(),
+      averageCompletionDays:
+          (json['average_completion_days'] as num).toDouble(),
       byPriority: (json['by_priority'] as List<dynamic>)
-          .map((e) =>
-              MaintenanceByPriorityDto.fromJson(e as Map<String, dynamic>),)
+          .map(
+            (e) => MaintenanceByPriorityDto.fromJson(e as Map<String, dynamic>),
+          )
           .toList(),
       byCategory: (json['by_category'] as List<dynamic>)
-          .map((e) =>
-              MaintenanceByCategoryDto.fromJson(e as Map<String, dynamic>),)
+          .map(
+            (e) => MaintenanceByCategoryDto.fromJson(e as Map<String, dynamic>),
+          )
           .toList(),
       items: (json['items'] as List<dynamic>)
-          .map((e) =>
-              MaintenanceReportItemDto.fromJson(e as Map<String, dynamic>),)
+          .map(
+            (e) => MaintenanceReportItemDto.fromJson(e as Map<String, dynamic>),
+          )
           .toList(),
     );
   }

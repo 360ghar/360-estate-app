@@ -1,3 +1,4 @@
+import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/features/home/data/models/dashboard_overview_dto.dart';
 import 'package:estate_app/features/home/data/models/activity_item_dto.dart';
@@ -19,7 +20,7 @@ final class ApiDashboardRemoteDataSource implements DashboardRemoteDataSource {
 
   @override
   Future<DashboardOverviewDto> getOverview() async {
-    print('[DASHBOARD] WARNING: PM dashboard endpoint not available');
+    AppLogger.w(' PM dashboard endpoint not available');
     // Return a placeholder with zeros
     return DashboardOverviewDto.fromJson(const {
       'total_properties': 0,
@@ -35,8 +36,7 @@ final class ApiDashboardRemoteDataSource implements DashboardRemoteDataSource {
 
   @override
   Future<List<ActivityItemDto>> getRecentActivity({required int limit}) async {
-    print('[DASHBOARD] WARNING: PM dashboard endpoint not available');
+    AppLogger.w(' PM dashboard endpoint not available');
     return [];
   }
 }
-

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/network/auth_token_provider.dart';
 import 'package:estate_app/core/network/interceptors/request_id_interceptor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,11 +24,11 @@ final class AuthInterceptor extends QueuedInterceptor {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString(_tokenKey);
       if (token != null && token.isNotEmpty) {
-        print('[AUTH] Found stored backend token (${token.length} chars)');
+        AppLogger.d('Found stored backend token (${token.length} chars)');
       }
       return token;
     } catch (e) {
-      print('[AUTH] Error reading stored token: $e');
+      AppLogger.w('Error reading stored token', error: e);
       return null;
     }
   }
@@ -42,9 +43,7 @@ final class AuthInterceptor extends QueuedInterceptor {
       final storedToken = await _getStoredToken();
       if (storedToken != null && storedToken.isNotEmpty) {
         options.headers['Authorization'] = 'Bearer $storedToken';
-        print('[AUTH] Using stored backend token for: ${options.path}');
-        print('[AUTH] Token (first 30 chars): ${storedToken.substring(0, storedToken.length > 30 ? 30 : storedToken.length)}...');
-        print('[AUTH] Headers after setting: ${options.headers.containsKey('Authorization') ? 'Authorization present' : 'Authorization MISSING!'}');
+        AppLogger.d('Using stored backend token for: ${options.path}');
         handler.next(options);
         return;
       }
@@ -53,31 +52,26 @@ final class AuthInterceptor extends QueuedInterceptor {
       final token = await _tokenProvider.getAccessToken();
       if (token != null && token.isNotEmpty) {
         options.headers['Authorization'] = 'Bearer $token';
-        print('[AUTH] Token found (async), length: ${token.length}, sending to: ${options.path}');
-        print('[AUTH] Headers after setting: ${options.headers.containsKey('Authorization') ? 'Authorization present' : 'Authorization MISSING!'}');
+        AppLogger.d(
+            'Token found (async), length: ${token.length}, sending to: ${options.path}');
       } else {
-        print('[AUTH] WARNING: No token available for: ${options.path}');
+        AppLogger.w('No token available for: ${options.path}');
       }
-      
+
       handler.next(options);
     } catch (e) {
-      print('[AUTH] Error in onRequest: $e');
+      AppLogger.e('Error in onRequest', error: e);
       handler.next(options);
     }
   }
 
   @override
-  Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
+  Future<void> onError(
+      DioException err, ErrorInterceptorHandler handler) async {
     final statusCode = err.response?.statusCode;
     final options = err.requestOptions;
 
-    print('[AUTH] ========================================');
-    print('[AUTH] Error on ${options.path}');
-    print('[AUTH] Status code: $statusCode');
-    print('[AUTH] Response data: ${err.response?.data}');
-    print('[AUTH] Request URL: ${options.uri}');
-    print('[AUTH] Request headers: ${options.headers}');
-    print('[AUTH] ========================================');
+    AppLogger.d('Error on ${options.path} - Status: $statusCode');
 
     final alreadyRefreshed =
         (options.extra[RequestIdKeys.authRefreshed] as bool?) ?? false;
@@ -88,24 +82,23 @@ final class AuthInterceptor extends QueuedInterceptor {
       return;
     }
 
-    print('[AUTH] Attempting token refresh for: ${options.path}');
+    AppLogger.d('Attempting token refresh for: ${options.path}');
     final refreshed = await _tokenProvider.refreshSession();
     if (!refreshed) {
-      print('[AUTH] Token refresh failed for: ${options.path}');
+      AppLogger.w('Token refresh failed for: ${options.path}');
       handler.next(err);
       return;
     }
 
     final token = await _tokenProvider.getAccessToken();
     if (token == null || token.isEmpty) {
-      print('[AUTH] No token after refresh for: ${options.path}');
+      AppLogger.w('No token after refresh for: ${options.path}');
       handler.next(err);
       return;
     }
 
-    print('[AUTH] Retrying with new token for: ${options.path}');
-    print('[AUTH] New token (first 30 chars): ${token.substring(0, token.length > 30 ? 30 : token.length)}...');
-    
+    AppLogger.d('Retrying with new token for: ${options.path}');
+
     try {
       // Create completely fresh request with new token
       final response = await _dio.request<dynamic>(

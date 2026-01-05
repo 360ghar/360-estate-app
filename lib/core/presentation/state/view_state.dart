@@ -16,8 +16,8 @@ final class ViewState<T> {
   const ViewState.empty() : this._(status: ViewStatus.empty);
 
   const ViewState.success(T data)
-    : this._(status: ViewStatus.success, data: data);
+      : this._(status: ViewStatus.success, data: data);
 
   const ViewState.error(Failure failure)
-    : this._(status: ViewStatus.error, failure: failure);
+      : this._(status: ViewStatus.error, failure: failure);
 }

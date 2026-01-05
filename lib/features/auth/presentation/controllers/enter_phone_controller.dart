@@ -8,32 +8,35 @@ import 'package:estate_app/features/auth/domain/usecases/check_phone_registered_
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-enum PhoneValidationError { required, missingPlus, tooShort }
+enum PhoneValidationError { required, tooShort }
 
 class EnterPhoneController extends GetxController {
   EnterPhoneController({
     required AppConfig config,
     required CheckPhoneRegisteredUseCase checkPhoneRegistered,
-  }) : _config = config,
-       _checkPhoneRegistered = checkPhoneRegistered;
+  })  : _config = config,
+        _checkPhoneRegistered = checkPhoneRegistered;
 
   final AppConfig _config;
   final CheckPhoneRegisteredUseCase _checkPhoneRegistered;
 
-  final TextEditingController phoneController = TextEditingController(
-    text: '+91',
-  );
+  // Country code is displayed separately in the UI
+  static const String countryCode = '+91';
+
+  // User only enters digits (without country code)
+  final TextEditingController phoneController = TextEditingController();
   final Rx<ViewState<void>> state = const ViewState<void>.idle().obs;
   final Rxn<PhoneValidationError> phoneError = Rxn<PhoneValidationError>();
 
   bool get isConfigured => _config.isSupabaseConfigured;
 
-  PhoneValidationError? _validatePhone(String raw) {
-    final value = raw.trim();
+  /// Returns the full phone number with country code
+  String get fullPhoneNumber => '$countryCode${phoneController.text.trim()}';
+
+  PhoneValidationError? _validatePhone(String digits) {
+    final value = digits.trim();
     if (value.isEmpty) return PhoneValidationError.required;
-    if (!value.startsWith('+')) return PhoneValidationError.missingPlus;
-    final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
-    if (digits.length < 10) return PhoneValidationError.tooShort;
+    if (value.length < 10) return PhoneValidationError.tooShort;
     return null;
   }
 
@@ -45,26 +48,29 @@ class EnterPhoneController extends GetxController {
       return;
     }
 
-    final phone = phoneController.text;
-    final error = _validatePhone(phone);
+    final digits = phoneController.text.trim();
+    final error = _validatePhone(digits);
     phoneError.value = error;
     if (error != null) return;
 
+    // Combine country code with entered digits
+    final phone = fullPhoneNumber;
+
     state.value = const ViewState<void>.loading();
     try {
-      final exists = await _checkPhoneRegistered(phone.trim());
+      final exists = await _checkPhoneRegistered(phone);
       state.value = const ViewState<void>.success(null);
 
       if (exists == false) {
         unawaited(
-          Get.toNamed<void>(Routes.signup, arguments: {'phone': phone.trim()}),
+          Get.toNamed<void>(Routes.signup, arguments: {'phone': phone}),
         );
         return;
       }
 
       // Unknown backend support defaults to login to avoid accidental sign-ups.
       unawaited(
-        Get.toNamed<void>(Routes.login, arguments: {'phone': phone.trim()}),
+        Get.toNamed<void>(Routes.login, arguments: {'phone': phone}),
       );
     } on Failure catch (f) {
       state.value = ViewState<void>.error(f);

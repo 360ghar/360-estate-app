@@ -13,7 +13,8 @@ class ReportsBindings extends Bindings {
     );
 
     Get.lazyPut<ReportsRepository>(
-      () => ReportsRepositoryImpl(dataSource: Get.find<ReportsRemoteDataSource>()),
+      () => ReportsRepositoryImpl(
+          dataSource: Get.find<ReportsRemoteDataSource>()),
     );
 
     Get.lazyPut<ReportsController>(

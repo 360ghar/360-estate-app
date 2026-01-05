@@ -120,9 +120,11 @@ class _PropertyDetailContent extends StatelessWidget {
   }
 
   void _editProperty(BuildContext context) {
-    unawaited(Get.toNamed<void>(
-      Routes.propertyEdit.replaceFirst(':id', property.id.toString()),
-    ),);
+    unawaited(
+      Get.toNamed<void>(
+        Routes.propertyEdit.replaceFirst(':id', property.id.toString()),
+      ),
+    );
   }
 
   void _handleMenuAction(BuildContext context, String action) {
@@ -132,35 +134,37 @@ class _PropertyDetailContent extends StatelessWidget {
   }
 
   void _confirmDelete(BuildContext context) {
-    unawaited(showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Property'),
-        content: Text(
-          'Are you sure you want to delete "${property.displayName}"? This action cannot be undone.',
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Delete Property'),
+          content: Text(
+            'Are you sure you want to delete "${property.displayName}"? This action cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () async {
+                Navigator.pop(context);
+                final success = await controller.deleteProperty();
+                if (success) {
+                  Get.back<void>();
+                  Get.snackbar('Success', 'Property deleted');
+                } else {
+                  Get.snackbar('Error', 'Failed to delete property');
+                }
+              },
+              child: const Text('Delete'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () async {
-              Navigator.pop(context);
-              final success = await controller.deleteProperty();
-              if (success) {
-                Get.back<void>();
-                Get.snackbar('Success', 'Property deleted');
-              } else {
-                Get.snackbar('Error', 'Failed to delete property');
-              }
-            },
-            child: const Text('Delete'),
-          ),
-        ],
       ),
-    ),);
+    );
   }
 }
 
@@ -197,7 +201,8 @@ class _OverviewTab extends StatelessWidget {
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Container(
                         color: theme.colorScheme.surfaceContainerHighest,
-                        child: Icon(Icons.image, size: 64, color: theme.colorScheme.outlineVariant),
+                        child: Icon(Icons.image,
+                            size: 64, color: theme.colorScheme.outlineVariant),
                       ),
                     ),
                   );
@@ -228,75 +233,80 @@ class _OverviewTab extends StatelessWidget {
 
           AppCard(
             child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Property Details',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Property Details',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(height: 12),
-                  _InfoRow(label: 'Type', value: property.propertyType.name),
-                  _InfoRow(label: 'Category', value: property.propertyCategory.name),
-                  _InfoRow(label: 'Address', value: property.fullAddress),
-                  if (property.bedroomCount != null)
-                    _InfoRow(label: 'Bedrooms', value: '${property.bedroomCount}'),
-                  if (property.bathroomCount != null)
-                    _InfoRow(label: 'Bathrooms', value: '${property.bathroomCount}'),
-                  if (property.balconyCount != null)
-                    _InfoRow(label: 'Balconies', value: '${property.balconyCount}'),
-                  if (property.floorAreaSqft != null)
-                    _InfoRow(
-                      label: 'Area',
-                      value: '${property.floorAreaSqft!.toStringAsFixed(0)} sq.ft',
-                    ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 12),
+                _InfoRow(label: 'Type', value: property.propertyType.name),
+                _InfoRow(
+                    label: 'Category', value: property.propertyCategory.name),
+                _InfoRow(label: 'Address', value: property.fullAddress),
+                if (property.bedroomCount != null)
+                  _InfoRow(
+                      label: 'Bedrooms', value: '${property.bedroomCount}'),
+                if (property.bathroomCount != null)
+                  _InfoRow(
+                      label: 'Bathrooms', value: '${property.bathroomCount}'),
+                if (property.balconyCount != null)
+                  _InfoRow(
+                      label: 'Balconies', value: '${property.balconyCount}'),
+                if (property.floorAreaSqft != null)
+                  _InfoRow(
+                    label: 'Area',
+                    value:
+                        '${property.floorAreaSqft!.toStringAsFixed(0)} sq.ft',
+                  ),
+              ],
             ),
+          ),
           const SizedBox(height: 16),
 
           AppCard(
             child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Financial Info',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Financial Info',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(height: 12),
-                  _InfoRow(
-                    label: 'Monthly Rent',
-                    value: currencyFormat.format(property.monthlyRentInr),
-                  ),
-                  _InfoRow(
-                    label: 'Payment Due Day',
-                    value: 'Day ${property.paymentDueDay} of each month',
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 12),
+                _InfoRow(
+                  label: 'Monthly Rent',
+                  value: currencyFormat.format(property.monthlyRentInr),
+                ),
+                _InfoRow(
+                  label: 'Payment Due Day',
+                  value: 'Day ${property.paymentDueDay} of each month',
+                ),
+              ],
             ),
+          ),
           const SizedBox(height: 16),
 
           // Notes
           if (property.notes != null && property.notes!.isNotEmpty)
             AppCard(
               child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Notes',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Notes',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(height: 8),
-                    Text(property.notes!),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(property.notes!),
+                ],
               ),
+            ),
         ],
       ),
     );
@@ -323,7 +333,8 @@ class _LeaseTab extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.description_outlined, size: 64, color: Theme.of(context).colorScheme.outlineVariant),
+            Icon(Icons.description_outlined,
+                size: 64, color: Theme.of(context).colorScheme.outlineVariant),
             const SizedBox(height: 16),
             Text(
               'No Active Lease',
@@ -373,7 +384,7 @@ class _LeaseTab extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.orange.withOpacity(0.1),
+                        color: Colors.orange.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Row(
@@ -394,24 +405,27 @@ class _LeaseTab extends StatelessWidget {
                     ),
                 ],
               ),
-                const Divider(height: 24),
-                _InfoRow(label: 'Tenant', value: lease.tenantName),
-                _InfoRow(label: 'Start Date', value: dateFormat.format(lease.startDate)),
-                _InfoRow(label: 'End Date', value: dateFormat.format(lease.endDate)),
+              const Divider(height: 24),
+              _InfoRow(label: 'Tenant', value: lease.tenantName),
+              _InfoRow(
+                  label: 'Start Date',
+                  value: dateFormat.format(lease.startDate)),
+              _InfoRow(
+                  label: 'End Date', value: dateFormat.format(lease.endDate)),
+              _InfoRow(
+                label: 'Monthly Rent',
+                value: currencyFormat.format(lease.monthlyRent),
+              ),
+              if (lease.securityDeposit != null)
                 _InfoRow(
-                  label: 'Monthly Rent',
-                  value: currencyFormat.format(lease.monthlyRent),
+                  label: 'Security Deposit',
+                  value: currencyFormat.format(lease.securityDeposit),
                 ),
-                if (lease.securityDeposit != null)
-                  _InfoRow(
-                    label: 'Security Deposit',
-                    value: currencyFormat.format(lease.securityDeposit),
-                  ),
-                if (lease.status != null)
-                  _InfoRow(label: 'Status', value: lease.status!),
-              ],
-            ),
+              if (lease.status != null)
+                _InfoRow(label: 'Status', value: lease.status!),
+            ],
           ),
+        ),
         const SizedBox(height: 16),
         Row(
           children: [
@@ -466,8 +480,8 @@ class _PlaceholderTab extends StatelessWidget {
           Text(
             'Coming soon',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey,
-            ),
+                  color: Colors.grey,
+                ),
           ),
         ],
       ),
@@ -494,7 +508,7 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: displayColor.withOpacity(0.1),
+        color: displayColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(

@@ -37,13 +37,15 @@ class ApplicationFormController extends GetxController {
     bool isRequired = false,
     List<String>? options,
   }) {
-    customFields.add(ApplicationFormField(
-      id: DateTime.now().millisecondsSinceEpoch,
-      label: label,
-      fieldType: fieldType,
-      isRequired: isRequired,
-      options: options ?? [],
-    ),);
+    customFields.add(
+      ApplicationFormField(
+        id: DateTime.now().millisecondsSinceEpoch,
+        label: label,
+        fieldType: fieldType,
+        isRequired: isRequired,
+        options: options ?? [],
+      ),
+    );
   }
 
   void removeCustomField(int index) {

@@ -19,7 +19,8 @@ class InspectionsBindings extends Bindings {
     );
 
     Get.lazyPut<InspectionsController>(
-      () => InspectionsController(repository: Get.find<InspectionsRepository>()),
+      () =>
+          InspectionsController(repository: Get.find<InspectionsRepository>()),
     );
   }
 }

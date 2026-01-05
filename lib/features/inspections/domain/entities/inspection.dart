@@ -273,8 +273,8 @@ final class Inspection {
   bool get isFullySigned => hasTenantSignature && hasLandlordSignature;
 
   int get itemsCount => items.length;
-  int get goodItemsCount =>
-      items.where((i) => i.condition == 'good').length;
-  int get issueItemsCount =>
-      items.where((i) => i.condition == 'poor' || i.condition == 'damaged').length;
+  int get goodItemsCount => items.where((i) => i.condition == 'good').length;
+  int get issueItemsCount => items
+      .where((i) => i.condition == 'poor' || i.condition == 'damaged')
+      .length;
 }

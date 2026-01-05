@@ -1,3 +1,4 @@
+import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/core/pagination/page.dart';
 import 'package:estate_app/features/finance/data/models/expense_dto.dart';
@@ -62,8 +63,8 @@ final class ApiFinanceRemoteDataSource implements FinanceRemoteDataSource {
   }) async {
     // NOTE: /pm/rent/charges endpoint does NOT exist in the current backend
     // This is a placeholder implementation until the PM module is added
-    print('[FINANCE] WARNING: /pm/rent/charges endpoint not available in backend');
-    print('[FINANCE] Returning empty list - PM module pending implementation');
+    AppLogger.w(' /pm/rent/charges endpoint not available in backend');
+    AppLogger.d(' Returning empty list - PM module pending implementation');
 
     return Page<RentChargeDto>(
       items: [],
@@ -76,7 +77,7 @@ final class ApiFinanceRemoteDataSource implements FinanceRemoteDataSource {
   @override
   Future<void> generateRentCharges({DateTime? forMonth}) async {
     // NOTE: /pm/rent/charges/generate endpoint does NOT exist
-    print('[FINANCE] WARNING: /pm/rent/charges/generate endpoint not available');
+    AppLogger.w(' /pm/rent/charges/generate endpoint not available');
     throw UnsupportedError(
       'Rent charge generation is not yet available. PM module pending backend implementation.',
     );
@@ -90,8 +91,8 @@ final class ApiFinanceRemoteDataSource implements FinanceRemoteDataSource {
     int? rentChargeId,
   }) async {
     // NOTE: /pm/rent/payments endpoint does NOT exist
-    print('[FINANCE] WARNING: /pm/rent/payments endpoint not available in backend');
-    print('[FINANCE] Returning empty list - PM module pending implementation');
+    AppLogger.w(' /pm/rent/payments endpoint not available in backend');
+    AppLogger.d(' Returning empty list - PM module pending implementation');
 
     return Page<RentPaymentDto>(
       items: [],
@@ -104,7 +105,7 @@ final class ApiFinanceRemoteDataSource implements FinanceRemoteDataSource {
   @override
   Future<RentPaymentDto> recordPayment(Map<String, dynamic> data) async {
     // NOTE: POST /pm/rent/payments endpoint does NOT exist
-    print('[FINANCE] WARNING: POST /pm/rent/payments endpoint not available');
+    AppLogger.w(' POST /pm/rent/payments endpoint not available');
     throw UnsupportedError(
       'Payment recording is not yet available. PM module pending backend implementation.',
     );
@@ -116,7 +117,7 @@ final class ApiFinanceRemoteDataSource implements FinanceRemoteDataSource {
     required Map<String, dynamic> data,
   }) async {
     // NOTE: /pm/rent/charges/{id}/tenant-payment-intent endpoint does NOT exist
-    print('[FINANCE] WARNING: Tenant payment intent endpoint not available');
+    AppLogger.w(' Tenant payment intent endpoint not available');
     throw UnsupportedError(
       'Payment intent submission is not yet available. PM module pending backend implementation.',
     );
@@ -132,8 +133,8 @@ final class ApiFinanceRemoteDataSource implements FinanceRemoteDataSource {
     DateTime? endDate,
   }) async {
     // NOTE: /pm/expenses endpoint does NOT exist
-    print('[FINANCE] WARNING: /pm/expenses endpoint not available in backend');
-    print('[FINANCE] Returning empty list - PM module pending implementation');
+    AppLogger.w(' /pm/expenses endpoint not available in backend');
+    AppLogger.d(' Returning empty list - PM module pending implementation');
 
     return Page<ExpenseDto>(
       items: [],
@@ -146,7 +147,7 @@ final class ApiFinanceRemoteDataSource implements FinanceRemoteDataSource {
   @override
   Future<ExpenseDto> createExpense(Map<String, dynamic> data) async {
     // NOTE: POST /pm/expenses endpoint does NOT exist
-    print('[FINANCE] WARNING: POST /pm/expenses endpoint not available');
+    AppLogger.w(' POST /pm/expenses endpoint not available');
     throw UnsupportedError(
       'Expense creation is not yet available. PM module pending backend implementation.',
     );
@@ -155,10 +156,9 @@ final class ApiFinanceRemoteDataSource implements FinanceRemoteDataSource {
   @override
   Future<ExpenseDto> updateExpense(int id, Map<String, dynamic> updates) async {
     // NOTE: PATCH /pm/expenses/{id} endpoint does NOT exist
-    print('[FINANCE] WARNING: PATCH /pm/expenses/$id endpoint not available');
+    AppLogger.w(' PATCH /pm/expenses/$id endpoint not available');
     throw UnsupportedError(
       'Expense update is not yet available. PM module pending backend implementation.',
     );
   }
 }
-

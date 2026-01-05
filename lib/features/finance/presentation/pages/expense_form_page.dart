@@ -25,24 +25,26 @@ class ExpenseFormPage extends GetView<ExpenseFormController> {
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
-            Obx(() => Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: ExpenseCategory.values.map((category) {
-                    final isSelected = controller.category.value == category;
-                    return ChoiceChip(
-                      avatar: Icon(
-                        category.icon,
-                        size: 18,
-                        color: isSelected ? Colors.white : category.color,
-                      ),
-                      label: Text(category.displayName),
-                      selected: isSelected,
-                      selectedColor: category.color,
-                      onSelected: (_) => controller.setCategory(category),
-                    );
-                  }).toList(),
-                ),),
+            Obx(
+              () => Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: ExpenseCategory.values.map((category) {
+                  final isSelected = controller.category.value == category;
+                  return ChoiceChip(
+                    avatar: Icon(
+                      category.icon,
+                      size: 18,
+                      color: isSelected ? Colors.white : category.color,
+                    ),
+                    label: Text(category.displayName),
+                    selected: isSelected,
+                    selectedColor: category.color,
+                    onSelected: (_) => controller.setCategory(category),
+                  );
+                }).toList(),
+              ),
+            ),
             const SizedBox(height: 24),
 
             // Amount
@@ -53,7 +55,8 @@ class ExpenseFormPage extends GetView<ExpenseFormController> {
                 prefixText: '₹ ',
                 border: OutlineInputBorder(),
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
               ],
@@ -75,25 +78,27 @@ class ExpenseFormPage extends GetView<ExpenseFormController> {
             const SizedBox(height: 16),
 
             // Expense date
-            Obx(() => ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.calendar_today),
-                  title: const Text('Expense Date'),
-                  subtitle: Text(
-                    DateFormat.yMMMd().format(controller.expenseDate.value),
-                  ),
-                  onTap: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: controller.expenseDate.value,
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime.now(),
-                    );
-                    if (date != null) {
-                      controller.setExpenseDate(date);
-                    }
-                  },
-                ),),
+            Obx(
+              () => ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.calendar_today),
+                title: const Text('Expense Date'),
+                subtitle: Text(
+                  DateFormat.yMMMd().format(controller.expenseDate.value),
+                ),
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: controller.expenseDate.value,
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime.now(),
+                  );
+                  if (date != null) {
+                    controller.setExpenseDate(date);
+                  }
+                },
+              ),
+            ),
             const SizedBox(height: 16),
 
             // Vendor
@@ -120,18 +125,21 @@ class ExpenseFormPage extends GetView<ExpenseFormController> {
             const SizedBox(height: 24),
 
             // Submit button
-            Obx(() => FilledButton(
-                  onPressed: controller.isSubmitting.value
-                      ? null
-                      : controller.submit,
-                  child: controller.isSubmitting.value
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(controller.isEditing ? 'Update Expense' : 'Create Expense'),
-                ),),
+            Obx(
+              () => FilledButton(
+                onPressed:
+                    controller.isSubmitting.value ? null : controller.submit,
+                child: controller.isSubmitting.value
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(controller.isEditing
+                        ? 'Update Expense'
+                        : 'Create Expense'),
+              ),
+            ),
           ],
         ),
       ),

@@ -39,8 +39,7 @@ class _MaintenanceDetailView extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () async {
-                  final result =
-                      await Get.toNamed<MaintenanceRequest>(
+                  final result = await Get.toNamed<MaintenanceRequest>(
                     Routes.maintenanceCreate,
                     arguments: {'request': state.data},
                   );
@@ -99,204 +98,213 @@ class _DetailContent extends StatelessWidget {
           // Header card
           AppCard(
             child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: request.category.color.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          request.category.icon,
-                          color: request.category.color,
-                          size: 28,
-                        ),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: request.category.color.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              request.title,
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              request.category.displayName,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
+                      child: Icon(
+                        request.category.icon,
+                        color: request.category.color,
+                        size: 28,
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      _StatusBadge(status: request.status),
-                      const SizedBox(width: 8),
-                      _PriorityBadge(priority: request.priority),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            request.title,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            request.category.displayName,
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    _StatusBadge(status: request.status),
+                    const SizedBox(width: 8),
+                    _PriorityBadge(priority: request.priority),
+                  ],
+                ),
+              ],
             ),
+          ),
           const SizedBox(height: 16),
 
           // Property info
           AppCard(
             child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Property',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey,
-                    ),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Property',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey,
                   ),
-                  const SizedBox(height: 8),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.apartment,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        request.propertyTitle,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (request.tenantName != null) ...[
+                  const SizedBox(height: 12),
                   Row(
                     children: [
-                      Icon(Icons.apartment, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      Icon(Icons.person_outline,
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant),
                       const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          request.propertyTitle,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                      Text(
+                        request.tenantName!,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                     ],
                   ),
-                  if (request.tenantName != null) ...[
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Icon(Icons.person_outline, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                        const SizedBox(width: 8),
-                        Text(
-                          request.tenantName!,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
                 ],
-              ),
+              ],
             ),
+          ),
           const SizedBox(height: 16),
 
           // Description
           AppCard(
             child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Description',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey,
-                    ),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Description',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    request.description,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  request.description,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
             ),
+          ),
           const SizedBox(height: 16),
 
           // Details
           AppCard(
             child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Details',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey,
-                    ),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Details',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey,
                   ),
-                  const SizedBox(height: 12),
-                  if (request.assignedTo != null)
-                    _DetailRow(
-                      icon: Icons.person_pin,
-                      label: 'Assigned To',
-                      value: request.assignedTo!,
-                    ),
-                  if (request.estimatedCost != null)
-                    _DetailRow(
-                      icon: Icons.attach_money,
-                      label: 'Estimated Cost',
-                      value: currencyFormat.format(request.estimatedCost),
-                    ),
-                  if (request.actualCost != null)
-                    _DetailRow(
-                      icon: Icons.receipt,
-                      label: 'Actual Cost',
-                      value: currencyFormat.format(request.actualCost),
-                    ),
-                  if (request.scheduledDate != null)
-                    _DetailRow(
-                      icon: Icons.event,
-                      label: 'Scheduled',
-                      value: dateFormat.format(request.scheduledDate!),
-                    ),
-                  if (request.completedDate != null)
-                    _DetailRow(
-                      icon: Icons.check_circle_outline,
-                      label: 'Completed',
-                      value: dateFormat.format(request.completedDate!),
-                    ),
-                  if (request.createdAt != null)
-                    _DetailRow(
-                      icon: Icons.access_time,
-                      label: 'Created',
-                      value: dateFormat.format(request.createdAt!),
-                    ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 12),
+                if (request.assignedTo != null)
+                  _DetailRow(
+                    icon: Icons.person_pin,
+                    label: 'Assigned To',
+                    value: request.assignedTo!,
+                  ),
+                if (request.estimatedCost != null)
+                  _DetailRow(
+                    icon: Icons.attach_money,
+                    label: 'Estimated Cost',
+                    value: currencyFormat.format(request.estimatedCost),
+                  ),
+                if (request.actualCost != null)
+                  _DetailRow(
+                    icon: Icons.receipt,
+                    label: 'Actual Cost',
+                    value: currencyFormat.format(request.actualCost),
+                  ),
+                if (request.scheduledDate != null)
+                  _DetailRow(
+                    icon: Icons.event,
+                    label: 'Scheduled',
+                    value: dateFormat.format(request.scheduledDate!),
+                  ),
+                if (request.completedDate != null)
+                  _DetailRow(
+                    icon: Icons.check_circle_outline,
+                    label: 'Completed',
+                    value: dateFormat.format(request.completedDate!),
+                  ),
+                if (request.createdAt != null)
+                  _DetailRow(
+                    icon: Icons.access_time,
+                    label: 'Created',
+                    value: dateFormat.format(request.createdAt!),
+                  ),
+              ],
             ),
+          ),
 
           if (request.notes != null && request.notes!.isNotEmpty) ...[
             const SizedBox(height: 16),
             AppCard(
               child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Notes',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      request.notes!,
-                      style: const TextStyle(fontSize: 15),
-                    ),
-                  ],
-                ),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Notes',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    request.notes!,
+                    style: const TextStyle(fontSize: 15),
+                  ),
+                ],
               ),
+            ),
           ],
 
           const SizedBox(height: 24),
@@ -343,8 +351,7 @@ class _DetailContent extends StatelessWidget {
                         icon: Icons.check,
                         color: Colors.green,
                         isLoading: isUpdating,
-                        onPressed: () =>
-                            unawaited(controller.markCompleted()),
+                        onPressed: () => unawaited(controller.markCompleted()),
                       ),
                       _ActionButton(
                         label: 'Cancel',
@@ -369,29 +376,31 @@ class _DetailContent extends StatelessWidget {
     BuildContext context,
     MaintenanceDetailController controller,
   ) {
-    unawaited(showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Cancel Request'),
-        content: const Text(
-          'Are you sure you want to cancel this maintenance request?',
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Cancel Request'),
+          content: const Text(
+            'Are you sure you want to cancel this maintenance request?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                unawaited(controller.markCancelled());
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Yes, Cancel'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('No'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              unawaited(controller.markCancelled());
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Yes, Cancel'),
-          ),
-        ],
       ),
-    ),);
+    );
   }
 }
 
@@ -417,16 +426,16 @@ class _DetailRow extends StatelessWidget {
           Text(
             '$label:',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
               textAlign: TextAlign.right,
             ),
           ),
@@ -446,9 +455,9 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: status.color.withOpacity(0.1),
+        color: status.color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: status.color.withOpacity(0.3)),
+        border: Border.all(color: status.color.withValues(alpha: 0.3)),
       ),
       child: Text(
         status.displayName,
@@ -472,7 +481,7 @@ class _PriorityBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: priority.color.withOpacity(0.1),
+        color: priority.color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(

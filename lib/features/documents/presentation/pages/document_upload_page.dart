@@ -42,12 +42,17 @@ class _DocumentUploadView extends StatelessWidget {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: file != null ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
+                  color: file != null
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.grey.shade300,
                   width: file != null ? 2 : 1,
                 ),
                 borderRadius: BorderRadius.circular(12),
                 color: file != null
-                    ? Theme.of(context).colorScheme.primary.withOpacity(0.05)
+                    ? Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: 0.05)
                     : null,
               ),
               child: Column(
@@ -128,33 +133,35 @@ class _DocumentUploadView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Obx(() => Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: DocumentType.values.map((type) {
-                  final isSelected = controller.documentType.value == type;
-                  return ChoiceChip(
-                    label: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          type.icon,
-                          size: 16,
-                          color: isSelected ? Colors.white : type.color,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(type.displayName),
-                      ],
-                    ),
-                    selected: isSelected,
-                    onSelected: (_) => controller.setDocumentType(type),
-                    selectedColor: Theme.of(context).colorScheme.primary,
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black,
-                    ),
-                  );
-                }).toList(),
-              ),),
+          Obx(
+            () => Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: DocumentType.values.map((type) {
+                final isSelected = controller.documentType.value == type;
+                return ChoiceChip(
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        type.icon,
+                        size: 16,
+                        color: isSelected ? Colors.white : type.color,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(type.displayName),
+                    ],
+                  ),
+                  selected: isSelected,
+                  onSelected: (_) => controller.setDocumentType(type),
+                  selectedColor: Theme.of(context).colorScheme.primary,
+                  labelStyle: TextStyle(
+                    color: isSelected ? Colors.white : Colors.black,
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
           const SizedBox(height: 24),
 
           // Property selector (if not preset)
@@ -182,48 +189,52 @@ class _DocumentUploadView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Obx(() => InkWell(
-                onTap: () => _selectExpiryDate(context, controller),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.event, color: Colors.grey),
-                      const SizedBox(width: 12),
-                      Text(
-                        controller.expiryDate.value != null
-                            ? dateFormat.format(controller.expiryDate.value!)
-                            : 'Select expiry date',
-                        style: TextStyle(
-                          color: controller.expiryDate.value != null
-                              ? Colors.black
-                              : Colors.grey,
-                        ),
-                      ),
-                      const Spacer(),
-                      if (controller.expiryDate.value != null)
-                        IconButton(
-                          icon: const Icon(Icons.clear, size: 20),
-                          onPressed: () => controller.setExpiryDate(null),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                        ),
-                    ],
-                  ),
+          Obx(
+            () => InkWell(
+              onTap: () => _selectExpiryDate(context, controller),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              ),),
+                child: Row(
+                  children: [
+                    const Icon(Icons.event, color: Colors.grey),
+                    const SizedBox(width: 12),
+                    Text(
+                      controller.expiryDate.value != null
+                          ? dateFormat.format(controller.expiryDate.value!)
+                          : 'Select expiry date',
+                      style: TextStyle(
+                        color: controller.expiryDate.value != null
+                            ? Colors.black
+                            : Colors.grey,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (controller.expiryDate.value != null)
+                      IconButton(
+                        icon: const Icon(Icons.clear, size: 20),
+                        onPressed: () => controller.setExpiryDate(null),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           const SizedBox(height: 32),
 
           // Upload button
-          Obx(() => AppButton(
-                label: 'Upload Document',
-                isLoading: controller.isUploading.value,
-                onPressed: controller.canSubmit ? controller.upload : null,
-              ),),
+          Obx(
+            () => AppButton(
+              label: 'Upload Document',
+              isLoading: controller.isUploading.value,
+              onPressed: controller.canSubmit ? controller.upload : null,
+            ),
+          ),
 
           const SizedBox(height: 24),
         ],
@@ -343,25 +354,27 @@ class _PropertySelectorState extends State<_PropertySelector> {
           ),
         ),
         const SizedBox(height: 8),
-        Obx(() => DropdownButtonFormField<int>(
-              initialValue: widget.controller.selectedPropertyId.value,
-              decoration: const InputDecoration(
-                hintText: 'Select a property',
-                prefixIcon: Icon(Icons.apartment),
+        Obx(
+          () => DropdownButtonFormField<int>(
+            initialValue: widget.controller.selectedPropertyId.value,
+            decoration: const InputDecoration(
+              hintText: 'Select a property',
+              prefixIcon: Icon(Icons.apartment),
+            ),
+            items: [
+              const DropdownMenuItem(
+                child: Text('No property'),
               ),
-              items: [
-                const DropdownMenuItem(
-                  child: Text('No property'),
-                ),
-                ..._properties.map((prop) {
-                  return DropdownMenuItem(
-                    value: prop.id,
-                    child: Text(prop.title),
-                  );
-                }),
-              ],
-              onChanged: (value) => widget.controller.setPropertyId(value),
-            ),),
+              ..._properties.map((prop) {
+                return DropdownMenuItem(
+                  value: prop.id,
+                  child: Text(prop.title),
+                );
+              }),
+            ],
+            onChanged: (value) => widget.controller.setPropertyId(value),
+          ),
+        ),
         const SizedBox(height: 16),
       ],
     );

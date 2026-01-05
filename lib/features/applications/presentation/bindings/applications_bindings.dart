@@ -19,7 +19,8 @@ class ApplicationsBindings extends Bindings {
     );
 
     Get.lazyPut<ApplicationsController>(
-      () => ApplicationsController(repository: Get.find<ApplicationsRepository>()),
+      () => ApplicationsController(
+          repository: Get.find<ApplicationsRepository>()),
     );
   }
 }

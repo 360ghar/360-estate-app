@@ -109,7 +109,8 @@ final class ApplicationForm {
   final DateTime? expiresAt;
 
   String get publicUrl => '/public/application/$slug';
-  bool get isExpired => expiresAt != null && expiresAt!.isBefore(DateTime.now());
+  bool get isExpired =>
+      expiresAt != null && expiresAt!.isBefore(DateTime.now());
 }
 
 final class ApplicationFormField {

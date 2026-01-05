@@ -111,12 +111,12 @@ class TenantCreateController extends GetxController {
             ? null
             : emergencyPhoneController.text.trim(),
         'government_id_type': governmentIdType.value,
-        'government_id_number':
-            governmentIdNumberController.text.trim().isEmpty
-                ? null
-                : governmentIdNumberController.text.trim(),
-        'notes':
-            notesController.text.trim().isEmpty ? null : notesController.text.trim(),
+        'government_id_number': governmentIdNumberController.text.trim().isEmpty
+            ? null
+            : governmentIdNumberController.text.trim(),
+        'notes': notesController.text.trim().isEmpty
+            ? null
+            : notesController.text.trim(),
         'status': 'active',
       };
 

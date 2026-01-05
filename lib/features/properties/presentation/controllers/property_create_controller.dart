@@ -62,12 +62,13 @@ class PropertyCreateController extends GetxController {
     try {
       final authController = Get.find<AuthController>();
       final role = authController.state.value.data?.role;
-      
+
       if (role == null || (role != UserRole.admin && role != UserRole.agent)) {
         // Delay to allow UI to build before navigating back
         await Future.delayed(const Duration(milliseconds: 100));
         Get.back();
-        Get.snackbar('Access Denied', 'Only Property Owners and Managers can create properties');
+        Get.snackbar('Access Denied',
+            'Only Property Owners and Managers can create properties');
       }
     } catch (e) {
       // AuthController might not be found in testing
@@ -116,13 +117,16 @@ class PropertyCreateController extends GetxController {
     bool isValid;
     switch (step) {
       case 0: // Basic
-        isValid = formKeyBasic.currentState?.validate() ?? validatedSteps.contains(0);
+        isValid =
+            formKeyBasic.currentState?.validate() ?? validatedSteps.contains(0);
         break;
       case 1: // Address
-        isValid = formKeyAddress.currentState?.validate() ?? validatedSteps.contains(1);
+        isValid = formKeyAddress.currentState?.validate() ??
+            validatedSteps.contains(1);
         break;
       case 2: // Specs
-        isValid = formKeySpecs.currentState?.validate() ?? validatedSteps.contains(2);
+        isValid =
+            formKeySpecs.currentState?.validate() ?? validatedSteps.contains(2);
         break;
       case 3: // Media - Optional
         isValid = true;
@@ -130,7 +134,7 @@ class PropertyCreateController extends GetxController {
       default:
         isValid = true;
     }
-    
+
     if (isValid) {
       validatedSteps.add(step);
     }
@@ -139,7 +143,9 @@ class PropertyCreateController extends GetxController {
 
   Future<void> submit() async {
     // Check if all required steps were validated during the wizard flow
-    if (!validatedSteps.contains(0) || !validatedSteps.contains(1) || !validatedSteps.contains(2)) {
+    if (!validatedSteps.contains(0) ||
+        !validatedSteps.contains(1) ||
+        !validatedSteps.contains(2)) {
       Get.snackbar('Error', 'Please complete all steps before submitting');
       return;
     }

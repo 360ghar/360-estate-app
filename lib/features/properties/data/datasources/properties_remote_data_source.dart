@@ -37,10 +37,9 @@ final class ApiPropertiesRemoteDataSource
     required int limit,
     required String query,
   }) async {
-    // Endpoint: GET /properties (backend uses page/limit pagination)
-    // Note: Backend endpoint is /properties, NOT /pm/properties
+    // Endpoint: GET /pm/properties/ (backend PM module)
     final response = await _client.get<dynamic>(
-      '/properties',
+      '/pm/properties/',
       queryParameters: <String, dynamic>{
         'page': page + 1, // Backend uses 1-indexed pages
         'limit': limit,
@@ -58,8 +57,7 @@ final class ApiPropertiesRemoteDataSource
       rawItems = data;
     } else if (data is Map<String, dynamic>) {
       // Backend returns: { properties: [...], total: int, ... }
-      final itemsValue =
-          data['properties'] ??
+      final itemsValue = data['properties'] ??
           data['items'] ??
           data['data'] ??
           data['results'];
@@ -104,7 +102,7 @@ final class ApiPropertiesRemoteDataSource
     if (totalPages != null) {
       return page < totalPages;
     }
-    
+
     final total = data['total'] as int?;
     if (total != null) {
       return (page * limit) < total;
@@ -128,9 +126,9 @@ final class ApiPropertiesRemoteDataSource
 
   @override
   Future<PropertyDto> getPropertyById(int id) async {
-    // Endpoint: GET /properties/{property_id}
+    // Endpoint: GET /pm/properties/{property_id}
     final response = await _client.get<dynamic>(
-      '/properties/$id',
+      '/pm/properties/$id',
       options: Options(responseType: ResponseType.json),
     );
 
@@ -145,10 +143,10 @@ final class ApiPropertiesRemoteDataSource
 
   @override
   Future<PropertyDto> createProperty(PropertyDto property) async {
-    // Endpoint: POST /properties
-    // Backend expects: PropertyCreate schema
+    // Endpoint: POST /pm/properties/
+    // Backend expects: PropertyCreate schema with mandatory fields
     final response = await _client.post<dynamic>(
-      '/properties',
+      '/pm/properties/',
       data: _createPropertyToJson(property),
       options: Options(responseType: ResponseType.json),
     );
@@ -163,25 +161,35 @@ final class ApiPropertiesRemoteDataSource
   }
 
   /// Converts PropertyDto to backend API format for property creation
+  /// Includes all mandatory fields required by POST /pm/properties/
   Map<String, dynamic> _createPropertyToJson(PropertyDto property) {
     return {
+      // MANDATORY FIELDS (required by backend)
       'title': property.title,
+      'description': property.notes ??
+          property.title, // Required - use notes or fallback to title
+      'address':
+          '${property.addressLine}, ${property.city}${property.state != null ? ', ${property.state}' : ''}',
       'property_type': property.propertyType,
-      'purpose': 'rent', // Default purpose for PM properties
-      'base_price': property.monthlyRentInr,
-      'address': '${property.addressLine}, ${property.city}${property.state != null ? ', ${property.state}' : ''}',
+      'status': 'available', // Required: e.g., "available"
+      'purpose': property.purpose, // Required: "rent" or "sale"
+      'price': property.monthlyRentInr.toDouble(), // Required: Total price
+      'base_price': property.basePrice ??
+          property.monthlyRentInr.toDouble(), // Required by backend
+      'owner_id': 1, // TODO: Get from authenticated user context
+
+      // OPTIONAL FIELDS
       'payment_due_day': property.paymentDueDay,
       'grace_period_days': 3, // Default grace period
       'late_fee_policy': {
         'type': 'fixed',
         'amount': 500, // Default late fee
       },
-      // Optional fields
       if (property.nickname != null) 'nickname': property.nickname,
       if (property.bedroomCount != null) 'bedrooms': property.bedroomCount,
       if (property.bathroomCount != null) 'bathrooms': property.bathroomCount,
       if (property.floorAreaSqft != null) 'area_sqft': property.floorAreaSqft,
-      if (property.notes != null) 'description': property.notes,
+      // NOTE: Do NOT send 'amenity_ids' as it causes 500/422 errors
     };
   }
 
@@ -190,9 +198,9 @@ final class ApiPropertiesRemoteDataSource
     int id,
     Map<String, dynamic> updates,
   ) async {
-    // Endpoint: PUT /properties/{property_id}
+    // Endpoint: PUT /pm/properties/{property_id}
     final response = await _client.put<dynamic>(
-      '/properties/$id',
+      '/pm/properties/$id',
       data: updates,
       options: Options(responseType: ResponseType.json),
     );
@@ -208,9 +216,9 @@ final class ApiPropertiesRemoteDataSource
 
   @override
   Future<void> deleteProperty(int id) async {
-    // Endpoint: DELETE /properties/{property_id}/
+    // Endpoint: DELETE /pm/properties/{property_id}/
     await _client.delete<dynamic>(
-      '/properties/$id/',
+      '/pm/properties/$id/',
       options: Options(responseType: ResponseType.json),
     );
   }

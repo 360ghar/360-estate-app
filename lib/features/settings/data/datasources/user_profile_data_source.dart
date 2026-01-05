@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/features/settings/domain/entities/user_profile.dart';
 
@@ -30,8 +31,8 @@ final class UserProfileDataSourceImpl implements UserProfileDataSource {
   @override
   Future<UserProfile> getProfile() async {
     try {
-      print('[PROFILE] Fetching user profile from /users/profile/');
-      
+      AppLogger.d(' Fetching user profile from /users/profile/');
+
       final response = await _apiClient.get<Map<String, dynamic>>(
         '/users/profile/',
       );
@@ -41,7 +42,7 @@ final class UserProfileDataSourceImpl implements UserProfileDataSource {
         throw Exception('No profile data received');
       }
 
-      print('[PROFILE] Received profile data: $data');
+      AppLogger.d(' Received profile data: $data');
 
       // Handle different response structures
       final profileData = data['data'] as Map<String, dynamic>? ??
@@ -51,12 +52,12 @@ final class UserProfileDataSourceImpl implements UserProfileDataSource {
 
       return UserProfile.fromJson(profileData);
     } on DioException catch (e) {
-      print('[PROFILE] Error fetching profile: ${e.message}');
-      print('[PROFILE] Status: ${e.response?.statusCode}');
-      print('[PROFILE] Response: ${e.response?.data}');
+      AppLogger.d(' Error fetching profile: ${e.message}');
+      AppLogger.d(' Status: ${e.response?.statusCode}');
+      AppLogger.d(' Response: ${e.response?.data}');
       rethrow;
     } catch (e) {
-      print('[PROFILE] Unexpected error: $e');
+      AppLogger.d(' Unexpected error: $e');
       rethrow;
     }
   }

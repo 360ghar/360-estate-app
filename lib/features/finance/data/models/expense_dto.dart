@@ -20,8 +20,8 @@ final class ExpenseDto {
     return ExpenseDto(
       id: json['id'] as int,
       propertyId: json['property_id'] as int? ?? json['propertyId'] as int?,
-      propertyTitle: json['property_title'] as String? ??
-          json['propertyTitle'] as String?,
+      propertyTitle:
+          json['property_title'] as String? ?? json['propertyTitle'] as String?,
       category: json['category'] as String? ?? 'other',
       amount: _parseDouble(json['amount']),
       expenseDate: DateTime.parse(
@@ -31,8 +31,8 @@ final class ExpenseDto {
       ),
       description: json['description'] as String? ?? '',
       vendor: json['vendor'] as String?,
-      receiptUrl: json['receipt_url'] as String? ??
-          json['receiptUrl'] as String?,
+      receiptUrl:
+          json['receipt_url'] as String? ?? json['receiptUrl'] as String?,
       notes: json['notes'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)

@@ -22,13 +22,13 @@ final class RentChargeDto {
     return RentChargeDto(
       id: json['id'] as int,
       leaseId: json['lease_id'] as int? ?? json['leaseId'] as int? ?? 0,
-      propertyId: json['property_id'] as int? ?? json['propertyId'] as int? ?? 0,
+      propertyId:
+          json['property_id'] as int? ?? json['propertyId'] as int? ?? 0,
       propertyTitle: json['property_title'] as String? ??
           json['propertyTitle'] as String? ??
           '',
-      tenantName: json['tenant_name'] as String? ??
-          json['tenantName'] as String? ??
-          '',
+      tenantName:
+          json['tenant_name'] as String? ?? json['tenantName'] as String? ?? '',
       periodStart: DateTime.parse(
         json['period_start'] as String? ??
             json['periodStart'] as String? ??

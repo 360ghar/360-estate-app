@@ -29,7 +29,8 @@ class LeasesPage extends StatelessWidget {
         body: const FeatureComingSoon(
           featureName: 'Lease Management',
           icon: Icons.description,
-          description: 'Create and manage lease agreements, track renewals, and handle terminations.',
+          description:
+              'Create and manage lease agreements, track renewals, and handle terminations.',
         ),
       );
     }
@@ -160,72 +161,74 @@ class _LeasesViewState extends State<_LeasesView> {
   }
 
   void _showFilterSheet(BuildContext context) {
-    unawaited(showModalBottomSheet<void>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    'Filter Leases',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: () {
-                      controller.clearFilters();
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Clear'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Status',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                children: [
-                  _FilterChip(
-                    label: 'Active',
-                    isSelected: controller.filterStatus.value == 'active',
-                    onTap: () {
-                      controller.setStatusFilter('active');
-                      Navigator.pop(context);
-                    },
-                  ),
-                  _FilterChip(
-                    label: 'Expired',
-                    isSelected: controller.filterStatus.value == 'expired',
-                    onTap: () {
-                      controller.setStatusFilter('expired');
-                      Navigator.pop(context);
-                    },
-                  ),
-                  _FilterChip(
-                    label: 'Terminated',
-                    isSelected: controller.filterStatus.value == 'terminated',
-                    onTap: () {
-                      controller.setStatusFilter('terminated');
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-            ],
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (context) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Filter Leases',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: () {
+                        controller.clearFilters();
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Clear'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Status',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    _FilterChip(
+                      label: 'Active',
+                      isSelected: controller.filterStatus.value == 'active',
+                      onTap: () {
+                        controller.setStatusFilter('active');
+                        Navigator.pop(context);
+                      },
+                    ),
+                    _FilterChip(
+                      label: 'Expired',
+                      isSelected: controller.filterStatus.value == 'expired',
+                      onTap: () {
+                        controller.setStatusFilter('expired');
+                        Navigator.pop(context);
+                      },
+                    ),
+                    _FilterChip(
+                      label: 'Terminated',
+                      isSelected: controller.filterStatus.value == 'terminated',
+                      onTap: () {
+                        controller.setStatusFilter('terminated');
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),
-    ),);
+    );
   }
 }
 
@@ -246,7 +249,8 @@ class _FilterChip extends StatelessWidget {
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => onTap(),
-      selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+      selectedColor:
+          Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
       checkmarkColor: Theme.of(context).colorScheme.primary,
     );
   }
@@ -319,16 +323,20 @@ class _LeaseCard extends StatelessWidget {
                       children: [
                         Text(
                           '${dateFormat.format(lease.startDate)} - ${dateFormat.format(lease.endDate)}',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(
                                 color: Theme.of(context).colorScheme.outline,
                               ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${currencyFormat.format(lease.monthlyRent)}/month',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                       ],
                     ),
@@ -340,7 +348,7 @@ class _LeaseCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.amber.withOpacity(0.1),
+                        color: Colors.amber.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(

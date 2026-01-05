@@ -109,7 +109,9 @@ class ExpenseFormController extends GetxController {
       Get.back<Expense>(result: result);
       Get.snackbar(
         'Success',
-        isEditing ? 'Expense updated successfully' : 'Expense created successfully',
+        isEditing
+            ? 'Expense updated successfully'
+            : 'Expense created successfully',
         snackPosition: SnackPosition.BOTTOM,
       );
     } on Failure catch (f) {

@@ -16,22 +16,21 @@ final class ApiClient {
     required bool enableLogging,
     DioFailureMapper? failureMapper,
     Dio? dio,
-  }) : _networkInfo = networkInfo,
-       _failureMapper = failureMapper ?? const DioFailureMapper(),
-       _dio =
-           dio ??
-           Dio(
-             BaseOptions(
-               baseUrl: baseUrl,
-               connectTimeout: const Duration(seconds: 15),
-               sendTimeout: const Duration(seconds: 30),
-               receiveTimeout: const Duration(seconds: 30),
-               validateStatus: (status) =>
-                   status != null && status >= 200 && status < 400,
-               followRedirects: true,
-               headers: const {'Accept': 'application/json'},
-             ),
-           ) {
+  })  : _networkInfo = networkInfo,
+        _failureMapper = failureMapper ?? const DioFailureMapper(),
+        _dio = dio ??
+            Dio(
+              BaseOptions(
+                baseUrl: baseUrl,
+                connectTimeout: const Duration(seconds: 15),
+                sendTimeout: const Duration(seconds: 30),
+                receiveTimeout: const Duration(seconds: 30),
+                validateStatus: (status) =>
+                    status != null && status >= 200 && status < 400,
+                followRedirects: true,
+                headers: const {'Accept': 'application/json'},
+              ),
+            ) {
     _dio.interceptors.addAll([
       RequestIdInterceptor(),
       AuthInterceptor(dio: _dio, tokenProvider: tokenProvider),

@@ -121,9 +121,7 @@ class _InspectionDetailView extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Status Actions
-        if (inspection.canStart ||
-            inspection.canComplete ||
-            inspection.canSign)
+        if (inspection.canStart || inspection.canComplete || inspection.canSign)
           _ActionCard(inspection: inspection, controller: controller),
 
         // Property Info
@@ -220,39 +218,43 @@ class _InspectionDetailView extends StatelessWidget {
   }
 
   void _editInspection(BuildContext context, Inspection inspection) {
-    unawaited(Get.toNamed<Inspection>(
-      Routes.inspectionCreate,
-      arguments: {'inspection': inspection},
-    ),);
+    unawaited(
+      Get.toNamed<Inspection>(
+        Routes.inspectionCreate,
+        arguments: {'inspection': inspection},
+      ),
+    );
   }
 
   void _confirmCancel(
     BuildContext context,
     InspectionDetailController controller,
   ) {
-    unawaited(showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Cancel Inspection'),
-        content: const Text(
-          'Are you sure you want to cancel this inspection?',
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Cancel Inspection'),
+          content: const Text(
+            'Are you sure you want to cancel this inspection?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                unawaited(controller.cancelInspection());
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Yes, Cancel'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('No'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              unawaited(controller.cancelInspection());
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Yes, Cancel'),
-          ),
-        ],
       ),
-    ),);
+    );
   }
 }
 
@@ -273,7 +275,7 @@ class _HeaderCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: inspection.inspectionType.color.withOpacity(0.1),
+              color: inspection.inspectionType.color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -301,7 +303,7 @@ class _HeaderCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: inspection.status.color.withOpacity(0.1),
+                    color: inspection.status.color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Row(
@@ -344,50 +346,50 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => AppCard(
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (inspection.canStart)
-                  AppButton(
-                    label: 'Start Inspection',
-                    leading: const Icon(Icons.play_circle, size: 18),
-                    isLoading: controller.isActionLoading.value,
-                    onPressed: () => unawaited(controller.startInspection()),
-                  ),
-                if (inspection.canComplete)
-                  AppButton(
-                    label: 'Complete Inspection',
-                    leading: const Icon(Icons.check_circle, size: 18),
-                    isLoading: controller.isActionLoading.value,
-                    onPressed: () =>
-                        unawaited(controller.completeInspection()),
-                  ),
-                if (inspection.canSign && !inspection.isFullySigned) ...[
-                  if (!inspection.hasTenantSignature)
-                    AppButton(
-                      label: 'Sign as Tenant',
-                      leading: const Icon(Icons.draw, size: 18),
-                      isLoading: controller.isActionLoading.value,
-                      onPressed: () =>
-                          _showSignatureDialog(context, controller, 'tenant'),
-                    ),
-                  if (inspection.hasTenantSignature &&
-                      !inspection.hasLandlordSignature) ...[
-                    const SizedBox(height: 8),
-                    AppButton(
-                      label: 'Sign as Landlord',
-                      leading: const Icon(Icons.draw, size: 18),
-                      isLoading: controller.isActionLoading.value,
-                      onPressed: () =>
-                          _showSignatureDialog(context, controller, 'landlord'),
-                    ),
-                  ],
-                ],
+    return Obx(
+      () => AppCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (inspection.canStart)
+              AppButton(
+                label: 'Start Inspection',
+                leading: const Icon(Icons.play_circle, size: 18),
+                isLoading: controller.isActionLoading.value,
+                onPressed: () => unawaited(controller.startInspection()),
+              ),
+            if (inspection.canComplete)
+              AppButton(
+                label: 'Complete Inspection',
+                leading: const Icon(Icons.check_circle, size: 18),
+                isLoading: controller.isActionLoading.value,
+                onPressed: () => unawaited(controller.completeInspection()),
+              ),
+            if (inspection.canSign && !inspection.isFullySigned) ...[
+              if (!inspection.hasTenantSignature)
+                AppButton(
+                  label: 'Sign as Tenant',
+                  leading: const Icon(Icons.draw, size: 18),
+                  isLoading: controller.isActionLoading.value,
+                  onPressed: () =>
+                      _showSignatureDialog(context, controller, 'tenant'),
+                ),
+              if (inspection.hasTenantSignature &&
+                  !inspection.hasLandlordSignature) ...[
+                const SizedBox(height: 8),
+                AppButton(
+                  label: 'Sign as Landlord',
+                  leading: const Icon(Icons.draw, size: 18),
+                  isLoading: controller.isActionLoading.value,
+                  onPressed: () =>
+                      _showSignatureDialog(context, controller, 'landlord'),
+                ),
               ],
-            ),
-          ),
-      );
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -396,32 +398,32 @@ void _showSignatureDialog(
   InspectionDetailController controller,
   String type,
 ) {
-    unawaited(showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Sign as ${type == 'tenant' ? 'Tenant' : 'Landlord'}'),
-        content: const Text(
-          'By signing, you confirm that the inspection details are accurate.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              unawaited(controller.signInspection(
-                signatureType: type,
-                signature: 'signed_${DateTime.now().millisecondsSinceEpoch}',
-              ));
-            },
-            child: const Text('Confirm & Sign'),
-          ),
-        ],
+  unawaited(showDialog<void>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Sign as ${type == 'tenant' ? 'Tenant' : 'Landlord'}'),
+      content: const Text(
+        'By signing, you confirm that the inspection details are accurate.',
       ),
-    ));
-  }
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+            unawaited(controller.signInspection(
+              signatureType: type,
+              signature: 'signed_${DateTime.now().millisecondsSinceEpoch}',
+            ));
+          },
+          child: const Text('Confirm & Sign'),
+        ),
+      ],
+    ),
+  ));
+}
 
 class _InfoCard extends StatelessWidget {
   const _InfoCard({
@@ -441,8 +443,8 @@ class _InfoCard extends StatelessWidget {
           Text(
             title,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 12),
           ...children,
@@ -469,23 +471,24 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          Icon(icon,
+              size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(width: 8),
           SizedBox(
             width: 80,
             child: Text(
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
           ),
           Expanded(
             child: Text(
               value,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ),
         ],
@@ -508,8 +511,8 @@ class _SignaturesCard extends StatelessWidget {
           Text(
             'Signatures',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 12),
           _SignatureRow(
@@ -653,7 +656,7 @@ class _InspectionItemRow extends StatelessWidget {
               vertical: 4,
             ),
             decoration: BoxDecoration(
-              color: item.conditionColor.withOpacity(0.1),
+              color: item.conditionColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(

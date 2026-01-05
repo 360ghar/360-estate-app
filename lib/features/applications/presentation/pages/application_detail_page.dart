@@ -240,9 +240,8 @@ class _ApplicationDetailView extends StatelessWidget {
             title: 'Decision',
             children: [
               _InfoRow(
-                icon: application.isApproved
-                    ? Icons.check_circle
-                    : Icons.cancel,
+                icon:
+                    application.isApproved ? Icons.check_circle : Icons.cancel,
                 label: 'Status',
                 value: application.status.displayName,
               ),
@@ -285,7 +284,7 @@ class _HeaderCard extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 30,
-            backgroundColor: application.status.color.withOpacity(0.1),
+            backgroundColor: application.status.color.withValues(alpha: 0.1),
             child: Text(
               application.applicantName.isNotEmpty
                   ? application.applicantName[0].toUpperCase()
@@ -316,7 +315,7 @@ class _HeaderCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: application.status.color.withOpacity(0.1),
+                    color: application.status.color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Row(
@@ -359,47 +358,48 @@ class _ActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => AppCard(
-          child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (application.canReview)
-                  AppButton(
-                    label: 'Start Review',
-                    leading: const Icon(Icons.rate_review, size: 18),
-                    isLoading: controller.isActionLoading.value,
-                    onPressed: () => unawaited(controller.startReview()),
+    return Obx(
+      () => AppCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (application.canReview)
+              AppButton(
+                label: 'Start Review',
+                leading: const Icon(Icons.rate_review, size: 18),
+                isLoading: controller.isActionLoading.value,
+                onPressed: () => unawaited(controller.startReview()),
+              ),
+            if (application.canDecide) ...[
+              Row(
+                children: [
+                  Expanded(
+                    child: AppButton(
+                      label: 'Approve',
+                      leading: const Icon(Icons.check, size: 18),
+                      isLoading: controller.isActionLoading.value,
+                      onPressed: () =>
+                          _showDecisionDialog(context, isApprove: true),
+                    ),
                   ),
-                if (application.canDecide) ...[
-                  Row(
-                    children: [
-                      Expanded(
-                        child: AppButton(
-                          label: 'Approve',
-                          leading: const Icon(Icons.check, size: 18),
-                          isLoading: controller.isActionLoading.value,
-                          onPressed: () =>
-                              _showDecisionDialog(context, isApprove: true),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: AppButton(
-                          label: 'Reject',
-                          variant: AppButtonVariant.destructive,
-                          leading: const Icon(Icons.close, size: 18),
-                          isLoading: controller.isActionLoading.value,
-                          onPressed: () =>
-                              _showDecisionDialog(context, isApprove: false),
-                        ),
-                      ),
-                    ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: AppButton(
+                      label: 'Reject',
+                      variant: AppButtonVariant.destructive,
+                      leading: const Icon(Icons.close, size: 18),
+                      isLoading: controller.isActionLoading.value,
+                      onPressed: () =>
+                          _showDecisionDialog(context, isApprove: false),
+                    ),
                   ),
                 ],
-              ],
-            ),
-          ),
-      );
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 
   void _showDecisionDialog(BuildContext context, {required bool isApprove}) {
@@ -479,8 +479,8 @@ class _InfoCard extends StatelessWidget {
           Text(
             title,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 12),
           ...children,
@@ -508,23 +508,24 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          Icon(icon,
+              size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(width: 8),
           SizedBox(
             width: 100,
             child: Text(
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
           ),
           Expanded(
             child: Text(
               value,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ),
         ],
@@ -551,41 +552,45 @@ class _ReferencesCard extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: 12),
-          ...references.map((ref) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      ref.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                      ),
+          ...references.map(
+            (ref) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    ref.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
                     ),
-                    Text(
-                      ref.relationship,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                    ),
-                    Row(
-                      children: [
-                        Icon(Icons.phone,
-                            size: 14,
-                            color: Theme.of(context).colorScheme.primary,),
-                        const SizedBox(width: 4),
-                        Text(
-                          ref.phone,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                  ),
+                  Text(
+                    ref.relationship,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),),
+                  ),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.phone,
+                        size: 14,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        ref.phone,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

@@ -65,30 +65,38 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
         children: [
           // Date range indicator for applicable reports
           if (reportType.requiresDateRange)
-            Obx(() => Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.calendar_today,
-                          size: 16, color: Colors.grey,),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${dateFormat.format(controller.startDate.value!)} - ${dateFormat.format(controller.endDate.value!)}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[700],
-                        ),
+            Obx(
+              () => Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: 0.05),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.calendar_today,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${dateFormat.format(controller.startDate.value!)} - ${dateFormat.format(controller.endDate.value!)}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[700],
                       ),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: () => _showDateRangePicker(context),
-                        child: const Text('Change'),
-                      ),
-                    ],
-                  ),
-                ),),
+                    ),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: () => _showDateRangePicker(context),
+                      child: const Text('Change'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           // Report content
           Expanded(child: _buildReportContent()),
         ],
@@ -100,27 +108,34 @@ class _ReportDetailPageState extends State<ReportDetailPage> {
     switch (reportType) {
       case ReportType.rentRoll:
         return _RentRollReportView(
-            controller: controller, currencyFormat: currencyFormat,);
+          controller: controller,
+          currencyFormat: currencyFormat,
+        );
       case ReportType.income:
         return _IncomeReportView(
-            controller: controller,
-            currencyFormat: currencyFormat,
-            monthFormat: monthFormat,);
+          controller: controller,
+          currencyFormat: currencyFormat,
+          monthFormat: monthFormat,
+        );
       case ReportType.expenses:
         return _ExpensesReportView(
-            controller: controller,
-            currencyFormat: currencyFormat,
-            monthFormat: monthFormat,);
+          controller: controller,
+          currencyFormat: currencyFormat,
+          monthFormat: monthFormat,
+        );
       case ReportType.profitAndLoss:
         return _PnLReportView(
-            controller: controller,
-            currencyFormat: currencyFormat,
-            monthFormat: monthFormat,);
+          controller: controller,
+          currencyFormat: currencyFormat,
+          monthFormat: monthFormat,
+        );
       case ReportType.occupancy:
         return _OccupancyReportView(controller: controller);
       case ReportType.maintenance:
         return _MaintenanceReportView(
-            controller: controller, currencyFormat: currencyFormat,);
+          controller: controller,
+          currencyFormat: currencyFormat,
+        );
     }
   }
 
@@ -229,10 +244,12 @@ class _RentRollReportView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              ...report.items.map((item) => _RentRollItemCard(
-                    item: item,
-                    currencyFormat: currencyFormat,
-                  ),),
+              ...report.items.map(
+                (item) => _RentRollItemCard(
+                  item: item,
+                  currencyFormat: currencyFormat,
+                ),
+              ),
             ],
           );
       }
@@ -275,57 +292,57 @@ class _RentRollItemCard extends StatelessWidget {
     return AppCard(
       margin: const EdgeInsets.only(bottom: 8),
       child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(statusIcon, color: statusColor, size: 20),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.propertyTitle,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  if (item.tenantName != null)
-                    Text(
-                      item.tenantName!,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[600],
-                      ),
-                    )
-                  else
-                    Text(
-                      'Vacant',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[500],
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(statusIcon, color: statusColor, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  currencyFormat.format(item.monthlyRent),
+                  item.propertyTitle,
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
-                if (item.amountDue > 0)
+                if (item.tenantName != null)
                   Text(
-                    'Due: ${currencyFormat.format(item.amountDue)}',
+                    item.tenantName!,
                     style: TextStyle(
-                      fontSize: 12,
-                      color: Theme.of(context).colorScheme.error,
+                      fontSize: 13,
+                      color: Colors.grey[600],
+                    ),
+                  )
+                else
+                  Text(
+                    'Vacant',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[500],
+                      fontStyle: FontStyle.italic,
                     ),
                   ),
               ],
             ),
-          ],
-        ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                currencyFormat.format(item.monthlyRent),
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              if (item.amountDue > 0)
+                Text(
+                  'Due: ${currencyFormat.format(item.amountDue)}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -380,13 +397,15 @@ class _IncomeReportView extends StatelessWidget {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              ...report.byCategory.map((cat) => _CategoryBar(
-                    label: cat.category,
-                    amount: cat.amount,
-                    percentage: cat.percentage,
-                    currencyFormat: currencyFormat,
-                    color: Colors.green,
-                  ),),
+              ...report.byCategory.map(
+                (cat) => _CategoryBar(
+                  label: cat.category,
+                  amount: cat.amount,
+                  percentage: cat.percentage,
+                  currencyFormat: currencyFormat,
+                  color: Colors.green,
+                ),
+              ),
               const SizedBox(height: 24),
 
               // By Month
@@ -395,10 +414,12 @@ class _IncomeReportView extends StatelessWidget {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              ...report.byMonth.map((month) => _MonthRow(
-                    month: monthFormat.format(month.month),
-                    amount: currencyFormat.format(month.amount),
-                  ),),
+              ...report.byMonth.map(
+                (month) => _MonthRow(
+                  month: monthFormat.format(month.month),
+                  amount: currencyFormat.format(month.amount),
+                ),
+              ),
             ],
           );
       }
@@ -448,30 +469,32 @@ class _ExpensesReportView extends StatelessWidget {
                 color: Colors.red,
               ),
               const SizedBox(height: 24),
-
               const Text(
                 'By Category',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              ...report.byCategory.map((cat) => _CategoryBar(
-                    label: cat.category,
-                    amount: cat.amount,
-                    percentage: cat.percentage,
-                    currencyFormat: currencyFormat,
-                    color: Colors.red,
-                  ),),
+              ...report.byCategory.map(
+                (cat) => _CategoryBar(
+                  label: cat.category,
+                  amount: cat.amount,
+                  percentage: cat.percentage,
+                  currencyFormat: currencyFormat,
+                  color: Colors.red,
+                ),
+              ),
               const SizedBox(height: 24),
-
               const Text(
                 'By Month',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              ...report.byMonth.map((month) => _MonthRow(
-                    month: monthFormat.format(month.month),
-                    amount: currencyFormat.format(month.amount),
-                  ),),
+              ...report.byMonth.map(
+                (month) => _MonthRow(
+                  month: monthFormat.format(month.month),
+                  amount: currencyFormat.format(month.amount),
+                ),
+              ),
             ],
           );
       }
@@ -543,8 +566,7 @@ class _PnLReportView extends StatelessWidget {
                       label: 'Net Income',
                       value: currencyFormat.format(report.netIncome),
                       icon: Icons.account_balance,
-                      color:
-                          report.netIncome >= 0 ? Colors.green : Colors.red,
+                      color: report.netIncome >= 0 ? Colors.green : Colors.red,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -559,7 +581,6 @@ class _PnLReportView extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 24),
-
               const Text(
                 'Monthly Breakdown',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -572,9 +593,10 @@ class _PnLReportView extends StatelessWidget {
                       children: [
                         Text(
                           monthFormat.format(month.month),
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         const SizedBox(height: 8),
                         Row(
@@ -582,17 +604,23 @@ class _PnLReportView extends StatelessWidget {
                             Expanded(
                               child: Text(
                                 'Income: ${currencyFormat.format(month.income)}',
-                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  color: Colors.green,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: Colors.green,
+                                    ),
                               ),
                             ),
                             Expanded(
                               child: Text(
                                 'Expenses: ${currencyFormat.format(month.expenses)}',
-                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  color: Colors.red,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(
+                                      color: Colors.red,
+                                    ),
                               ),
                             ),
                           ],
@@ -691,7 +719,6 @@ class _OccupancyReportView extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 24),
-
               const Text(
                 'By Property Type',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -728,7 +755,7 @@ class _OccupancyReportView extends StatelessWidget {
                           ),
                           decoration: BoxDecoration(
                             color: _getOccupancyColor(type.occupancyRate)
-                                .withOpacity(0.1),
+                                .withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Text(
@@ -743,7 +770,6 @@ class _OccupancyReportView extends StatelessWidget {
                     ),
                   )),
               const SizedBox(height: 24),
-
               const Text(
                 'Properties',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -777,7 +803,7 @@ class _OccupancyReportView extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: (item.isOccupied ? Colors.green : Colors.grey)
-                              .withOpacity(0.1),
+                              .withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -879,60 +905,65 @@ class _MaintenanceReportView extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 24),
-
               const Text(
                 'By Priority',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              ...report.byPriority.map((p) => _CategoryBar(
-                    label: p.priority,
-                    amount: p.count.toDouble(),
-                    percentage: p.percentage,
-                    currencyFormat: NumberFormat.decimalPattern(),
-                    color: _getPriorityColor(p.priority),
-                    showAsCount: true,
-                  ),),
+              ...report.byPriority.map(
+                (p) => _CategoryBar(
+                  label: p.priority,
+                  amount: p.count.toDouble(),
+                  percentage: p.percentage,
+                  currencyFormat: NumberFormat.decimalPattern(),
+                  color: _getPriorityColor(p.priority),
+                  showAsCount: true,
+                ),
+              ),
               const SizedBox(height: 24),
-
               const Text(
                 'By Category',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              ...report.byCategory.map((cat) => AppCard(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                cat.category,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w600,),
+              ...report.byCategory.map(
+                (cat) => AppCard(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              cat.category,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
                               ),
-                              Text(
-                                '${cat.count} requests',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
+                            ),
+                            Text(
+                              '${cat.count} requests',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          currencyFormat.format(cat.totalCost),
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                      ),
+                      Text(
+                        currencyFormat.format(cat.totalCost),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
-                      ],
-                    ),
-                  ),),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           );
       }

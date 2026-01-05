@@ -176,11 +176,8 @@ final class SupabaseAuthDataSourceImpl implements SupabaseAuthDataSource {
     if (client == null) return null;
 
     try {
-      final rows = await client
-          .from('users')
-          .select('id')
-          .eq('phone', phone)
-          .limit(1);
+      final rows =
+          await client.from('users').select('id').eq('phone', phone).limit(1);
       return (rows as List).isNotEmpty;
     } on PostgrestException {
       return null;

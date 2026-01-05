@@ -21,12 +21,12 @@ class AuthController extends GetxController {
     required SignOutUseCase signOut,
     required HandleAuthRedirectUseCase handleAuthRedirect,
     required DeepLinkService deepLinks,
-  }) : _config = config,
-       _getCurrentUser = getCurrentUser,
-       _observeAuthState = observeAuthState,
-       _signOut = signOut,
-       _handleAuthRedirect = handleAuthRedirect,
-       _deepLinks = deepLinks;
+  })  : _config = config,
+        _getCurrentUser = getCurrentUser,
+        _observeAuthState = observeAuthState,
+        _signOut = signOut,
+        _handleAuthRedirect = handleAuthRedirect,
+        _deepLinks = deepLinks;
 
   final AppConfig _config;
   final GetCurrentUserUseCase _getCurrentUser;

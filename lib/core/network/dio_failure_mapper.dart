@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:estate_app/core/errors/api_error.dart';
 import 'package:estate_app/core/errors/failure.dart';
+import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/network/interceptors/request_id_interceptor.dart';
 
 final class DioFailureMapper {
@@ -36,6 +37,9 @@ final class DioFailureMapper {
 
     if (statusCode == 400 || statusCode == 422) {
       final fields = _tryExtractFieldErrors(exception.response?.data);
+      AppLogger.w(
+        'Validation Error ($statusCode) on ${exception.requestOptions.path}: $fields',
+      );
       return ValidationFailure(
         _tryExtractMessage(exception.response?.data) ?? 'Invalid request',
         fields: fields,
@@ -73,6 +77,28 @@ final class DioFailureMapper {
 
   static Map<String, String> _tryExtractFieldErrors(Object? data) {
     if (data is! Map) return const {};
+
+    // Handle FastAPI's 'detail' array format for 422 errors
+    // Format: { "detail": [{ "loc": ["body", "field_name"], "msg": "error message", "type": "error_type" }] }
+    final detail = data['detail'];
+    if (detail is List) {
+      final Map<String, String> result = {};
+      for (final item in detail) {
+        if (item is Map) {
+          final loc = item['loc'];
+          final msg = item['msg'];
+          if (loc is List && loc.isNotEmpty) {
+            // Use the last element of 'loc' as the field name (e.g., "field_name" from ["body", "field_name"])
+            final fieldName = loc.last.toString();
+            result[fieldName] = msg?.toString() ?? 'Invalid value';
+            AppLogger.d('Field validation error - "$fieldName": $msg');
+          }
+        }
+      }
+      if (result.isNotEmpty) return result;
+    }
+
+    // Fallback: Handle standard 'errors' object format
     final errors = data['errors'];
     if (errors is Map) {
       return errors.map(

@@ -99,49 +99,51 @@ class _InspectionsView extends GetView<InspectionsController> {
   }
 
   void _showFilterSheet(BuildContext context) {
-    unawaited(showModalBottomSheet<void>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Filter by Status',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                children: [
-                  ChoiceChip(
-                    label: const Text('All'),
-                    selected: controller.filterStatus.value == null,
-                    onSelected: (_) {
-                      controller.setStatusFilter(null);
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ...InspectionStatus.values.map((status) {
-                    return ChoiceChip(
-                      label: Text(status.displayName),
-                      selected: controller.filterStatus.value == status,
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (context) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Filter by Status',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    ChoiceChip(
+                      label: const Text('All'),
+                      selected: controller.filterStatus.value == null,
                       onSelected: (_) {
-                        controller.setStatusFilter(status);
+                        controller.setStatusFilter(null);
                         Navigator.pop(context);
                       },
-                    );
-                  }),
-                ],
-              ),
-              const SizedBox(height: 24),
-            ],
+                    ),
+                    ...InspectionStatus.values.map((status) {
+                      return ChoiceChip(
+                        label: Text(status.displayName),
+                        selected: controller.filterStatus.value == status,
+                        onSelected: (_) {
+                          controller.setStatusFilter(status);
+                          Navigator.pop(context);
+                        },
+                      );
+                    }),
+                  ],
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),
-    ),);
+    );
   }
 }
 
@@ -241,7 +243,10 @@ class _StatusBadge extends StatelessWidget {
       InspectionStatus.completed => (Colors.green[700]!, Colors.green[50]!),
       InspectionStatus.cancelled => (Colors.red[700]!, Colors.red[50]!),
       InspectionStatus.inProgress => (Colors.orange[700]!, Colors.orange[50]!),
-      InspectionStatus.pendingReview => (Colors.purple[700]!, Colors.purple[50]!),
+      InspectionStatus.pendingReview => (
+          Colors.purple[700]!,
+          Colors.purple[50]!
+        ),
     };
 
     return Container(

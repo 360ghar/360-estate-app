@@ -45,7 +45,6 @@ final class AppConfig {
     required this.supabaseAnonKey,
     required this.enableCrashReporting,
     required this.enableDebugLogs,
-    required this.useMockApi,
     required this.featureFlags,
   });
 
@@ -55,7 +54,6 @@ final class AppConfig {
   final String supabaseAnonKey;
   final bool enableCrashReporting;
   final bool enableDebugLogs;
-  final bool useMockApi;
   final FeatureFlags featureFlags;
 
   bool get isProd => environment == AppEnvironment.prod;
@@ -102,8 +100,7 @@ final class AppConfig {
     const enableCrashReportingDefine = String.fromEnvironment(
       'ENABLE_CRASH_REPORTING',
     );
-    final enableCrashReporting =
-        _parseBool(
+    final enableCrashReporting = _parseBool(
           enableCrashReportingDefine.trim().isNotEmpty
               ? enableCrashReportingDefine
               : dotenv.env['ENABLE_CRASH_REPORTING'],
@@ -113,26 +110,12 @@ final class AppConfig {
     const enableDebugLogsDefine = String.fromEnvironment('ENABLE_DEBUG_LOGS');
     final enableDebugLogsDefault =
         !kReleaseMode && environment != AppEnvironment.prod;
-    final enableDebugLogs =
-        _parseBool(
+    final enableDebugLogs = _parseBool(
           enableDebugLogsDefine.trim().isNotEmpty
               ? enableDebugLogsDefine
               : dotenv.env['ENABLE_DEBUG_LOGS'],
         ) ??
         enableDebugLogsDefault;
-
-    // USE_MOCK_API: Optional fallback for isolated dev/test scenarios.
-    // DISABLED BY DEFAULT - Real API is the primary data source.
-    // Set explicitly to 'true' in .env only for local testing without backend.
-    // Must NEVER be enabled in production builds.
-    const useMockApiDefine = String.fromEnvironment('USE_MOCK_API');
-    final useMockApi =
-        _parseBool(
-          useMockApiDefine.trim().isNotEmpty
-              ? useMockApiDefine
-              : dotenv.env['USE_MOCK_API'],
-        ) ??
-        false; // DEFAULT: API-first, mock is opt-in only
 
     final featureFlags = FeatureFlags.fromEnvironment(environment);
 
@@ -143,7 +126,6 @@ final class AppConfig {
       supabaseAnonKey: supabaseAnonKey,
       enableCrashReporting: enableCrashReporting,
       enableDebugLogs: enableDebugLogs,
-      useMockApi: useMockApi,
       featureFlags: featureFlags,
     );
   }

@@ -20,9 +20,9 @@ class PropertyCreatePage extends StatelessWidget {
         return Stepper(
           currentStep: controller.currentStep.value,
           onStepTapped: (index) {
-             if (controller.validateStep(controller.currentStep.value)) {
-               controller.currentStep.value = index;
-             }
+            if (controller.validateStep(controller.currentStep.value)) {
+              controller.currentStep.value = index;
+            }
           },
           onStepContinue: () {
             if (controller.currentStep.value < 3) {
@@ -44,12 +44,15 @@ class PropertyCreatePage extends StatelessWidget {
               padding: const EdgeInsets.only(top: 32),
               child: Row(
                 children: [
-                   Expanded(
-                     child: FilledButton(
-                      onPressed: controller.isLoading.value ? null : details.onStepContinue,
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: controller.isLoading.value
+                          ? null
+                          : details.onStepContinue,
                       style: FilledButton.styleFrom(
                         minimumSize: const Size.fromHeight(56),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       child: controller.isLoading.value
                           ? const SizedBox(
@@ -61,21 +64,24 @@ class PropertyCreatePage extends StatelessWidget {
                               ),
                             )
                           : Text(isLastStep ? 'SUBMIT PROPERTY' : 'CONTINUE'),
-                     ),
-                   ),
-                   if (controller.currentStep.value > 0) ...[
-                     const SizedBox(width: 12),
-                     Expanded(
-                       child: OutlinedButton(
-                        onPressed: controller.isLoading.value ? null : details.onStepCancel,
+                    ),
+                  ),
+                  if (controller.currentStep.value > 0) ...[
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: controller.isLoading.value
+                            ? null
+                            : details.onStepCancel,
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size.fromHeight(56),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
                         child: const Text('BACK'),
                       ),
-                     ),
-                   ],
+                    ),
+                  ],
                 ],
               ),
             );
@@ -99,7 +105,7 @@ class PropertyCreatePage extends StatelessWidget {
               isActive: controller.currentStep.value >= 2,
               content: _SpecsForm(controller: controller),
             ),
-             Step(
+            Step(
               title: const Text('Media'),
               state: _getStepState(3, controller.currentStep.value),
               isActive: controller.currentStep.value >= 3,
@@ -181,7 +187,8 @@ class _BasicInfoForm extends StatelessWidget {
               border: OutlineInputBorder(),
             ),
             items: const [
-              DropdownMenuItem(value: 'residential', child: Text('Residential')),
+              DropdownMenuItem(
+                  value: 'residential', child: Text('Residential')),
               DropdownMenuItem(value: 'commercial', child: Text('Commercial')),
             ],
             onChanged: (String? value) {
@@ -303,7 +310,7 @@ class _SpecsForm extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-           Row(
+          Row(
             children: [
               Expanded(
                 child: TextFormField(
@@ -331,7 +338,7 @@ class _SpecsForm extends StatelessWidget {
           const SizedBox(height: 24),
           const Divider(),
           const SizedBox(height: 16),
-           Row(
+          Row(
             children: [
               Expanded(
                 child: TextFormField(
@@ -371,10 +378,12 @@ class _SpecsForm extends StatelessWidget {
                   ),
                   keyboardType: TextInputType.number,
                   validator: (value) {
-                     if (value != null && value.isNotEmpty && double.tryParse(value) == null) {
-                       return 'Invalid amount';
-                     }
-                     return null;
+                    if (value != null &&
+                        value.isNotEmpty &&
+                        double.tryParse(value) == null) {
+                      return 'Invalid amount';
+                    }
+                    return null;
                   },
                 ),
               ),
@@ -389,10 +398,12 @@ class _SpecsForm extends StatelessWidget {
                   ),
                   keyboardType: TextInputType.number,
                   validator: (value) {
-                     if (value != null && value.isNotEmpty && double.tryParse(value) == null) {
-                       return 'Invalid amount';
-                     }
-                     return null;
+                    if (value != null &&
+                        value.isNotEmpty &&
+                        double.tryParse(value) == null) {
+                      return 'Invalid amount';
+                    }
+                    return null;
                   },
                 ),
               ),

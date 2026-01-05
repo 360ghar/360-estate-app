@@ -30,6 +30,8 @@ final class Property {
     this.activeLease,
     this.createdAt,
     this.updatedAt,
+    this.purpose = 'rent',
+    this.basePrice,
   });
 
   final int id;
@@ -56,6 +58,8 @@ final class Property {
   final ActiveLease? activeLease;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final String purpose;
+  final double? basePrice;
 
   String get displayName => nickname ?? title;
 

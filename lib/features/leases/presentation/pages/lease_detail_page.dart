@@ -112,65 +112,67 @@ class LeaseDetailPage extends StatelessWidget {
       text: lease.monthlyRent.toStringAsFixed(0),
     );
 
-    unawaited(showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Renew Lease'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('New End Date'),
-              subtitle: Text(DateFormat('MMM d, yyyy').format(newEndDate)),
-              trailing: IconButton(
-                icon: const Icon(Icons.calendar_today),
-                onPressed: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: newEndDate,
-                    firstDate: lease.endDate,
-                    lastDate: lease.endDate.add(const Duration(days: 3650)),
-                  );
-                  if (picked != null) {
-                    newEndDate = picked;
-                  }
-                },
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Renew Lease'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('New End Date'),
+                subtitle: Text(DateFormat('MMM d, yyyy').format(newEndDate)),
+                trailing: IconButton(
+                  icon: const Icon(Icons.calendar_today),
+                  onPressed: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: newEndDate,
+                      firstDate: lease.endDate,
+                      lastDate: lease.endDate.add(const Duration(days: 3650)),
+                    );
+                    if (picked != null) {
+                      newEndDate = picked;
+                    }
+                  },
+                ),
               ),
+              TextField(
+                controller: rentController,
+                decoration: const InputDecoration(
+                  labelText: 'New Monthly Rent (optional)',
+                  prefixText: '\u20B9 ',
+                ),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
             ),
-            TextField(
-              controller: rentController,
-              decoration: const InputDecoration(
-                labelText: 'New Monthly Rent (optional)',
-                prefixText: '\u20B9 ',
-              ),
-              keyboardType: TextInputType.number,
+            FilledButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                final success = await controller.renewLease(
+                  newEndDate: newEndDate,
+                  newMonthlyRent: double.tryParse(rentController.text),
+                );
+                if (success) {
+                  Get.snackbar('Success', 'Lease renewed successfully');
+                } else {
+                  Get.snackbar('Error', 'Failed to renew lease');
+                }
+              },
+              child: const Text('Renew'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              final success = await controller.renewLease(
-                newEndDate: newEndDate,
-                newMonthlyRent: double.tryParse(rentController.text),
-              );
-              if (success) {
-                Get.snackbar('Success', 'Lease renewed successfully');
-              } else {
-                Get.snackbar('Error', 'Failed to renew lease');
-              }
-            },
-            child: const Text('Renew'),
-          ),
-        ],
       ),
-    ),);
+    );
   }
 
   void _showTerminateDialog(
@@ -179,53 +181,55 @@ class LeaseDetailPage extends StatelessWidget {
   ) {
     final reasonController = TextEditingController();
 
-    unawaited(showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Terminate Lease'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Are you sure you want to terminate this lease? This action cannot be undone.',
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: reasonController,
-              decoration: const InputDecoration(
-                labelText: 'Reason (optional)',
-                border: OutlineInputBorder(),
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Terminate Lease'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Are you sure you want to terminate this lease? This action cannot be undone.',
               ),
-              maxLines: 2,
+              const SizedBox(height: 16),
+              TextField(
+                controller: reasonController,
+                decoration: const InputDecoration(
+                  labelText: 'Reason (optional)',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 2,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () async {
+                Navigator.pop(context);
+                final success = await controller.terminateLease(
+                  reason: reasonController.text.isNotEmpty
+                      ? reasonController.text
+                      : null,
+                );
+                if (success) {
+                  Get.back<void>();
+                  Get.snackbar('Success', 'Lease terminated');
+                } else {
+                  Get.snackbar('Error', 'Failed to terminate lease');
+                }
+              },
+              child: const Text('Terminate'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () async {
-              Navigator.pop(context);
-              final success = await controller.terminateLease(
-                reason: reasonController.text.isNotEmpty
-                    ? reasonController.text
-                    : null,
-              );
-              if (success) {
-                Get.back<void>();
-                Get.snackbar('Success', 'Lease terminated');
-              } else {
-                Get.snackbar('Error', 'Failed to terminate lease');
-              }
-            },
-            child: const Text('Terminate'),
-          ),
-        ],
       ),
-    ),);
+    );
   }
 }
 
@@ -256,56 +260,56 @@ class _LeaseDetailContent extends StatelessWidget {
           // Status and timing card
           AppCard(
             child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      _StatusBadge(lease: lease),
-                      const Spacer(),
-                      if (lease.isExpiringSoon)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.orange.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.warning,
-                                size: 16,
-                                color: Colors.orange,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${lease.daysRemaining} days remaining',
-                                style: const TextStyle(
-                                  color: Colors.orange,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    _StatusBadge(lease: lease),
+                    const Spacer(),
+                    if (lease.isExpiringSoon)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  _InfoRow(
-                    label: 'Duration',
-                    value:
-                        '${dateFormat.format(lease.startDate)} - ${dateFormat.format(lease.endDate)}',
-                  ),
-                  _InfoRow(
-                    label: 'Term',
-                    value: '${lease.durationMonths} months',
-                  ),
-                ],
-              ),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.warning,
+                              size: 16,
+                              color: Colors.orange,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${lease.daysRemaining} days remaining',
+                              style: const TextStyle(
+                                color: Colors.orange,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _InfoRow(
+                  label: 'Duration',
+                  value:
+                      '${dateFormat.format(lease.startDate)} - ${dateFormat.format(lease.endDate)}',
+                ),
+                _InfoRow(
+                  label: 'Term',
+                  value: '${lease.durationMonths} months',
+                ),
+              ],
             ),
+          ),
           const SizedBox(height: 16),
 
           // Property card
@@ -313,8 +317,12 @@ class _LeaseDetailContent extends StatelessWidget {
             padding: EdgeInsets.zero,
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                child: Icon(Icons.apartment, color: Theme.of(context).colorScheme.primary),
+                backgroundColor: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: 0.1),
+                child: Icon(Icons.apartment,
+                    color: Theme.of(context).colorScheme.primary),
               ),
               title: Text(
                 lease.propertyTitle,
@@ -337,7 +345,7 @@ class _LeaseDetailContent extends StatelessWidget {
             padding: EdgeInsets.zero,
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: Colors.blue.withOpacity(0.1),
+                backgroundColor: Colors.blue.withValues(alpha: 0.1),
                 child: const Icon(Icons.person, color: Colors.blue),
               ),
               title: Text(
@@ -427,7 +435,8 @@ class _LeaseDetailContent extends StatelessWidget {
                   if (lease.signedDocumentUrl != null)
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.description, color: Colors.green),
+                      leading:
+                          const Icon(Icons.description, color: Colors.green),
                       title: const Text('Signed lease agreement'),
                       subtitle: const Text('Tap to view'),
                       trailing: const Icon(Icons.open_in_new),
@@ -442,14 +451,17 @@ class _LeaseDetailContent extends StatelessWidget {
                         child: Column(
                           children: [
                             Icon(
-                                Icons.upload_file,
-                                size: 48,
-                                color: Theme.of(context).colorScheme.outlineVariant, // Changed color
-                              ),
+                              Icons.upload_file,
+                              size: 48,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .outlineVariant, // Changed color
+                            ),
                             const SizedBox(height: 8),
                             Text(
                               'No signed document uploaded',
-                              style: TextStyle(color: Theme.of(context).colorScheme.outline),
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.outline),
                             ),
                           ],
                         ),
@@ -509,15 +521,15 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
         label,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: color,
-          fontWeight: FontWeight.bold,
-        ),
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
       ),
     );
   }
@@ -544,16 +556,16 @@ class _InfoRow extends StatelessWidget {
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
             ),
           ),
           Expanded(
             child: Text(
               value,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           ),
         ],

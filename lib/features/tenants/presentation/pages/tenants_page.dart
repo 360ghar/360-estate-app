@@ -29,7 +29,8 @@ class TenantsPage extends StatelessWidget {
         body: const FeatureComingSoon(
           featureName: 'Tenant Management',
           icon: Icons.people,
-          description: 'Manage your tenants, track leases, and handle tenant communications.',
+          description:
+              'Manage your tenants, track leases, and handle tenant communications.',
         ),
       );
     }
@@ -134,9 +135,10 @@ class _TenantsViewState extends State<_TenantsView> {
                       if (refreshFailure != null) ...[
                         Text(
                           refreshFailure.localizedMessage(context.l10n),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.error,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).colorScheme.error,
+                                  ),
                         ),
                         const SizedBox(height: 8),
                       ],
@@ -248,7 +250,10 @@ class _TenantCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                backgroundColor: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: 0.1),
                 child: Text(
                   tenant.initials,
                   style: TextStyle(
@@ -265,22 +270,25 @@ class _TenantCard extends StatelessWidget {
                     Text(
                       tenant.displayName,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     if (tenant.contactInfo != null)
                       Text(
                         tenant.contactInfo!,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
                       ),
                     const SizedBox(height: 4),
                     if (tenant.hasActiveLease)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.1),
+                          color: Colors.green.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -296,9 +304,10 @@ class _TenantCard extends StatelessWidget {
                       )
                     else
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.1),
+                          color: Colors.orange.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: const Text(

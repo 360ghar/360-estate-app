@@ -14,8 +14,8 @@ class SignupController extends GetxController {
   SignupController({
     required AppConfig config,
     required SignUpWithPhonePasswordUseCase signUp,
-  }) : _config = config,
-       _signUp = signUp;
+  })  : _config = config,
+        _signUp = signUp;
 
   final AppConfig _config;
   final SignUpWithPhonePasswordUseCase _signUp;

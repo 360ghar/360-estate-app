@@ -17,13 +17,15 @@ final class AuthRepositoryImpl implements AuthRepository {
   Future<AuthUser> signInWithPhonePassword({
     required String phone,
     required String password,
-  }) => _remote.signInWithPhonePassword(phone: phone, password: password);
+  }) =>
+      _remote.signInWithPhonePassword(phone: phone, password: password);
 
   @override
   Future<AuthUser> signUpWithPhonePassword({
     required String phone,
     required String password,
-  }) => _remote.signUpWithPhonePassword(phone: phone, password: password);
+  }) =>
+      _remote.signUpWithPhonePassword(phone: phone, password: password);
 
   @override
   Future<void> signOut() => _remote.signOut();

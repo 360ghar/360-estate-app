@@ -75,103 +75,106 @@ class ShellPage extends StatelessWidget {
   }
 
   void _showQuickActions(BuildContext context) {
-    unawaited(showModalBottomSheet<void>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    'Quick Actions',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton.filledTonal(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Flexible(
-                child: GridView.count(
-                  crossAxisCount: 3,
-                  shrinkWrap: true,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        builder: (context) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    _QuickActionItem(
-                      icon: Icons.apartment,
-                      label: 'Add Property',
-                      color: Colors.blue,
-                      onTap: () {
-                        Navigator.pop(context);
-                        unawaited(Get.toNamed<void>(Routes.propertyCreate));
-                      },
+                    Text(
+                      'Quick Actions',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
-                    _QuickActionItem(
-                      icon: Icons.description,
-                      label: 'Create Lease',
-                      color: Colors.green,
-                      onTap: () {
-                        Navigator.pop(context);
-                        unawaited(Get.toNamed<void>(Routes.leaseCreate));
-                      },
-                    ),
-                    _QuickActionItem(
-                      icon: Icons.receipt_long,
-                      label: 'Generate Rent',
-                      color: Colors.orange,
-                      onTap: () {
-                        Navigator.pop(context);
-                        unawaited(Get.toNamed<void>(Routes.finance));
-                      },
-                    ),
-                    _QuickActionItem(
-                      icon: Icons.payments,
-                      label: 'Record Pay',
-                      color: Colors.purple,
-                      onTap: () {
-                        Navigator.pop(context);
-                        unawaited(Get.toNamed<void>(Routes.recordPayment));
-                      },
-                    ),
-                    _QuickActionItem(
-                      icon: Icons.money_off,
-                      label: 'Add Expense',
-                      color: Colors.red,
-                      onTap: () {
-                        Navigator.pop(context);
-                        unawaited(Get.toNamed<void>(Routes.expenseCreate));
-                      },
-                    ),
-                    _QuickActionItem(
-                      icon: Icons.build,
-                      label: 'Maintenance',
-                      color: Colors.amber,
-                      onTap: () {
-                        Navigator.pop(context);
-                        unawaited(Get.toNamed<void>(Routes.maintenanceCreate));
-                      },
+                    const Spacer(),
+                    IconButton.filledTonal(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
                     ),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 24),
+                Flexible(
+                  child: GridView.count(
+                    crossAxisCount: 3,
+                    shrinkWrap: true,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    children: [
+                      _QuickActionItem(
+                        icon: Icons.apartment,
+                        label: 'Add Property',
+                        color: Colors.blue,
+                        onTap: () {
+                          Navigator.pop(context);
+                          unawaited(Get.toNamed<void>(Routes.propertyCreate));
+                        },
+                      ),
+                      _QuickActionItem(
+                        icon: Icons.description,
+                        label: 'Create Lease',
+                        color: Colors.green,
+                        onTap: () {
+                          Navigator.pop(context);
+                          unawaited(Get.toNamed<void>(Routes.leaseCreate));
+                        },
+                      ),
+                      _QuickActionItem(
+                        icon: Icons.receipt_long,
+                        label: 'Generate Rent',
+                        color: Colors.orange,
+                        onTap: () {
+                          Navigator.pop(context);
+                          unawaited(Get.toNamed<void>(Routes.finance));
+                        },
+                      ),
+                      _QuickActionItem(
+                        icon: Icons.payments,
+                        label: 'Record Pay',
+                        color: Colors.purple,
+                        onTap: () {
+                          Navigator.pop(context);
+                          unawaited(Get.toNamed<void>(Routes.recordPayment));
+                        },
+                      ),
+                      _QuickActionItem(
+                        icon: Icons.money_off,
+                        label: 'Add Expense',
+                        color: Colors.red,
+                        onTap: () {
+                          Navigator.pop(context);
+                          unawaited(Get.toNamed<void>(Routes.expenseCreate));
+                        },
+                      ),
+                      _QuickActionItem(
+                        icon: Icons.build,
+                        label: 'Maintenance',
+                        color: Colors.amber,
+                        onTap: () {
+                          Navigator.pop(context);
+                          unawaited(
+                              Get.toNamed<void>(Routes.maintenanceCreate));
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    ),);
+    );
   }
 }
 
@@ -199,7 +202,7 @@ class _QuickActionItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(icon, color: color, size: 28),
@@ -209,8 +212,8 @@ class _QuickActionItem extends StatelessWidget {
             label,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
+                  fontWeight: FontWeight.w500,
+                ),
           ),
         ],
       ),

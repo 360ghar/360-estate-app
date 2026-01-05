@@ -29,13 +29,12 @@ class RMDashboardPage extends StatelessWidget {
 
     return AppScaffold(
       appBar: AppBar(
-        title: const Text('RM Dashboard'),
-        actions: [
-          IconButton(
-            onPressed: () => Get.toNamed<void>(Routes.settings),
-            icon: const Icon(Icons.settings_outlined),
-          ),
-        ],
+        title: const Text(
+          'RM Dashboard',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        centerTitle: false,
+        elevation: 0,
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -390,9 +389,10 @@ class RMDashboardPage extends StatelessWidget {
                 return _PropertyMiniCard(
                   name: property.displayName,
                   units: '${property.bedroomCount ?? 0} BHK',
-                  occupancy: property.managementStatus == ManagementStatus.active
-                      ? 'Occupied'
-                      : property.managementStatus.name,
+                  occupancy:
+                      property.managementStatus == ManagementStatus.active
+                          ? 'Occupied'
+                          : property.managementStatus.name,
                   onTap: () => Get.toNamed<void>(
                     Routes.propertyDetail.replaceFirst(
                       ':id',

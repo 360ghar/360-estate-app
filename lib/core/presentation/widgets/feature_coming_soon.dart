@@ -17,7 +17,7 @@ class FeatureComingSoon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -27,7 +27,8 @@ class FeatureComingSoon extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+                color:
+                    theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -56,7 +57,8 @@ class FeatureComingSoon extends StatelessWidget {
               Text(
                 description!,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                  color:
+                      theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
                 ),
                 textAlign: TextAlign.center,
               ),

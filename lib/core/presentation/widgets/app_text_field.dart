@@ -88,7 +88,7 @@ class _AppTextFieldState extends State<AppTextField>
         ? theme.colorScheme.error
         : _isFocused
             ? theme.colorScheme.primary
-            : theme.colorScheme.outline.withOpacity(0.5);
+            : theme.colorScheme.outline.withValues(alpha: 0.5);
 
     final field = AnimatedBuilder(
       animation: _borderAnimation,
@@ -98,7 +98,7 @@ class _AppTextFieldState extends State<AppTextField>
           boxShadow: _isFocused && !hasError
               ? [
                   BoxShadow(
-                    color: theme.colorScheme.primary.withOpacity(0.1),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -110,7 +110,8 @@ class _AppTextFieldState extends State<AppTextField>
           focusNode: _focusNode,
           keyboardType: widget.keyboardType,
           textInputAction: widget.textInputAction,
-          obscureText: widget.showPasswordToggle ? _obscurePassword : widget.obscureText,
+          obscureText:
+              widget.showPasswordToggle ? _obscurePassword : widget.obscureText,
           autofillHints: widget.autofillHints,
           onChanged: widget.onChanged,
           enabled: widget.enabled,
@@ -126,7 +127,7 @@ class _AppTextFieldState extends State<AppTextField>
                     widget.prefixIcon,
                     color: _isFocused
                         ? theme.colorScheme.primary
-                        : theme.colorScheme.onSurface.withOpacity(0.5),
+                        : theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   )
                 : null,
             suffixIcon: widget.showPasswordToggle
@@ -135,7 +136,7 @@ class _AppTextFieldState extends State<AppTextField>
                       _obscurePassword
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
-                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                     onPressed: () {
                       setState(() {
@@ -145,7 +146,8 @@ class _AppTextFieldState extends State<AppTextField>
                   )
                 : null,
             filled: true,
-            fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+            fillColor: theme.colorScheme.surfaceContainerHighest
+                .withValues(alpha: 0.5),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 18,
@@ -157,7 +159,7 @@ class _AppTextFieldState extends State<AppTextField>
             enabledBorder: OutlineInputBorder(
               borderRadius: AppRadii.md,
               borderSide: BorderSide(
-                color: theme.colorScheme.outline.withOpacity(0.3),
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
                 width: 1.5,
               ),
             ),
@@ -185,11 +187,11 @@ class _AppTextFieldState extends State<AppTextField>
             labelStyle: TextStyle(
               color: _isFocused
                   ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurface.withOpacity(0.6),
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.6),
               fontWeight: FontWeight.w500,
             ),
             hintStyle: TextStyle(
-              color: theme.colorScheme.onSurface.withOpacity(0.4),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
             ),
           ),
         ),
@@ -197,6 +199,7 @@ class _AppTextFieldState extends State<AppTextField>
     );
 
     if (widget.semanticsLabel == null) return field;
-    return Semantics(textField: true, label: widget.semanticsLabel, child: field);
+    return Semantics(
+        textField: true, label: widget.semanticsLabel, child: field);
   }
 }

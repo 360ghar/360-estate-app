@@ -19,10 +19,12 @@ class InitialBindings extends Bindings {
 
     // Register backend auth data source first (needed by CompositeAuthTokenProvider)
     Get.put<BackendAuthDataSource>(
-      BackendAuthDataSourceImpl(apiClient: ApiClient(
+      BackendAuthDataSourceImpl(
+          apiClient: ApiClient(
         baseUrl: config.apiBaseUrl,
         networkInfo: NetworkInfoImpl(),
-        tokenProvider: const SupabaseAuthTokenProvider(), // Use Supabase token for backend login itself
+        tokenProvider:
+            const SupabaseAuthTokenProvider(), // Use Supabase token for backend login itself
         enableLogging: config.enableDebugLogs,
       )),
       permanent: true,

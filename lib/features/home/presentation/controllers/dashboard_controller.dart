@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/core/presentation/state/view_state.dart';
+import 'package:estate_app/core/services/app_lifecycle_service.dart';
 import 'package:estate_app/features/home/domain/entities/activity_item.dart';
 import 'package:estate_app/features/home/domain/entities/dashboard_overview.dart';
 import 'package:estate_app/features/home/domain/usecases/get_dashboard_overview_usecase.dart';
@@ -30,6 +32,26 @@ class DashboardController extends GetxController {
   void onInit() {
     super.onInit();
     unawaited(loadDashboard());
+
+    // Register for auto-refresh when app resumes from background
+    if (Get.isRegistered<AppLifecycleService>()) {
+      Get.find<AppLifecycleService>().registerRefreshCallback(_onAppResume);
+    }
+  }
+
+  @override
+  void onClose() {
+    // Unregister refresh callback
+    if (Get.isRegistered<AppLifecycleService>()) {
+      Get.find<AppLifecycleService>().unregisterRefreshCallback(_onAppResume);
+    }
+    super.onClose();
+  }
+
+  /// Called when app resumes from background
+  void _onAppResume() {
+    AppLogger.d(' App resumed - refreshing dashboard data');
+    unawaited(refresh());
   }
 
   Future<void> loadDashboard() async {

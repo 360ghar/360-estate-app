@@ -74,33 +74,35 @@ class _MaintenanceFormView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Obx(() => Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: MaintenanceCategory.values.map((cat) {
-                    final isSelected = controller.category.value == cat;
-                    return ChoiceChip(
-                      label: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            cat.icon,
-                            size: 16,
-                            color: isSelected ? Colors.white : cat.color,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(cat.displayName),
-                        ],
-                      ),
-                      selected: isSelected,
-                      onSelected: (_) => controller.setCategory(cat),
-                      selectedColor: Theme.of(context).colorScheme.primary,
-                      labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : Colors.black,
-                      ),
-                    );
-                  }).toList(),
-                ),),
+            Obx(
+              () => Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: MaintenanceCategory.values.map((cat) {
+                  final isSelected = controller.category.value == cat;
+                  return ChoiceChip(
+                    label: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          cat.icon,
+                          size: 16,
+                          color: isSelected ? Colors.white : cat.color,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(cat.displayName),
+                      ],
+                    ),
+                    selected: isSelected,
+                    onSelected: (_) => controller.setCategory(cat),
+                    selectedColor: Theme.of(context).colorScheme.primary,
+                    labelStyle: TextStyle(
+                      color: isSelected ? Colors.white : Colors.black,
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
             const SizedBox(height: 24),
 
             // Priority
@@ -112,34 +114,36 @@ class _MaintenanceFormView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Obx(() => Row(
-                  children: MaintenancePriority.values.map((prio) {
-                    final isSelected = controller.priority.value == prio;
-                    return Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          right: prio != MaintenancePriority.urgent ? 8 : 0,
+            Obx(
+              () => Row(
+                children: MaintenancePriority.values.map((prio) {
+                  final isSelected = controller.priority.value == prio;
+                  return Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        right: prio != MaintenancePriority.urgent ? 8 : 0,
+                      ),
+                      child: ChoiceChip(
+                        label: SizedBox(
+                          width: double.infinity,
+                          child: Text(
+                            prio.displayName,
+                            textAlign: TextAlign.center,
+                          ),
                         ),
-                        child: ChoiceChip(
-                          label: SizedBox(
-                            width: double.infinity,
-                            child: Text(
-                              prio.displayName,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          selected: isSelected,
-                          onSelected: (_) => controller.setPriority(prio),
-                          selectedColor: prio.color,
-                          labelStyle: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black,
-                            fontWeight: FontWeight.w500,
-                          ),
+                        selected: isSelected,
+                        onSelected: (_) => controller.setPriority(prio),
+                        selectedColor: prio.color,
+                        labelStyle: TextStyle(
+                          color: isSelected ? Colors.white : Colors.black,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                    );
-                  }).toList(),
-                ),),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
             const SizedBox(height: 24),
 
             // Scheduled Date
@@ -151,41 +155,42 @@ class _MaintenanceFormView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Obx(() => InkWell(
-                  onTap: () => _selectDate(context, controller),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.event, color: Colors.grey),
-                        const SizedBox(width: 12),
-                        Text(
-                          controller.scheduledDate.value != null
-                              ? dateFormat
-                                  .format(controller.scheduledDate.value!)
-                              : 'Select a date',
-                          style: TextStyle(
-                            color: controller.scheduledDate.value != null
-                                ? Colors.black
-                                : Colors.grey,
-                          ),
-                        ),
-                        const Spacer(),
-                        if (controller.scheduledDate.value != null)
-                          IconButton(
-                            icon: const Icon(Icons.clear, size: 20),
-                            onPressed: () => controller.setScheduledDate(null),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
-                      ],
-                    ),
+            Obx(
+              () => InkWell(
+                onTap: () => _selectDate(context, controller),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                ),),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.event, color: Colors.grey),
+                      const SizedBox(width: 12),
+                      Text(
+                        controller.scheduledDate.value != null
+                            ? dateFormat.format(controller.scheduledDate.value!)
+                            : 'Select a date',
+                        style: TextStyle(
+                          color: controller.scheduledDate.value != null
+                              ? Colors.black
+                              : Colors.grey,
+                        ),
+                      ),
+                      const Spacer(),
+                      if (controller.scheduledDate.value != null)
+                        IconButton(
+                          icon: const Icon(Icons.clear, size: 20),
+                          onPressed: () => controller.setScheduledDate(null),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
 
             // Assigned To
@@ -225,13 +230,14 @@ class _MaintenanceFormView extends StatelessWidget {
             const SizedBox(height: 32),
 
             // Submit button
-            Obx(() => AppButton(
-                  label: controller.isEditing
-                      ? 'Update Request'
-                      : 'Create Request',
-                  isLoading: controller.isSubmitting.value,
-                  onPressed: controller.submit,
-                ),),
+            Obx(
+              () => AppButton(
+                label:
+                    controller.isEditing ? 'Update Request' : 'Create Request',
+                isLoading: controller.isSubmitting.value,
+                onPressed: controller.submit,
+              ),
+            ),
 
             const SizedBox(height: 24),
           ],
@@ -313,26 +319,28 @@ class _PropertySelectorState extends State<_PropertySelector> {
           ),
         ),
         const SizedBox(height: 8),
-        Obx(() => DropdownButtonFormField<int>(
-              initialValue: widget.controller.selectedPropertyId.value,
-              decoration: const InputDecoration(
-                hintText: 'Select a property',
-                prefixIcon: Icon(Icons.apartment),
-              ),
-              items: _properties.map((prop) {
-                return DropdownMenuItem(
-                  value: prop.id,
-                  child: Text(prop.title),
-                );
-              }).toList(),
-              onChanged: (value) => widget.controller.setPropertyId(value),
-              validator: (value) {
-                if (value == null) {
-                  return 'Please select a property';
-                }
-                return null;
-              },
-            ),),
+        Obx(
+          () => DropdownButtonFormField<int>(
+            initialValue: widget.controller.selectedPropertyId.value,
+            decoration: const InputDecoration(
+              hintText: 'Select a property',
+              prefixIcon: Icon(Icons.apartment),
+            ),
+            items: _properties.map((prop) {
+              return DropdownMenuItem(
+                value: prop.id,
+                child: Text(prop.title),
+              );
+            }).toList(),
+            onChanged: (value) => widget.controller.setPropertyId(value),
+            validator: (value) {
+              if (value == null) {
+                return 'Please select a property';
+              }
+              return null;
+            },
+          ),
+        ),
         const SizedBox(height: 16),
       ],
     );

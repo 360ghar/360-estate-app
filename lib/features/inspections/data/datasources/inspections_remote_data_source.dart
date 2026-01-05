@@ -1,3 +1,4 @@
+import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/features/inspections/data/models/inspection_dto.dart';
 
@@ -27,9 +28,11 @@ abstract interface class InspectionsRemoteDataSource {
 
   Future<void> cancelInspection(int id, {String? reason});
 
-  Future<InspectionDto> addInspectionItem(int inspectionId, Map<String, dynamic> data);
+  Future<InspectionDto> addInspectionItem(
+      int inspectionId, Map<String, dynamic> data);
 
-  Future<InspectionDto> updateInspectionItem(int inspectionId, int itemId, Map<String, dynamic> data);
+  Future<InspectionDto> updateInspectionItem(
+      int inspectionId, int itemId, Map<String, dynamic> data);
 }
 
 /// Stub implementation that returns empty data since PM inspections endpoints
@@ -50,13 +53,13 @@ final class ApiInspectionsRemoteDataSource
     String? inspectionType,
     String? status,
   }) async {
-    print('[INSPECTIONS] WARNING: PM inspections endpoint not available');
+    AppLogger.w(' PM inspections endpoint not available');
     return [];
   }
 
   @override
   Future<InspectionDto> getInspectionById(int id) async {
-    print('[INSPECTIONS] WARNING: PM inspections endpoint not available');
+    AppLogger.w(' PM inspections endpoint not available');
     throw UnsupportedError(
       'Inspections are not yet available. PM module pending backend implementation.',
     );
@@ -64,7 +67,7 @@ final class ApiInspectionsRemoteDataSource
 
   @override
   Future<InspectionDto> createInspection(Map<String, dynamic> data) async {
-    print('[INSPECTIONS] WARNING: PM inspections endpoint not available');
+    AppLogger.w(' PM inspections endpoint not available');
     throw UnsupportedError(
       'Inspection creation is not yet available. PM module pending backend implementation.',
     );
@@ -73,7 +76,7 @@ final class ApiInspectionsRemoteDataSource
   @override
   Future<InspectionDto> updateInspection(
       int id, Map<String, dynamic> updates) async {
-    print('[INSPECTIONS] WARNING: PM inspections endpoint not available');
+    AppLogger.w(' PM inspections endpoint not available');
     throw UnsupportedError(
       'Inspection update is not yet available. PM module pending backend implementation.',
     );
@@ -81,7 +84,7 @@ final class ApiInspectionsRemoteDataSource
 
   @override
   Future<InspectionDto> startInspection(int id) async {
-    print('[INSPECTIONS] WARNING: PM inspections endpoint not available');
+    AppLogger.w(' PM inspections endpoint not available');
     throw UnsupportedError(
       'Inspection start is not yet available. PM module pending backend implementation.',
     );
@@ -89,15 +92,16 @@ final class ApiInspectionsRemoteDataSource
 
   @override
   Future<InspectionDto> completeInspection(int id, {String? notes}) async {
-    print('[INSPECTIONS] WARNING: PM inspections endpoint not available');
+    AppLogger.w(' PM inspections endpoint not available');
     throw UnsupportedError(
       'Inspection completion is not yet available. PM module pending backend implementation.',
     );
   }
 
   @override
-  Future<InspectionDto> signInspection(int id, Map<String, dynamic> data) async {
-    print('[INSPECTIONS] WARNING: PM inspections endpoint not available');
+  Future<InspectionDto> signInspection(
+      int id, Map<String, dynamic> data) async {
+    AppLogger.w(' PM inspections endpoint not available');
     throw UnsupportedError(
       'Inspection signing is not yet available. PM module pending backend implementation.',
     );
@@ -105,15 +109,16 @@ final class ApiInspectionsRemoteDataSource
 
   @override
   Future<void> cancelInspection(int id, {String? reason}) async {
-    print('[INSPECTIONS] WARNING: PM inspections endpoint not available');
+    AppLogger.w(' PM inspections endpoint not available');
     throw UnsupportedError(
       'Inspection cancellation is not yet available. PM module pending backend implementation.',
     );
   }
 
   @override
-  Future<InspectionDto> addInspectionItem(int inspectionId, Map<String, dynamic> data) async {
-    print('[INSPECTIONS] WARNING: PM inspections endpoint not available');
+  Future<InspectionDto> addInspectionItem(
+      int inspectionId, Map<String, dynamic> data) async {
+    AppLogger.w(' PM inspections endpoint not available');
     throw UnsupportedError(
       'Inspection item addition is not yet available. PM module pending backend implementation.',
     );
@@ -125,7 +130,7 @@ final class ApiInspectionsRemoteDataSource
     int itemId,
     Map<String, dynamic> data,
   ) async {
-    print('[INSPECTIONS] WARNING: PM inspections endpoint not available');
+    AppLogger.w(' PM inspections endpoint not available');
     throw UnsupportedError(
       'Inspection item update is not yet available. PM module pending backend implementation.',
     );

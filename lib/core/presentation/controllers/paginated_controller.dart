@@ -1,15 +1,16 @@
 import 'dart:async';
 
+import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/core/pagination/page.dart';
+import 'package:estate_app/core/services/app_lifecycle_service.dart';
 import 'package:get/get.dart';
 
-typedef PageFetcher<T> =
-    Future<Page<T>> Function({
-      required int page,
-      required int limit,
-      required String query,
-    });
+typedef PageFetcher<T> = Future<Page<T>> Function({
+  required int page,
+  required int limit,
+  required String query,
+});
 
 class PaginatedController<T, K> extends GetxController {
   PaginatedController({
@@ -17,9 +18,9 @@ class PaginatedController<T, K> extends GetxController {
     required K Function(T item) keyOf,
     this.pageSize = 20,
     Duration searchDebounce = const Duration(milliseconds: 350),
-  }) : _fetchPage = fetchPage,
-       _keyOf = keyOf,
-       _searchDebounce = searchDebounce;
+  })  : _fetchPage = fetchPage,
+        _keyOf = keyOf,
+        _searchDebounce = searchDebounce;
 
   final PageFetcher<T> _fetchPage;
   final K Function(T item) _keyOf;
@@ -51,6 +52,17 @@ class PaginatedController<T, K> extends GetxController {
   void onInit() {
     super.onInit();
     unawaited(loadInitial());
+
+    // Register for auto-refresh when app resumes from background
+    if (Get.isRegistered<AppLifecycleService>()) {
+      Get.find<AppLifecycleService>().registerRefreshCallback(_onAppResume);
+    }
+  }
+
+  /// Called when app resumes from background
+  void _onAppResume() {
+    AppLogger.d(' App resumed - refreshing list');
+    unawaited(refreshList());
   }
 
   Future<void> loadInitial() async {
@@ -184,6 +196,10 @@ class PaginatedController<T, K> extends GetxController {
   @override
   void onClose() {
     _debounceTimer?.cancel();
+    // Unregister refresh callback
+    if (Get.isRegistered<AppLifecycleService>()) {
+      Get.find<AppLifecycleService>().unregisterRefreshCallback(_onAppResume);
+    }
     super.onClose();
   }
 }

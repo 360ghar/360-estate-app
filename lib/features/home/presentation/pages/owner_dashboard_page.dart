@@ -25,14 +25,12 @@ class OwnerDashboardPage extends StatelessWidget {
 
     return AppScaffold(
       appBar: AppBar(
-        title: Text(context.l10n.homeTitle),
-        actions: [
-          IconButton(
-            onPressed: () => Get.toNamed<void>(Routes.settings),
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: context.l10n.settingsTitle,
-          ),
-        ],
+        title: Text(
+          context.l10n.homeTitle,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        centerTitle: false,
+        elevation: 0,
       ),
       body: Obx(() {
         return RefreshIndicator(
@@ -121,7 +119,8 @@ class OwnerDashboardPage extends StatelessWidget {
                 title: 'Occupancy Rate',
                 value: percentFormat.format(overview.occupancyRate),
                 icon: Icons.people,
-                subtitle: '${overview.underMaintenanceProperties} under maintenance',
+                subtitle:
+                    '${overview.underMaintenanceProperties} under maintenance',
               ),
             ),
           ],
@@ -214,10 +213,12 @@ class OwnerDashboardPage extends StatelessWidget {
                 activities: state.data!,
                 onActivityTap: (activity) {
                   if (activity.propertyId != null) {
-                    unawaited(Get.toNamed<void>(
-                      Routes.propertyDetail
-                          .replaceFirst(':id', activity.propertyId.toString()),
-                    ),);
+                    unawaited(
+                      Get.toNamed<void>(
+                        Routes.propertyDetail.replaceFirst(
+                            ':id', activity.propertyId.toString()),
+                      ),
+                    );
                   }
                 },
               ),

@@ -15,11 +15,12 @@ final class UserProfileRepositoryImpl implements UserProfileRepository {
     String? fullName,
     String? email,
     String? avatarUrl,
-  }) => _dataSource.updateProfile(
-    fullName: fullName,
-    email: email,
-    avatarUrl: avatarUrl,
-  );
+  }) =>
+      _dataSource.updateProfile(
+        fullName: fullName,
+        email: email,
+        avatarUrl: avatarUrl,
+      );
 
   @override
   Future<void> updatePreferences(UserPreferences preferences) =>

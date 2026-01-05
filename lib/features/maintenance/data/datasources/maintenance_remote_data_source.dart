@@ -1,3 +1,4 @@
+import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/core/pagination/page.dart';
 import 'package:estate_app/features/maintenance/data/models/maintenance_request_dto.dart';
@@ -18,14 +19,16 @@ abstract interface class MaintenanceRemoteDataSource {
 
   Future<MaintenanceRequestDto> createRequest(Map<String, dynamic> data);
 
-  Future<MaintenanceRequestDto> updateRequest(int id, Map<String, dynamic> updates);
+  Future<MaintenanceRequestDto> updateRequest(
+      int id, Map<String, dynamic> updates);
 
   Future<void> updateStatus(int id, String status);
 }
 
 /// Stub implementation that returns empty data since PM maintenance endpoints
 /// are not available in the current backend.
-final class ApiMaintenanceRemoteDataSource implements MaintenanceRemoteDataSource {
+final class ApiMaintenanceRemoteDataSource
+    implements MaintenanceRemoteDataSource {
   ApiMaintenanceRemoteDataSource(this._apiClient);
 
   final ApiClient _apiClient;
@@ -39,7 +42,7 @@ final class ApiMaintenanceRemoteDataSource implements MaintenanceRemoteDataSourc
     String? priority,
     String? category,
   }) async {
-    print('[MAINTENANCE] WARNING: PM maintenance endpoint not available');
+    AppLogger.w(' PM maintenance endpoint not available');
     return Page<MaintenanceRequestDto>(
       items: [],
       page: page,
@@ -50,7 +53,7 @@ final class ApiMaintenanceRemoteDataSource implements MaintenanceRemoteDataSourc
 
   @override
   Future<MaintenanceRequestDto> getRequestById(int id) async {
-    print('[MAINTENANCE] WARNING: PM maintenance endpoint not available');
+    AppLogger.w(' PM maintenance endpoint not available');
     throw UnsupportedError(
       'Maintenance requests are not yet available. PM module pending backend implementation.',
     );
@@ -58,15 +61,16 @@ final class ApiMaintenanceRemoteDataSource implements MaintenanceRemoteDataSourc
 
   @override
   Future<MaintenanceRequestDto> createRequest(Map<String, dynamic> data) async {
-    print('[MAINTENANCE] WARNING: PM maintenance endpoint not available');
+    AppLogger.w(' PM maintenance endpoint not available');
     throw UnsupportedError(
       'Maintenance request creation is not yet available. PM module pending backend implementation.',
     );
   }
 
   @override
-  Future<MaintenanceRequestDto> updateRequest(int id, Map<String, dynamic> updates) async {
-    print('[MAINTENANCE] WARNING: PM maintenance endpoint not available');
+  Future<MaintenanceRequestDto> updateRequest(
+      int id, Map<String, dynamic> updates) async {
+    AppLogger.w(' PM maintenance endpoint not available');
     throw UnsupportedError(
       'Maintenance request update is not yet available. PM module pending backend implementation.',
     );
@@ -74,10 +78,9 @@ final class ApiMaintenanceRemoteDataSource implements MaintenanceRemoteDataSourc
 
   @override
   Future<void> updateStatus(int id, String status) async {
-    print('[MAINTENANCE] WARNING: PM maintenance endpoint not available');
+    AppLogger.w(' PM maintenance endpoint not available');
     throw UnsupportedError(
       'Maintenance status update is not yet available. PM module pending backend implementation.',
     );
   }
 }
-

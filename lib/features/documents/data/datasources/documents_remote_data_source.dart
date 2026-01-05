@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/core/pagination/page.dart';
 import 'package:estate_app/features/documents/data/models/document_dto.dart';
@@ -48,7 +49,7 @@ final class ApiDocumentsRemoteDataSource implements DocumentsRemoteDataSource {
     int? leaseId,
     String? documentType,
   }) async {
-    print('[DOCUMENTS] WARNING: PM documents endpoint not available');
+    AppLogger.w(' PM documents endpoint not available');
     return Page<DocumentDto>(
       items: [],
       page: page,
@@ -59,7 +60,7 @@ final class ApiDocumentsRemoteDataSource implements DocumentsRemoteDataSource {
 
   @override
   Future<DocumentDto> getDocumentById(int id) async {
-    print('[DOCUMENTS] WARNING: PM documents endpoint not available');
+    AppLogger.w(' PM documents endpoint not available');
     throw UnsupportedError(
       'Document management is not yet available. PM module pending backend implementation.',
     );
@@ -74,15 +75,16 @@ final class ApiDocumentsRemoteDataSource implements DocumentsRemoteDataSource {
     String? description,
     String? expiryDate,
   }) async {
-    print('[DOCUMENTS] WARNING: PM documents endpoint not available');
+    AppLogger.w(' PM documents endpoint not available');
     throw UnsupportedError(
       'Document upload is not yet available. PM module pending backend implementation.',
     );
   }
 
   @override
-  Future<DocumentDto> updateDocument(int id, Map<String, dynamic> updates) async {
-    print('[DOCUMENTS] WARNING: PM documents endpoint not available');
+  Future<DocumentDto> updateDocument(
+      int id, Map<String, dynamic> updates) async {
+    AppLogger.w(' PM documents endpoint not available');
     throw UnsupportedError(
       'Document update is not yet available. PM module pending backend implementation.',
     );
@@ -90,7 +92,7 @@ final class ApiDocumentsRemoteDataSource implements DocumentsRemoteDataSource {
 
   @override
   Future<void> deleteDocument(int id) async {
-    print('[DOCUMENTS] WARNING: PM documents endpoint not available');
+    AppLogger.w(' PM documents endpoint not available');
     throw UnsupportedError(
       'Document deletion is not yet available. PM module pending backend implementation.',
     );
@@ -98,10 +100,9 @@ final class ApiDocumentsRemoteDataSource implements DocumentsRemoteDataSource {
 
   @override
   Future<String> getDownloadUrl(int id) async {
-    print('[DOCUMENTS] WARNING: PM documents endpoint not available');
+    AppLogger.w(' PM documents endpoint not available');
     throw UnsupportedError(
       'Document download is not yet available. PM module pending backend implementation.',
     );
   }
 }
-

@@ -1,5 +1,3 @@
-import 'package:estate_app/core/config/app_config.dart';
-import 'package:estate_app/core/mocks/mock_properties_data_source.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/features/properties/data/datasources/properties_remote_data_source.dart';
 import 'package:estate_app/features/properties/data/repositories/properties_repository_impl.dart';
@@ -19,12 +17,8 @@ class PropertiesBindings extends Bindings {
       Get.lazyPut<T>(builder, fenix: true);
     }
 
-    final config = Get.find<AppConfig>();
-
     lazyPutIfAbsent<PropertiesRemoteDataSource>(
-      () => config.useMockApi
-          ? MockPropertiesRemoteDataSource()
-          : ApiPropertiesRemoteDataSource(Get.find<ApiClient>()),
+      () => ApiPropertiesRemoteDataSource(Get.find<ApiClient>()),
     );
 
     lazyPutIfAbsent<PropertiesRepository>(
@@ -44,7 +38,7 @@ class PropertiesBindings extends Bindings {
         ),
       );
     }
-    
+
     Get.lazyPut<PropertyCreateController>(
       () => PropertyCreateController(
         repository: Get.find<PropertiesRepository>(),
@@ -53,4 +47,3 @@ class PropertiesBindings extends Bindings {
     );
   }
 }
-

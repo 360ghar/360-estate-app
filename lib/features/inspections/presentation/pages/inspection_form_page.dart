@@ -28,9 +28,9 @@ class _InspectionFormView extends StatelessWidget {
 
     return AppScaffold(
       appBar: AppBar(
-        title: Text(controller.isEditing
-            ? 'Edit Inspection'
-            : 'Schedule Inspection',),
+        title: Text(
+          controller.isEditing ? 'Edit Inspection' : 'Schedule Inspection',
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -49,33 +49,35 @@ class _InspectionFormView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Obx(() => Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: InspectionType.values.map((type) {
-                  final isSelected = controller.inspectionType.value == type;
-                  return ChoiceChip(
-                    label: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          type.icon,
-                          size: 16,
-                          color: isSelected ? Colors.white : type.color,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(type.displayName),
-                      ],
-                    ),
-                    selected: isSelected,
-                    onSelected: (_) => controller.setInspectionType(type),
-                    selectedColor: Theme.of(context).colorScheme.primary,
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black,
-                    ),
-                  );
-                }).toList(),
-              ),),
+          Obx(
+            () => Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: InspectionType.values.map((type) {
+                final isSelected = controller.inspectionType.value == type;
+                return ChoiceChip(
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        type.icon,
+                        size: 16,
+                        color: isSelected ? Colors.white : type.color,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(type.displayName),
+                    ],
+                  ),
+                  selected: isSelected,
+                  onSelected: (_) => controller.setInspectionType(type),
+                  selectedColor: Theme.of(context).colorScheme.primary,
+                  labelStyle: TextStyle(
+                    color: isSelected ? Colors.white : Colors.black,
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
           const SizedBox(height: 24),
 
           // Scheduled Date
@@ -88,33 +90,35 @@ class _InspectionFormView extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Obx(() => InkWell(
-                onTap: () => _selectDate(context, controller),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.calendar_today, color: Colors.grey),
-                      const SizedBox(width: 12),
-                      Text(
-                        controller.scheduledDate.value != null
-                            ? dateFormat.format(controller.scheduledDate.value!)
-                            : 'Select date',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: controller.scheduledDate.value != null
-                              ? Colors.black
-                              : Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
+          Obx(
+            () => InkWell(
+              onTap: () => _selectDate(context, controller),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              ),),
+                child: Row(
+                  children: [
+                    const Icon(Icons.calendar_today, color: Colors.grey),
+                    const SizedBox(width: 12),
+                    Text(
+                      controller.scheduledDate.value != null
+                          ? dateFormat.format(controller.scheduledDate.value!)
+                          : 'Select date',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: controller.scheduledDate.value != null
+                            ? Colors.black
+                            : Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           const SizedBox(height: 24),
 
           // Inspector Name
@@ -143,20 +147,22 @@ class _InspectionFormView extends StatelessWidget {
           const SizedBox(height: 32),
 
           // Submit button
-          Obx(() => AppButton(
-                label: controller.isEditing
-                    ? 'Update Inspection'
-                    : 'Schedule Inspection',
-                isLoading: controller.isSubmitting.value,
-                onPressed: controller.canSubmit
-                    ? () async {
-                        final result = await controller.submit();
-                        if (result != null) {
-                          Get.back<Inspection>(result: result);
-                        }
+          Obx(
+            () => AppButton(
+              label: controller.isEditing
+                  ? 'Update Inspection'
+                  : 'Schedule Inspection',
+              isLoading: controller.isSubmitting.value,
+              onPressed: controller.canSubmit
+                  ? () async {
+                      final result = await controller.submit();
+                      if (result != null) {
+                        Get.back<Inspection>(result: result);
                       }
-                    : null,
-              ),),
+                    }
+                  : null,
+            ),
+          ),
 
           const SizedBox(height: 24),
         ],
@@ -238,26 +244,28 @@ class _PropertySelectorState extends State<_PropertySelector> {
           ),
         ),
         const SizedBox(height: 8),
-        Obx(() => DropdownButtonFormField<int>(
-              initialValue: widget.controller.selectedPropertyId.value,
-              decoration: const InputDecoration(
-                hintText: 'Select a property',
-                prefixIcon: Icon(Icons.apartment),
-              ),
-              items: _properties.map((prop) {
-                return DropdownMenuItem(
-                  value: prop.id,
-                  child: Text(prop.title),
-                );
-              }).toList(),
-              onChanged: (value) => widget.controller.setPropertyId(value),
-              validator: (value) {
-                if (value == null) {
-                  return 'Please select a property';
-                }
-                return null;
-              },
-            ),),
+        Obx(
+          () => DropdownButtonFormField<int>(
+            initialValue: widget.controller.selectedPropertyId.value,
+            decoration: const InputDecoration(
+              hintText: 'Select a property',
+              prefixIcon: Icon(Icons.apartment),
+            ),
+            items: _properties.map((prop) {
+              return DropdownMenuItem(
+                value: prop.id,
+                child: Text(prop.title),
+              );
+            }).toList(),
+            onChanged: (value) => widget.controller.setPropertyId(value),
+            validator: (value) {
+              if (value == null) {
+                return 'Please select a property';
+              }
+              return null;
+            },
+          ),
+        ),
         const SizedBox(height: 24),
       ],
     );

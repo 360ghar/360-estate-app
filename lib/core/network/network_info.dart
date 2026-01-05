@@ -7,7 +7,7 @@ abstract interface class NetworkInfo {
 
 final class NetworkInfoImpl implements NetworkInfo {
   NetworkInfoImpl({Connectivity? connectivity})
-    : _connectivity = connectivity ?? Connectivity();
+      : _connectivity = connectivity ?? Connectivity();
 
   final Connectivity _connectivity;
 

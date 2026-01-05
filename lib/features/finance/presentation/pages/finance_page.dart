@@ -46,11 +46,12 @@ class _FinancePageState extends State<FinancePage>
         body: const FeatureComingSoon(
           featureName: 'Finance Management',
           icon: Icons.account_balance_wallet,
-          description: 'Track rent payments, generate charges, and manage property expenses.',
+          description:
+              'Track rent payments, generate charges, and manage property expenses.',
         ),
       );
     }
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Finance'),
@@ -112,28 +113,30 @@ class _FinancePageState extends State<FinancePage>
   }
 
   void _showGenerateDialog(BuildContext context) {
-    unawaited(showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Generate Rent Charges'),
-        content: const Text(
-          'This will generate rent charges for all active leases for the current month. Charges that already exist will be skipped.',
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Generate Rent Charges'),
+          content: const Text(
+            'This will generate rent charges for all active leases for the current month. Charges that already exist will be skipped.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(context);
+                unawaited(Get.find<RentChargesController>().generateCharges());
+              },
+              child: const Text('Generate'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              unawaited(Get.find<RentChargesController>().generateCharges());
-            },
-            child: const Text('Generate'),
-          ),
-        ],
       ),
-    ),);
+    );
   }
 }
 
@@ -217,16 +220,18 @@ class _RentChargesTab extends GetView<RentChargesController> {
             onSelected: (_) => controller.setStatusFilter(null),
           ),
           const SizedBox(width: 8),
-          ...RentChargeStatus.values.map((status) => Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: FilterChip(
-                  label: Text(status.displayName),
-                  selected: controller.filterStatus.value == status,
-                  onSelected: (_) => controller.setStatusFilter(
-                    controller.filterStatus.value == status ? null : status,
-                  ),
+          ...RentChargeStatus.values.map(
+            (status) => Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilterChip(
+                label: Text(status.displayName),
+                selected: controller.filterStatus.value == status,
+                onSelected: (_) => controller.setStatusFilter(
+                  controller.filterStatus.value == status ? null : status,
                 ),
-              ),),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -281,7 +286,10 @@ class _RentChargeCard extends StatelessWidget {
                       children: [
                         Text(
                           'Period',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(
                                 color: Theme.of(context).colorScheme.outline,
                               ),
                         ),
@@ -298,15 +306,21 @@ class _RentChargeCard extends StatelessWidget {
                       children: [
                         Text(
                           'Due Date',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(
                                 color: Theme.of(context).colorScheme.outline,
                               ),
                         ),
                         Text(
                           DateFormat.yMMMd().format(charge.dueDate),
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: charge.isOverdue ? Theme.of(context).colorScheme.error : null,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: charge.isOverdue
+                                        ? Theme.of(context).colorScheme.error
+                                        : null,
+                                  ),
                         ),
                       ],
                     ),
@@ -314,7 +328,9 @@ class _RentChargeCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant),
+              Divider(
+                  height: 1,
+                  color: Theme.of(context).colorScheme.outlineVariant),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -347,31 +363,34 @@ class _RentChargeCard extends StatelessWidget {
   void _showChargeActions(BuildContext context) {
     if (charge.balance <= 0) return;
 
-    unawaited(showModalBottomSheet<void>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.payment),
-              title: const Text('Record Payment'),
-              onTap: () async {
-                Navigator.pop(context);
-                final result = await Get.toNamed<RentPayment>(
-                  Routes.recordPayment,
-                  arguments: charge,
-                );
-                if (result != null) {
-                  unawaited(Get.find<RentChargesController>().loadCharges());
-                  unawaited(Get.find<RentPaymentsController>().loadPayments());
-                }
-              },
-            ),
-          ],
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (context) => SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.payment),
+                title: const Text('Record Payment'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final result = await Get.toNamed<RentPayment>(
+                    Routes.recordPayment,
+                    arguments: charge,
+                  );
+                  if (result != null) {
+                    unawaited(Get.find<RentChargesController>().loadCharges());
+                    unawaited(
+                        Get.find<RentPaymentsController>().loadPayments());
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
-    ),);
+    );
   }
 }
 
@@ -526,7 +545,7 @@ class _RentPaymentCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
+                color: Colors.green.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
@@ -662,18 +681,20 @@ class _ExpensesTab extends GetView<ExpensesController> {
             onSelected: (_) => controller.setCategoryFilter(null),
           ),
           const SizedBox(width: 8),
-          ...ExpenseCategory.values.take(5).map((category) => Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: FilterChip(
-                  label: Text(category.displayName),
-                  selected: controller.filterCategory.value == category,
-                  onSelected: (_) => controller.setCategoryFilter(
-                    controller.filterCategory.value == category
-                        ? null
-                        : category,
+          ...ExpenseCategory.values.take(5).map(
+                (category) => Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    label: Text(category.displayName),
+                    selected: controller.filterCategory.value == category,
+                    onSelected: (_) => controller.setCategoryFilter(
+                      controller.filterCategory.value == category
+                          ? null
+                          : category,
+                    ),
                   ),
                 ),
-               ),),
+              ),
         ],
       ),
     );
@@ -710,7 +731,7 @@ class _ExpenseCard extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: expense.category.color.withOpacity(0.1),
+                  color: expense.category.color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -735,7 +756,8 @@ class _ExpenseCard extends StatelessWidget {
                     Text(
                       expense.category.displayName,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                     if (expense.propertyTitle != null) ...[

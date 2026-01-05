@@ -75,13 +75,24 @@ final class RentCharge {
 
   double get totalDue => amountDue + lateFee;
   double get balance => totalDue - amountPaid;
-  bool get isOverdue => DateTime.now().isAfter(dueDate) && status != RentChargeStatus.paid;
+  bool get isOverdue =>
+      DateTime.now().isAfter(dueDate) && status != RentChargeStatus.paid;
   bool get isPaid => status == RentChargeStatus.paid;
 
   String get periodLabel {
     final monthNames = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${monthNames[periodStart.month - 1]} ${periodStart.year}';
   }

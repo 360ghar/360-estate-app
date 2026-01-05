@@ -26,14 +26,16 @@ abstract interface class InspectionsRepository {
 
   Future<Inspection> completeInspection(int id, {String? notes});
 
-  Future<Inspection> signInspection(int id, {
+  Future<Inspection> signInspection(
+    int id, {
     required String signatureType, // 'tenant' or 'landlord'
     required String signature, // base64 signature data
   });
 
   Future<void> cancelInspection(int id, {String? reason});
 
-  Future<Inspection> addInspectionItem(int inspectionId, {
+  Future<Inspection> addInspectionItem(
+    int inspectionId, {
     required String area,
     required String item,
     required String condition,

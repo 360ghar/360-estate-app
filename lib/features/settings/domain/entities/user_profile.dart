@@ -66,34 +66,36 @@ final class UserProfile {
       role: json['role'] as String?,
       isActive: json['is_active'] as bool? ?? true,
       isVerified: json['is_verified'] as bool? ?? false,
-      createdAt: json['created_at'] != null 
-          ? DateTime.tryParse(json['created_at'] as String) 
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'] as String)
           : null,
-      updatedAt: json['updated_at'] != null 
-          ? DateTime.tryParse(json['updated_at'] as String) 
+      updatedAt: json['updated_at'] != null
+          ? DateTime.tryParse(json['updated_at'] as String)
           : null,
       preferences: json['preferences'] != null
-          ? UserPreferences.fromJson(json['preferences'] as Map<String, dynamic>)
+          ? UserPreferences.fromJson(
+              json['preferences'] as Map<String, dynamic>)
           : null,
       notificationSettings: json['notification_settings'] != null
-          ? NotificationSettings.fromJson(json['notification_settings'] as Map<String, dynamic>)
+          ? NotificationSettings.fromJson(
+              json['notification_settings'] as Map<String, dynamic>)
           : null,
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'supabase_user_id': supabaseUserId,
-    'phone': phone,
-    'email': email,
-    'full_name': fullName,
-    'avatar_url': avatarUrl,
-    'role': role,
-    'is_active': isActive,
-    'is_verified': isVerified,
-    'created_at': createdAt?.toIso8601String(),
-    'updated_at': updatedAt?.toIso8601String(),
-  };
+        'id': id,
+        'supabase_user_id': supabaseUserId,
+        'phone': phone,
+        'email': email,
+        'full_name': fullName,
+        'avatar_url': avatarUrl,
+        'role': role,
+        'is_active': isActive,
+        'is_verified': isVerified,
+        'created_at': createdAt?.toIso8601String(),
+        'updated_at': updatedAt?.toIso8601String(),
+      };
 }
 
 /// User search/property preferences
@@ -112,12 +114,12 @@ final class UserPreferences {
 
   factory UserPreferences.fromJson(Map<String, dynamic> json) {
     return UserPreferences(
-      preferredLocations: (json['preferred_locations'] as List<dynamic>?)
-          ?.cast<String>(),
+      preferredLocations:
+          (json['preferred_locations'] as List<dynamic>?)?.cast<String>(),
       budgetMin: (json['budget_min'] as num?)?.toDouble(),
       budgetMax: (json['budget_max'] as num?)?.toDouble(),
-      preferredPropertyTypes: (json['preferred_property_types'] as List<dynamic>?)
-          ?.cast<String>(),
+      preferredPropertyTypes:
+          (json['preferred_property_types'] as List<dynamic>?)?.cast<String>(),
     );
   }
 }
@@ -146,9 +148,9 @@ final class NotificationSettings {
   }
 
   Map<String, dynamic> toJson() => {
-    'push_enabled': pushEnabled,
-    'email_enabled': emailEnabled,
-    'sms_enabled': smsEnabled,
-    'marketing_enabled': marketingEnabled,
-  };
+        'push_enabled': pushEnabled,
+        'email_enabled': emailEnabled,
+        'sms_enabled': smsEnabled,
+        'marketing_enabled': marketingEnabled,
+      };
 }

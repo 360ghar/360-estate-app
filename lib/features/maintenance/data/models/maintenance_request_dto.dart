@@ -43,7 +43,8 @@ final class MaintenanceRequestDto {
       description: json['description'] as String? ?? '',
       assignedTo:
           json['assigned_to'] as String? ?? json['assignedTo'] as String?,
-      estimatedCost: _parseDouble(json['estimated_cost'] ?? json['estimatedCost']),
+      estimatedCost:
+          _parseDouble(json['estimated_cost'] ?? json['estimatedCost']),
       actualCost: _parseDouble(json['actual_cost'] ?? json['actualCost']),
       scheduledDate: json['scheduled_date'] != null
           ? DateTime.parse(json['scheduled_date'] as String)

@@ -22,13 +22,12 @@ class TenantDashboardPage extends StatelessWidget {
 
     return AppScaffold(
       appBar: AppBar(
-        title: const Text('My Home'),
-        actions: [
-          IconButton(
-            onPressed: () => Get.toNamed<void>(Routes.settings),
-            icon: const Icon(Icons.settings_outlined),
-          ),
-        ],
+        title: const Text(
+          'My Home',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        centerTitle: false,
+        elevation: 0,
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -42,7 +41,8 @@ class TenantDashboardPage extends StatelessWidget {
           children: [
             _buildLeaseInfoSection(context, leasesController),
             const SizedBox(height: 20),
-            _buildPaymentStatusSection(context, leasesController, paymentsController),
+            _buildPaymentStatusSection(
+                context, leasesController, paymentsController),
             const SizedBox(height: 20),
             _buildQuickActions(context),
             const SizedBox(height: 20),
@@ -63,9 +63,7 @@ class TenantDashboardPage extends StatelessWidget {
 
     return Obx(() {
       // Find active lease
-      final activeLease = controller.items
-          .where((l) => l.isActive)
-          .firstOrNull;
+      final activeLease = controller.items.where((l) => l.isActive).firstOrNull;
 
       if (activeLease == null) {
         return Card(
@@ -212,7 +210,8 @@ class TenantDashboardPage extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.3),
+                    color: theme.colorScheme.tertiaryContainer
+                        .withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -254,9 +253,8 @@ class TenantDashboardPage extends StatelessWidget {
     );
 
     return Obx(() {
-      final activeLease = leasesController.items
-          .where((l) => l.isActive)
-          .firstOrNull;
+      final activeLease =
+          leasesController.items.where((l) => l.isActive).firstOrNull;
 
       if (activeLease == null) {
         return const SizedBox.shrink();
@@ -476,9 +474,11 @@ class TenantDashboardPage extends StatelessWidget {
                   children: [
                     if (index > 0) const Divider(height: 1),
                     _PaymentTile(
-                      month: DateFormat('MMMM yyyy').format(items[index].paymentDate),
+                      month: DateFormat('MMMM yyyy')
+                          .format(items[index].paymentDate),
                       amount: currencyFormat.format(items[index].amount),
-                      date: DateFormat('dd MMM yyyy').format(items[index].paymentDate),
+                      date: DateFormat('dd MMM yyyy')
+                          .format(items[index].paymentDate),
                       statusColor: Colors.green,
                     ),
                   ],
@@ -525,7 +525,8 @@ class TenantDashboardPage extends StatelessWidget {
                 Card(
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      backgroundColor:
+                          theme.colorScheme.surfaceContainerHighest,
                       child: const Icon(Icons.build_outlined),
                     ),
                     title: Text(
@@ -556,10 +557,8 @@ class TenantDashboardPage extends StatelessWidget {
                 (index) => Card(
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: items[index]
-                          .status
-                          .color
-                          .withValues(alpha: 0.1),
+                      backgroundColor:
+                          items[index].status.color.withValues(alpha: 0.1),
                       child: Icon(
                         items[index].category.icon,
                         color: items[index].status.color,
@@ -571,8 +570,8 @@ class TenantDashboardPage extends StatelessWidget {
                     ),
                     subtitle: Text(_getRelativeTime(items[index].createdAt)),
                     trailing: Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: items[index].status.color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),

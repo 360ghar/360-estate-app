@@ -1,5 +1,4 @@
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
-import 'package:estate_app/core/presentation/design_system/app_text_styles.dart';
 import 'package:flutter/material.dart';
 
 class SplashPage extends StatefulWidget {
@@ -52,10 +51,8 @@ class _SplashPageState extends State<SplashPage>
 
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: isDark
-              ? AppColors.darkAuthGradient
-              : AppColors.primaryGradient,
+        decoration: const BoxDecoration(
+          gradient: AppColors.darkAuthGradient,
         ),
         child: SafeArea(
           child: Center(
@@ -80,7 +77,7 @@ class _SplashPageState extends State<SplashPage>
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           blurRadius: 30,
                           offset: const Offset(0, 10),
                         ),
@@ -88,7 +85,7 @@ class _SplashPageState extends State<SplashPage>
                     ),
                     child: Center(
                       child: Icon(
-                        Icons.home_work_rounded,
+                        Icons.apartment_rounded,
                         size: 60,
                         color: AppColors.brand,
                       ),
@@ -96,17 +93,22 @@ class _SplashPageState extends State<SplashPage>
                   ),
                   const SizedBox(height: 32),
                   // App Name
-                  Text(
+                  const Text(
                     '360 Estate',
-                    style: AppTextStyles.heroTitle(context).copyWith(
+                    style: TextStyle(
                       fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                       letterSpacing: -1,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Property Management Simplified',
-                    style: AppTextStyles.heroSubtitle(context),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white.withValues(alpha: 0.8),
+                    ),
                   ),
                   const SizedBox(height: 60),
                   // Loading Indicator
@@ -116,7 +118,7 @@ class _SplashPageState extends State<SplashPage>
                     child: CircularProgressIndicator(
                       strokeWidth: 3,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.white.withOpacity(0.9),
+                        Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
                   ),

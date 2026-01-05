@@ -159,84 +159,88 @@ class _DocumentsViewState extends State<_DocumentsView> {
   }
 
   void _confirmDelete(BuildContext context, Document document) {
-    unawaited(showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Document'),
-        content: Text(
-          'Are you sure you want to delete "${document.fileName}"?',
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Delete Document'),
+          content: Text(
+            'Are you sure you want to delete "${document.fileName}"?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                unawaited(controller.deleteDocument(document.id));
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Delete'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              unawaited(controller.deleteDocument(document.id));
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
       ),
-    ),);
+    );
   }
 
   void _showFilterSheet(BuildContext context) {
-    unawaited(showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    'Filter Documents',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: () {
-                      controller.clearFilters();
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Clear All'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Document Type',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: DocumentType.values.map((type) {
-                  return _FilterChip(
-                    label: type.displayName,
-                    isSelected: controller.filterType.value == type,
-                    onTap: () {
-                      controller.setTypeFilter(type);
-                      Navigator.pop(context);
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 24),
-            ],
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Filter Documents',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: () {
+                        controller.clearFilters();
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Clear All'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Document Type',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: DocumentType.values.map((type) {
+                    return _FilterChip(
+                      label: type.displayName,
+                      isSelected: controller.filterType.value == type,
+                      onTap: () {
+                        controller.setTypeFilter(type);
+                        Navigator.pop(context);
+                      },
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),
-    ),);
+    );
   }
 }
 
@@ -257,7 +261,8 @@ class _FilterChip extends StatelessWidget {
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => onTap(),
-      selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+      selectedColor:
+          Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
       checkmarkColor: Theme.of(context).colorScheme.primary,
     );
   }
@@ -290,7 +295,7 @@ class _DocumentCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: document.documentType.color.withOpacity(0.1),
+                  color: document.documentType.color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -325,7 +330,8 @@ class _DocumentCard extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: document.documentType.color.withOpacity(0.1),
+                            color: document.documentType.color
+                                .withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -341,9 +347,14 @@ class _DocumentCard extends StatelessWidget {
                           const SizedBox(width: 8),
                           Text(
                             document.formattedFileSize,
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
                           ),
                         ],
                       ],
@@ -361,9 +372,13 @@ class _DocumentCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               document.propertyTitle!,
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Theme.of(context).colorScheme.outline,
-                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.outline,
+                                  ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -376,9 +391,9 @@ class _DocumentCard extends StatelessWidget {
                       Text(
                         'Uploaded ${dateFormat.format(document.uploadedAt!)}',
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.outline,
-                          fontSize: 10,
-                        ),
+                              color: Theme.of(context).colorScheme.outline,
+                              fontSize: 10,
+                            ),
                       ),
                     ],
                     if (document.isExpired) ...[

@@ -5,6 +5,7 @@ import 'package:estate_app/core/config/app_config.dart';
 import 'package:estate_app/core/config/env_loader.dart';
 import 'package:estate_app/core/crash_reporting/crash_reporter.dart';
 import 'package:estate_app/core/logger/app_logger.dart';
+import 'package:estate_app/core/services/app_lifecycle_service.dart';
 import 'package:estate_app/core/services/deep_link_service.dart';
 import 'package:estate_app/core/storage/app_preferences.dart';
 import 'package:estate_app/core/storage/secure_kv_store.dart';
@@ -22,7 +23,8 @@ Future<void> bootstrap() async {
       final config = AppConfig.fromEnvironment();
       AppLogger.init(config);
       if (!envLoaded) {
-        AppLogger.w('No .env asset found; falling back to --dart-define values');
+        AppLogger.w(
+            'No .env asset found; falling back to --dart-define values');
       }
 
       final preferences = await AppPreferences.create();
@@ -52,6 +54,9 @@ Future<void> bootstrap() async {
       }
 
       Get.put<DeepLinkService>(DeepLinkService(), permanent: true);
+
+      // Initialize AppLifecycleService to handle data refresh on app resume
+      Get.put<AppLifecycleService>(AppLifecycleService(), permanent: true);
 
       runApp(const App());
     },

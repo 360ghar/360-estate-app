@@ -155,7 +155,8 @@ class LeaseCreateController extends GetxController {
         lateFeeGraceDays: lateFeeGraceDaysController.text.trim().isNotEmpty
             ? int.tryParse(lateFeeGraceDaysController.text.trim())
             : null,
-        renewalNotifyDays: int.tryParse(renewalNotifyDaysController.text.trim()) ?? 30,
+        renewalNotifyDays:
+            int.tryParse(renewalNotifyDaysController.text.trim()) ?? 30,
         notes: notesController.text.trim().isEmpty
             ? null
             : notesController.text.trim(),

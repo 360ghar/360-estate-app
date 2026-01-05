@@ -1,5 +1,3 @@
-import 'package:estate_app/core/config/app_config.dart';
-import 'package:estate_app/core/mocks/mock_finance_data_source.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/features/finance/data/datasources/finance_remote_data_source.dart';
 import 'package:estate_app/features/finance/data/repositories/finance_repository_impl.dart';
@@ -12,13 +10,9 @@ import 'package:get/get.dart';
 class FinanceBindings extends Bindings {
   @override
   void dependencies() {
-    final config = Get.find<AppConfig>();
-
     // Data source
     Get.lazyPut<FinanceRemoteDataSource>(
-      () => config.useMockApi
-          ? MockFinanceRemoteDataSource()
-          : ApiFinanceRemoteDataSource(Get.find<ApiClient>()),
+      () => ApiFinanceRemoteDataSource(Get.find<ApiClient>()),
     );
 
     // Repository
@@ -40,4 +34,3 @@ class FinanceBindings extends Bindings {
     );
   }
 }
-

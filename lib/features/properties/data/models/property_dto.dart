@@ -26,6 +26,8 @@ final class PropertyDto {
     this.activeLease,
     this.createdAt,
     this.updatedAt,
+    this.purpose = 'rent',
+    this.basePrice,
   });
 
   final int id;
@@ -52,24 +54,32 @@ final class PropertyDto {
   final ActiveLeaseDto? activeLease;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final String purpose;
+  final double? basePrice;
 
   factory PropertyDto.fromJson(Map<String, dynamic> json) {
     final id = _parseInt(json['id'] ?? json['property_id']);
     final title = (json['title'] ?? json['name'] ?? '').toString();
     final nickname = json['nickname'] as String?;
-    final addressLine = (json['address_line'] ?? json['address'] ?? '').toString();
+    final addressLine =
+        (json['address_line'] ?? json['address'] ?? '').toString();
     final city = (json['city'] ?? json['town'] ?? '').toString();
     final state = json['state'] as String?;
     final pincode = (json['pincode'] ?? json['postal_code'])?.toString();
     final country = (json['country'] ?? 'India').toString();
 
     final propertyType = (json['property_type'] ?? 'apartment').toString();
-    final propertyCategory = (json['property_category'] ?? 'residential').toString();
+    final propertyCategory =
+        (json['property_category'] ?? 'residential').toString();
 
-    final bedroomCount = _parseIntOrNull(json['bedroom_count'] ?? json['bedrooms']);
-    final bathroomCount = _parseIntOrNull(json['bathroom_count'] ?? json['bathrooms']);
-    final balconyCount = _parseIntOrNull(json['balcony_count'] ?? json['balconies']);
-    final floorAreaSqft = _parseDoubleOrNull(json['floor_area_sqft'] ?? json['area']);
+    final bedroomCount =
+        _parseIntOrNull(json['bedroom_count'] ?? json['bedrooms']);
+    final bathroomCount =
+        _parseIntOrNull(json['bathroom_count'] ?? json['bathrooms']);
+    final balconyCount =
+        _parseIntOrNull(json['balcony_count'] ?? json['balconies']);
+    final floorAreaSqft =
+        _parseDoubleOrNull(json['floor_area_sqft'] ?? json['area']);
 
     final rawImages = json['images'];
     final images = <String>[];
@@ -87,7 +97,8 @@ final class PropertyDto {
     final managementStatus = (json['management_status'] ?? 'active').toString();
     final paymentDueDay = _parseInt(json['payment_due_day'] ?? 1);
     final notes = json['notes'] as String?;
-    final monthlyRentInr = _parseInt(json['monthly_rent_inr'] ?? json['rent'] ?? json['monthly_rent'] ?? 0);
+    final monthlyRentInr = _parseInt(
+        json['monthly_rent_inr'] ?? json['rent'] ?? json['monthly_rent'] ?? 0);
     final securityDeposit = _parseDoubleOrNull(json['security_deposit']);
     final maintenanceCharges = _parseDoubleOrNull(json['maintenance_charges']);
 
@@ -98,6 +109,8 @@ final class PropertyDto {
 
     final createdAt = _parseDateTime(json['created_at']);
     final updatedAt = _parseDateTime(json['updated_at']);
+    final purpose = (json['purpose'] ?? 'rent').toString();
+    final basePrice = _parseDoubleOrNull(json['base_price']);
 
     return PropertyDto(
       id: id,
@@ -124,62 +137,76 @@ final class PropertyDto {
       activeLease: activeLease,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      purpose: purpose,
+      basePrice: basePrice,
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'title': title,
-    if (nickname != null) 'nickname': nickname,
-    'address_line': addressLine,
-    'city': city,
-    if (state != null) 'state': state,
-    if (pincode != null) 'pincode': pincode,
-    'country': country,
-    'property_type': propertyType,
-    'property_category': propertyCategory,
-    if (bedroomCount != null) 'bedroom_count': bedroomCount,
-    if (bathroomCount != null) 'bathroom_count': bathroomCount,
-    if (balconyCount != null) 'balcony_count': balconyCount,
-    if (floorAreaSqft != null) 'floor_area_sqft': floorAreaSqft,
-    'management_status': managementStatus,
-    'payment_due_day': paymentDueDay,
-    if (notes != null) 'notes': notes,
-    if (images.isNotEmpty)
-      'images': images.map((url) => {
-        'image_url': url,
-        'is_main_image': images.first == url, // Simple logic: first is main
-      },).toList(),
-    if (monthlyRentInr > 0) 'monthly_rent': monthlyRentInr, // Backend expects 'monthly_rent' (float) in Create
-    if (securityDeposit != null) 'security_deposit': securityDeposit,
-    if (maintenanceCharges != null) 'maintenance_charges': maintenanceCharges,
-  };
+        'title': title,
+        if (nickname != null) 'nickname': nickname,
+        'address_line': addressLine,
+        'city': city,
+        if (state != null) 'state': state,
+        if (pincode != null) 'pincode': pincode,
+        'country': country,
+        'property_type': propertyType,
+        'property_category': propertyCategory,
+        if (bedroomCount != null) 'bedroom_count': bedroomCount,
+        if (bathroomCount != null) 'bathroom_count': bathroomCount,
+        if (balconyCount != null) 'balcony_count': balconyCount,
+        if (floorAreaSqft != null) 'floor_area_sqft': floorAreaSqft,
+        'management_status': managementStatus,
+        'payment_due_day': paymentDueDay,
+        if (notes != null) 'notes': notes,
+        if (images.isNotEmpty)
+          'images': images
+              .map(
+                (url) => {
+                  'image_url': url,
+                  'is_main_image':
+                      images.first == url, // Simple logic: first is main
+                },
+              )
+              .toList(),
+        if (monthlyRentInr > 0)
+          'monthly_rent':
+              monthlyRentInr, // Backend expects 'monthly_rent' (float) in Create
+        if (securityDeposit != null) 'security_deposit': securityDeposit,
+        if (maintenanceCharges != null)
+          'maintenance_charges': maintenanceCharges,
+        'purpose': purpose,
+        if (basePrice != null) 'base_price': basePrice,
+      };
 
   Property toEntity() => Property(
-    id: id,
-    title: title,
-    nickname: nickname,
-    addressLine: addressLine,
-    city: city,
-    state: state,
-    pincode: pincode,
-    country: country,
-    propertyType: _parsePropertyType(propertyType),
-    propertyCategory: _parsePropertyCategory(propertyCategory),
-    bedroomCount: bedroomCount,
-    bathroomCount: bathroomCount,
-    balconyCount: balconyCount,
-    floorAreaSqft: floorAreaSqft,
-    images: images,
-    managementStatus: _parseManagementStatus(managementStatus),
-    paymentDueDay: paymentDueDay,
-    notes: notes,
-    monthlyRentInr: monthlyRentInr,
-    securityDeposit: securityDeposit,
-    maintenanceCharges: maintenanceCharges,
-    activeLease: activeLease?.toEntity(),
-    createdAt: createdAt,
-    updatedAt: updatedAt,
-  );
+        id: id,
+        title: title,
+        nickname: nickname,
+        addressLine: addressLine,
+        city: city,
+        state: state,
+        pincode: pincode,
+        country: country,
+        propertyType: _parsePropertyType(propertyType),
+        propertyCategory: _parsePropertyCategory(propertyCategory),
+        bedroomCount: bedroomCount,
+        bathroomCount: bathroomCount,
+        balconyCount: balconyCount,
+        floorAreaSqft: floorAreaSqft,
+        images: images,
+        managementStatus: _parseManagementStatus(managementStatus),
+        paymentDueDay: paymentDueDay,
+        notes: notes,
+        monthlyRentInr: monthlyRentInr,
+        securityDeposit: securityDeposit,
+        maintenanceCharges: maintenanceCharges,
+        activeLease: activeLease?.toEntity(),
+        createdAt: createdAt,
+        updatedAt: updatedAt,
+        purpose: purpose,
+        basePrice: basePrice,
+      );
 
   static int _parseInt(dynamic value) {
     if (value is int) return value;
@@ -260,7 +287,8 @@ final class ActiveLeaseDto {
   factory ActiveLeaseDto.fromJson(Map<String, dynamic> json) {
     return ActiveLeaseDto(
       id: PropertyDto._parseInt(json['id'] ?? json['lease_id']),
-      tenantName: (json['tenant_name'] ?? json['tenant']?['name'] ?? '').toString(),
+      tenantName:
+          (json['tenant_name'] ?? json['tenant']?['name'] ?? '').toString(),
       startDate: DateTime.parse(json['start_date'] as String),
       endDate: DateTime.parse(json['end_date'] as String),
       monthlyRent: PropertyDto._parseDoubleOrNull(json['monthly_rent']) ?? 0,
@@ -270,12 +298,12 @@ final class ActiveLeaseDto {
   }
 
   ActiveLease toEntity() => ActiveLease(
-    id: id,
-    tenantName: tenantName,
-    startDate: startDate,
-    endDate: endDate,
-    monthlyRent: monthlyRent,
-    securityDeposit: securityDeposit,
-    status: status,
-  );
+        id: id,
+        tenantName: tenantName,
+        startDate: startDate,
+        endDate: endDate,
+        monthlyRent: monthlyRent,
+        securityDeposit: securityDeposit,
+        status: status,
+      );
 }

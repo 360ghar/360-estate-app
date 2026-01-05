@@ -119,7 +119,8 @@ class ApplicationsController extends GetxController {
       applicationsFailure.value = f;
     } catch (e) {
       _currentPage--;
-      applicationsFailure.value = UnknownFailure('Failed to load more', cause: e);
+      applicationsFailure.value =
+          UnknownFailure('Failed to load more', cause: e);
     } finally {
       isLoadingMore.value = false;
     }
@@ -150,8 +151,9 @@ class ApplicationsController extends GetxController {
   // Stats
   int get pendingCount =>
       applications.where((a) => a.status == ApplicationStatus.pending).length;
-  int get underReviewCount =>
-      applications.where((a) => a.status == ApplicationStatus.underReview).length;
+  int get underReviewCount => applications
+      .where((a) => a.status == ApplicationStatus.underReview)
+      .length;
   int get approvedCount =>
       applications.where((a) => a.status == ApplicationStatus.approved).length;
   int get rejectedCount =>

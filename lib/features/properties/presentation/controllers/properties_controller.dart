@@ -4,11 +4,13 @@ import 'package:estate_app/features/properties/domain/usecases/get_properties_pa
 
 class PropertiesController extends PaginatedController<Property, int> {
   PropertiesController({required GetPropertiesPageUseCase getPropertiesPage})
-    : super(
-        fetchPage:
-            ({required int page, required int limit, required String query}) =>
-                getPropertiesPage(page: page, limit: limit, query: query),
-        keyOf: (p) => p.id,
-        pageSize: 20,
-      );
+      : super(
+          fetchPage: (
+                  {required int page,
+                  required int limit,
+                  required String query}) =>
+              getPropertiesPage(page: page, limit: limit, query: query),
+          keyOf: (p) => p.id,
+          pageSize: 20,
+        );
 }

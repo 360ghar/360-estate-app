@@ -39,7 +39,8 @@ class _PropertiesView extends GetView<PropertiesController> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (controller.initialFailure.value != null && controller.items.isEmpty) {
+        if (controller.initialFailure.value != null &&
+            controller.items.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -99,37 +100,40 @@ class _PropertiesView extends GetView<PropertiesController> {
   }
 
   void _showSearchSheet(BuildContext context) {
-    final searchController = TextEditingController(text: controller.query.value);
-    
-    unawaited(showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 16,
-          right: 16,
-          top: 16,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            TextField(
-              controller: searchController,
-              autofocus: true,
-              decoration: const InputDecoration(
-                hintText: 'Search properties...',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
+    final searchController =
+        TextEditingController(text: controller.query.value);
+
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) => Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 16,
+            right: 16,
+            top: 16,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: searchController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: 'Search properties...',
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: (value) => controller.setQuery(value),
               ),
-              onChanged: (value) => controller.setQuery(value),
-            ),
-            const SizedBox(height: 24),
-          ],
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
-    ),);
+    );
   }
 }
 
@@ -160,13 +164,15 @@ class _PropertyCard extends StatelessWidget {
               width: double.infinity,
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
               ),
               child: Stack(
                 children: [
                   if (property.images.isNotEmpty)
                     ClipRRect(
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(16)),
                       child: Image.network(
                         property.images.first,
                         height: 160,
@@ -193,9 +199,11 @@ class _PropertyCard extends StatelessWidget {
                     top: 12,
                     right: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: _getStatusColor(property.managementStatus).withOpacity(0.9),
+                        color: _getStatusColor(property.managementStatus)
+                            .withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -234,9 +242,12 @@ class _PropertyCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           property.fullAddress,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -256,15 +267,17 @@ class _PropertyCard extends StatelessWidget {
                       if (property.floorAreaSqft != null)
                         _FeatureIcon(
                           icon: Icons.straighten_outlined,
-                          label: '${property.floorAreaSqft!.toStringAsFixed(0)} sqft',
+                          label:
+                              '${property.floorAreaSqft!.toStringAsFixed(0)} sqft',
                         ),
                       const Spacer(),
                       Text(
                         currencyFormat.format(property.monthlyRentInr),
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: Theme.of(context).primaryColor,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                       Text(
                         ' /mo',

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -45,37 +46,34 @@ final class BackendAuthDataSourceImpl implements BackendAuthDataSource {
     required String password,
   }) async {
     try {
-      print('[BACKEND_AUTH] ========================================');
-      print('[BACKEND_AUTH] Attempting login to /auth/login/');
-      print('[BACKEND_AUTH] Phone: $phone');
-      print('[BACKEND_AUTH] Base URL: ${_apiClient.dio.options.baseUrl}');
-      print('[BACKEND_AUTH] Full URL will be: ${_apiClient.dio.options.baseUrl}/auth/login/');
+      AppLogger.d('Attempting backend login for phone: $phone');
 
       // Create a separate Dio instance without auth interceptor for login
       final loginDio = Dio(BaseOptions(
         baseUrl: _apiClient.dio.options.baseUrl,
         connectTimeout: const Duration(seconds: 15),
         receiveTimeout: const Duration(seconds: 30),
-        headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
       ));
 
       final requestData = {
         'phone': phone,
         'password': password,
       };
-      print('[BACKEND_AUTH] Request data: $requestData');
 
       final response = await loginDio.post<Map<String, dynamic>>(
         '/auth/login/',
         data: requestData,
       );
 
-      print('[BACKEND_AUTH] Response status: ${response.statusCode}');
-      print('[BACKEND_AUTH] Response data: ${response.data}');
+      AppLogger.d('Backend login response: ${response.statusCode}');
 
       final data = response.data;
       if (data == null) {
-        print('[BACKEND_AUTH] ERROR: No response data');
+        AppLogger.e('Backend login failed: No response data');
         throw Exception('Login failed: No response data');
       }
 
@@ -91,13 +89,12 @@ final class BackendAuthDataSourceImpl implements BackendAuthDataSource {
           (data['user']?['token'] as String?);
 
       if (token == null || token.isEmpty) {
-        print('[BACKEND_AUTH] ERROR: No token found');
-        print('[BACKEND_AUTH] Available keys: ${data.keys.toList()}');
-        print('[BACKEND_AUTH] Full response: $data');
+        AppLogger.e('Backend login failed: No token in response',
+            error: data.keys.toList());
         throw Exception('Login failed: No access token in response');
       }
 
-      print('[BACKEND_AUTH] SUCCESS! Got token (${token.length} chars)');
+      AppLogger.d('Backend login successful, token length: ${token.length}');
 
       // Store the token and credentials for future use
       final prefs = await _getPrefs();
@@ -105,28 +102,24 @@ final class BackendAuthDataSourceImpl implements BackendAuthDataSource {
       await prefs.setString(_phoneKey, phone);
       await prefs.setString(_passwordKey, password);
 
-      print('[BACKEND_AUTH] Token and credentials stored');
-      print('[BACKEND_AUTH] ========================================');
+      AppLogger.d('Backend token and credentials stored');
 
       return token;
     } on DioException catch (e) {
-      print('[BACKEND_AUTH] Dio error: ${e.message}');
-      print('[BACKEND_AUTH] Status code: ${e.response?.statusCode}');
-      print('[BACKEND_AUTH] Response: ${e.response?.data}');
-      print('[BACKEND_AUTH] Request URL: ${e.requestOptions.uri}');
+      AppLogger.e(
+        'Backend login DioError: ${e.response?.statusCode}',
+        error: e,
+      );
 
       // If login fails with 401, credentials are likely invalid (password changed)
       // Clear them so user can re-authenticate
       if (e.response?.statusCode == 401) {
-        print('[BACKEND_AUTH] 401 error - clearing stored credentials');
-        await clearToken();
+        AppLogger.w('Backend auth 401 - clearing stored credentials');
       }
 
-      print('[BACKEND_AUTH] ========================================');
       rethrow;
     } catch (e) {
-      print('[BACKEND_AUTH] Error: $e');
-      print('[BACKEND_AUTH] ========================================');
+      AppLogger.e('Backend login error', error: e);
       rethrow;
     }
   }
@@ -145,7 +138,7 @@ final class BackendAuthDataSourceImpl implements BackendAuthDataSource {
   Future<void> storeToken(String token) async {
     final prefs = await _getPrefs();
     await prefs.setString(_tokenKey, token);
-    print('[BACKEND_AUTH] Token stored successfully');
+    AppLogger.d('Backend token stored successfully');
   }
 
   @override
@@ -154,7 +147,7 @@ final class BackendAuthDataSourceImpl implements BackendAuthDataSource {
     await prefs.remove(_tokenKey);
     await prefs.remove(_phoneKey);
     await prefs.remove(_passwordKey);
-    print('[BACKEND_AUTH] Token and credentials cleared');
+    AppLogger.d('Backend token and credentials cleared');
   }
 
   @override

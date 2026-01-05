@@ -63,7 +63,8 @@ class RecordPaymentPage extends GetView<RecordPaymentController> {
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                         Text(
-                          currencyFormat.format(controller.rentCharge.amountPaid),
+                          currencyFormat
+                              .format(controller.rentCharge.amountPaid),
                           style: const TextStyle(color: Colors.green),
                         ),
                       ],
@@ -74,16 +75,18 @@ class RecordPaymentPage extends GetView<RecordPaymentController> {
                       children: [
                         Text(
                           'Balance',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         Text(
                           currencyFormat.format(controller.rentCharge.balance),
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.red,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.red,
+                                  ),
                         ),
                       ],
                     ),
@@ -101,7 +104,8 @@ class RecordPaymentPage extends GetView<RecordPaymentController> {
                 prefixText: '₹ ',
                 border: OutlineInputBorder(),
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
               ],
@@ -110,25 +114,27 @@ class RecordPaymentPage extends GetView<RecordPaymentController> {
             const SizedBox(height: 16),
 
             // Payment date
-            Obx(() => ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.calendar_today),
-                  title: const Text('Payment Date'),
-                  subtitle: Text(
-                    DateFormat.yMMMd().format(controller.paymentDate.value),
-                  ),
-                  onTap: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      initialDate: controller.paymentDate.value,
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime.now(),
-                    );
-                    if (date != null) {
-                      controller.setPaymentDate(date);
-                    }
-                  },
-                ),),
+            Obx(
+              () => ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.calendar_today),
+                title: const Text('Payment Date'),
+                subtitle: Text(
+                  DateFormat.yMMMd().format(controller.paymentDate.value),
+                ),
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: controller.paymentDate.value,
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime.now(),
+                  );
+                  if (date != null) {
+                    controller.setPaymentDate(date);
+                  }
+                },
+              ),
+            ),
             const SizedBox(height: 16),
 
             // Payment method
@@ -137,18 +143,20 @@ class RecordPaymentPage extends GetView<RecordPaymentController> {
               style: Theme.of(context).textTheme.titleSmall,
             ),
             const SizedBox(height: 8),
-            Obx(() => Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: PaymentMethod.values.map((method) {
-                    final isSelected = controller.paymentMethod.value == method;
-                    return ChoiceChip(
-                      label: Text(method.displayName),
-                      selected: isSelected,
-                      onSelected: (_) => controller.setPaymentMethod(method),
-                    );
-                  }).toList(),
-                ),),
+            Obx(
+              () => Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: PaymentMethod.values.map((method) {
+                  final isSelected = controller.paymentMethod.value == method;
+                  return ChoiceChip(
+                    label: Text(method.displayName),
+                    selected: isSelected,
+                    onSelected: (_) => controller.setPaymentMethod(method),
+                  );
+                }).toList(),
+              ),
+            ),
             const SizedBox(height: 16),
 
             // Reference number
@@ -175,18 +183,19 @@ class RecordPaymentPage extends GetView<RecordPaymentController> {
             const SizedBox(height: 24),
 
             // Submit button
-            Obx(() => FilledButton(
-                  onPressed: controller.isSubmitting.value
-                      ? null
-                      : controller.submit,
-                  child: controller.isSubmitting.value
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Record Payment'),
-                ),),
+            Obx(
+              () => FilledButton(
+                onPressed:
+                    controller.isSubmitting.value ? null : controller.submit,
+                child: controller.isSubmitting.value
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Record Payment'),
+              ),
+            ),
           ],
         ),
       ),

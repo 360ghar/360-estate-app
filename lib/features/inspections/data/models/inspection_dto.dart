@@ -89,7 +89,8 @@ final class InspectionDto {
       landlordSignature: json['landlord_signature'] as String?,
       notes: json['notes'] as String?,
       items: (json['items'] as List<dynamic>?)
-              ?.map((e) => InspectionItemDto.fromJson(e as Map<String, dynamic>))
+              ?.map(
+                  (e) => InspectionItemDto.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [],
       propertyTitle: json['property_title'] as String? ??

@@ -26,7 +26,8 @@ abstract interface class MaintenanceRepository {
     String? notes,
   });
 
-  Future<MaintenanceRequest> updateRequest(int id, Map<String, dynamic> updates);
+  Future<MaintenanceRequest> updateRequest(
+      int id, Map<String, dynamic> updates);
 
   Future<void> updateStatus(int id, String status);
 }

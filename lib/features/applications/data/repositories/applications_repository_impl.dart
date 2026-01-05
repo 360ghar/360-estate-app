@@ -56,12 +56,14 @@ final class ApplicationsRepositoryImpl implements ApplicationsRepository {
       'property_id': propertyId,
       if (customFields != null && customFields.isNotEmpty)
         'custom_fields': customFields
-            .map((f) => {
-                  'label': f.label,
-                  'field_type': f.fieldType,
-                  'is_required': f.isRequired,
-                  if (f.options.isNotEmpty) 'options': f.options,
-                },)
+            .map(
+              (f) => {
+                'label': f.label,
+                'field_type': f.fieldType,
+                'is_required': f.isRequired,
+                if (f.options.isNotEmpty) 'options': f.options,
+              },
+            )
             .toList(),
       if (expiresAt != null)
         'expires_at': expiresAt.toIso8601String().split('T')[0],

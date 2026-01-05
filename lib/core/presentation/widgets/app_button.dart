@@ -121,17 +121,19 @@ class _AppButtonState extends State<AppButton>
             width: widget.fullWidth ? double.infinity : null,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             decoration: BoxDecoration(
-              gradient: effectiveOnPressed != null
-                  ? AppColors.primaryGradient
-                  : null,
+              gradient:
+                  effectiveOnPressed != null ? AppColors.primaryGradient : null,
               color: effectiveOnPressed == null
-                  ? Theme.of(context).colorScheme.onSurface.withOpacity(0.12)
+                  ? Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.12)
                   : null,
               borderRadius: AppRadii.md,
               boxShadow: effectiveOnPressed != null
                   ? [
                       BoxShadow(
-                        color: AppColors.gradientEnd.withOpacity(0.3),
+                        color: AppColors.gradientEnd.withValues(alpha: 0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -142,7 +144,10 @@ class _AppButtonState extends State<AppButton>
               style: TextStyle(
                 color: effectiveOnPressed != null
                     ? Colors.white
-                    : Theme.of(context).colorScheme.onSurface.withOpacity(0.38),
+                    : Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.38),
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
@@ -170,12 +175,12 @@ class _AppButtonState extends State<AppButton>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                   elevation: 2,
-                  shadowColor:
-                      Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                  shadowColor: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.3),
                 ),
-                child: widget.fullWidth
-                    ? Center(child: child)
-                    : child,
+                child: widget.fullWidth ? Center(child: child) : child,
               ),
             ),
           ),

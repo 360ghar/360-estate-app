@@ -19,11 +19,11 @@ class SettingsController extends GetxController {
     required GetLocaleUseCase getLocale,
     required SetLocaleUseCase setLocale,
     required UserProfileRepository profileRepository,
-  }) : _getThemeMode = getThemeMode,
-       _setThemeMode = setThemeMode,
-       _getLocale = getLocale,
-       _setLocale = setLocale,
-       _profileRepository = profileRepository;
+  })  : _getThemeMode = getThemeMode,
+        _setThemeMode = setThemeMode,
+        _getLocale = getLocale,
+        _setLocale = setLocale,
+        _profileRepository = profileRepository;
 
   final GetThemeModeUseCase _getThemeMode;
   final SetThemeModeUseCase _setThemeMode;
@@ -33,17 +33,17 @@ class SettingsController extends GetxController {
 
   final Rx<AppThemeMode> themeMode = AppThemeMode.system.obs;
   final Rx<AppLocale?> locale = Rx<AppLocale?>(null);
-  
+
   // User profile state
   final Rx<UserProfile?> userProfile = Rx<UserProfile?>(null);
   final RxBool isLoadingProfile = false.obs;
   final RxString? profileError = RxString('');
 
   ThemeMode get flutterThemeMode => switch (themeMode.value) {
-    AppThemeMode.system => ThemeMode.system,
-    AppThemeMode.light => ThemeMode.light,
-    AppThemeMode.dark => ThemeMode.dark,
-  };
+        AppThemeMode.system => ThemeMode.system,
+        AppThemeMode.light => ThemeMode.light,
+        AppThemeMode.dark => ThemeMode.dark,
+      };
 
   Locale? get flutterLocale {
     final pref = locale.value;
@@ -82,7 +82,7 @@ class SettingsController extends GetxController {
   /// Fetch user profile from backend API
   Future<void> fetchProfile() async {
     if (isLoadingProfile.value) return;
-    
+
     isLoadingProfile.value = true;
     profileError?.value = '';
 
@@ -129,7 +129,7 @@ class SettingsController extends GetxController {
       locale.value = await _getLocale();
       final flutter = flutterLocale;
       if (flutter != null) await Get.updateLocale(flutter);
-      
+
       // Also fetch user profile
       unawaited(fetchProfile());
     } catch (e, st) {

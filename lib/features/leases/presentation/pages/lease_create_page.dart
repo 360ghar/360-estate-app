@@ -78,7 +78,8 @@ class LeaseCreatePage extends GetView<LeaseCreateController> {
             labelText: 'Select Property *',
             prefixIcon: const Icon(Icons.apartment),
             filled: true,
-            fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            fillColor: theme.colorScheme.surfaceContainerHighest
+                .withValues(alpha: 0.3),
           ),
           items: controller.properties.map((property) {
             return DropdownMenuItem(
@@ -95,8 +96,9 @@ class LeaseCreatePage extends GetView<LeaseCreateController> {
                   controller.properties.firstWhere((p) => p.id == value);
               // Auto-fill rent from property
               if (controller.monthlyRentController.text.isEmpty) {
-                controller.monthlyRentController.text =
-                    controller.selectedProperty.value!.monthlyRentInr.toString();
+                controller.monthlyRentController.text = controller
+                    .selectedProperty.value!.monthlyRentInr
+                    .toString();
               }
             }
           },
@@ -110,7 +112,8 @@ class LeaseCreatePage extends GetView<LeaseCreateController> {
             labelText: 'Select Tenant *',
             prefixIcon: const Icon(Icons.person),
             filled: true,
-            fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            fillColor: theme.colorScheme.surfaceContainerHighest
+                .withValues(alpha: 0.3),
           ),
           items: controller.tenants.map((tenant) {
             return DropdownMenuItem(
@@ -143,7 +146,8 @@ class LeaseCreatePage extends GetView<LeaseCreateController> {
                     labelText: 'Start Date *',
                     prefixIcon: const Icon(Icons.calendar_today),
                     filled: true,
-                    fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                    fillColor: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.3),
                   ),
                   child: Text(
                     controller.startDate.value != null
@@ -167,7 +171,8 @@ class LeaseCreatePage extends GetView<LeaseCreateController> {
                     labelText: 'End Date *',
                     prefixIcon: const Icon(Icons.event),
                     filled: true,
-                    fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                    fillColor: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.3),
                   ),
                   child: Text(
                     controller.endDate.value != null
@@ -186,12 +191,13 @@ class LeaseCreatePage extends GetView<LeaseCreateController> {
     );
   }
 
-  Future<void> _selectDate(BuildContext context, {required bool isStartDate}) async {
+  Future<void> _selectDate(BuildContext context,
+      {required bool isStartDate}) async {
     final initialDate = isStartDate
         ? (controller.startDate.value ?? DateTime.now())
-        : (controller.endDate.value ?? 
-            (controller.startDate.value?.add(const Duration(days: 365)) ?? 
-             DateTime.now().add(const Duration(days: 365))));
+        : (controller.endDate.value ??
+            (controller.startDate.value?.add(const Duration(days: 365)) ??
+                DateTime.now().add(const Duration(days: 365))));
 
     final picked = await showDatePicker(
       context: context,
@@ -225,7 +231,8 @@ class LeaseCreatePage extends GetView<LeaseCreateController> {
                   labelText: 'Monthly Rent *',
                   prefixIcon: const Icon(Icons.currency_rupee),
                   filled: true,
-                  fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                  fillColor: theme.colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.3),
                 ),
                 keyboardType: TextInputType.number,
               ),
@@ -238,7 +245,8 @@ class LeaseCreatePage extends GetView<LeaseCreateController> {
                   labelText: 'Security Deposit',
                   prefixIcon: const Icon(Icons.account_balance_wallet),
                   filled: true,
-                  fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                  fillColor: theme.colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.3),
                 ),
                 keyboardType: TextInputType.number,
               ),
@@ -252,7 +260,8 @@ class LeaseCreatePage extends GetView<LeaseCreateController> {
                 labelText: 'Rent Due Day of Month',
                 prefixIcon: const Icon(Icons.today),
                 filled: true,
-                fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                fillColor: theme.colorScheme.surfaceContainerHighest
+                    .withValues(alpha: 0.3),
               ),
               items: List.generate(28, (i) => i + 1).map((day) {
                 return DropdownMenuItem(
@@ -294,7 +303,8 @@ class LeaseCreatePage extends GetView<LeaseCreateController> {
               labelText: 'Late Fee Amount',
               prefixIcon: const Icon(Icons.money_off),
               filled: true,
-              fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+              fillColor: theme.colorScheme.surfaceContainerHighest
+                  .withValues(alpha: 0.3),
             ),
             keyboardType: TextInputType.number,
           ),
@@ -307,7 +317,8 @@ class LeaseCreatePage extends GetView<LeaseCreateController> {
               labelText: 'Grace Days',
               prefixIcon: const Icon(Icons.timer),
               filled: true,
-              fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+              fillColor: theme.colorScheme.surfaceContainerHighest
+                  .withValues(alpha: 0.3),
             ),
             keyboardType: TextInputType.number,
           ),
@@ -325,7 +336,8 @@ class LeaseCreatePage extends GetView<LeaseCreateController> {
             labelText: 'Renewal Reminder (days before)',
             prefixIcon: const Icon(Icons.notifications),
             filled: true,
-            fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            fillColor: theme.colorScheme.surfaceContainerHighest
+                .withValues(alpha: 0.3),
           ),
           keyboardType: TextInputType.number,
         ),
@@ -337,7 +349,8 @@ class LeaseCreatePage extends GetView<LeaseCreateController> {
             prefixIcon: const Icon(Icons.notes),
             alignLabelWithHint: true,
             filled: true,
-            fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            fillColor: theme.colorScheme.surfaceContainerHighest
+                .withValues(alpha: 0.3),
           ),
           maxLines: 3,
           textCapitalization: TextCapitalization.sentences,
@@ -349,7 +362,7 @@ class LeaseCreatePage extends GetView<LeaseCreateController> {
   Widget _buildSubmitButton(ThemeData theme) {
     return Obx(() {
       final isLoading = controller.state.value.status == ViewStatus.loading;
-      
+
       return FilledButton.icon(
         onPressed: isLoading ? null : controller.submit,
         icon: isLoading

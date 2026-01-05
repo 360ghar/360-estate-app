@@ -64,7 +64,7 @@ class TenantCreatePage extends GetView<TenantCreateController> {
         color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),
@@ -444,7 +444,7 @@ class _NotesForm extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Card(
-            color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(

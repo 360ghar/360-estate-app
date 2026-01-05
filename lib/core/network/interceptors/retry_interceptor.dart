@@ -10,10 +10,10 @@ final class RetryInterceptor extends Interceptor {
     int maxRetries = 2,
     Duration baseDelay = const Duration(milliseconds: 350),
     Random? random,
-  }) : _dio = dio,
-       _maxRetries = maxRetries,
-       _baseDelay = baseDelay,
-       _random = random ?? Random.secure();
+  })  : _dio = dio,
+        _maxRetries = maxRetries,
+        _baseDelay = baseDelay,
+        _random = random ?? Random.secure();
 
   final Dio _dio;
   final int _maxRetries;
@@ -42,8 +42,8 @@ final class RetryInterceptor extends Interceptor {
       DioExceptionType.receiveTimeout => true,
       DioExceptionType.connectionError => true,
       DioExceptionType.badResponse => _isRetryableStatus(
-        err.response?.statusCode,
-      ),
+          err.response?.statusCode,
+        ),
       DioExceptionType.badCertificate => false,
       DioExceptionType.cancel => false,
       DioExceptionType.unknown => false,

@@ -1,3 +1,4 @@
+import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/features/applications/data/models/application_dto.dart';
 
@@ -59,13 +60,13 @@ final class ApiApplicationsRemoteDataSource
     bool? isActive,
   }) async {
     // NOTE: /pm/applications/forms endpoint does NOT exist
-    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    AppLogger.w('PM applications endpoint not available');
     return [];
   }
 
   @override
   Future<ApplicationFormDto> getApplicationFormById(int id) async {
-    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    AppLogger.w('PM applications endpoint not available');
     throw UnsupportedError(
       'Application forms are not yet available. PM module pending backend implementation.',
     );
@@ -73,7 +74,7 @@ final class ApiApplicationsRemoteDataSource
 
   @override
   Future<ApplicationFormDto> getApplicationFormBySlug(String slug) async {
-    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    AppLogger.w('PM applications endpoint not available');
     throw UnsupportedError(
       'Application forms are not yet available. PM module pending backend implementation.',
     );
@@ -82,7 +83,7 @@ final class ApiApplicationsRemoteDataSource
   @override
   Future<ApplicationFormDto> createApplicationForm(
       Map<String, dynamic> data) async {
-    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    AppLogger.w('PM applications endpoint not available');
     throw UnsupportedError(
       'Application form creation is not yet available. PM module pending backend implementation.',
     );
@@ -93,7 +94,7 @@ final class ApiApplicationsRemoteDataSource
     int id,
     Map<String, dynamic> updates,
   ) async {
-    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    AppLogger.w('PM applications endpoint not available');
     throw UnsupportedError(
       'Application form update is not yet available. PM module pending backend implementation.',
     );
@@ -101,7 +102,7 @@ final class ApiApplicationsRemoteDataSource
 
   @override
   Future<void> deactivateApplicationForm(int id) async {
-    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    AppLogger.w('PM applications endpoint not available');
     throw UnsupportedError(
       'Application form deactivation is not yet available. PM module pending backend implementation.',
     );
@@ -116,13 +117,13 @@ final class ApiApplicationsRemoteDataSource
     String? status,
   }) async {
     // NOTE: /pm/applications endpoint does NOT exist
-    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    AppLogger.w('PM applications endpoint not available');
     return [];
   }
 
   @override
   Future<ApplicationDto> getApplicationById(int id) async {
-    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    AppLogger.w('PM applications endpoint not available');
     throw UnsupportedError(
       'Application details are not yet available. PM module pending backend implementation.',
     );
@@ -130,7 +131,7 @@ final class ApiApplicationsRemoteDataSource
 
   @override
   Future<ApplicationDto> reviewApplication(int id) async {
-    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    AppLogger.w('PM applications endpoint not available');
     throw UnsupportedError(
       'Application review is not yet available. PM module pending backend implementation.',
     );
@@ -138,7 +139,7 @@ final class ApiApplicationsRemoteDataSource
 
   @override
   Future<ApplicationDto> approveApplication(int id, {String? notes}) async {
-    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    AppLogger.w('PM applications endpoint not available');
     throw UnsupportedError(
       'Application approval is not yet available. PM module pending backend implementation.',
     );
@@ -146,7 +147,7 @@ final class ApiApplicationsRemoteDataSource
 
   @override
   Future<ApplicationDto> rejectApplication(int id, {String? notes}) async {
-    print('[APPLICATIONS] WARNING: PM applications endpoint not available');
+    AppLogger.w('PM applications endpoint not available');
     throw UnsupportedError(
       'Application rejection is not yet available. PM module pending backend implementation.',
     );

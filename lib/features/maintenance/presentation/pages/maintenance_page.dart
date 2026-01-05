@@ -29,7 +29,8 @@ class MaintenancePage extends StatelessWidget {
         body: const FeatureComingSoon(
           featureName: 'Maintenance Requests',
           icon: Icons.build,
-          description: 'Create and track maintenance requests, assign technicians, and manage repairs.',
+          description:
+              'Create and track maintenance requests, assign technicians, and manage repairs.',
         ),
       );
     }
@@ -124,8 +125,7 @@ class _MaintenanceViewState extends State<_MaintenanceView> {
                     'No maintenance requests found. Create a new request to get started.',
                 action: AppButton(
                   label: 'Create Request',
-                  onPressed: () =>
-                      Get.toNamed<void>(Routes.maintenanceCreate),
+                  onPressed: () => Get.toNamed<void>(Routes.maintenanceCreate),
                 ),
               );
             }
@@ -177,98 +177,100 @@ class _MaintenanceViewState extends State<_MaintenanceView> {
   }
 
   void _showFilterSheet(BuildContext context) {
-    unawaited(showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    'Filter Requests',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: () {
-                      controller.clearFilters();
-                      Navigator.pop(context);
-                    },
-                    child: const Text('Clear All'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Status',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: MaintenanceStatus.values.map((status) {
-                  return _FilterChip(
-                    label: status.displayName,
-                    isSelected: controller.filterStatus.value == status,
-                    onTap: () {
-                      controller.setStatusFilter(status);
-                      Navigator.pop(context);
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Priority',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: MaintenancePriority.values.map((priority) {
-                  return _FilterChip(
-                    label: priority.displayName,
-                    isSelected: controller.filterPriority.value == priority,
-                    onTap: () {
-                      controller.setPriorityFilter(priority);
-                      Navigator.pop(context);
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Category',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: MaintenanceCategory.values.map((category) {
-                  return _FilterChip(
-                    label: category.displayName,
-                    isSelected: controller.filterCategory.value == category,
-                    onTap: () {
-                      controller.setCategoryFilter(category);
-                      Navigator.pop(context);
-                    },
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 24),
-            ],
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Filter Requests',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: () {
+                        controller.clearFilters();
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Clear All'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Status',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: MaintenanceStatus.values.map((status) {
+                    return _FilterChip(
+                      label: status.displayName,
+                      isSelected: controller.filterStatus.value == status,
+                      onTap: () {
+                        controller.setStatusFilter(status);
+                        Navigator.pop(context);
+                      },
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Priority',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: MaintenancePriority.values.map((priority) {
+                    return _FilterChip(
+                      label: priority.displayName,
+                      isSelected: controller.filterPriority.value == priority,
+                      onTap: () {
+                        controller.setPriorityFilter(priority);
+                        Navigator.pop(context);
+                      },
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Category',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: MaintenanceCategory.values.map((category) {
+                    return _FilterChip(
+                      label: category.displayName,
+                      isSelected: controller.filterCategory.value == category,
+                      onTap: () {
+                        controller.setCategoryFilter(category);
+                        Navigator.pop(context);
+                      },
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),
-    ),);
+    );
   }
 }
 
@@ -284,7 +286,11 @@ class _StatsBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLow,
         border: Border(
-          bottom: BorderSide(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5)),
+          bottom: BorderSide(
+              color: Theme.of(context)
+                  .colorScheme
+                  .outlineVariant
+                  .withValues(alpha: 0.5)),
         ),
       ),
       child: Row(
@@ -338,8 +344,8 @@ class _StatItem extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
         ),
       ],
     );
@@ -363,7 +369,8 @@ class _FilterChip extends StatelessWidget {
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => onTap(),
-      selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+      selectedColor:
+          Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
       checkmarkColor: Theme.of(context).colorScheme.primary,
     );
   }
@@ -397,7 +404,7 @@ class _MaintenanceCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: request.category.color.withOpacity(0.1),
+                      color: request.category.color.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -413,19 +420,23 @@ class _MaintenanceCard extends StatelessWidget {
                       children: [
                         Text(
                           request.title,
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 2),
                         Text(
                           request.category.displayName,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            fontSize: 12,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                    fontSize: 12,
+                                  ),
                         ),
                       ],
                     ),
@@ -437,9 +448,9 @@ class _MaintenanceCard extends StatelessWidget {
               Text(
                 request.description,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 13,
-                ),
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontSize: 13,
+                    ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -458,8 +469,8 @@ class _MaintenanceCard extends StatelessWidget {
                     Text(
                       dateFormat.format(request.createdAt!),
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
                     ),
                   ],
                 ],

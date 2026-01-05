@@ -18,19 +18,24 @@ final class DashboardOverviewDto {
     return DashboardOverviewDto(
       totalProperties: (json['total_properties'] as num?)?.toInt() ?? 0,
       occupiedProperties: (json['occupied_units'] as num?)?.toInt() ??
-          (json['occupied_properties'] as num?)?.toInt() ?? 0,
+          (json['occupied_properties'] as num?)?.toInt() ??
+          0,
       vacantProperties: (json['vacant_units'] as num?)?.toInt() ??
-          (json['vacant_properties'] as num?)?.toInt() ?? 0,
+          (json['vacant_properties'] as num?)?.toInt() ??
+          0,
       underMaintenanceProperties:
           (json['under_maintenance_properties'] as num?)?.toInt() ?? 0,
       monthlyRevenueCurrent: (json['monthly_revenue'] as num?)?.toDouble() ??
-          (json['monthly_revenue_current'] as num?)?.toDouble() ?? 0,
+          (json['monthly_revenue_current'] as num?)?.toDouble() ??
+          0,
       monthlyRevenuePrevious:
           (json['monthly_revenue_previous'] as num?)?.toDouble() ?? 0,
       outstandingRentTotal: (json['outstanding_rent'] as num?)?.toDouble() ??
-          (json['outstanding_rent_total'] as num?)?.toDouble() ?? 0,
+          (json['outstanding_rent_total'] as num?)?.toDouble() ??
+          0,
       upcomingExpensesTotal: (json['upcoming_expenses'] as num?)?.toDouble() ??
-          (json['upcoming_expenses_total'] as num?)?.toDouble() ?? 0,
+          (json['upcoming_expenses_total'] as num?)?.toDouble() ??
+          0,
     );
   }
 

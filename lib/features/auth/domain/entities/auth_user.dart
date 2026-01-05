@@ -6,9 +6,9 @@ enum UserRole {
 
   static UserRole parse(String? value) {
     if (value == null) return UserRole.unknown;
-    
+
     final normalized = value.toLowerCase().trim();
-    
+
     // Map backend role values to app roles
     switch (normalized) {
       case 'admin':

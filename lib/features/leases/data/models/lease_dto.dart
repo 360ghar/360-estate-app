@@ -25,16 +25,16 @@ final class LeaseDto {
   factory LeaseDto.fromJson(Map<String, dynamic> json) {
     return LeaseDto(
       id: json['id'] as int,
-      propertyId: json['property_id'] as int? ?? json['propertyId'] as int? ?? 0,
+      propertyId:
+          json['property_id'] as int? ?? json['propertyId'] as int? ?? 0,
       propertyTitle: json['property_title'] as String? ??
           json['propertyTitle'] as String? ??
           '',
       tenantUserId: json['tenant_user_id'] as String? ??
           json['tenantUserId'] as String? ??
           '',
-      tenantName: json['tenant_name'] as String? ??
-          json['tenantName'] as String? ??
-          '',
+      tenantName:
+          json['tenant_name'] as String? ?? json['tenantName'] as String? ?? '',
       startDate: DateTime.parse(
         json['start_date'] as String? ??
             json['startDate'] as String? ??

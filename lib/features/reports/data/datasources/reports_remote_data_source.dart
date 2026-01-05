@@ -1,3 +1,4 @@
+import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/features/reports/data/models/report_dto.dart';
 
@@ -36,7 +37,7 @@ final class ReportsRemoteDataSourceImpl implements ReportsRemoteDataSource {
 
   @override
   Future<RentRollReportDto> getRentRollReport() async {
-    print('[REPORTS] WARNING: PM reports endpoint not available');
+    AppLogger.w(' PM reports endpoint not available');
     return RentRollReportDto.empty();
   }
 
@@ -45,7 +46,7 @@ final class ReportsRemoteDataSourceImpl implements ReportsRemoteDataSource {
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    print('[REPORTS] WARNING: PM reports endpoint not available');
+    AppLogger.w(' PM reports endpoint not available');
     return IncomeReportDto.empty();
   }
 
@@ -54,7 +55,7 @@ final class ReportsRemoteDataSourceImpl implements ReportsRemoteDataSource {
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    print('[REPORTS] WARNING: PM reports endpoint not available');
+    AppLogger.w(' PM reports endpoint not available');
     return ExpensesReportDto.empty();
   }
 
@@ -63,20 +64,19 @@ final class ReportsRemoteDataSourceImpl implements ReportsRemoteDataSource {
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    print('[REPORTS] WARNING: PM reports endpoint not available');
+    AppLogger.w(' PM reports endpoint not available');
     return ProfitAndLossReportDto.empty();
   }
 
   @override
   Future<OccupancyReportDto> getOccupancyReport() async {
-    print('[REPORTS] WARNING: PM reports endpoint not available');
+    AppLogger.w(' PM reports endpoint not available');
     return OccupancyReportDto.empty();
   }
 
   @override
   Future<MaintenanceReportDto> getMaintenanceReport() async {
-    print('[REPORTS] WARNING: PM reports endpoint not available');
+    AppLogger.w(' PM reports endpoint not available');
     return MaintenanceReportDto.empty();
   }
 }
-

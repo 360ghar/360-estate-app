@@ -87,9 +87,8 @@ class InspectionFormController extends GetxController {
               scheduledDate.value!.toIso8601String().split('T')[0];
         }
         if (inspectorName.value != (existingInspection!.inspectorName ?? '')) {
-          updates['inspector_name'] = inspectorName.value.isEmpty
-              ? null
-              : inspectorName.value;
+          updates['inspector_name'] =
+              inspectorName.value.isEmpty ? null : inspectorName.value;
         }
         if (notes.value != (existingInspection!.notes ?? '')) {
           updates['notes'] = notes.value.isEmpty ? null : notes.value;
@@ -108,7 +107,8 @@ class InspectionFormController extends GetxController {
           propertyId: selectedPropertyId.value!,
           inspectionType: inspectionType.value!,
           scheduledDate: scheduledDate.value!,
-          inspectorName: inspectorName.value.isEmpty ? null : inspectorName.value,
+          inspectorName:
+              inspectorName.value.isEmpty ? null : inspectorName.value,
           notes: notes.value.isEmpty ? null : notes.value,
         );
       }

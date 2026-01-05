@@ -11,5 +11,6 @@ final class GetPropertiesPageUseCase {
     required int page,
     required int limit,
     required String query,
-  }) => _repository.getProperties(page: page, limit: limit, query: query);
+  }) =>
+      _repository.getProperties(page: page, limit: limit, query: query);
 }

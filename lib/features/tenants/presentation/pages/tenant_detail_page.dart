@@ -77,7 +77,10 @@ class _TenantDetailContent extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 48,
-                  backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  backgroundColor: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.1),
                   child: Text(
                     tenant.initials,
                     style: TextStyle(
@@ -104,51 +107,51 @@ class _TenantDetailContent extends StatelessWidget {
           // Contact info card
           AppCard(
             child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Contact Information',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                if (tenant.phone != null)
+                  _InfoRow(
+                    icon: Icons.phone,
+                    label: 'Phone',
+                    value: tenant.phone!,
+                  ),
+                if (tenant.email != null)
+                  _InfoRow(
+                    icon: Icons.email,
+                    label: 'Email',
+                    value: tenant.email!,
+                  ),
+                if (tenant.emergencyContact != null) ...[
+                  const Divider(height: 24),
                   Text(
-                    'Contact Information',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                    'Emergency Contact',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  if (tenant.phone != null)
+                  const SizedBox(height: 8),
+                  _InfoRow(
+                    icon: Icons.person,
+                    label: 'Name',
+                    value: tenant.emergencyContact!,
+                  ),
+                  if (tenant.emergencyPhone != null)
                     _InfoRow(
                       icon: Icons.phone,
                       label: 'Phone',
-                      value: tenant.phone!,
+                      value: tenant.emergencyPhone!,
                     ),
-                  if (tenant.email != null)
-                    _InfoRow(
-                      icon: Icons.email,
-                      label: 'Email',
-                      value: tenant.email!,
-                    ),
-                  if (tenant.emergencyContact != null) ...[
-                    const Divider(height: 24),
-                    Text(
-                      'Emergency Contact',
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    _InfoRow(
-                      icon: Icons.person,
-                      label: 'Name',
-                      value: tenant.emergencyContact!,
-                    ),
-                    if (tenant.emergencyPhone != null)
-                      _InfoRow(
-                        icon: Icons.phone,
-                        label: 'Phone',
-                        value: tenant.emergencyPhone!,
-                      ),
-                  ],
                 ],
-              ),
+              ],
             ),
+          ),
           const SizedBox(height: 16),
 
           // ID Documents card
@@ -313,15 +316,15 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         status.name.toUpperCase(),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: color,
-          fontWeight: FontWeight.bold,
-        ),
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
       ),
     );
   }
@@ -357,14 +360,14 @@ class _InfoRow extends StatelessWidget {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                 ),
                 Text(
                   value,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ],
             ),
@@ -398,12 +401,12 @@ class _LeaseCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isHistory
             ? Theme.of(context).colorScheme.surfaceContainerLow
-            : Theme.of(context).colorScheme.primary.withOpacity(0.05),
+            : Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isHistory
               ? Theme.of(context).colorScheme.outlineVariant
-              : Theme.of(context).colorScheme.primary.withOpacity(0.2),
+              : Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
         ),
       ),
       child: Column(
@@ -412,8 +415,8 @@ class _LeaseCard extends StatelessWidget {
           Text(
             lease.propertyTitle,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 8),
           Row(
@@ -425,7 +428,8 @@ class _LeaseCard extends StatelessWidget {
                     Text(
                       '${dateFormat.format(lease.startDate)} - ${dateFormat.format(lease.endDate)}',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                     const SizedBox(height: 4),
@@ -445,7 +449,7 @@ class _LeaseCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
+                    color: Colors.orange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(

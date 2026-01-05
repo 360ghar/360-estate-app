@@ -20,8 +20,8 @@ class ReportsPage extends StatelessWidget {
           Text(
             'Select a report to view',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
           const SizedBox(height: 16),
           _ReportCategory(
@@ -152,7 +152,8 @@ class _ReportItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant),
+      leading:
+          Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant),
       title: Text(title),
       subtitle: Text(subtitle),
       trailing: const Icon(Icons.chevron_right, size: 20),

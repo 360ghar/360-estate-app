@@ -69,7 +69,8 @@ class SettingsPage extends StatelessWidget {
                         icon: Icons.person_outline,
                         title: 'Edit Profile',
                         subtitle: 'Update your personal information',
-                        onTap: () => _showEditProfileDialog(context, controller, profile),
+                        onTap: () => _showEditProfileDialog(
+                            context, controller, profile),
                       ),
                       const Divider(height: 1),
                       _SettingsTile(
@@ -103,22 +104,28 @@ class SettingsPage extends StatelessWidget {
                       _ThemeOptionTile(
                         icon: Icons.brightness_auto,
                         title: context.l10n.themeSystem,
-                        isSelected: controller.themeMode.value == AppThemeMode.system,
-                        onTap: () => unawaited(controller.setTheme(AppThemeMode.system)),
+                        isSelected:
+                            controller.themeMode.value == AppThemeMode.system,
+                        onTap: () =>
+                            unawaited(controller.setTheme(AppThemeMode.system)),
                       ),
                       const Divider(height: 1),
                       _ThemeOptionTile(
                         icon: Icons.light_mode_outlined,
                         title: context.l10n.themeLight,
-                        isSelected: controller.themeMode.value == AppThemeMode.light,
-                        onTap: () => unawaited(controller.setTheme(AppThemeMode.light)),
+                        isSelected:
+                            controller.themeMode.value == AppThemeMode.light,
+                        onTap: () =>
+                            unawaited(controller.setTheme(AppThemeMode.light)),
                       ),
                       const Divider(height: 1),
                       _ThemeOptionTile(
                         icon: Icons.dark_mode_outlined,
                         title: context.l10n.themeDark,
-                        isSelected: controller.themeMode.value == AppThemeMode.dark,
-                        onTap: () => unawaited(controller.setTheme(AppThemeMode.dark)),
+                        isSelected:
+                            controller.themeMode.value == AppThemeMode.dark,
+                        onTap: () =>
+                            unawaited(controller.setTheme(AppThemeMode.dark)),
                       ),
                     ],
                   ),
@@ -136,25 +143,30 @@ class SettingsPage extends StatelessWidget {
                       _LanguageOptionTile(
                         flag: '🌐',
                         title: context.l10n.languageSystem,
-                        isSelected: controller.locale.value?.languageCode == null,
+                        isSelected:
+                            controller.locale.value?.languageCode == null,
                         onTap: () => unawaited(controller.setAppLocale(null)),
                       ),
                       const Divider(height: 1),
                       _LanguageOptionTile(
                         flag: '🇬🇧',
                         title: context.l10n.languageEnglish,
-                        isSelected: controller.locale.value?.languageCode == 'en',
+                        isSelected:
+                            controller.locale.value?.languageCode == 'en',
                         onTap: () => unawaited(
-                          controller.setAppLocale(const AppLocale(languageCode: 'en')),
+                          controller.setAppLocale(
+                              const AppLocale(languageCode: 'en')),
                         ),
                       ),
                       const Divider(height: 1),
                       _LanguageOptionTile(
                         flag: '🇮🇳',
                         title: context.l10n.languageHindi,
-                        isSelected: controller.locale.value?.languageCode == 'hi',
+                        isSelected:
+                            controller.locale.value?.languageCode == 'hi',
                         onTap: () => unawaited(
-                          controller.setAppLocale(const AppLocale(languageCode: 'hi')),
+                          controller.setAppLocale(
+                              const AppLocale(languageCode: 'hi')),
                         ),
                       ),
                     ],
@@ -219,7 +231,8 @@ class SettingsPage extends StatelessWidget {
                         trailing: Text(
                           '1.0.0',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withOpacity(0.5),
+                            color: theme.colorScheme.onSurface
+                                .withValues(alpha: 0.5),
                           ),
                         ),
                       ),
@@ -231,7 +244,8 @@ class SettingsPage extends StatelessWidget {
 
                 // Logout Button
                 _LogoutButton(
-                  onPressed: () => _showLogoutConfirmation(context, authController),
+                  onPressed: () =>
+                      _showLogoutConfirmation(context, authController),
                 ),
 
                 const SizedBox(height: 32),
@@ -243,20 +257,22 @@ class SettingsPage extends StatelessWidget {
                       Icon(
                         Icons.home_work_rounded,
                         size: 40,
-                        color: theme.colorScheme.primary.withOpacity(0.5),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.5),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         '360 Estate',
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.5),
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.5),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       Text(
                         'Made with ❤️ in India',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.4),
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.4),
                         ),
                       ),
                     ],
@@ -281,7 +297,8 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  void _showEditProfileDialog(BuildContext context, SettingsController controller, UserProfile? profile) {
+  void _showEditProfileDialog(BuildContext context,
+      SettingsController controller, UserProfile? profile) {
     final nameController = TextEditingController(text: profile?.fullName ?? '');
     final emailController = TextEditingController(text: profile?.email ?? '');
 
@@ -318,14 +335,20 @@ class SettingsPage extends StatelessWidget {
           FilledButton(
             onPressed: () async {
               final success = await controller.updateProfile(
-                fullName: nameController.text.trim().isEmpty ? null : nameController.text.trim(),
-                email: emailController.text.trim().isEmpty ? null : emailController.text.trim(),
+                fullName: nameController.text.trim().isEmpty
+                    ? null
+                    : nameController.text.trim(),
+                email: emailController.text.trim().isEmpty
+                    ? null
+                    : emailController.text.trim(),
               );
               if (context.mounted) {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(success ? 'Profile updated!' : 'Failed to update profile'),
+                    content: Text(success
+                        ? 'Profile updated!'
+                        : 'Failed to update profile'),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
@@ -374,7 +397,8 @@ class SettingsPage extends StatelessWidget {
     }
   }
 
-  void _showLogoutConfirmation(BuildContext context, AuthController authController) {
+  void _showLogoutConfirmation(
+      BuildContext context, AuthController authController) {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -439,7 +463,7 @@ class _ProfileHeader extends StatelessWidget {
         borderRadius: AppRadii.xl,
         boxShadow: [
           BoxShadow(
-            color: AppColors.gradientEnd.withOpacity(0.3),
+            color: AppColors.gradientEnd.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -456,7 +480,7 @@ class _ProfileHeader extends StatelessWidget {
                     width: 70,
                     height: 70,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                       image: avatarUrl != null
                           ? DecorationImage(
@@ -514,9 +538,10 @@ class _ProfileHeader extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: AppRadii.sm,
                       ),
                       child: Text(
@@ -539,13 +564,14 @@ class _ProfileHeader extends StatelessWidget {
                       SnackBar(
                         content: const Text('User ID copied to clipboard'),
                         behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(borderRadius: AppRadii.md),
+                        shape:
+                            RoundedRectangleBorder(borderRadius: AppRadii.md),
                       ),
                     );
                   },
                   icon: Icon(
                     Icons.content_copy,
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     size: 20,
                   ),
                   tooltip: 'Copy User ID',
@@ -563,13 +589,13 @@ class _ProfileHeader extends StatelessWidget {
                   Icon(
                     Icons.phone_outlined,
                     size: 16,
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                   ),
                   const SizedBox(width: 6),
                   Text(
                     phone,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -578,14 +604,14 @@ class _ProfileHeader extends StatelessWidget {
                   Icon(
                     Icons.email_outlined,
                     size: 16,
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                   ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       email,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -600,7 +626,7 @@ class _ProfileHeader extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 borderRadius: AppRadii.sm,
               ),
               child: Row(
@@ -609,13 +635,13 @@ class _ProfileHeader extends StatelessWidget {
                   Icon(
                     Icons.info_outline,
                     size: 14,
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                   ),
                   const SizedBox(width: 6),
                   Text(
                     'Pull to refresh profile',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                     ),
                   ),
                 ],
@@ -654,10 +680,10 @@ class _SectionTitle extends StatelessWidget {
       child: Text(
         title.toUpperCase(),
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 1.2,
-        ),
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.2,
+            ),
       ),
     );
   }
@@ -688,7 +714,7 @@ class _SettingsTile extends StatelessWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: theme.colorScheme.primary.withOpacity(0.1),
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
           borderRadius: AppRadii.sm,
         ),
         child: Icon(
@@ -707,7 +733,7 @@ class _SettingsTile extends StatelessWidget {
           ? Text(
               subtitle!,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.6),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             )
           : null,
@@ -715,7 +741,7 @@ class _SettingsTile extends StatelessWidget {
           (onTap != null
               ? Icon(
                   Icons.chevron_right,
-                  color: theme.colorScheme.onSurface.withOpacity(0.4),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                 )
               : null),
       onTap: onTap,
@@ -745,7 +771,9 @@ class _ThemeOptionTile extends StatelessWidget {
     return ListTile(
       leading: Icon(
         icon,
-        color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.6),
+        color: isSelected
+            ? theme.colorScheme.primary
+            : theme.colorScheme.onSurface.withValues(alpha: 0.6),
       ),
       title: Text(
         title,
@@ -816,12 +844,12 @@ class _LogoutButton extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: AppRadii.md,
         border: Border.all(
-          color: theme.colorScheme.error.withOpacity(0.3),
+          color: theme.colorScheme.error.withValues(alpha: 0.3),
           width: 1.5,
         ),
       ),
       child: Material(
-        color: theme.colorScheme.error.withOpacity(0.05),
+        color: theme.colorScheme.error.withValues(alpha: 0.05),
         borderRadius: AppRadii.md,
         child: InkWell(
           onTap: onPressed,
