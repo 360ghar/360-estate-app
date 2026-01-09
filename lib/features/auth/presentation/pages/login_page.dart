@@ -7,6 +7,7 @@ import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/state/view_state.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/features/auth/presentation/controllers/login_controller.dart';
+import 'package:estate_app/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -271,7 +272,8 @@ class _LoginPageState extends State<LoginPage>
                                   onPressed: isLoading
                                       ? null
                                       : () {
-                                          // TODO: Navigate to forgot password
+                                          Get.to<void>(() =>
+                                              const ForgotPasswordPage());
                                         },
                                   style: TextButton.styleFrom(
                                     padding: EdgeInsets.zero,

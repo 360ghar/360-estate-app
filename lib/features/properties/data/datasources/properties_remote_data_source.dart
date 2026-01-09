@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:estate_app/core/errors/api_error.dart';
 import 'package:estate_app/core/errors/failure.dart';
+import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/core/pagination/page.dart';
 import 'package:estate_app/features/properties/data/models/property_dto.dart';
@@ -30,6 +31,15 @@ final class ApiPropertiesRemoteDataSource
   ApiPropertiesRemoteDataSource(this._client);
 
   final ApiClient _client;
+
+  /// Get the current authenticated user's ID from Supabase
+  String? _getCurrentUserId() {
+    try {
+      return Supabase.instance.client.auth.currentSession?.user.id;
+    } catch (_) {
+      return null;
+    }
+  }
 
   @override
   Future<Page<PropertyDto>> getProperties({
@@ -163,7 +173,15 @@ final class ApiPropertiesRemoteDataSource
   /// Converts PropertyDto to backend API format for property creation
   /// Includes all mandatory fields required by POST /pm/properties/
   Map<String, dynamic> _createPropertyToJson(PropertyDto property) {
-    return {
+    // Get current user ID from Supabase auth session
+    final userId = _getCurrentUserId();
+
+    if (userId == null) {
+      AppLogger.w('No Supabase user session found; owner_id will be omitted');
+    }
+
+    final payload = <String, dynamic>{
+      ...property.toJson(),
       // MANDATORY FIELDS (required by backend)
       'title': property.title,
       'description': property.notes ??
@@ -171,12 +189,12 @@ final class ApiPropertiesRemoteDataSource
       'address':
           '${property.addressLine}, ${property.city}${property.state != null ? ', ${property.state}' : ''}',
       'property_type': property.propertyType,
+      'property_category': property.propertyCategory,
       'status': 'available', // Required: e.g., "available"
       'purpose': property.purpose, // Required: "rent" or "sale"
       'price': property.monthlyRentInr.toDouble(), // Required: Total price
       'base_price': property.basePrice ??
           property.monthlyRentInr.toDouble(), // Required by backend
-      'owner_id': 1, // TODO: Get from authenticated user context
 
       // OPTIONAL FIELDS
       'payment_due_day': property.paymentDueDay,
@@ -191,6 +209,12 @@ final class ApiPropertiesRemoteDataSource
       if (property.floorAreaSqft != null) 'area_sqft': property.floorAreaSqft,
       // NOTE: Do NOT send 'amenity_ids' as it causes 500/422 errors
     };
+
+    if (userId != null) {
+      payload['owner_id'] = userId;
+    }
+
+    return payload;
   }
 
   @override

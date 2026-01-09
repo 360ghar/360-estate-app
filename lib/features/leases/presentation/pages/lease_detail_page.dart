@@ -10,9 +10,11 @@ import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loader.dart';
 import 'package:estate_app/features/leases/domain/entities/lease.dart';
 import 'package:estate_app/features/leases/presentation/controllers/lease_detail_controller.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LeaseDetailPage extends StatelessWidget {
   const LeaseDetailPage({super.key});
@@ -419,13 +421,7 @@ class _LeaseDetailContent extends StatelessWidget {
                       ),
                       if (lease.signedDocumentUrl == null)
                         TextButton.icon(
-                          onPressed: () {
-                            // TODO: Implement file picker
-                            Get.snackbar(
-                              'Coming Soon',
-                              'Document upload will be available soon',
-                            );
-                          },
+                          onPressed: () => _uploadDocument(lease),
                           icon: const Icon(Icons.upload),
                           label: const Text('Upload'),
                         ),
@@ -440,9 +436,7 @@ class _LeaseDetailContent extends StatelessWidget {
                       title: const Text('Signed lease agreement'),
                       subtitle: const Text('Tap to view'),
                       trailing: const Icon(Icons.open_in_new),
-                      onTap: () {
-                        // TODO: Open document viewer
-                      },
+                      onTap: () => _openDocument(lease.signedDocumentUrl!),
                     )
                   else
                     Center(
@@ -494,6 +488,63 @@ class _LeaseDetailContent extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _uploadDocument(Lease lease) async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx'],
+        allowMultiple: false,
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+        // TODO: Implement actual upload to backend
+        Get.snackbar(
+          'Document Selected',
+          'Uploading ${file.name}...',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
+        );
+
+        // Simulate upload delay
+        await Future.delayed(const Duration(seconds: 2));
+
+        Get.snackbar(
+          'Coming Soon',
+          'Document upload will be available soon',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to pick document: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  Future<void> _openDocument(String url) async {
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        Get.snackbar(
+          'Error',
+          'Cannot open document',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to open document: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 }
 

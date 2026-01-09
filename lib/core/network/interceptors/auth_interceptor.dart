@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/network/auth_token_provider.dart';
 import 'package:estate_app/core/network/interceptors/request_id_interceptor.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:estate_app/core/storage/secure_kv_store.dart';
 
 /// Uses QueuedInterceptor to ensure async token operations complete
 /// before the request is sent. This prevents race conditions where
@@ -11,18 +11,20 @@ final class AuthInterceptor extends QueuedInterceptor {
   AuthInterceptor({
     required Dio dio,
     required AuthTokenProvider tokenProvider,
+    required SecureKvStore secureStore,
   })  : _dio = dio,
-        _tokenProvider = tokenProvider;
+        _tokenProvider = tokenProvider,
+        _secureStore = secureStore;
 
   final Dio _dio;
   final AuthTokenProvider _tokenProvider;
+  final SecureKvStore _secureStore;
   static const String _tokenKey = 'backend_access_token';
 
-  // Get SharedPreferences synchronously if possible, or await
+  // Get stored token from secure storage
   Future<String?> _getStoredToken() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString(_tokenKey);
+      final token = await _secureStore.getString(_tokenKey);
       if (token != null && token.isNotEmpty) {
         AppLogger.d('Found stored backend token (${token.length} chars)');
       }
@@ -30,6 +32,16 @@ final class AuthInterceptor extends QueuedInterceptor {
     } catch (e) {
       AppLogger.w('Error reading stored token', error: e);
       return null;
+    }
+  }
+
+  // Store token securely
+  Future<void> _storeToken(String token) async {
+    try {
+      await _secureStore.setString(_tokenKey, token);
+      AppLogger.d('Stored backend token (${token.length} chars)');
+    } catch (e) {
+      AppLogger.w('Error storing token', error: e);
     }
   }
 
@@ -52,6 +64,10 @@ final class AuthInterceptor extends QueuedInterceptor {
       final token = await _tokenProvider.getAccessToken();
       if (token != null && token.isNotEmpty) {
         options.headers['Authorization'] = 'Bearer $token';
+        
+        // Store for future use
+        await _storeToken(token);
+        
         AppLogger.d(
             'Token found (async), length: ${token.length}, sending to: ${options.path}');
       } else {
@@ -96,6 +112,9 @@ final class AuthInterceptor extends QueuedInterceptor {
       handler.next(err);
       return;
     }
+
+    // Store the new token
+    await _storeToken(token);
 
     AppLogger.d('Retrying with new token for: ${options.path}');
 

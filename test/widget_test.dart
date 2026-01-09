@@ -22,8 +22,8 @@ void main() {
       supabaseUrl: '',
       supabaseAnonKey: '',
       enableCrashReporting: false,
+      enableAnalytics: false,
       enableDebugLogs: true,
-      useMockApi: false,
       featureFlags: FeatureFlags(
         enablePublicApplications: true,
       ),

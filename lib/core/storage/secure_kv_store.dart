@@ -13,5 +13,10 @@ final class SecureKvStore {
 
   Future<void> delete(String key) => _storage.delete(key: key);
 
+  // Aliases for compatibility
+  Future<String?> getString(String key) => readString(key);
+  Future<void> setString(String key, String value) =>
+      writeString(key: key, value: value);
+
   Future<void> deleteAll() => _storage.deleteAll();
 }

@@ -1,4 +1,5 @@
 import 'package:estate_app/core/logger/app_logger.dart';
+import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/features/auth/domain/entities/auth_user.dart';
 import 'package:estate_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:estate_app/features/properties/domain/repositories/properties_repository.dart';
@@ -194,11 +195,28 @@ class PropertyCreateController extends GetxController {
 
       Get.back<void>();
       Get.snackbar('Success', 'Property created successfully');
-    } catch (e) {
-      AppLogger.e('Failed to create property', error: e);
-      Get.snackbar('Error', 'Failed to create property');
+    } on Failure catch (f) {
+      AppLogger.e('Failed to create property', error: f);
+      Get.snackbar('Error', _formatFailureMessage(f));
+    } catch (e, st) {
+      AppLogger.e('Failed to create property', error: e, stackTrace: st);
+      Get.snackbar('Error', 'Failed to create property: $e');
     } finally {
       isLoading.value = false;
     }
+  }
+
+  String _formatFailureMessage(Failure failure) {
+    if (failure is ValidationFailure && failure.fields.isNotEmpty) {
+      final first = failure.fields.entries.first;
+      return '${failure.message} (${first.key}: ${first.value})';
+    }
+    if (failure is ApiFailure) {
+      final status = failure.error.statusCode;
+      final details = failure.error.details;
+      final detailText = details == null ? '' : ' Details: $details';
+      return '${failure.message}${status != null ? ' (HTTP $status)' : ''}$detailText';
+    }
+    return failure.message;
   }
 }

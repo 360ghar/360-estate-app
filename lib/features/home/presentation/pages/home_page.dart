@@ -1,3 +1,4 @@
+import 'package:estate_app/core/presentation/widgets/app_loader.dart';
 import 'package:estate_app/features/auth/domain/entities/auth_user.dart';
 import 'package:estate_app/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:estate_app/features/home/presentation/pages/owner_dashboard_page.dart';
@@ -17,7 +18,7 @@ class HomePage extends StatelessWidget {
       final user = authController.state.value.data;
       if (user == null) {
         return const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
+          body: Center(child: AppLoader()),
         );
       }
 

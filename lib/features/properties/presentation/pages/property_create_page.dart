@@ -349,6 +349,17 @@ class _SpecsForm extends StatelessWidget {
                     prefixText: '₹ ',
                   ),
                   keyboardType: TextInputType.number,
+                  validator: (value) {
+                    final raw = value?.trim() ?? '';
+                    if (raw.isEmpty) {
+                      return 'Monthly rent is required';
+                    }
+                    final amount = int.tryParse(raw);
+                    if (amount == null || amount <= 0) {
+                      return 'Enter a valid monthly rent';
+                    }
+                    return null;
+                  },
                 ),
               ),
               const SizedBox(width: 16),

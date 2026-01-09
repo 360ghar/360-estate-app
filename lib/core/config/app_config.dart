@@ -44,6 +44,7 @@ final class AppConfig {
     required this.supabaseUrl,
     required this.supabaseAnonKey,
     required this.enableCrashReporting,
+    required this.enableAnalytics,
     required this.enableDebugLogs,
     required this.featureFlags,
   });
@@ -53,6 +54,7 @@ final class AppConfig {
   final String supabaseUrl;
   final String supabaseAnonKey;
   final bool enableCrashReporting;
+  final bool enableAnalytics;
   final bool enableDebugLogs;
   final FeatureFlags featureFlags;
 
@@ -117,6 +119,15 @@ final class AppConfig {
         ) ??
         enableDebugLogsDefault;
 
+    const enableAnalyticsDefine = String.fromEnvironment('ENABLE_ANALYTICS');
+    final enableAnalyticsDefault = environment == AppEnvironment.prod;
+    final enableAnalytics = _parseBool(
+          enableAnalyticsDefine.trim().isNotEmpty
+              ? enableAnalyticsDefine
+              : dotenv.env['ENABLE_ANALYTICS'],
+        ) ??
+        enableAnalyticsDefault;
+
     final featureFlags = FeatureFlags.fromEnvironment(environment);
 
     return AppConfig(
@@ -125,6 +136,7 @@ final class AppConfig {
       supabaseUrl: supabaseUrl,
       supabaseAnonKey: supabaseAnonKey,
       enableCrashReporting: enableCrashReporting,
+      enableAnalytics: enableAnalytics,
       enableDebugLogs: enableDebugLogs,
       featureFlags: featureFlags,
     );

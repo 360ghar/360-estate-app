@@ -8,8 +8,14 @@ enum LogLevel { trace, debug, info, warn, error }
 final class AppLogger {
   AppLogger._(this._minLevel);
 
-  static late AppLogger _instance;
-  static AppLogger get instance => _instance;
+  static AppLogger? _instance;
+  
+  /// Returns the singleton instance, creating a default one if not yet initialized.
+  /// This prevents LateInitializationError when logging is attempted before init().
+  static AppLogger get instance {
+    _instance ??= AppLogger._(kReleaseMode ? LogLevel.info : LogLevel.trace);
+    return _instance!;
+  }
 
   final LogLevel _minLevel;
 

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:estate_app/app/routes/app_routes.dart';
 import 'package:estate_app/core/config/feature_flags.dart';
 import 'package:estate_app/core/presentation/widgets/app_card.dart';
+import 'package:estate_app/core/presentation/widgets/app_loader.dart';
 import 'package:estate_app/core/presentation/widgets/feature_coming_soon.dart';
 import 'package:estate_app/features/finance/domain/entities/expense.dart';
 import 'package:estate_app/features/finance/domain/entities/rent_charge.dart';
@@ -69,11 +70,7 @@ class _FinancePageState extends State<FinancePage>
             if (chargesController.isGenerating.value) {
               return const Padding(
                 padding: EdgeInsets.all(16.0),
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
+                child: AppLoader(),
               );
             }
             return IconButton(
@@ -152,7 +149,7 @@ class _RentChargesTab extends GetView<RentChargesController> {
         Expanded(
           child: Obx(() {
             if (controller.isLoading.value && controller.items.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: AppLoader());
             }
 
             if (controller.failure.value != null && controller.items.isEmpty) {
@@ -192,7 +189,7 @@ class _RentChargesTab extends GetView<RentChargesController> {
                     return const Center(
                       child: Padding(
                         padding: EdgeInsets.all(16.0),
-                        child: CircularProgressIndicator(),
+                        child: AppLoader(),
                       ),
                     );
                   }
@@ -613,7 +610,7 @@ class _ExpensesTab extends GetView<ExpensesController> {
         Expanded(
           child: Obx(() {
             if (controller.isLoading.value && controller.items.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: AppLoader());
             }
 
             if (controller.failure.value != null && controller.items.isEmpty) {
@@ -653,7 +650,7 @@ class _ExpensesTab extends GetView<ExpensesController> {
                     return const Center(
                       child: Padding(
                         padding: EdgeInsets.all(16.0),
-                        child: CircularProgressIndicator(),
+                        child: AppLoader(),
                       ),
                     );
                   }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:estate_app/app/app.dart';
+import 'package:estate_app/core/analytics/analytics_service.dart';
 import 'package:estate_app/core/config/app_config.dart';
 import 'package:estate_app/core/config/env_loader.dart';
 import 'package:estate_app/core/crash_reporting/crash_reporter.dart';
@@ -9,6 +10,8 @@ import 'package:estate_app/core/services/app_lifecycle_service.dart';
 import 'package:estate_app/core/services/deep_link_service.dart';
 import 'package:estate_app/core/storage/app_preferences.dart';
 import 'package:estate_app/core/storage/secure_kv_store.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -26,6 +29,12 @@ Future<void> bootstrap() async {
         AppLogger.w(
             'No .env asset found; falling back to --dart-define values');
       }
+      if (config.apiBaseUrl.trim().isEmpty) {
+        AppLogger.w('API_BASE_URL is empty; API calls will fail');
+      }
+
+      // Initialize Firebase
+      await _initializeFirebase(config);
 
       final preferences = await AppPreferences.create();
       final secureStore = SecureKvStore();
@@ -43,14 +52,18 @@ Future<void> bootstrap() async {
         ..put<CrashReporter>(crashReporter, permanent: true);
 
       if (config.isSupabaseConfigured) {
-        await Supabase.initialize(
-          url: config.supabaseUrl,
-          anonKey: config.supabaseAnonKey,
-          debug: config.enableDebugLogs,
-          authOptions: const FlutterAuthClientOptions(
-            detectSessionInUri: false,
-          ),
-        );
+        try {
+          await Supabase.initialize(
+            url: config.supabaseUrl,
+            anonKey: config.supabaseAnonKey,
+            debug: config.enableDebugLogs,
+            authOptions: const FlutterAuthClientOptions(
+              detectSessionInUri: false,
+            ),
+          );
+        } catch (e, st) {
+          AppLogger.w('Failed to initialize Supabase', error: e, stackTrace: st);
+        }
       }
 
       Get.put<DeepLinkService>(DeepLinkService(), permanent: true);
@@ -58,10 +71,42 @@ Future<void> bootstrap() async {
       // Initialize AppLifecycleService to handle data refresh on app resume
       Get.put<AppLifecycleService>(AppLifecycleService(), permanent: true);
 
+      // Initialize Analytics Service
+      AnalyticsService.initialize(config: config);
+
       runApp(const App());
     },
     (error, stackTrace) {
       AppLogger.e('Bootstrap error', error: error, stackTrace: stackTrace);
+      // Also send to Crashlytics
+      if (Get.isRegistered<CrashReporter>()) {
+        final reporter = Get.find<CrashReporter>();
+        reporter.recordError(error, stackTrace);
+      }
     },
   );
+}
+
+/// Initialize Firebase and Crashlytics.
+Future<void> _initializeFirebase(AppConfig config) async {
+  if (!config.enableAnalytics && !config.enableCrashReporting) {
+    AppLogger.d('Firebase not enabled, skipping initialization');
+    return;
+  }
+
+  try {
+    await Firebase.initializeApp();
+    AppLogger.d('Firebase initialized successfully');
+
+    // Set Crashlytics to collect errors in release mode
+    if (config.enableCrashReporting) {
+      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+      FlutterError.onError = (errorDetails) {
+        FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+      };
+    }
+  } catch (e, st) {
+    AppLogger.w('Failed to initialize Firebase', error: e, stackTrace: st);
+    // Don't fail the app if Firebase fails to initialize
+  }
 }

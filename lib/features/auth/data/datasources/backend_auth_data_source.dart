@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/network/api_client.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Backend API authentication data source.
@@ -28,12 +29,19 @@ abstract interface class BackendAuthDataSource {
 final class BackendAuthDataSourceImpl implements BackendAuthDataSource {
   BackendAuthDataSourceImpl({
     required ApiClient apiClient,
-  }) : _apiClient = apiClient {
+    FlutterSecureStorage? secureStorage,
+  })  : _apiClient = apiClient,
+        _secureStorage = secureStorage ?? const FlutterSecureStorage(
+          aOptions: AndroidOptions(
+            encryptedSharedPreferences: true,
+          ),
+        ) {
     // Initialize prefs
     SharedPreferences.getInstance().then((value) => _sharedPrefs = value);
   }
 
   final ApiClient _apiClient;
+  final FlutterSecureStorage _secureStorage;
   static const String _tokenKey = 'backend_access_token';
   static const String _phoneKey = 'backend_phone';
   static const String _passwordKey = 'backend_password';
@@ -97,12 +105,14 @@ final class BackendAuthDataSourceImpl implements BackendAuthDataSource {
       AppLogger.d('Backend login successful, token length: ${token.length}');
 
       // Store the token and credentials for future use
+      // Store sensitive data (password) in secure storage
+      await _secureStorage.write(key: _passwordKey, value: password);
+      // Store phone and token in regular prefs (phone is not sensitive, token is temporary)
       final prefs = await _getPrefs();
       await prefs.setString(_tokenKey, token);
       await prefs.setString(_phoneKey, phone);
-      await prefs.setString(_passwordKey, password);
 
-      AppLogger.d('Backend token and credentials stored');
+      AppLogger.d('Backend token and credentials stored securely');
 
       return token;
     } on DioException catch (e) {
@@ -146,15 +156,15 @@ final class BackendAuthDataSourceImpl implements BackendAuthDataSource {
     final prefs = await _getPrefs();
     await prefs.remove(_tokenKey);
     await prefs.remove(_phoneKey);
-    await prefs.remove(_passwordKey);
-    AppLogger.d('Backend token and credentials cleared');
+    await _secureStorage.delete(key: _passwordKey);
+    AppLogger.d('Backend token and credentials cleared securely');
   }
 
   @override
   Future<Map<String, String>?> getStoredCredentials() async {
     final prefs = await _getPrefs();
     final phone = prefs.getString(_phoneKey);
-    final password = prefs.getString(_passwordKey);
+    final password = await _secureStorage.read(key: _passwordKey);
     if (phone != null && password != null) {
       return {'phone': phone, 'password': password};
     }

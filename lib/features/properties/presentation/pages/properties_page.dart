@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:estate_app/app/routes/app_routes.dart';
 import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_empty_state.dart';
+import 'package:estate_app/core/presentation/widgets/app_loader.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/features/properties/domain/entities/property.dart';
 import 'package:estate_app/features/properties/presentation/controllers/properties_controller.dart';
@@ -36,7 +38,7 @@ class _PropertiesView extends GetView<PropertiesController> {
       ),
       body: Obx(() {
         if (controller.isLoadingFirstPage.value && controller.items.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: AppLoader());
         }
 
         if (controller.initialFailure.value != null &&
@@ -79,7 +81,7 @@ class _PropertiesView extends GetView<PropertiesController> {
                 return const Center(
                   child: Padding(
                     padding: EdgeInsets.all(16.0),
-                    child: CircularProgressIndicator(),
+                    child: AppLoader(),
                   ),
                 );
               }
@@ -173,12 +175,27 @@ class _PropertyCard extends StatelessWidget {
                     ClipRRect(
                       borderRadius:
                           const BorderRadius.vertical(top: Radius.circular(16)),
-                      child: Image.network(
-                        property.images.first,
+                      child: CachedNetworkImage(
+                        imageUrl: property.images.first,
                         height: 160,
                         width: double.infinity,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Center(
+                        memCacheWidth: 400, // Optimize memory for thumbnail size
+                        fadeInDuration: const Duration(milliseconds: 200),
+                        placeholder: (context, url) => Container(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          child: Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
+                            ),
+                          ),
+                        ),
+                        errorWidget: (_, __, ___) => Center(
                           child: Icon(
                             Icons.business,
                             size: 48,

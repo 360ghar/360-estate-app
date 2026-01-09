@@ -441,9 +441,7 @@ class _LeaseTab extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: FilledButton.icon(
-                onPressed: () {
-                  // TODO: Implement renew lease
-                },
+                onPressed: () => _showRenewLeaseDialog(context, lease),
                 icon: const Icon(Icons.refresh),
                 label: const Text('Renew'),
               ),
@@ -451,6 +449,62 @@ class _LeaseTab extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  void _showRenewLeaseDialog(BuildContext context, dynamic lease) {
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Renew Lease'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Renew lease for ${lease.tenantName ?? 'Tenant'}?',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 16),
+              const Text('Current lease ends on:'),
+              Text(
+                lease.endDate != null
+                    ? lease.endDate.toString().split(' ')[0]
+                    : 'N/A',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 24),
+              TextField(
+                decoration: const InputDecoration(
+                  labelText: 'New End Date',
+                  hintText: 'YYYY-MM-DD',
+                  prefixIcon: Icon(Icons.calendar_today),
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.datetime,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Get.snackbar(
+                  'Coming Soon',
+                  'Lease renewal will be available soon',
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              },
+              child: const Text('Renew'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
