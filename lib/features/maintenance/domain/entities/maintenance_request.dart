@@ -8,10 +8,18 @@ enum MaintenancePriority {
   ;
 
   static MaintenancePriority fromString(String value) {
-    return MaintenancePriority.values.firstWhere(
-      (e) => e.name == value.toLowerCase(),
-      orElse: () => MaintenancePriority.medium,
-    );
+    switch (value.trim().toLowerCase()) {
+      case 'emergency':
+      case 'urgent':
+        return MaintenancePriority.urgent;
+      case 'high':
+        return MaintenancePriority.high;
+      case 'low':
+        return MaintenancePriority.low;
+      case 'medium':
+      default:
+        return MaintenancePriority.medium;
+    }
   }
 
   String get displayName {
@@ -66,13 +74,23 @@ enum MaintenanceStatus {
     switch (value.toLowerCase()) {
       case 'open':
         return MaintenanceStatus.open;
+      case 'in_review':
+      case 'inreview':
+        return MaintenanceStatus.onHold;
+      case 'work_order_created':
+      case 'workordercreated':
+        return MaintenanceStatus.inProgress;
       case 'in_progress':
       case 'inprogress':
         return MaintenanceStatus.inProgress;
       case 'on_hold':
       case 'onhold':
         return MaintenanceStatus.onHold;
+      case 'resolved':
+        return MaintenanceStatus.completed;
       case 'completed':
+        return MaintenanceStatus.completed;
+      case 'closed':
         return MaintenanceStatus.completed;
       case 'cancelled':
       case 'canceled':
@@ -102,13 +120,13 @@ enum MaintenanceStatus {
       case MaintenanceStatus.open:
         return 'open';
       case MaintenanceStatus.inProgress:
-        return 'in_progress';
+        return 'work_order_created';
       case MaintenanceStatus.onHold:
-        return 'on_hold';
+        return 'in_review';
       case MaintenanceStatus.completed:
-        return 'completed';
+        return 'resolved';
       case MaintenanceStatus.cancelled:
-        return 'cancelled';
+        return 'closed';
     }
   }
 
@@ -145,8 +163,12 @@ enum MaintenanceCategory {
   ;
 
   static MaintenanceCategory fromString(String value) {
+    final normalized = value.toLowerCase();
+    if (normalized == 'pest_control' || normalized == 'pestcontrol') {
+      return MaintenanceCategory.pest;
+    }
     return MaintenanceCategory.values.firstWhere(
-      (e) => e.name == value.toLowerCase(),
+      (e) => e.name == normalized,
       orElse: () => MaintenanceCategory.other,
     );
   }

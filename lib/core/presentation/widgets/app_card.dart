@@ -1,4 +1,5 @@
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
+import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:flutter/material.dart';
 
@@ -18,9 +19,10 @@ class AppCard extends StatelessWidget {
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: scheme.surface,
+        color: scheme.surfaceContainerHighest,
         borderRadius: AppRadii.lg,
         border: Border.all(color: scheme.outlineVariant),
+        boxShadow: AppShadows.subtle,
       ),
       child: child,
     );

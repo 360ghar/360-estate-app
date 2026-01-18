@@ -1,5 +1,5 @@
 import 'package:estate_app/core/pagination/page.dart';
-import 'package:estate_app/features/properties/domain/entities/property.dart';
+import 'package:estate_app/features/properties/models/property.dart';
 import 'package:estate_app/features/properties/domain/repositories/properties_repository.dart';
 import 'package:estate_app/features/properties/domain/usecases/get_properties_page_usecase.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,10 +20,12 @@ void main() {
     final expected = Page<Property>(
       items: const [
         Property(
-          id: 'prop_1',
-          title: 'Property 1',
+          id: 1,
+          name: 'Property 1',
           city: 'Mumbai',
-          addressLine: 'Address',
+          address: 'Address',
+          type: 'apartment',
+          managementStatus: 'active',
           monthlyRentInr: 25000,
         ),
       ],
@@ -33,14 +35,14 @@ void main() {
     );
 
     when(
-      () => repository.getProperties(page: 1, limit: 20, query: ''),
+      () => repository.listPage(page: 1, limit: 20),
     ).thenAnswer((_) async => expected);
 
-    final result = await useCase(page: 1, limit: 20, query: '');
+    final result = await useCase(page: 1, limit: 20);
 
     expect(result, same(expected));
     verify(
-      () => repository.getProperties(page: 1, limit: 20, query: ''),
+      () => repository.listPage(page: 1, limit: 20),
     ).called(1);
   });
 }

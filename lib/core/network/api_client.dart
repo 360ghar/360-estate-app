@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+﻿import 'package:dio/dio.dart';
 import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/core/network/auth_token_provider.dart';
 import 'package:estate_app/core/network/dio_failure_mapper.dart';
@@ -23,7 +23,7 @@ final class ApiClient {
            Dio(
              BaseOptions(
                baseUrl: baseUrl,
-               connectTimeout: const Duration(seconds: 15),
+               connectTimeout: const Duration(seconds: 30),
                sendTimeout: const Duration(seconds: 30),
                receiveTimeout: const Duration(seconds: 30),
                validateStatus: (status) =>
@@ -33,7 +33,7 @@ final class ApiClient {
            ) {
     _dio.interceptors.addAll([
       RequestIdInterceptor(),
-      AuthInterceptor(dio: _dio, tokenProvider: tokenProvider),
+      AuthInterceptor(tokenProvider: tokenProvider),
       LoggingInterceptor(enabled: enableLogging),
       RetryInterceptor(dio: _dio),
     ]);
@@ -149,6 +149,8 @@ final class ApiClient {
         onSendProgress: onSendProgress,
         options: Options(
           contentType: 'multipart/form-data',
+          sendTimeout: const Duration(seconds: 60),
+          receiveTimeout: const Duration(seconds: 60),
         ),
       ),
     );
@@ -165,3 +167,4 @@ final class ApiClient {
     }
   }
 }
+

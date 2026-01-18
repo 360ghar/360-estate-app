@@ -44,12 +44,32 @@ final class LoggingInterceptor extends Interceptor {
       final options = err.requestOptions;
       final requestId = options.extra[RequestIdKeys.requestId] ?? 'n/a';
       final code = err.response?.statusCode;
+      final data = err.response?.data;
+      final tokenMeta = _formatTokenMeta(options.extra);
       AppLogger.w(
-        'HTTP ✕ [${code ?? '-'}] ${options.method} ${options.uri.path} (rid=$requestId)',
+        'HTTP ERROR [${code ?? '-'}] ${options.method} ${options.uri.path} (rid=$requestId)$tokenMeta - Response: $data',
         error: err,
         stackTrace: err.stackTrace,
       );
     }
     handler.next(err);
   }
+}
+
+String _formatTokenMeta(Map<String, dynamic> extras) {
+  final tail = extras['auth_token_tail']?.toString();
+  final exp = extras['auth_token_exp']?.toString();
+  final iss = extras['auth_token_iss']?.toString();
+  final parts = <String>[];
+  if (tail != null && tail.isNotEmpty) {
+    parts.add('tail=$tail');
+  }
+  if (exp != null && exp.isNotEmpty) {
+    parts.add('exp=$exp');
+  }
+  if (iss != null && iss.isNotEmpty) {
+    parts.add('iss=$iss');
+  }
+  if (parts.isEmpty) return '';
+  return ' token[' + parts.join(',') + ']';
 }

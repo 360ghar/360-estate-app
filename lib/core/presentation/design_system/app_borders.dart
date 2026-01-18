@@ -6,5 +6,5 @@ abstract final class AppBorders {
       BorderSide(color: color, width: width);
 
   static OutlineInputBorder input(Color color, {Color? fillColor}) =>
-      OutlineInputBorder(borderRadius: AppRadii.md, borderSide: outline(color));
+      OutlineInputBorder(borderRadius: AppRadii.lg, borderSide: outline(color));
 }

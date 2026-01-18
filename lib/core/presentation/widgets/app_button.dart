@@ -23,12 +23,21 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final effectiveOnPressed = isLoading ? null : onPressed;
+    final spinnerColor = switch (variant) {
+      AppButtonVariant.primary => scheme.onPrimary,
+      AppButtonVariant.secondary => scheme.primary,
+      AppButtonVariant.destructive => scheme.onError,
+    };
     final child = isLoading
-        ? const SizedBox(
+        ? SizedBox(
             width: 18,
             height: 18,
-            child: CircularProgressIndicator(strokeWidth: 2),
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(spinnerColor),
+            ),
           )
         : Row(
             mainAxisSize: MainAxisSize.min,
@@ -41,24 +50,18 @@ class AppButton extends StatelessWidget {
     final button = switch (variant) {
       AppButtonVariant.primary => FilledButton(
         onPressed: effectiveOnPressed,
-        style: FilledButton.styleFrom(
-          shape: RoundedRectangleBorder(borderRadius: AppRadii.md),
-        ),
         child: child,
       ),
       AppButtonVariant.secondary => OutlinedButton(
         onPressed: effectiveOnPressed,
-        style: OutlinedButton.styleFrom(
-          shape: RoundedRectangleBorder(borderRadius: AppRadii.md),
-        ),
         child: child,
       ),
       AppButtonVariant.destructive => FilledButton(
         onPressed: effectiveOnPressed,
         style: FilledButton.styleFrom(
-          backgroundColor: Theme.of(context).colorScheme.error,
-          foregroundColor: Theme.of(context).colorScheme.onError,
-          shape: RoundedRectangleBorder(borderRadius: AppRadii.md),
+          backgroundColor: scheme.error,
+          foregroundColor: scheme.onError,
+          shape: RoundedRectangleBorder(borderRadius: AppRadii.pill),
         ),
         child: child,
       ),

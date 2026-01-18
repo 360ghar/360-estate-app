@@ -17,13 +17,16 @@ final class MaintenanceRepositoryImpl implements MaintenanceRepository {
     String? priority,
     String? category,
   }) async {
+    final apiStatus = status == null ? null : _mapStatus(status);
+    final apiPriority = priority == null ? null : _mapUrgency(priority);
+    final apiCategory = category == null ? null : _mapCategory(category);
     final dtoPage = await _remoteDataSource.getRequests(
       page: page,
       limit: limit,
       propertyId: propertyId,
-      status: status,
-      priority: priority,
-      category: category,
+      status: apiStatus,
+      priority: apiPriority,
+      category: apiCategory,
     );
 
     return Page<MaintenanceRequest>(
@@ -56,16 +59,25 @@ final class MaintenanceRepositoryImpl implements MaintenanceRepository {
     final data = <String, dynamic>{
       'property_id': propertyId,
       if (leaseId != null) 'lease_id': leaseId,
-      'category': category,
-      'priority': priority,
+      'category': _mapCategory(category),
+      'urgency': _mapUrgency(priority),
       'title': title,
-      'description': description,
-      if (assignedTo != null) 'assigned_to': assignedTo,
+      if (description.trim().isNotEmpty) 'description': description,
+      if (notes != null && notes.trim().isNotEmpty)
+        'availability_notes': notes.trim(),
       if (estimatedCost != null) 'estimated_cost': estimatedCost,
       if (scheduledDate != null)
-        'scheduled_date': scheduledDate.toIso8601String().split('T')[0],
-      if (notes != null) 'notes': notes,
+        'scheduled_for': scheduledDate.toIso8601String(),
     };
+    final trimmedAssignee = assignedTo?.trim();
+    if (trimmedAssignee != null && trimmedAssignee.isNotEmpty) {
+      final assignedId = int.tryParse(trimmedAssignee);
+      if (assignedId != null) {
+        data['assigned_agent_id'] = assignedId;
+      } else {
+        data['assigned_to'] = trimmedAssignee;
+      }
+    }
 
     final dto = await _remoteDataSource.createRequest(data);
     return dto.toEntity();
@@ -74,12 +86,139 @@ final class MaintenanceRepositoryImpl implements MaintenanceRepository {
   @override
   Future<MaintenanceRequest> updateRequest(
       int id, Map<String, dynamic> updates) async {
-    final dto = await _remoteDataSource.updateRequest(id, updates);
+    final payload = _normalizeUpdate(updates);
+    final dto = await _remoteDataSource.updateRequest(id, payload);
     return dto.toEntity();
   }
 
   @override
   Future<void> updateStatus(int id, String status) async {
-    await _remoteDataSource.updateStatus(id, status);
+    await _remoteDataSource.updateStatus(id, _mapStatus(status));
   }
+}
+
+String _mapUrgency(String raw) {
+  final normalized = raw.trim().toLowerCase();
+  if (normalized == 'urgent') return 'emergency';
+  if (normalized == 'emergency') return 'emergency';
+  if (normalized == 'high') return 'high';
+  if (normalized == 'low') return 'low';
+  return 'medium';
+}
+
+String _mapCategory(String raw) {
+  final normalized = raw.trim().toLowerCase();
+  switch (normalized) {
+    case 'plumbing':
+    case 'electrical':
+    case 'hvac':
+    case 'appliance':
+    case 'structural':
+    case 'cleaning':
+    case 'other':
+      return normalized;
+    case 'pest':
+    case 'pest_control':
+    case 'pestcontrol':
+      return 'pest_control';
+    default:
+      return 'other';
+  }
+}
+
+String _mapStatus(String raw) {
+  final normalized = raw.trim().toLowerCase();
+  switch (normalized) {
+    case 'open':
+      return 'open';
+    case 'in_review':
+    case 'on_hold':
+    case 'onhold':
+      return 'in_review';
+    case 'work_order_created':
+    case 'in_progress':
+    case 'inprogress':
+      return 'work_order_created';
+    case 'resolved':
+    case 'completed':
+      return 'resolved';
+    case 'closed':
+    case 'cancelled':
+    case 'canceled':
+      return 'closed';
+    default:
+      return normalized;
+  }
+}
+
+Map<String, dynamic> _normalizeUpdate(Map<String, dynamic> updates) {
+  final payload = <String, dynamic>{};
+
+  for (final entry in updates.entries) {
+    final key = entry.key;
+    final value = entry.value;
+    if (value == null) continue;
+
+    switch (key) {
+      case 'status':
+      case 'request_status':
+        payload['request_status'] = _mapStatus(value.toString());
+        break;
+      case 'priority':
+      case 'urgency':
+        payload['urgency'] = _mapUrgency(value.toString());
+        break;
+      case 'notes':
+      case 'completion_notes':
+      case 'availability_notes':
+        final note = value.toString().trim();
+        if (note.isNotEmpty) {
+          payload['completion_notes'] = note;
+        }
+        break;
+      case 'scheduled_date':
+      case 'scheduled_for':
+        final scheduled = _normalizeDate(value);
+        if (scheduled != null) {
+          payload['scheduled_for'] = scheduled;
+        }
+        break;
+      case 'completed_date':
+      case 'completed_at':
+        final completed = _normalizeDate(value);
+        if (completed != null) {
+          payload['completed_at'] = completed;
+        }
+        break;
+      case 'assigned_to':
+      case 'assigned_agent_id':
+        final parsed = int.tryParse(value.toString());
+        if (parsed != null) {
+          payload['assigned_agent_id'] = parsed;
+        }
+        break;
+      case 'estimated_cost':
+        final parsed = double.tryParse(value.toString());
+        if (parsed != null) {
+          payload['estimated_cost'] = parsed;
+        }
+        break;
+      case 'actual_cost':
+        final parsed = double.tryParse(value.toString());
+        if (parsed != null) {
+          payload['actual_cost'] = parsed;
+        }
+        break;
+    }
+  }
+
+  return payload;
+}
+
+String? _normalizeDate(Object value) {
+  if (value is DateTime) {
+    return value.toIso8601String();
+  }
+  final parsed = DateTime.tryParse(value.toString());
+  return parsed?.toIso8601String();
 }

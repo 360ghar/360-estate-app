@@ -30,6 +30,7 @@ class AppTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final field = TextField(
       controller: controller,
       keyboardType: keyboardType,
@@ -38,6 +39,8 @@ class AppTextField extends StatelessWidget {
       autofillHints: autofillHints,
       onChanged: onChanged,
       enabled: enabled,
+      cursorColor: scheme.primary,
+      style: Theme.of(context).textTheme.bodyLarge,
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,

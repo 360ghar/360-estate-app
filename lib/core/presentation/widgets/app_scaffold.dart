@@ -11,6 +11,9 @@ class AppScaffold extends StatelessWidget {
     this.bottomNavigationBar,
     this.safeArea = true,
     this.scrollable = false,
+    this.background,
+    this.extendBodyBehindAppBar = false,
+    this.resizeToAvoidBottomInset = true,
   });
 
   final PreferredSizeWidget? appBar;
@@ -20,18 +23,33 @@ class AppScaffold extends StatelessWidget {
   final Widget? bottomNavigationBar;
   final bool safeArea;
   final bool scrollable;
+  final Widget? background;
+  final bool extendBodyBehindAppBar;
+  final bool resizeToAvoidBottomInset;
 
   @override
   Widget build(BuildContext context) {
     Widget content = Padding(padding: padding, child: body);
-    if (scrollable) content = SingleChildScrollView(child: content);
+    // Apply SafeArea before SingleChildScrollView so padding respects safe areas
     if (safeArea) content = SafeArea(child: content);
+    if (scrollable) content = SingleChildScrollView(child: content);
+
+    final scaffoldBody = background == null
+        ? content
+        : Stack(
+            children: [
+              Positioned.fill(child: background!),
+              content,
+            ],
+          );
 
     return Scaffold(
       appBar: appBar,
-      body: content,
+      body: scaffoldBody,
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,
+      extendBodyBehindAppBar: extendBodyBehindAppBar,
+      resizeToAvoidBottomInset: resizeToAvoidBottomInset,
     );
   }
 }
