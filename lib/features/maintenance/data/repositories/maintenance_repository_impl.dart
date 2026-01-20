@@ -215,7 +215,7 @@ Map<String, dynamic> _normalizeUpdate(Map<String, dynamic> updates) {
   return payload;
 }
 
-String? _normalizeDate(Object value) {
+String? _normalizeDate(dynamic value) {
   if (value is DateTime) {
     return value.toIso8601String();
   }

@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter run:*)",
+      "Bash(flutter test:*)",
+      "Bash(flutter --version:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(del \"C:\\\\Users\\\\ravi7\\\\OneDrive\\\\Documents\\\\GitHub\\\\360-estate-app\\\\lib\\\\features\\\\properties\\\\data\\\\repositories\\\\properties_repository_impl.dart\")",
+      "Bash(del \"C:\\\\Users\\\\ravi7\\\\OneDrive\\\\Documents\\\\GitHub\\\\360-estate-app\\\\lib\\\\features\\\\leases\\\\data\\\\repositories\\\\leases_repository_impl.dart\")",
+      "Bash(dart run build_runner build:*)",
+      "Bash(flutter pub get:*)",
+      "Bash(nc:*)",
+      "Bash(curl:*)",
+      "Bash(flutter devices:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(powershell -Command:*)",
+      "Bash(dir /s /b \"C:\\\\Users\\\\ravi7\\\\OneDrive\\\\Documents\\\\GitHub\\\\360-estate-app\\\\lib\\\\features\\\\properties\\\\presentation\")",
+      "Bash(findstr:*)",
+      "Bash(del:*)",
+      "Bash(find:*)",
+      "Bash(flutter build:*)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\ravi7\\\\OneDrive\\\\Documents\\\\GitHub\\\\360-estate-app\\\\lib\\\\app\\\\tenant_shell.dart\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\ravi7\\\\OneDrive\\\\Documents\\\\GitHub\\\\360-estate-app\\\\lib\\\\features\\\\tenant\\\\presentation\\\\tenant_home_page.dart\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\ravi7\\\\OneDrive\\\\Documents\\\\GitHub\\\\360-estate-app\\\\lib\\\\features\\\\tenant\\\\presentation\\\\tenant_payments_page.dart\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\ravi7\\\\OneDrive\\\\Documents\\\\GitHub\\\\360-estate-app\\\\lib\\\\features\\\\tenant\\\\presentation\\\\tenant_requests_page.dart\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\ravi7\\\\OneDrive\\\\Documents\\\\GitHub\\\\360-estate-app\\\\lib\\\\features\\\\tenant\\\\presentation\\\\tenant_request_form_page.dart\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\ravi7\\\\OneDrive\\\\Documents\\\\GitHub\\\\360-estate-app\\\\lib\\\\features\\\\tenant\\\\presentation\\\\tenant_documents_page.dart\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\ravi7\\\\OneDrive\\\\Documents\\\\GitHub\\\\360-estate-app\\\\lib\\\\features\\\\tenant\\\\presentation\\\\tenant_profile_page.dart\" -Force)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\ravi7\\\\OneDrive\\\\Documents\\\\GitHub\\\\360-estate-app\\\\lib\\\\features\\\\tenant\\\\presentation\\\\tenant_inspections_page.dart\" -Force)",
+      "Bash(git add:*)"
+    ]
+  }
+}

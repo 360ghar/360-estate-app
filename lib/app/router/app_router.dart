@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:estate_app/app/app_shell.dart';
-import 'package:estate_app/app/tenant_shell.dart';
-import 'package:estate_app/core/auth/user_role.dart';
 import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:estate_app/features/auth/presentation/enter_phone_page.dart';
@@ -52,13 +50,6 @@ import 'package:estate_app/features/maintenance/domain/entities/maintenance_requ
 import 'package:estate_app/features/tasks/presentation/maintenance_detail_page.dart';
 import 'package:estate_app/features/tasks/presentation/task_create_page.dart';
 import 'package:estate_app/features/tasks/presentation/tasks_page.dart';
-import 'package:estate_app/features/tenant/presentation/tenant_documents_page.dart';
-import 'package:estate_app/features/tenant/presentation/tenant_home_page.dart';
-import 'package:estate_app/features/tenant/presentation/tenant_payments_page.dart';
-import 'package:estate_app/features/tenant/presentation/tenant_profile_page.dart';
-import 'package:estate_app/features/tenant/presentation/tenant_requests_page.dart';
-import 'package:estate_app/features/tenant/presentation/tenant_request_form_page.dart';
-import 'package:estate_app/features/tenant/presentation/tenant_inspections_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -89,7 +80,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (isPublicRoute) {
         if (!flags.enablePublicApplications) {
           if (!isLoggedIn) return '/enter-phone';
-          return authState.role == UserRole.tenant ? '/tenant/home' : '/home';
+          return '/home';
         }
         return null;
       }
@@ -106,24 +97,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return isRoleRoute ? null : '/select-role';
       }
 
-      final role = authState.role;
-      final isTenantRoute = location.startsWith('/tenant');
-      final homePath = role == UserRole.tenant ? '/tenant/home' : '/home';
-
-      if (role == UserRole.tenant && !isTenantRoute) {
-        return homePath;
-      }
-
-      if (role != UserRole.tenant && isTenantRoute) {
-        return '/home';
-      }
-
       if (!flags.enableApplicationsModule && isApplicationsRoute) {
         return '/more';
       }
 
       if (isLoggedIn && (isAuthRoute || isSplash || isRoleRoute)) {
-        return homePath;
+        return '/home';
       }
 
       return null;
@@ -450,105 +429,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         builder: (context, state) => const AboutPage(),
                       ),
                     ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-      StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) {
-          return TenantShell(navigationShell: navigationShell);
-        },
-        branches: [
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/tenant/home',
-                builder: (context, state) => const TenantHomePage(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/tenant/payments',
-                builder: (context, state) => const TenantPaymentsPage(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/tenant/requests',
-                builder: (context, state) => const TenantRequestsPage(),
-                routes: [
-                  GoRoute(
-                    path: 'new',
-                    builder: (context, state) =>
-                        const TenantRequestFormPage(),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/tenant/documents',
-                builder: (context, state) => const TenantDocumentsPage(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/tenant/profile',
-                builder: (context, state) => const TenantProfilePage(),
-                routes: [
-                  GoRoute(
-                    path: 'edit',
-                    builder: (context, state) => const ProfileEditPage(),
-                  ),
-                  GoRoute(
-                    path: 'settings',
-                    builder: (context, state) => const AppSettingsPage(
-                      routePrefix: '/tenant/profile/settings',
-                    ),
-                    routes: [
-                      GoRoute(
-                        path: 'notifications',
-                        builder: (context, state) =>
-                            const NotificationSettingsPage(),
-                      ),
-                      GoRoute(
-                        path: 'privacy',
-                        builder: (context, state) =>
-                            const PrivacySettingsPage(),
-                      ),
-                    ],
-                  ),
-                  GoRoute(
-                    path: 'inspections',
-                    builder: (context, state) =>
-                        const TenantInspectionsPage(),
-                    routes: [
-                      GoRoute(
-                        path: ':id',
-                        builder: (context, state) {
-                          final id = state.pathParameters['id']!;
-                          return InspectionDetailPage(
-                            inspectionId: id,
-                            allowSign: true,
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                  GoRoute(
-                    path: 'notifications',
-                    builder: (context, state) => const NotificationsPage(),
                   ),
                 ],
               ),
