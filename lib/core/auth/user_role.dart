@@ -1,27 +1,23 @@
-enum UserRole { owner, manager }
+enum UserRole { owner }
 
 extension UserRoleX on UserRole {
-  bool get isOwner => this == UserRole.owner;
-  bool get isManager => this == UserRole.manager;
+  bool get isOwner => true;
 
   String get label {
-    switch (this) {
-      case UserRole.owner:
-        return 'Owner';
-      case UserRole.manager:
-        return 'Relationship Manager';
-    }
+    return 'Owner';
   }
 }
 
 UserRole? parseUserRole(String? value) {
   final normalized = value?.trim().toLowerCase();
   if (normalized == null || normalized.isEmpty) return null;
-  if (normalized.contains('owner')) return UserRole.owner;
-  if (normalized.contains('rm') ||
+  // Always return owner for any valid input
+  if (normalized.contains('owner') ||
+      normalized.contains('manager') ||
+      normalized.contains('rm') ||
       normalized.contains('relationship') ||
-      normalized.contains('manager')) {
-    return UserRole.manager;
+      normalized.contains('tenant')) {
+    return UserRole.owner;
   }
   return null;
 }

@@ -6,7 +6,6 @@ import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:estate_app/features/auth/presentation/enter_phone_page.dart';
 import 'package:estate_app/features/auth/presentation/login_page.dart';
 import 'package:estate_app/features/auth/presentation/otp_verify_page.dart';
-import 'package:estate_app/features/auth/presentation/role_selection_page.dart';
 import 'package:estate_app/features/auth/presentation/signup_page.dart';
 import 'package:estate_app/features/auth/presentation/splash_page.dart';
 import 'package:estate_app/features/collections/presentation/collections_page.dart';
@@ -65,7 +64,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final authState = ref.read(authControllerProvider);
       final isChecking = authState.status == AuthStatus.checking;
       final isLoggedIn = authState.isLoggedIn;
-      final needsRole = authState.needsRoleSelection;
       final location = state.uri.path;
 
       final isSplash = location == '/splash';
@@ -73,7 +71,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           location == '/login' ||
           location == '/otp' ||
           location == '/signup';
-      final isRoleRoute = location == '/select-role';
       final isPublicRoute = location.startsWith('/public');
       final isApplicationsRoute = location.startsWith('/more/applications');
 
@@ -93,15 +90,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return isAuthRoute ? null : '/enter-phone';
       }
 
-      if (needsRole) {
-        return isRoleRoute ? null : '/select-role';
-      }
-
       if (!flags.enableApplicationsModule && isApplicationsRoute) {
         return '/more';
       }
 
-      if (isLoggedIn && (isAuthRoute || isSplash || isRoleRoute)) {
+      if (isLoggedIn && (isAuthRoute || isSplash)) {
         return '/home';
       }
 
@@ -154,10 +147,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             isSignupFlow: flow == 'signup',
           );
         },
-      ),
-      GoRoute(
-        path: '/select-role',
-        builder: (context, state) => const RoleSelectionPage(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {

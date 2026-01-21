@@ -325,27 +325,19 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   Future<void> _setAuthenticated(UserProfile user, {String? phone}) async {
-    final role = await _resolveRole(user);
-    if (role == null) {
-      state = AuthState(
-        status: AuthStatus.needsRole,
-        user: user,
-        phone: phone ?? state.phone,
-      );
-    } else {
-      state = AuthState(
-        status: AuthStatus.authenticated,
-        user: user,
-        role: role,
-        phone: phone ?? state.phone,
-      );
-    }
+    final role = await _resolveRole(user) ?? UserRole.owner;
+    await _preferences.setString(PrefKeys.userRole, role.name);
+    state = AuthState(
+      status: AuthStatus.authenticated,
+      user: user,
+      role: role,
+      phone: phone ?? state.phone,
+    );
   }
 
   Future<UserRole?> _resolveRole(UserProfile user) async {
     final roleFromProfile = parseUserRole(user.role);
     if (roleFromProfile != null) {
-      await _preferences.setString(PrefKeys.userRole, roleFromProfile.name);
       return roleFromProfile;
     }
 
