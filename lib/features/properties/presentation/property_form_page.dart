@@ -302,14 +302,20 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
     try {
       final repository = ref.read(propertiesRepositoryProvider);
       final currentId = _currentPropertyIdForSubmit();
-      final property = currentId == null
+      final isCreating = currentId == null;
+
+      // Create or update property
+      final property = isCreating
           ? await repository.create(payload)
           : await repository.update(currentId, payload);
-      if (currentId == null && property.id != null) {
+      if (isCreating && property.id != null) {
         _createdPropertyId = property.id;
       }
 
       final propertyId = property.id;
+      int failedUploads = 0;
+
+      // Upload local images if any
       if (propertyId != null &&
           (_imageFiles.isNotEmpty || _floorPlanFiles.isNotEmpty)) {
         setState(() => _isUploading = true);
@@ -317,40 +323,64 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
 
         final uploadedImages = <String>[...remoteImages];
         for (final file in _imageFiles) {
-          final result = await uploadService.uploadFile(
-            file: file,
-            target: UploadTarget.documents,
-            type: DocumentType.other.apiValue,
-            title: _data.name ?? 'Property image',
-            propertyId: propertyId,
-          );
-          if (result.url != null) {
-            uploadedImages.add(result.url!);
+          try {
+            final result = await uploadService.uploadFile(
+              file: file,
+              target: UploadTarget.documents,
+              type: DocumentType.other.apiValue,
+              title: _data.name ?? 'Property image',
+              propertyId: propertyId,
+            );
+            if (result.url != null) {
+              uploadedImages.add(result.url!);
+            } else {
+              failedUploads++;
+              // Debug: upload returned no URL
+              print('Image upload returned no URL. Data: ${result.data}');
+            }
+          } catch (e) {
+            failedUploads++;
+            // Debug: log the actual error
+            print('Image upload failed: ${e.toString()}');
           }
         }
 
         final uploadedFloorPlans = <String>[...remoteFloorPlans];
         for (final file in _floorPlanFiles) {
-          final result = await uploadService.uploadFile(
-            file: file,
-            target: UploadTarget.documents,
-            type: DocumentType.other.apiValue,
-            title: _data.name ?? 'Floor plan',
-            propertyId: propertyId,
-          );
-          if (result.url != null) {
-            uploadedFloorPlans.add(result.url!);
+          try {
+            final result = await uploadService.uploadFile(
+              file: file,
+              target: UploadTarget.documents,
+              type: DocumentType.other.apiValue,
+              title: _data.name ?? 'Floor plan',
+              propertyId: propertyId,
+            );
+            if (result.url != null) {
+              uploadedFloorPlans.add(result.url!);
+            } else {
+              failedUploads++;
+              print('Floor plan upload returned no URL. Data: ${result.data}');
+            }
+          } catch (e) {
+            failedUploads++;
+            print('Floor plan upload failed: ${e.toString()}');
           }
         }
 
+        // Update property with uploaded image URLs
         if (uploadedImages.isNotEmpty || uploadedFloorPlans.isNotEmpty) {
-          await repository.update(
-            propertyId.toString(),
-            PropertyPayload(
-              images: uploadedImages.isEmpty ? null : uploadedImages,
-              floorPlans: uploadedFloorPlans.isEmpty ? null : uploadedFloorPlans,
-            ),
-          );
+          try {
+            await repository.update(
+              propertyId.toString(),
+              PropertyPayload(
+                images: uploadedImages.isEmpty ? null : uploadedImages,
+                floorPlans: uploadedFloorPlans.isEmpty ? null : uploadedFloorPlans,
+              ),
+            );
+          } catch (e) {
+            // Log error but don't fail the entire operation
+            failedUploads++;
+          }
         }
 
         _imageFiles.clear();
@@ -364,12 +394,29 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
       ref.invalidate(propertiesPagedProvider);
 
       if (mounted) {
+        // Navigate first, then show success message on the next screen
         context.go('/properties');
+        // Show success message after navigation (using a post-frame callback)
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final action = isCreating ? 'created' : 'updated';
+          final suffix = failedUploads > 0 ? ' (some images failed to upload)' : '';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Property $action successfully$suffix'),
+              backgroundColor: failedUploads > 0 ? Colors.orange : Colors.green,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        });
       }
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_formatError(error))),
+        SnackBar(
+          content: Text('Failed to save property: ${_formatError(error)}'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+        ),
       );
     } finally {
       if (mounted) {
