@@ -1,4 +1,5 @@
 import 'package:estate_app/core/network/api_client.dart';
+import 'package:estate_app/core/network/response_parser.dart';
 import 'package:estate_app/core/pagination/page.dart';
 import 'package:estate_app/features/maintenance/data/models/maintenance_request_dto.dart';
 
@@ -47,20 +48,27 @@ final class ApiMaintenanceRemoteDataSource
       if (category != null) 'category': category,
     };
 
-    final response = await _apiClient.get<Map<String, dynamic>>(
+    final response = await _apiClient.get<dynamic>(
       '/pm/maintenance/requests',
       queryParameters: queryParams,
     );
 
-    final data = response.data!;
-    final items = (data['items'] as List<dynamic>? ??
-            data['data'] as List<dynamic>? ??
-            [])
-        .map((e) => MaintenanceRequestDto.fromJson(e as Map<String, dynamic>))
+    final data = response.data;
+    final rawItems = unwrapList(data);
+    final items = rawItems
+        .whereType<Map<String, dynamic>>()
+        .map(MaintenanceRequestDto.fromJson)
         .toList();
 
-    final total = data['total'] as int? ?? items.length;
-    final hasMore = offset + items.length < total;
+    int? total;
+    if (data is Map<String, dynamic>) {
+      final totalValue = data['total'] ?? data['count'];
+      if (totalValue is int) {
+        total = totalValue;
+      }
+    }
+    final hasMore =
+        total != null ? offset + items.length < total : items.length >= limit;
 
     return Page<MaintenanceRequestDto>(
       items: items,

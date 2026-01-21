@@ -1,37 +1,102 @@
-import 'package:estate_app/core/pagination/page.dart';
-import 'package:estate_app/features/leases/domain/entities/lease.dart';
+import 'dart:io';
+import 'package:estate_app/features/leases/models/lease.dart';
 
 abstract interface class LeasesRepository {
-  Future<Page<Lease>> getLeases({
-    required int page,
-    required int limit,
-    int? propertyId,
+  /// List leases with optional filters
+  Future<List<Lease>> list({
+    String? propertyId,
+    String? tenantId,
     String? status,
   });
 
-  Future<Lease> getLeaseById(int id);
+  /// Get a lease by ID
+  Future<Lease> fetch(String leaseId);
 
-  Future<Lease> createLease({
-    required int propertyId,
-    required String tenantUserId,
-    required DateTime startDate,
-    required DateTime endDate,
-    required double monthlyRent,
-    double? securityDeposit,
-    int rentDueDay = 1,
-    double? lateFeeAmount,
-    int? lateFeeGraceDays,
-    int renewalNotifyDays = 30,
-    String? notes,
+  /// Create a new lease
+  Future<Lease> create(LeaseCreateRequest request);
+
+  /// Upload a signed lease document
+  Future<Lease> uploadSigned(String leaseId, File file);
+
+  /// Renew an existing lease
+  Future<Lease> renew(String leaseId, LeaseRenewRequest request);
+
+  /// Terminate a lease
+  Future<Lease> terminate(String leaseId, LeaseTerminateRequest request);
+}
+
+/// Request payload for creating a lease
+class LeaseCreateRequest {
+  const LeaseCreateRequest({
+    required this.propertyId,
+    required this.tenantId,
+    required this.startDate,
+    required this.endDate,
+    required this.rentAmount,
+    this.depositAmount,
+    this.notes,
   });
 
-  Future<Lease> uploadSignedLease(int leaseId, String filePath);
+  final String propertyId;
+  final String tenantId;
+  final DateTime startDate;
+  final DateTime endDate;
+  final double rentAmount;
+  final double? depositAmount;
+  final String? notes;
 
-  Future<Lease> renewLease({
-    required int leaseId,
-    required DateTime newEndDate,
-    double? newMonthlyRent,
-  });
+  Map<String, dynamic> toJson() {
+    final payload = <String, dynamic>{
+      'property_id': propertyId,
+      'tenant_id': tenantId,
+      'start_date': startDate.toIso8601String(),
+      'end_date': endDate.toIso8601String(),
+      'rent_amount': rentAmount,
+    };
+    if (depositAmount != null) {
+      payload['deposit_amount'] = depositAmount;
+    }
+    if (notes != null && notes!.trim().isNotEmpty) {
+      payload['notes'] = notes!.trim();
+    }
+    return payload;
+  }
+}
 
-  Future<void> terminateLease(int leaseId, {String? reason});
+/// Request payload for renewing a lease
+class LeaseRenewRequest {
+  const LeaseRenewRequest({this.newEndDate, this.newRentAmount});
+
+  final DateTime? newEndDate;
+  final double? newRentAmount;
+
+  Map<String, dynamic> toJson() {
+    final payload = <String, dynamic>{};
+    if (newEndDate != null) {
+      payload['end_date'] = newEndDate!.toIso8601String();
+    }
+    if (newRentAmount != null) {
+      payload['rent_amount'] = newRentAmount;
+    }
+    return payload;
+  }
+}
+
+/// Request payload for terminating a lease
+class LeaseTerminateRequest {
+  const LeaseTerminateRequest({this.reason, this.terminatedAt});
+
+  final String? reason;
+  final DateTime? terminatedAt;
+
+  Map<String, dynamic> toJson() {
+    final payload = <String, dynamic>{};
+    if (reason != null && reason!.trim().isNotEmpty) {
+      payload['reason'] = reason!.trim();
+    }
+    if (terminatedAt != null) {
+      payload['terminated_at'] = terminatedAt!.toIso8601String();
+    }
+    return payload;
+  }
 }

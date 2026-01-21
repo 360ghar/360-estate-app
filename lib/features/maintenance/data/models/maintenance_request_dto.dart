@@ -1,3 +1,4 @@
+import 'package:estate_app/core/utils/parse.dart';
 import 'package:estate_app/features/maintenance/domain/entities/maintenance_request.dart';
 
 final class MaintenanceRequestDto {
@@ -24,52 +25,47 @@ final class MaintenanceRequestDto {
   });
 
   factory MaintenanceRequestDto.fromJson(Map<String, dynamic> json) {
+    final propertyTitle = _extractPropertyTitle(json);
     return MaintenanceRequestDto(
-      id: json['id'] as int,
-      propertyId:
-          json['property_id'] as int? ?? json['propertyId'] as int? ?? 0,
-      propertyTitle: json['property_title'] as String? ??
-          json['propertyTitle'] as String? ??
-          '',
-      leaseId: json['lease_id'] as int? ?? json['leaseId'] as int?,
-      tenantName:
-          json['tenant_name'] as String? ?? json['tenantName'] as String?,
-      category: json['category'] as String? ?? 'other',
-      priority: json['priority'] as String? ?? 'medium',
-      status: json['request_status'] as String? ??
-          json['status'] as String? ??
-          'open',
-      title: json['title'] as String? ?? '',
-      description: json['description'] as String? ?? '',
-      assignedTo:
-          json['assigned_to'] as String? ?? json['assignedTo'] as String?,
-      estimatedCost: _parseDouble(json['estimated_cost'] ?? json['estimatedCost']),
-      actualCost: _parseDouble(json['actual_cost'] ?? json['actualCost']),
-      scheduledDate: json['scheduled_date'] != null
-          ? DateTime.parse(json['scheduled_date'] as String)
-          : json['scheduledDate'] != null
-              ? DateTime.parse(json['scheduledDate'] as String)
-              : null,
-      completedDate: json['completed_date'] != null
-          ? DateTime.parse(json['completed_date'] as String)
-          : json['completedDate'] != null
-              ? DateTime.parse(json['completedDate'] as String)
-              : null,
-      notes: json['notes'] as String?,
-      imageUrls: (json['image_urls'] as List<dynamic>? ??
-              json['imageUrls'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : json['createdAt'] != null
-              ? DateTime.parse(json['createdAt'] as String)
-              : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
-          : json['updatedAt'] != null
-              ? DateTime.parse(json['updatedAt'] as String)
-              : null,
+      id: parseInt(json['id']) ?? 0,
+      propertyId: parseInt(json['property_id'] ?? json['propertyId']) ?? 0,
+      propertyTitle: propertyTitle,
+      leaseId: parseInt(json['lease_id'] ?? json['leaseId']),
+      tenantName: parseString(json['tenant_name'] ?? json['tenantName']),
+      category: parseString(json['category']) ?? 'other',
+      priority:
+          parseString(json['urgency'] ?? json['priority']) ?? 'medium',
+      status: parseString(json['request_status'] ?? json['status']) ?? 'open',
+      title: parseString(json['title']) ?? '',
+      description: parseString(json['description']) ?? '',
+      assignedTo: parseString(
+        json['assigned_to'] ??
+            json['assignedTo'] ??
+            json['assigned_agent_id'],
+      ),
+      estimatedCost: parseDouble(json['estimated_cost'] ?? json['estimatedCost']),
+      actualCost: parseDouble(json['actual_cost'] ?? json['actualCost']),
+      scheduledDate: parseDateTime(
+        json['scheduled_for'] ??
+            json['scheduled_date'] ??
+            json['scheduledDate'],
+      ),
+      completedDate: parseDateTime(
+        json['completed_at'] ??
+            json['completed_date'] ??
+            json['completedDate'] ??
+            json['closed_at'],
+      ),
+      notes: parseString(
+        json['notes'] ??
+            json['completion_notes'] ??
+            json['availability_notes'],
+      ),
+      imageUrls: parseStringList(
+        json['image_urls'] ?? json['imageUrls'] ?? json['attachments'],
+      ),
+      createdAt: parseDateTime(json['created_at'] ?? json['createdAt']),
+      updatedAt: parseDateTime(json['updated_at'] ?? json['updatedAt']),
     );
   }
 
@@ -98,14 +94,14 @@ final class MaintenanceRequestDto {
       'property_id': propertyId,
       if (leaseId != null) 'lease_id': leaseId,
       'category': category,
-      'priority': priority,
+      'urgency': _mapUrgency(priority),
       'title': title,
       'description': description,
       if (assignedTo != null) 'assigned_to': assignedTo,
       if (estimatedCost != null) 'estimated_cost': estimatedCost,
       if (scheduledDate != null)
-        'scheduled_date': scheduledDate!.toIso8601String().split('T')[0],
-      if (notes != null) 'notes': notes,
+        'scheduled_for': scheduledDate!.toIso8601String(),
+      if (notes != null) 'availability_notes': notes,
     };
   }
 
@@ -133,11 +129,33 @@ final class MaintenanceRequestDto {
     );
   }
 
-  static double? _parseDouble(dynamic value) {
-    if (value == null) return null;
-    if (value is double) return value;
-    if (value is int) return value.toDouble();
-    if (value is String) return double.tryParse(value);
-    return null;
+  static String _extractPropertyTitle(Map<String, dynamic> json) {
+    final direct = parseString(
+      json['property_title'] ??
+          json['propertyTitle'] ??
+          json['property_name'] ??
+          json['propertyName'],
+    );
+    if (direct != null && direct.trim().isNotEmpty) return direct;
+
+    final property = json['property'];
+    if (property is Map) {
+      final nested = parseString(
+        property['name'] ??
+            property['title'] ??
+            property['property_name'] ??
+            property['propertyTitle'] ??
+            property['property_title'],
+      );
+      if (nested != null && nested.trim().isNotEmpty) return nested;
+    }
+
+    return '';
+  }
+
+  static String _mapUrgency(String value) {
+    final normalized = value.trim().toLowerCase();
+    if (normalized == 'urgent') return 'emergency';
+    return normalized.isEmpty ? 'medium' : normalized;
   }
 }

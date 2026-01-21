@@ -7,10 +7,14 @@ class AppLoader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loader = const SizedBox(
+    final scheme = Theme.of(context).colorScheme;
+    final loader = SizedBox(
       width: 22,
       height: 22,
-      child: CircularProgressIndicator(strokeWidth: 2),
+      child: CircularProgressIndicator(
+        strokeWidth: 2,
+        valueColor: AlwaysStoppedAnimation<Color>(scheme.primary),
+      ),
     );
     if (label == null) return loader;
     return Row(

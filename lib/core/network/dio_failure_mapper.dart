@@ -55,6 +55,29 @@ final class DioFailureMapper {
 
   static String? _tryExtractMessage(Object? data) {
     if (data is Map) {
+      final detail = data['detail'];
+      if (detail is String && detail.trim().isNotEmpty) {
+        return detail;
+      }
+      if (detail is Map) {
+        final detailMessage = detail['message'] ?? detail['error'] ?? detail['msg'];
+        if (detailMessage is String && detailMessage.trim().isNotEmpty) {
+          return detailMessage;
+        }
+      }
+      if (detail is List) {
+        for (final item in detail) {
+          if (item is String && item.trim().isNotEmpty) {
+            return item;
+          }
+          if (item is Map) {
+            final msg = item['message'] ?? item['error'] ?? item['msg'];
+            if (msg is String && msg.trim().isNotEmpty) {
+              return msg;
+            }
+          }
+        }
+      }
       final v = data['message'] ?? data['error'] ?? data['msg'];
       if (v is String && v.trim().isNotEmpty) return v;
     }
@@ -78,6 +101,25 @@ final class DioFailureMapper {
       return errors.map(
         (key, value) => MapEntry(key.toString(), value?.toString() ?? ''),
       );
+    }
+    final detail = data['detail'];
+    if (detail is List) {
+      final fields = <String, String>{};
+      for (final item in detail) {
+        if (item is! Map) continue;
+        final loc = item['loc'];
+        final msg = item['msg'] ?? item['message'] ?? item['error'];
+        if (msg is! String || msg.trim().isEmpty) continue;
+        String? field;
+        if (loc is List && loc.isNotEmpty) {
+          final last = loc.last;
+          if (last is String && last.trim().isNotEmpty) {
+            field = last;
+          }
+        }
+        fields[field ?? 'error'] = msg.trim();
+      }
+      return fields;
     }
     return const {};
   }

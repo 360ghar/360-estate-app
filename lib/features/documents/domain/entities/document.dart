@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 
 enum DocumentType {
   leaseAgreement,
-  rentReceipt,
-  identityProof,
+  idProof,
   addressProof,
-  propertyDocument,
-  maintenanceInvoice,
-  inspection,
+  incomeProof,
+  inspectionReport,
+  receipt,
+  invoice,
+  propertyDeed,
+  insurancePolicy,
   other,
   ;
 
@@ -15,18 +17,27 @@ enum DocumentType {
     switch (value.toLowerCase()) {
       case 'lease_agreement':
         return DocumentType.leaseAgreement;
-      case 'rent_receipt':
-        return DocumentType.rentReceipt;
+      case 'id_proof':
       case 'identity_proof':
-        return DocumentType.identityProof;
+        return DocumentType.idProof;
       case 'address_proof':
         return DocumentType.addressProof;
-      case 'property_document':
-        return DocumentType.propertyDocument;
-      case 'maintenance_invoice':
-        return DocumentType.maintenanceInvoice;
+      case 'income_proof':
+        return DocumentType.incomeProof;
+      case 'inspection_report':
       case 'inspection':
-        return DocumentType.inspection;
+        return DocumentType.inspectionReport;
+      case 'receipt':
+      case 'rent_receipt':
+        return DocumentType.receipt;
+      case 'invoice':
+      case 'maintenance_invoice':
+        return DocumentType.invoice;
+      case 'property_deed':
+      case 'property_document':
+        return DocumentType.propertyDeed;
+      case 'insurance_policy':
+        return DocumentType.insurancePolicy;
       default:
         return DocumentType.other;
     }
@@ -36,18 +47,22 @@ enum DocumentType {
     switch (this) {
       case DocumentType.leaseAgreement:
         return 'lease_agreement';
-      case DocumentType.rentReceipt:
-        return 'rent_receipt';
-      case DocumentType.identityProof:
-        return 'identity_proof';
+      case DocumentType.idProof:
+        return 'id_proof';
       case DocumentType.addressProof:
         return 'address_proof';
-      case DocumentType.propertyDocument:
-        return 'property_document';
-      case DocumentType.maintenanceInvoice:
-        return 'maintenance_invoice';
-      case DocumentType.inspection:
-        return 'inspection';
+      case DocumentType.incomeProof:
+        return 'income_proof';
+      case DocumentType.inspectionReport:
+        return 'inspection_report';
+      case DocumentType.receipt:
+        return 'receipt';
+      case DocumentType.invoice:
+        return 'invoice';
+      case DocumentType.propertyDeed:
+        return 'property_deed';
+      case DocumentType.insurancePolicy:
+        return 'insurance_policy';
       case DocumentType.other:
         return 'other';
     }
@@ -57,18 +72,22 @@ enum DocumentType {
     switch (this) {
       case DocumentType.leaseAgreement:
         return 'Lease Agreement';
-      case DocumentType.rentReceipt:
-        return 'Rent Receipt';
-      case DocumentType.identityProof:
-        return 'Identity Proof';
+      case DocumentType.idProof:
+        return 'ID Proof';
       case DocumentType.addressProof:
         return 'Address Proof';
-      case DocumentType.propertyDocument:
-        return 'Property Document';
-      case DocumentType.maintenanceInvoice:
-        return 'Maintenance Invoice';
-      case DocumentType.inspection:
-        return 'Inspection';
+      case DocumentType.incomeProof:
+        return 'Income Proof';
+      case DocumentType.inspectionReport:
+        return 'Inspection Report';
+      case DocumentType.receipt:
+        return 'Receipt';
+      case DocumentType.invoice:
+        return 'Invoice';
+      case DocumentType.propertyDeed:
+        return 'Property Deed';
+      case DocumentType.insurancePolicy:
+        return 'Insurance Policy';
       case DocumentType.other:
         return 'Other';
     }
@@ -78,18 +97,22 @@ enum DocumentType {
     switch (this) {
       case DocumentType.leaseAgreement:
         return Icons.description;
-      case DocumentType.rentReceipt:
+      case DocumentType.receipt:
         return Icons.receipt;
-      case DocumentType.identityProof:
+      case DocumentType.idProof:
         return Icons.badge;
       case DocumentType.addressProof:
         return Icons.home;
-      case DocumentType.propertyDocument:
+      case DocumentType.propertyDeed:
         return Icons.apartment;
-      case DocumentType.maintenanceInvoice:
+      case DocumentType.invoice:
         return Icons.build;
-      case DocumentType.inspection:
+      case DocumentType.inspectionReport:
         return Icons.checklist;
+      case DocumentType.incomeProof:
+        return Icons.account_balance_wallet_outlined;
+      case DocumentType.insurancePolicy:
+        return Icons.verified_outlined;
       case DocumentType.other:
         return Icons.insert_drive_file;
     }
@@ -99,18 +122,22 @@ enum DocumentType {
     switch (this) {
       case DocumentType.leaseAgreement:
         return Colors.blue;
-      case DocumentType.rentReceipt:
+      case DocumentType.receipt:
         return Colors.green;
-      case DocumentType.identityProof:
+      case DocumentType.idProof:
         return Colors.purple;
       case DocumentType.addressProof:
         return Colors.teal;
-      case DocumentType.propertyDocument:
+      case DocumentType.propertyDeed:
         return Colors.orange;
-      case DocumentType.maintenanceInvoice:
+      case DocumentType.invoice:
         return Colors.brown;
-      case DocumentType.inspection:
+      case DocumentType.inspectionReport:
         return Colors.indigo;
+      case DocumentType.incomeProof:
+        return Colors.blueGrey;
+      case DocumentType.insurancePolicy:
+        return Colors.cyan;
       case DocumentType.other:
         return Colors.grey;
     }

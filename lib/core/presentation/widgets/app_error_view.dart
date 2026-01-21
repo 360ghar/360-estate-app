@@ -24,11 +24,21 @@ class AppErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, size: 48, color: scheme.error),
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: scheme.error.withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.error_outline, size: 32, color: scheme.error),
+            ),
             const SizedBox(height: AppSpacing.lg),
             Text(
               title,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),

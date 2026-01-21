@@ -1,10 +1,34 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract final class PrefKeys {
+  // Theme & Language
   static const themeMode = 'theme_mode';
   static const localeLanguageCode = 'locale_language_code';
   static const localeCountryCode = 'locale_country_code';
+
+  // User & Mode
   static const lastSelectedMode = 'last_selected_mode';
+  static const userRole = 'user_role';
+
+  // Profile
+  static const profilePhotoUrl = 'profile_photo_url';
+
+  // Notifications
+  static const notificationsEnabled = 'notifications_enabled';
+  static const quietHoursStart = 'quiet_hours_start';
+  static const quietHoursEnd = 'quiet_hours_end';
+  static const rentRemindersEnabled = 'rent_reminders_enabled';
+  static const paymentAlertsEnabled = 'payment_alerts_enabled';
+  static const leaseExpiryAlertsEnabled = 'lease_expiry_alerts_enabled';
+  static const maintenanceAlertsEnabled = 'maintenance_alerts_enabled';
+  static const inspectionRemindersEnabled = 'inspection_reminders_enabled';
+  static const marketingEmailsEnabled = 'marketing_emails_enabled';
+
+  // Privacy
+  static const analyticsEnabled = 'analytics_enabled';
+  static const profileVisibility = 'profile_visibility';
+  static const phoneVisibility = 'phone_visibility';
+  static const emailVisibility = 'email_visibility';
 }
 
 final class AppPreferences {

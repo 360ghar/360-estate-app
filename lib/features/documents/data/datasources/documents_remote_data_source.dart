@@ -96,12 +96,17 @@ final class ApiDocumentsRemoteDataSource implements DocumentsRemoteDataSource {
     String? expiryDate,
   }) async {
     final fileName = file.path.split('/').last;
+    final trimmedDescription = description?.trim();
+    final title =
+        (trimmedDescription != null && trimmedDescription.isNotEmpty)
+            ? trimmedDescription
+            : fileName;
     final formData = FormData.fromMap({
       'file': await MultipartFile.fromFile(file.path, filename: fileName),
       'document_type': documentType,
+      'title': title,
       if (propertyId != null) 'property_id': propertyId,
       if (leaseId != null) 'lease_id': leaseId,
-      if (description != null) 'description': description,
       if (expiryDate != null) 'expiry_date': expiryDate,
     });
 

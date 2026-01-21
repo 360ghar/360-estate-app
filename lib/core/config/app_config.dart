@@ -14,15 +14,27 @@ bool? _parseBool(String? raw) {
 
 final class FeatureFlags {
   const FeatureFlags({
+    required this.enableApplicationsModule,
     required this.enablePublicApplications,
   });
 
+  final bool enableApplicationsModule;
   final bool enablePublicApplications;
 
   factory FeatureFlags.fromEnvironment(AppEnvironment env) {
+    const enableApplicationsModuleDefine = String.fromEnvironment(
+      'ENABLE_APPLICATIONS_MODULE',
+    );
     const enablePublicApplicationsDefine = String.fromEnvironment(
       'ENABLE_PUBLIC_APPLICATIONS',
     );
+
+    final enableApplicationsModule = _parseBool(
+          enableApplicationsModuleDefine.trim().isNotEmpty
+              ? enableApplicationsModuleDefine
+              : dotenv.env['ENABLE_APPLICATIONS_MODULE'],
+        ) ??
+        true;
 
     final enablePublicApplications = _parseBool(
           enablePublicApplicationsDefine.trim().isNotEmpty
@@ -32,6 +44,7 @@ final class FeatureFlags {
         true;
 
     return FeatureFlags(
+      enableApplicationsModule: enableApplicationsModule,
       enablePublicApplications: enablePublicApplications,
     );
   }
