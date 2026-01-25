@@ -3,7 +3,7 @@ import 'package:estate_app/core/presentation/animations/premium/premium_animatio
 import 'package:estate_app/core/presentation/widgets/glass/premium_glass_card.dart';
 import 'package:estate_app/core/utils/phone_utils.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
-import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart';
+import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart' show SimplePremiumBackground;
 import 'package:estate_app/features/auth/presentation/widgets/premium_otp_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -61,7 +61,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
       }
     });
 
-    return PremiumAuthBackground(
+    return SimplePremiumBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(

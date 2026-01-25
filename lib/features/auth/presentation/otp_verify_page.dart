@@ -2,7 +2,7 @@
 import 'package:estate_app/core/presentation/widgets/glass/glass_toast.dart';
 import 'package:estate_app/core/presentation/widgets/glass/premium_glass_card.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
-import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart';
+import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart' show SimplePremiumBackground;
 import 'package:estate_app/features/auth/presentation/widgets/premium_otp_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -41,7 +41,7 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
       }
     });
 
-    return PremiumAuthBackground(
+    return SimplePremiumBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(

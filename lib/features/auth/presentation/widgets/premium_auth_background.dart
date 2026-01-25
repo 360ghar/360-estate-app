@@ -313,7 +313,7 @@ class _NoisePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final random = math.Random(42); // Fixed seed for consistent pattern
 
-    for (int i = 0; i < 5000; i++) {
+    for (int i = 0; i < 500; i++) {
       final x = random.nextDouble() * size.width;
       final y = random.nextDouble() * size.height;
       final radius = random.nextDouble() * 1.5;

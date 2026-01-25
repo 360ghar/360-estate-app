@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:estate_app/core/presentation/design_system/app_glass_blur.dart';
 import 'package:estate_app/core/presentation/design_system/app_glass_colors.dart';
+import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 
 /// Premium glass card with animated border glow and superior visual effects.
 ///
@@ -41,26 +42,28 @@ class PremiumGlassCard extends StatefulWidget {
 
 class _PremiumGlassCardState extends State<PremiumGlassCard>
     with SingleTickerProviderStateMixin {
-  late AnimationController _shimmerController;
-  late Animation<double> _shimmerAnimation;
+  AnimationController? _shimmerController;
+  Animation<double>? _shimmerAnimation;
   bool _isPressed = false;
   bool _isHovered = false;
 
   @override
   void initState() {
     super.initState();
-    _shimmerController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    )..repeat();
-    _shimmerAnimation = Tween<double>(begin: -2, end: 2).animate(
-      CurvedAnimation(parent: _shimmerController, curve: Curves.easeInOutSine),
-    );
+    if (widget.shimmer) {
+      _shimmerController = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 1500),
+      )..repeat();
+      _shimmerAnimation = Tween<double>(begin: -2, end: 2).animate(
+        CurvedAnimation(parent: _shimmerController!, curve: Curves.easeInOutSine),
+      );
+    }
   }
 
   @override
   void dispose() {
-    _shimmerController.dispose();
+    _shimmerController?.dispose();
     super.dispose();
   }
 
@@ -146,7 +149,7 @@ class _PremiumGlassCardState extends State<PremiumGlassCard>
 
   Widget _buildShimmer(double radius) {
     return AnimatedBuilder(
-      animation: _shimmerAnimation,
+      animation: _shimmerAnimation!,
       builder: (context, child) {
         return ClipRRect(
           borderRadius: BorderRadius.circular(radius),
@@ -163,9 +166,9 @@ class _PremiumGlassCardState extends State<PremiumGlassCard>
                     Colors.transparent,
                   ],
                   stops: [
-                    _shimmerAnimation.value - 0.3,
-                    _shimmerAnimation.value,
-                    _shimmerAnimation.value + 0.3,
+                    _shimmerAnimation!.value - 0.3,
+                    _shimmerAnimation!.value,
+                    _shimmerAnimation!.value + 0.3,
                   ],
                 ),
               ),
@@ -679,9 +682,4 @@ class _PremiumGlassButtonState extends State<PremiumGlassButton>
     setState(() => _isPressed = false);
     _controller.reverse();
   }
-}
-
-// Import AppColors for reference
-abstract final class AppColors {
-  static const Color textPrimary = Color(0xFF1F2937);
 }

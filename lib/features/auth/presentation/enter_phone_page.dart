@@ -6,7 +6,7 @@ import 'package:estate_app/core/presentation/widgets/glass/premium_glass_card.da
 import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/core/utils/phone_utils.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
-import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart';
+import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart' show SimplePremiumBackground;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,7 +87,7 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
       );
     }
 
-    return PremiumAuthBackground(
+    return SimplePremiumBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         body: SafeArea(
