@@ -1,4 +1,4 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 import 'package:estate_app/core/presentation/animations/premium/premium_animations.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
@@ -244,11 +244,13 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
                     width: 1,
                   ),
                 ),
-                child: TextField(
+                child: TextFormField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => _continue(),
+                  onFieldSubmitted: (_) => _continue(),
+                  validator: _validatePhone,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                     LengthLimitingTextInputFormatter(10),
@@ -277,6 +279,10 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 18,
                       vertical: 18,
+                    ),
+                    errorStyle: const TextStyle(
+                      color: Color(0xFFFCA5A5),
+                      fontSize: 12,
                     ),
                   ),
                 ),

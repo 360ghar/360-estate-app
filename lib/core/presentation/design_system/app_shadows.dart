@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 /// Multi-level shadow system for B2B SaaS elevation.
 /// Provides clear visual hierarchy through subtle elevation differences.

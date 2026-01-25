@@ -1,4 +1,4 @@
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+﻿import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:flutter/material.dart';
 
 /// Premium gradient definitions for glassmorphism UI.
@@ -118,8 +118,8 @@ abstract final class AppGradients {
   /// Card surface gradient - directional glass effect
   static LinearGradient glassCard({bool isDark = false}) {
     return LinearGradient(
-      begin: Alignment(-1, -1),
-      end: Alignment(1, 1),
+      begin: const Alignment(-1, -1),
+      end: const Alignment(1, 1),
       colors: isDark
           ? [
               const Color(0xD91E293B), // 85% dark slate
@@ -138,8 +138,8 @@ abstract final class AppGradients {
   /// Shimmer gradient for loading states
   static LinearGradient shimmer({bool isDark = false}) {
     return LinearGradient(
-      begin: Alignment(-1, -0.5),
-      end: Alignment(1, 0.5),
+      begin: const Alignment(-1, -0.5),
+      end: const Alignment(1, 0.5),
       colors: isDark
           ? [
               const Color(0x331E293B), // 20% dark slate

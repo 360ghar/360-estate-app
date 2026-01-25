@@ -1,4 +1,4 @@
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+﻿import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_text_styles.dart';
 import 'package:flutter/material.dart';

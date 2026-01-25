@@ -1,4 +1,4 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 import 'package:estate_app/core/presentation/animations/premium/premium_animations.dart';
 import 'package:estate_app/core/presentation/widgets/glass/premium_glass_card.dart';
 import 'package:estate_app/core/utils/phone_utils.dart';
@@ -29,7 +29,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   final _confirmController = TextEditingController();
 
   bool _obscurePassword = true;
-  bool _obscureConfirm = false;
+  bool _obscureConfirm = true;
   bool _prefilled = false;
 
   @override
@@ -101,6 +101,12 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                                 controller: _phoneController,
                                 lockPhone: lockPhone,
                                 normalizedParam: normalizedParam,
+                                validator: (value) {
+                                  if (!isValidPhone(value ?? '')) {
+                                    return 'Enter a valid phone number.';
+                                  }
+                                  return null;
+                                },
                               )
                             else
                               _LockedPhoneDisplay(phone: normalizedParam!),
@@ -111,6 +117,13 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                               hint: 'Enter password',
                               obscure: _obscurePassword,
                               onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
+                              validator: (value) {
+                                final text = value?.trim() ?? '';
+                                if (text.length < 6) {
+                                  return 'Password must be 6+ characters.';
+                                }
+                                return null;
+                              },
                             ),
                             const SizedBox(height: 16),
                             _PasswordField(
@@ -119,6 +132,14 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                               hint: 'Confirm password',
                               obscure: _obscureConfirm,
                               onToggle: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                              validator: (value) {
+                                final text = value?.trim() ?? '';
+                                if (text.isEmpty) return 'Confirm your password.';
+                                if (text != _passwordController.text.trim()) {
+                                  return 'Passwords do not match.';
+                                }
+                                return null;
+                              },
                             ),
                             const SizedBox(height: 24),
                             _buildCreateAccountButton(state.isBusy, normalizedParam, lockPhone),
@@ -327,11 +348,13 @@ class _PhoneField extends StatelessWidget {
   final TextEditingController controller;
   final bool lockPhone;
   final String? normalizedParam;
+  final String? Function(String?)? validator;
 
   const _PhoneField({
     required this.controller,
     required this.lockPhone,
     required this.normalizedParam,
+    this.validator,
   });
 
   @override
@@ -354,6 +377,7 @@ class _PhoneField extends StatelessWidget {
             LengthLimitingTextInputFormatter(10),
             _PhoneFormatter(),
           ],
+          validator: validator,
         ),
       ],
     );
@@ -429,6 +453,7 @@ class _PasswordField extends StatefulWidget {
   final String hint;
   final bool obscure;
   final VoidCallback onToggle;
+  final String? Function(String?)? validator;
 
   const _PasswordField({
     required this.controller,
@@ -436,6 +461,7 @@ class _PasswordField extends StatefulWidget {
     required this.hint,
     required this.obscure,
     required this.onToggle,
+    this.validator,
   });
 
   @override
@@ -484,11 +510,12 @@ class _PasswordFieldState extends State<_PasswordField> {
                       width: _isFocused ? 1.5 : 1,
                     ),
                   ),
-                  child: TextField(
+                  child: TextFormField(
                     controller: widget.controller,
                     obscureText: widget.obscure,
                     style: _inputStyle,
                     cursorColor: const Color(0xFF3B82F6),
+                    validator: widget.validator,
                     decoration: InputDecoration(
                       hintText: widget.hint,
                       hintStyle: _hintStyle,
@@ -506,6 +533,10 @@ class _PasswordFieldState extends State<_PasswordField> {
                         ),
                       ),
                       border: InputBorder.none,
+                      errorStyle: const TextStyle(
+                        color: Color(0xFFFCA5A5),
+                        fontSize: 12,
+                      ),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     ),
                   ),
@@ -525,6 +556,7 @@ class _GlassInputField extends StatefulWidget {
   final IconData? prefixIcon;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
 
   const _GlassInputField({
     required this.controller,
@@ -532,6 +564,7 @@ class _GlassInputField extends StatefulWidget {
     this.prefixIcon,
     this.keyboardType,
     this.inputFormatters,
+    this.validator,
   });
 
   @override
@@ -572,12 +605,13 @@ class _GlassInputFieldState extends State<_GlassInputField> {
                   width: _isFocused ? 1.5 : 1,
                 ),
               ),
-              child: TextField(
+              child: TextFormField(
                 controller: widget.controller,
                 keyboardType: widget.keyboardType,
                 inputFormatters: widget.inputFormatters,
                 style: _inputStyle,
                 cursorColor: const Color(0xFF3B82F6),
+                validator: widget.validator,
                 decoration: InputDecoration(
                   hintText: widget.hint,
                   hintStyle: _hintStyle,
@@ -589,6 +623,10 @@ class _GlassInputFieldState extends State<_GlassInputField> {
                         )
                       : null,
                   border: InputBorder.none,
+                  errorStyle: const TextStyle(
+                    color: Color(0xFFFCA5A5),
+                    fontSize: 12,
+                  ),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 ),
               ),

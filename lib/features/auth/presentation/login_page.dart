@@ -1,4 +1,4 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 import 'package:estate_app/core/presentation/animations/premium/premium_animations.dart';
 import 'package:estate_app/core/presentation/widgets/glass/glass_toast.dart';
 import 'package:estate_app/core/presentation/widgets/glass/premium_glass_card.dart';
@@ -34,6 +34,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  String? _validatePhone(String? value) {
+    if (!isValidPhone(value ?? '')) return 'Enter a valid phone number.';
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    final text = value?.trim() ?? '';
+    if (text.length < 6) return 'Enter a valid password.';
+    return null;
   }
 
   @override
@@ -94,6 +105,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               controller: _phoneController,
                               lockPhone: lockPhone,
                               normalizedParam: normalizedParam,
+                              validator: _validatePhone,
                             ),
                             const SizedBox(height: 16),
 
@@ -102,7 +114,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               controller: _passwordController,
                               obscure: _obscurePassword,
                               onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
-                              error: state.errorMessage != null ? 'Invalid phone or password' : null,
+                              validator: _validatePassword,
+                              highlightError: state.errorMessage != null,
                             ),
                             const SizedBox(height: 12),
 
@@ -201,7 +214,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           : () {
               if (_formKey.currentState?.validate() ?? false) {
                 ref.read(authControllerProvider.notifier).signInWithPassword(
-                      phone: lockPhone ? normalizedParam! : normalizePhone(_phoneController.text),
+                      phone: lockPhone
+                          ? normalizedParam!
+                          : normalizePhone(_phoneController.text),
                       password: _passwordController.text.trim(),
                     );
               }
@@ -350,11 +365,13 @@ class _PhoneField extends StatelessWidget {
   final TextEditingController controller;
   final bool lockPhone;
   final String? normalizedParam;
+  final String? Function(String?)? validator;
 
   const _PhoneField({
     required this.controller,
     required this.lockPhone,
     required this.normalizedParam,
+    this.validator,
   });
 
   @override
@@ -380,6 +397,8 @@ class _PhoneField extends StatelessWidget {
               LengthLimitingTextInputFormatter(10),
               _PhoneFormatter(),
             ],
+            textInputAction: TextInputAction.next,
+            validator: validator,
           ),
       ],
     );
@@ -390,13 +409,15 @@ class _PasswordField extends StatefulWidget {
   final TextEditingController controller;
   final bool obscure;
   final VoidCallback onToggle;
-  final String? error;
+  final String? Function(String?)? validator;
+  final bool highlightError;
 
   const _PasswordField({
     required this.controller,
     required this.obscure,
     required this.onToggle,
-    this.error,
+    this.validator,
+    this.highlightError = false,
   });
 
   @override
@@ -439,19 +460,20 @@ class _PasswordFieldState extends State<_PasswordField> {
                     color: Colors.white.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: widget.error != null
+                      color: widget.highlightError
                           ? const Color(0xFFEF4444)
                           : _isFocused
                               ? const Color(0xFF3B82F6)
                               : Colors.white.withValues(alpha: 0.1),
-                      width: _isFocused || widget.error != null ? 1.5 : 1,
+                      width: _isFocused || widget.highlightError ? 1.5 : 1,
                     ),
                   ),
-                  child: TextField(
+                  child: TextFormField(
                     controller: widget.controller,
                     obscureText: widget.obscure,
                     style: _inputStyle,
                     cursorColor: const Color(0xFF3B82F6),
+                    validator: widget.validator,
                     decoration: InputDecoration(
                       hintText: 'Enter password',
                       hintStyle: _hintStyle,
@@ -463,15 +485,16 @@ class _PasswordFieldState extends State<_PasswordField> {
                       suffixIcon: GestureDetector(
                         onTap: widget.onToggle,
                         child: Icon(
-                          widget.obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                          widget.obscure
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
                           color: Colors.white.withValues(alpha: 0.5),
                           size: 20,
                         ),
                       ),
                       border: InputBorder.none,
-                      errorText: widget.error,
-                      errorStyle: TextStyle(
-                        color: const Color(0xFFEF4444),
+                      errorStyle: const TextStyle(
+                        color: Color(0xFFFCA5A5),
                         fontSize: 12,
                       ),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -546,6 +569,9 @@ class _GlassInputField extends StatefulWidget {
   final IconData? prefixIcon;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onFieldSubmitted;
+  final String? Function(String?)? validator;
 
   const _GlassInputField({
     required this.controller,
@@ -553,6 +579,9 @@ class _GlassInputField extends StatefulWidget {
     this.prefixIcon,
     this.keyboardType,
     this.inputFormatters,
+    this.textInputAction,
+    this.onFieldSubmitted,
+    this.validator,
   });
 
   @override
@@ -593,12 +622,15 @@ class _GlassInputFieldState extends State<_GlassInputField> {
                   width: _isFocused ? 1.5 : 1,
                 ),
               ),
-              child: TextField(
+              child: TextFormField(
                 controller: widget.controller,
                 keyboardType: widget.keyboardType,
                 inputFormatters: widget.inputFormatters,
+                textInputAction: widget.textInputAction,
+                onFieldSubmitted: widget.onFieldSubmitted,
                 style: _inputStyle,
                 cursorColor: const Color(0xFF3B82F6),
+                validator: widget.validator,
                 decoration: InputDecoration(
                   hintText: widget.hint,
                   hintStyle: _hintStyle,
@@ -610,6 +642,10 @@ class _GlassInputFieldState extends State<_GlassInputField> {
                         )
                       : null,
                   border: InputBorder.none,
+                  errorStyle: const TextStyle(
+                    color: Color(0xFFFCA5A5),
+                    fontSize: 12,
+                  ),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 ),
               ),
