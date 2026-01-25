@@ -49,12 +49,21 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.gh360.estateapp</string>
+			<string>com.the360ghar.estateapp</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.gh360.estateapp</string>
+				<string>com.the360ghar.estateapp</string>
 			</array>
 		</dict>
 	</array>
+	<!-- Camera permission for property photos -->
+	<key>NSCameraUsageDescription</key>
+	<string>360 Estate needs camera access to take photos for property listings.</string>
+	<!-- Photo library permission for image selection -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>360 Estate needs photo library access to select images for property listings.</string>
+	<!-- Photo library add permission for saving photos -->
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>360 Estate needs permission to save photos to your library.</string>
 </dict>
 </plist>
