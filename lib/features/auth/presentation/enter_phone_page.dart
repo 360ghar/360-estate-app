@@ -213,12 +213,7 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
       children: [
         Text(
           'PHONE NUMBER',
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1.2,
-          ),
+          style: _labelStyle(context),
         ),
         const SizedBox(height: 12),
         Container(
@@ -256,23 +251,14 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
                     LengthLimitingTextInputFormatter(10),
                     _PhoneNumberFormatter(),
                   ],
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 1,
-                  ),
+                  style: _inputStyle(context),
                   cursorColor: const Color(0xFF3B82F6),
                   decoration: InputDecoration(
                     hintText: '00000 00000',
-                    hintStyle: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.3),
-                      fontSize: 18,
-                      letterSpacing: 1,
-                    ),
+                    hintStyle: _hintStyle(context),
                     prefixIcon: Icon(
                       Icons.phone_outlined,
-                      color: Colors.white.withValues(alpha: 0.5),
+                      color: _iconColor(context),
                       size: 22,
                     ),
                     border: InputBorder.none,
@@ -299,10 +285,7 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
       padding: const EdgeInsets.only(top: 12),
       child: Text(
         'We\'ll send you a verification code',
-        style: TextStyle(
-          color: Colors.white.withValues(alpha: 0.5),
-          fontSize: 13,
-        ),
+        style: _helperStyle(context),
       ),
     );
   }
@@ -323,15 +306,12 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
     return Text.rich(
       TextSpan(
         text: 'By continuing, you agree to our ',
-        style: TextStyle(
-          color: Colors.white.withValues(alpha: 0.5),
-          fontSize: 13,
-        ),
+        style: _helperStyle(context),
         children: [
           TextSpan(
             text: 'Terms of Service',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.8),
+              color: _helperEmphasisColor(context),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -339,7 +319,7 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
           TextSpan(
             text: 'Privacy Policy',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.8),
+              color: _helperEmphasisColor(context),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -372,3 +352,45 @@ class _PhoneNumberFormatter extends TextInputFormatter {
     );
   }
 }
+
+bool _isLightTheme(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.light;
+
+TextStyle _labelStyle(BuildContext context) => TextStyle(
+      color: _isLightTheme(context)
+          ? const Color(0xFF64748B)
+          : Colors.white.withValues(alpha: 0.7),
+      fontSize: 13,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 1.2,
+    );
+
+TextStyle _inputStyle(BuildContext context) => TextStyle(
+      color: _isLightTheme(context) ? const Color(0xFF0F172A) : Colors.white,
+      fontSize: 18,
+      fontWeight: FontWeight.w500,
+      letterSpacing: 1,
+    );
+
+TextStyle _hintStyle(BuildContext context) => TextStyle(
+      color: _isLightTheme(context)
+          ? const Color(0xFF94A3B8)
+          : Colors.white.withValues(alpha: 0.3),
+      fontSize: 18,
+      letterSpacing: 1,
+    );
+
+Color _iconColor(BuildContext context) => _isLightTheme(context)
+    ? const Color(0xFF94A3B8)
+    : Colors.white.withValues(alpha: 0.5);
+
+TextStyle _helperStyle(BuildContext context) => TextStyle(
+      color: _isLightTheme(context)
+          ? const Color(0xFF64748B)
+          : Colors.white.withValues(alpha: 0.5),
+      fontSize: 13,
+    );
+
+Color _helperEmphasisColor(BuildContext context) => _isLightTheme(context)
+    ? const Color(0xFF0F172A)
+    : Colors.white.withValues(alpha: 0.8);

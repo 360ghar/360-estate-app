@@ -381,7 +381,7 @@ class _PhoneField extends StatelessWidget {
       children: [
         Text(
           'MOBILE NUMBER',
-          style: _labelStyle,
+          style: _labelStyle(context),
         ),
         const SizedBox(height: 10),
         if (lockPhone)
@@ -434,7 +434,7 @@ class _PasswordFieldState extends State<_PasswordField> {
       children: [
         Text(
           'PASSWORD',
-          style: _labelStyle,
+          style: _labelStyle(context),
         ),
         const SizedBox(height: 10),
         Focus(
@@ -471,15 +471,15 @@ class _PasswordFieldState extends State<_PasswordField> {
                   child: TextFormField(
                     controller: widget.controller,
                     obscureText: widget.obscure,
-                    style: _inputStyle,
+                    style: _inputStyle(context),
                     cursorColor: const Color(0xFF3B82F6),
                     validator: widget.validator,
                     decoration: InputDecoration(
                       hintText: 'Enter password',
-                      hintStyle: _hintStyle,
+                      hintStyle: _hintStyle(context),
                       prefixIcon: Icon(
                         Icons.lock_outline,
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: _iconColor(context),
                         size: 20,
                       ),
                       suffixIcon: GestureDetector(
@@ -488,7 +488,7 @@ class _PasswordFieldState extends State<_PasswordField> {
                           widget.obscure
                               ? Icons.visibility_outlined
                               : Icons.visibility_off_outlined,
-                          color: Colors.white.withValues(alpha: 0.5),
+                          color: _iconColor(context),
                           size: 20,
                         ),
                       ),
@@ -539,7 +539,7 @@ class _LockedPhoneDisplay extends StatelessWidget {
             child: Text(
               phone,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.9),
+                color: _inputTextColor(context),
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
                 letterSpacing: 1.2,
@@ -628,16 +628,16 @@ class _GlassInputFieldState extends State<_GlassInputField> {
                 inputFormatters: widget.inputFormatters,
                 textInputAction: widget.textInputAction,
                 onFieldSubmitted: widget.onFieldSubmitted,
-                style: _inputStyle,
+                style: _inputStyle(context),
                 cursorColor: const Color(0xFF3B82F6),
                 validator: widget.validator,
                 decoration: InputDecoration(
                   hintText: widget.hint,
-                  hintStyle: _hintStyle,
+                  hintStyle: _hintStyle(context),
                   prefixIcon: widget.prefixIcon != null
                       ? Icon(
                           widget.prefixIcon,
-                          color: Colors.white.withValues(alpha: 0.5),
+                          color: _iconColor(context),
                           size: 20,
                         )
                       : null,
@@ -658,21 +658,39 @@ class _GlassInputFieldState extends State<_GlassInputField> {
 }
 
 // Styles
-TextStyle get _labelStyle => TextStyle(
-      color: Colors.white.withValues(alpha: 0.7),
+bool _isLightTheme(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.light;
+
+Color _inputTextColor(BuildContext context) =>
+    _isLightTheme(context) ? const Color(0xFF0F172A) : Colors.white;
+
+Color _mutedTextColor(BuildContext context) => _isLightTheme(context)
+    ? const Color(0xFF64748B)
+    : Colors.white.withValues(alpha: 0.7);
+
+Color _hintTextColor(BuildContext context) => _isLightTheme(context)
+    ? const Color(0xFF94A3B8)
+    : Colors.white.withValues(alpha: 0.3);
+
+Color _iconColor(BuildContext context) => _isLightTheme(context)
+    ? const Color(0xFF94A3B8)
+    : Colors.white.withValues(alpha: 0.5);
+
+TextStyle _labelStyle(BuildContext context) => TextStyle(
+      color: _mutedTextColor(context),
       fontSize: 13,
       fontWeight: FontWeight.w600,
       letterSpacing: 1.2,
     );
 
-TextStyle get _inputStyle => const TextStyle(
-      color: Colors.white,
+TextStyle _inputStyle(BuildContext context) => TextStyle(
+      color: _inputTextColor(context),
       fontSize: 16,
       fontWeight: FontWeight.w500,
     );
 
-TextStyle get _hintStyle => TextStyle(
-      color: Colors.white.withValues(alpha: 0.3),
+TextStyle _hintStyle(BuildContext context) => TextStyle(
+      color: _hintTextColor(context),
       fontSize: 16,
     );
 
