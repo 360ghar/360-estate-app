@@ -2,6 +2,8 @@ import 'package:estate_app/core/presentation/design_system/app_borders.dart';
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_text_styles.dart';
+import 'package:estate_app/core/presentation/design_system/app_glass_colors.dart';
+import 'package:estate_app/core/presentation/design_system/app_glass_blur.dart';
 import 'package:flutter/material.dart';
 
 /// Professional B2B theme with navy/indigo primary color.
@@ -141,4 +143,147 @@ abstract final class AppTheme {
   static ThemeData get lightTheme => _buildTheme(AppColors.lightScheme());
 
   static ThemeData get darkTheme => _buildTheme(AppColors.darkScheme());
+
+  // === Glassmorphism Theme Variants ===
+
+  /// Light glassmorphism theme with premium glass effects
+  static ThemeData get lightGlassTheme {
+    final base = lightTheme;
+    final scheme = AppColors.lightScheme();
+
+    return base.copyWith(
+      scaffoldBackgroundColor: const Color(0xFFF9FAFB),
+      cardTheme: CardThemeData(
+        color: Colors.white.withOpacity(AppGlassColors.opacityMedium),
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: AppRadii.xl),
+        margin: const EdgeInsets.all(0),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.white.withOpacity(AppGlassColors.opacityStrong),
+        foregroundColor: scheme.onSurface,
+        elevation: 0,
+        centerTitle: false,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: base.textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  /// Dark glassmorphism theme with premium glass effects
+  static ThemeData get darkGlassTheme {
+    final base = darkTheme;
+
+    return base.copyWith(
+      scaffoldBackgroundColor: const Color(0xFF0F172A),
+      cardTheme: CardThemeData(
+        color: AppGlassColors.glassSurfaceDark(AppGlassColors.opacityMedium),
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: AppRadii.xl),
+        margin: const EdgeInsets.all(0),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: AppGlassColors.glassSurfaceDark(AppGlassColors.opacityStrong),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: false,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: base.textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  /// Auth theme with dark glassmorphism background
+  static ThemeData get authTheme {
+    final base = darkTheme;
+
+    return base.copyWith(
+      scaffoldBackgroundColor: Colors.transparent,
+      colorScheme: base.colorScheme.copyWith(
+        background: Colors.transparent,
+        surface: Colors.transparent,
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: false,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: base.textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: AppGlassColors.glassSurfaceDark(AppGlassColors.opacityMedium),
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: AppRadii.xl),
+        margin: const EdgeInsets.all(0),
+      ),
+      textTheme: base.textTheme.copyWith(
+        displayLarge: AppTextStyles.authTitleGlass,
+        bodyLarge: AppTextStyles.glassBody,
+        bodyMedium: AppTextStyles.glassBody,
+        labelLarge: AppTextStyles.glassLabel,
+      ),
+    );
+  }
+}
+
+/// Extension for accessing glassmorphism theme data
+extension GlassThemeExtension on ThemeData {
+  /// Whether this is a glassmorphism theme
+  bool get isGlassTheme =>
+      brightness == Brightness.dark ||
+      scaffoldBackgroundColor == const Color(0xFF0F172A) ||
+      scaffoldBackgroundColor == Colors.transparent;
+}
+
+/// Glass theme configuration for auth screens
+class GlassAuthTheme {
+  /// Background gradient for auth screens
+  static const LinearGradient authGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF0F172A), // Slate 900
+      Color(0xFF1E1B4B), // Indigo 950
+      Color(0xFF312E81), // Indigo 900
+      Color(0xFF1E3A5F), // Navy
+    ],
+    stops: [0.0, 0.3, 0.7, 1.0],
+  );
+
+  /// Glass container blur for auth cards
+  static double get cardBlur => AppGlassBlur.extra;
+
+  /// Glass container opacity for auth cards
+  static double get cardOpacity => AppGlassColors.opacityMedium;
+
+  /// Border radius for auth cards
+  static double get cardBorderRadius => 20;
+
+  /// Accent color for auth elements
+  static const Color accent = Color(0xFF3B82F6);
+
+  /// Primary gradient for auth buttons
+  static const LinearGradient primaryGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF1E3A5F), // Navy
+      Color(0xFF2563EB), // Blue
+      Color(0xFF3B82F6), // Lighter blue
+    ],
+  );
 }

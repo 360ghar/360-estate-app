@@ -255,4 +255,158 @@ abstract final class AppTextStyles {
         fontWeight: FontWeight.w600,
         height: 1.3,
       );
+
+  // === Glassmorphism Premium Text Styles ===
+
+  /// Glass title with shadow for glass surfaces
+  static const TextStyle glassTitle = TextStyle(
+    fontSize: 28,
+    fontWeight: FontWeight.w700,
+    height: 1.2,
+    color: Color(0xDDF9FAFB), // 87% white
+    shadows: [
+      Shadow(
+        color: Color(0x33000000), // 20% black shadow
+        offset: Offset(0, 1),
+        blurRadius: 3,
+      ),
+    ],
+  );
+
+  /// Glass subtitle with shadow
+  static const TextStyle glassSubtitle = TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.w400,
+    height: 1.4,
+    color: Color(0x99F9FAFB), // 60% white
+    shadows: [
+      Shadow(
+        color: Color(0x20000000), // 12% black shadow
+        offset: Offset(0, 1),
+        blurRadius: 2,
+      ),
+    ],
+  );
+
+  /// Glass body text for glass surfaces
+  static const TextStyle glassBody = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    height: 1.5,
+    color: Color(0xDDF9FAFB), // 87% white
+  );
+
+  /// Glass caption text
+  static const TextStyle glassCaption = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
+    height: 1.35,
+    color: Color(0x80F9FAFB), // 50% white
+  );
+
+  /// Glass label text (uppercase with spacing)
+  static const TextStyle glassLabel = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+    height: 1.3,
+    letterSpacing: 1.2,
+    color: Color(0x99F9FAFB), // 60% white
+  );
+
+  /// Auth title style - premium glass effect
+  static const TextStyle authTitleGlass = TextStyle(
+    fontSize: 32,
+    fontWeight: FontWeight.w700,
+    height: 1.15,
+    color: Colors.white,
+    shadows: [
+      Shadow(
+        color: Color(0x40000000), // 25% black shadow
+        offset: Offset(0, 2),
+        blurRadius: 8,
+      ),
+      Shadow(
+        color: Color(0x203B82F6), // 12% blue glow
+        offset: Offset(0, 0),
+        blurRadius: 16,
+      ),
+    ],
+  );
+
+  /// Auth subtitle style
+  static const TextStyle authSubtitleGlass = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    height: 1.5,
+    color: Color(0xB3F9FAFB), // 70% white
+    shadows: [
+      Shadow(
+        color: Color(0x30000000), // 18% black shadow
+        offset: Offset(0, 1),
+        blurRadius: 4,
+      ),
+    ],
+  );
+
+  /// Button text with glass effect
+  static const TextStyle glassButtonText = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    height: 1.3,
+    letterSpacing: 0.2,
+    color: Colors.white,
+    shadows: [
+      Shadow(
+        color: Color(0x40000000), // 25% black shadow
+        offset: Offset(0, 1),
+        blurRadius: 2,
+      ),
+    ],
+  );
+
+  /// Success text with green glow
+  static const TextStyle glassSuccess = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    height: 1.3,
+    color: Color(0xFF34D399),
+    shadows: [
+      Shadow(
+        color: Color(0x40059669), // 25% green glow
+        offset: Offset(0, 0),
+        blurRadius: 4,
+      ),
+    ],
+  );
+
+  /// Error text with red glow
+  static const TextStyle glassError = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+    height: 1.3,
+    color: Color(0xFFF87171),
+    shadows: [
+      Shadow(
+        color: Color(0x40DC2626), // 25% red glow
+        offset: Offset(0, 0),
+        blurRadius: 4,
+      ),
+    ],
+  );
+
+  /// OTP digit style - large, bold
+  static const TextStyle glassOtpDigit = TextStyle(
+    fontSize: 28,
+    fontWeight: FontWeight.w700,
+    height: 1.1,
+    color: Colors.white,
+    letterSpacing: 4,
+    shadows: [
+      Shadow(
+        color: Color(0x40000000), // 25% black
+        offset: Offset(0, 2),
+        blurRadius: 4,
+      ),
+    ],
+  );
 }

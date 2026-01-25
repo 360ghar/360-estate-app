@@ -33,7 +33,8 @@
       "Bash(dart run flutter_launcher_icons:*)",
       "Bash(ls:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat\\(pm-properties\\): support images and floor_plans in property update\n\n- Add images and floor_plans fields to ManagedPropertyUpdate schema\n- Add floor_plan to ImageCategory enum\n- Update update_managed_property service to handle image arrays\n- Create PropertyImage records for each image URL\n- First image is marked as main image\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(timeout 5 flutter attach:*)"
     ]
   }
 }

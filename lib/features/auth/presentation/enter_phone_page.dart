@@ -1,14 +1,18 @@
+import 'dart:ui';
+import 'package:estate_app/core/presentation/animations/premium/premium_animations.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/widgets/glass/premium_glass_card.dart';
 import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/core/utils/phone_utils.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
-import 'package:estate_app/features/auth/presentation/widgets/auth_ui.dart';
+import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+/// Premium enter phone page with glassmorphism design and smooth animations.
 class EnterPhonePage extends ConsumerStatefulWidget {
   const EnterPhonePage({super.key});
 
@@ -53,12 +57,21 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
       context.go('/login?phone=$encoded');
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
+      _showErrorSnackBar(error.toString());
     } finally {
       if (mounted) setState(() => _isChecking = false);
     }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: const Color(0xFFEF4444),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
   }
 
   @override
@@ -74,104 +87,282 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
       );
     }
 
-    return AppScaffold(
-      padding: EdgeInsets.zero,
-      body: AuthPageLayout(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AuthTopBar(
-                onBack: () => Navigator.of(context).maybePop(),
-                stepIndex: 0,
-              ),
-              const SizedBox(height: 20),
-              Text('Enter phone', style: authTitleStyle(context)),
-              const SizedBox(height: 8),
-              Text(
-                'We will check if your account exists or create a new one.',
-                style: authSubtitleStyle(context),
-              ),
-              const SizedBox(height: 32),
-              const AuthSectionLabel(text: 'MOBILE NUMBER'),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                textInputAction: TextInputAction.done,
-                onFieldSubmitted: (_) => _continue(),
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(10),
-                  const AuthPhoneNumberFormatter(),
-                ],
-                decoration: authInputDecoration(
-                  context,
-                  hintText: '00000 00000',
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(left: 16, right: 12),
-                    child: AuthCountryPrefix(),
-                  ),
-                ),
-                style: authInputTextStyle(context)?.copyWith(
-                  letterSpacing: 1.5,
-                ),
-                validator: _validatePhone,
-              ),
-              const SizedBox(height: 6),
-              Text('OTP will be sent to this number',
-                  style: authFootnoteStyle(context)),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isChecking ? null : _continue,
-                  style: authPrimaryButtonStyle(),
-                  child: _isChecking
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                      : const Text(
-                          'Continue',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: Text.rich(
-                  TextSpan(
-                    text: 'By continuing, you agree to our ',
-                    style: authFootnoteStyle(context),
+    return PremiumAuthBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+              child: PremiumFadeTransition(
+                slideOffset: const Offset(0, 0.05),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      TextSpan(
-                        text: 'Terms of Service',
-                        style: authLinkStyle(context),
+                      // Logo/Icon
+                      _buildLogo(),
+
+                      const SizedBox(height: 40),
+
+                      // Title
+                      _buildTitle(),
+
+                      const SizedBox(height: 48),
+
+                      // Phone input card
+                      PremiumGlassCard(
+                        padding: const EdgeInsets.all(28),
+                        borderRadius: 24,
+                        blur: 24,
+                        opacity: 0.15,
+                        child: PremiumStaggeredList(
+                          itemCount: 3,
+                          staggerDelay: const Duration(milliseconds: 80),
+                          itemBuilder: (context, index) {
+                            if (index == 0) return _buildPhoneInput();
+                            if (index == 1) return _buildHelperText();
+                            return _buildContinueButton();
+                          },
+                        ),
                       ),
-                      const TextSpan(text: ' and '),
-                      TextSpan(
-                        text: 'Privacy Policy.',
-                        style: authLinkStyle(context),
-                      ),
+
+                      const SizedBox(height: 32),
+
+                      // Terms text
+                      _buildTermsText(),
                     ],
                   ),
-                  textAlign: TextAlign.center,
                 ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogo() {
+    return PremiumScaleAnimation(
+      duration: const Duration(milliseconds: 600),
+      beginScale: 0.5,
+      bounce: true,
+      child: Container(
+        width: 80,
+        height: 80,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF3B82F6), Color(0xFF8B5CF6)],
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: const Icon(
+          Icons.home_rounded,
+          size: 40,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTitle() {
+    return Column(
+      children: [
+        Text(
+          'Welcome to 360° Estate',
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w700,
+            color: Colors.white.withValues(alpha: 0.95),
+            letterSpacing: -0.5,
+            shadows: [
+              Shadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                offset: const Offset(0, 2),
+                blurRadius: 8,
               ),
             ],
           ),
         ),
+        const SizedBox(height: 12),
+        Text(
+          'Enter your phone number to get started',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+            color: Colors.white.withValues(alpha: 0.6),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPhoneInput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'PHONE NUMBER',
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1.2,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF3B82F6).withValues(alpha: 0.1),
+                blurRadius: 16,
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    width: 1,
+                  ),
+                ),
+                child: TextField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => _continue(),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(10),
+                    _PhoneNumberFormatter(),
+                  ],
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 1,
+                  ),
+                  cursorColor: const Color(0xFF3B82F6),
+                  decoration: InputDecoration(
+                    hintText: '00000 00000',
+                    hintStyle: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.3),
+                      fontSize: 18,
+                      letterSpacing: 1,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.phone_outlined,
+                      color: Colors.white.withValues(alpha: 0.5),
+                      size: 22,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 18,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHelperText() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Text(
+        'We\'ll send you a verification code',
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.5),
+          fontSize: 13,
+        ),
       ),
+    );
+  }
+
+  Widget _buildContinueButton() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 24),
+      child: PremiumGlassButton(
+        label: 'Continue',
+        onPressed: _isChecking ? null : _continue,
+        isLoading: _isChecking,
+        icon: Icons.arrow_forward_rounded,
+      ),
+    );
+  }
+
+  Widget _buildTermsText() {
+    return Text.rich(
+      TextSpan(
+        text: 'By continuing, you agree to our ',
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.5),
+          fontSize: 13,
+        ),
+        children: [
+          TextSpan(
+            text: 'Terms of Service',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.8),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const TextSpan(text: ' and '),
+          TextSpan(
+            text: 'Privacy Policy',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.8),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+      textAlign: TextAlign.center,
+    );
+  }
+}
+
+/// Phone number formatter for Indian format (XXXXX XXXXX)
+class _PhoneNumberFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final text = newValue.text.replaceAll(' ', '');
+    final buffer = StringBuffer();
+
+    for (int i = 0; i < text.length; i++) {
+      if (i == 5) buffer.write(' ');
+      buffer.write(text[i]);
+    }
+
+    final formatted = buffer.toString();
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 }
