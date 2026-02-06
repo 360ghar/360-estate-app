@@ -70,50 +70,83 @@ class _PremiumGlassCardState extends State<PremiumGlassCard>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isInteractive = widget.onTap != null;
 
     return Container(
       margin: widget.margin,
-      child: AnimatedScale(
-        scale: _isPressed ? 0.98 : 1.0,
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeOutCubic,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-            boxShadow: _getShadow(isDark),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: widget.blur, sigmaY: widget.blur),
-              child: Stack(
-                children: [
-                  // Base glass layer
-                  Container(
-                    padding: widget.padding,
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppGlassColors.glassSurfaceDark(widget.opacity)
-                          : AppGlassColors.glassSurfaceLight(widget.opacity),
-                      borderRadius: BorderRadius.circular(widget.borderRadius),
-                      border: Border.all(
-                        color: isDark
-                            ? AppGlassColors.borderDark
-                            : AppGlassColors.borderLight,
-                        width: 1,
-                      ),
-                    ),
-                    child: widget.child,
+      child: MouseRegion(
+        cursor: isInteractive ? SystemMouseCursors.click : MouseCursor.defer,
+        onEnter: widget.animateOnHover
+            ? (_) => setState(() => _isHovered = true)
+            : null,
+        onExit: widget.animateOnHover
+            ? (_) => setState(() {
+                _isHovered = false;
+                _isPressed = false;
+              })
+            : null,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          onTapDown: isInteractive
+              ? (_) => setState(() => _isPressed = true)
+              : null,
+          onTapUp: isInteractive
+              ? (_) => setState(() => _isPressed = false)
+              : null,
+          onTapCancel: isInteractive
+              ? () => setState(() => _isPressed = false)
+              : null,
+          child: AnimatedScale(
+            scale: _isPressed ? 0.98 : 1.0,
+            duration: const Duration(milliseconds: 150),
+            curve: Curves.easeOutCubic,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(widget.borderRadius),
+                boxShadow: _getShadow(isDark),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(widget.borderRadius),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(
+                    sigmaX: widget.blur,
+                    sigmaY: widget.blur,
                   ),
+                  child: Stack(
+                    children: [
+                      // Base glass layer
+                      Container(
+                        padding: widget.padding,
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? AppGlassColors.glassSurfaceDark(widget.opacity)
+                              : AppGlassColors.glassSurfaceLight(
+                                  widget.opacity,
+                                ),
+                          borderRadius: BorderRadius.circular(
+                            widget.borderRadius,
+                          ),
+                          border: Border.all(
+                            color: isDark
+                                ? AppGlassColors.borderDark
+                                : AppGlassColors.borderLight,
+                            width: 1,
+                          ),
+                        ),
+                        child: widget.child,
+                      ),
 
-                  // Animated gradient border glow
-                  if (_isHovered || widget.onTap != null)
-                    _buildGradientBorder(widget.borderRadius),
+                      // Animated gradient border glow
+                      if (_isHovered || _isPressed)
+                        _buildGradientBorder(widget.borderRadius),
 
-                  // Shimmer effect
-                  if (widget.shimmer) _buildShimmer(widget.borderRadius),
-                ],
+                      // Shimmer effect
+                      if (widget.shimmer) _buildShimmer(widget.borderRadius),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),

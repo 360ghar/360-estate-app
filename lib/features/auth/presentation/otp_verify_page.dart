@@ -1,4 +1,4 @@
-﻿import 'package:estate_app/core/presentation/animations/premium/premium_animations.dart';
+import 'package:estate_app/core/presentation/animations/premium/premium_animations.dart';
 import 'package:estate_app/core/presentation/widgets/glass/glass_toast.dart';
 import 'package:estate_app/core/presentation/widgets/glass/premium_glass_card.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
@@ -76,10 +76,13 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
                             PremiumOtpInput(
                               length: 6,
                               onCompleted: (otp) async {
-                                _otp = otp;
+                                setState(() => _otp = otp);
                                 await _verifyOtp(otp);
                               },
-                              onChanged: (value) => _otp = value,
+                              onChanged: (value) {
+                                if (_otp == value) return;
+                                setState(() => _otp = value);
+                              },
                               isLoading: state.isBusy && _otp.length == 6,
                             ),
 
