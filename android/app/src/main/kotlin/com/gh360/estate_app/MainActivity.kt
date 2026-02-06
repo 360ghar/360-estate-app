@@ -1,5 +1,0 @@
-package com.gh360.estate_app
-
-import io.flutter.embedding.android.FlutterActivity
-
-class MainActivity : FlutterActivity()

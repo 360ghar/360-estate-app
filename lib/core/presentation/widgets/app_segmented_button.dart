@@ -1,4 +1,4 @@
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+﻿import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_text_styles.dart';
 import 'package:flutter/material.dart';
@@ -115,15 +115,23 @@ class AppSegmentedButton<T> extends StatelessWidget {
                     },
                     color: isDark ? AppColors.darkBorder : AppColors.border,
                   ),
-                Expanded(
-                  child: _SegmentItem<T>(
-                    segment: segments[i],
-                    isSelected: segments[i].value == selected,
-                    style: style,
-                    width: segmentWidth,
-                    onTap: () => onSelected(segments[i].value),
-                  ),
-                ),
+                fullWidth
+                    ? Expanded(
+                        child: _SegmentItem<T>(
+                          segment: segments[i],
+                          isSelected: segments[i].value == selected,
+                          style: style,
+                          width: segmentWidth,
+                          onTap: () => onSelected(segments[i].value),
+                        ),
+                      )
+                    : _SegmentItem<T>(
+                        segment: segments[i],
+                        isSelected: segments[i].value == selected,
+                        style: style,
+                        width: segmentWidth,
+                        onTap: () => onSelected(segments[i].value),
+                      ),
               ],
             ],
           ),
