@@ -23,18 +23,20 @@ class AppCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final effectiveBorderRadius = borderRadius ?? AppRadii.lg;
-    final container = Container(
-      padding: padding,
-      decoration: BoxDecoration(
-        color: color ?? scheme.surface,
-        borderRadius: effectiveBorderRadius,
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.5)),
-        boxShadow: AppShadows.md,
-      ),
-      child: child,
-    );
-
-    if (onTap == null) return container;
+    if (onTap == null) {
+      return Container(
+        padding: padding,
+        decoration: BoxDecoration(
+          color: color ?? scheme.surface,
+          borderRadius: effectiveBorderRadius,
+          border: Border.all(
+            color: scheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+          boxShadow: AppShadows.md,
+        ),
+        child: child,
+      );
+    }
 
     return Material(
       color: Colors.transparent,
@@ -42,7 +44,18 @@ class AppCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: effectiveBorderRadius,
-        child: container,
+        child: Ink(
+          padding: padding,
+          decoration: BoxDecoration(
+            color: color ?? scheme.surface,
+            borderRadius: effectiveBorderRadius,
+            border: Border.all(
+              color: scheme.outlineVariant.withValues(alpha: 0.5),
+            ),
+            boxShadow: AppShadows.md,
+          ),
+          child: child,
+        ),
       ),
     );
   }

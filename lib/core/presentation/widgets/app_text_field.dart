@@ -62,7 +62,7 @@ class AppTextField extends StatelessWidget {
           enabled: enabled,
           readOnly: readOnly,
           onFieldSubmitted: onSubmitted,
-          maxLines: maxLines,
+          maxLines: obscureText ? 1 : maxLines,
           validator: validator,
           cursorColor: scheme.primary,
           style: theme.textTheme.bodyLarge,
