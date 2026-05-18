@@ -14,7 +14,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-/// Unified More page with Profile & Settings - All features in one modern page
 class MorePage extends ConsumerStatefulWidget {
   const MorePage({super.key});
 
@@ -59,7 +58,6 @@ class _MorePageState extends ConsumerState<MorePage> {
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
-          // Profile Header Card
           _ProfileCard(
             userName: user?.displayName ?? 'User',
             userEmail: user?.email ?? '',
@@ -68,9 +66,8 @@ class _MorePageState extends ConsumerState<MorePage> {
             onEditTap: () => context.push('/more/profile/edit'),
           ),
 
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.xl),
 
-          // Account Security Section
           _SectionHeader(
             title: 'Account Security',
             icon: Icons.shield_outlined,
@@ -90,30 +87,27 @@ class _MorePageState extends ConsumerState<MorePage> {
                 iconColor: const Color(0xFF8B5CF6),
                 title: 'Two-Factor Authentication',
                 subtitle: 'Not enabled',
-                trailing: const _StatusChip(value: 'Off', color: Color(0xFF64748B)),
+                trailing: const _StatusChip(
+                  value: 'Off',
+                  color: Color(0xFF64748B),
+                ),
                 onTap: () => _showComingSoon(context),
               ),
             ],
           ),
 
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.xl),
 
-          // Preferences Section with Working Theme & Language
-          _SectionHeader(
-            title: 'Preferences',
-            icon: Icons.tune_outlined,
-          ),
+          _SectionHeader(title: 'Preferences', icon: Icons.tune_outlined),
           const SizedBox(height: AppSpacing.sm),
           _SectionCard(
             children: [
-              // Theme Selector - Inline
               _ThemeSelectorTile(
                 currentMode: themeMode,
                 onSelected: (mode) {
                   ref.read(appThemeProvider.notifier).state = mode;
                 },
               ),
-              // Language Selector - Inline
               _LanguageSelectorTile(
                 currentLocale: appLocale,
                 onSelected: (locale) {
@@ -125,7 +119,8 @@ class _MorePageState extends ConsumerState<MorePage> {
                 iconColor: const Color(0xFFEC4899),
                 title: 'Notifications',
                 subtitle: 'Manage alerts',
-                onTap: () => context.push('/more/profile/settings/notifications'),
+                onTap: () =>
+                    context.push('/more/profile/settings/notifications'),
               ),
               _MenuTile(
                 icon: Icons.privacy_tip_outlined,
@@ -137,13 +132,9 @@ class _MorePageState extends ConsumerState<MorePage> {
             ],
           ),
 
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.xl),
 
-          // Management Section
-          _SectionHeader(
-            title: 'Management',
-            icon: Icons.dashboard_outlined,
-          ),
+          _SectionHeader(title: 'Management', icon: Icons.dashboard_outlined),
           const SizedBox(height: AppSpacing.sm),
           _SectionCard(
             children: [
@@ -187,9 +178,8 @@ class _MorePageState extends ConsumerState<MorePage> {
             ],
           ),
 
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.xl),
 
-          // Finance Section
           _SectionHeader(
             title: 'Finance',
             icon: Icons.account_balance_wallet_outlined,
@@ -214,9 +204,8 @@ class _MorePageState extends ConsumerState<MorePage> {
             ],
           ),
 
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.xl),
 
-          // Documents & Reports Section
           _SectionHeader(
             title: 'Documents & Reports',
             icon: Icons.folder_outlined,
@@ -241,13 +230,9 @@ class _MorePageState extends ConsumerState<MorePage> {
             ],
           ),
 
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.xl),
 
-          // Support Section
-          _SectionHeader(
-            title: 'Support',
-            icon: Icons.support_agent_outlined,
-          ),
+          _SectionHeader(title: 'Support', icon: Icons.support_agent_outlined),
           const SizedBox(height: AppSpacing.sm),
           _SectionCard(
             children: [
@@ -275,13 +260,9 @@ class _MorePageState extends ConsumerState<MorePage> {
             ],
           ),
 
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.xl),
 
-          // About Section
-          _SectionHeader(
-            title: 'About',
-            icon: Icons.info_outline,
-          ),
+          _SectionHeader(title: 'About', icon: Icons.info_outline),
           const SizedBox(height: AppSpacing.sm),
           _SectionCard(
             children: [
@@ -296,7 +277,7 @@ class _MorePageState extends ConsumerState<MorePage> {
                     vertical: AppSpacing.xs,
                   ),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
+                    color: theme.colorScheme.primaryContainer.withOpacity(0.6),
                     borderRadius: AppRadii.sm,
                   ),
                   child: Text(
@@ -326,9 +307,8 @@ class _MorePageState extends ConsumerState<MorePage> {
             ],
           ),
 
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.xl),
 
-          // Sign Out Card
           _SignOutCard(
             isBusy: authState.isBusy,
             onTap: () => _showLogoutDialog(context, ref),
@@ -375,7 +355,6 @@ class _MorePageState extends ConsumerState<MorePage> {
   }
 }
 
-// Enhanced Profile Card
 class _ProfileCard extends StatelessWidget {
   const _ProfileCard({
     required this.userName,
@@ -394,72 +373,145 @@ class _ProfileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
 
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: AppRadii.lg,
-        border: Border.all(color: theme.colorScheme.outlineVariant),
-        boxShadow: AppShadows.subtle,
+        borderRadius: AppRadii.xl,
+        boxShadow: AppShadows.md,
       ),
-      child: Row(
-        children: [
-          AppAvatar(
-            imageUrl: avatarUrl,
-            name: userName,
-            size: AppAvatarSize.lg,
-            onTap: onEditTap,
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  userName,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+      child: ClipRRect(
+        borderRadius: AppRadii.xl,
+        child: Container(
+          decoration: BoxDecoration(color: theme.colorScheme.surface),
+          child: Column(
+            children: [
+              Container(
+                height: 4,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      primaryColor,
+                      primaryColor.withOpacity(0.6),
+                      primaryColor.withOpacity(0.2),
+                    ],
                   ),
                 ),
-                if (userEmail.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    userEmail,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            primaryColor.withOpacity(0.5),
+                            primaryColor.withOpacity(0.15),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: AppAvatar(
+                        imageUrl: avatarUrl,
+                        name: userName,
+                        size: AppAvatarSize.lg,
+                        onTap: onEditTap,
+                      ),
                     ),
-                  ),
-                ],
-                if (userPhone.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    userPhone,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            userName,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                          if (userEmail.isNotEmpty) ...[
+                            const SizedBox(height: AppSpacing.xxs),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.mail_outline_rounded,
+                                  size: 13,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    userEmail,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                          if (userPhone.isNotEmpty) ...[
+                            const SizedBox(height: AppSpacing.xxs),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.phone_outlined,
+                                  size: 13,
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  userPhone,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ],
-            ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: primaryColor.withOpacity(0.08),
+                        borderRadius: AppRadii.md,
+                      ),
+                      child: IconButton(
+                        onPressed: onEditTap,
+                        icon: Icon(
+                          Icons.edit_outlined,
+                          size: 18,
+                          color: primaryColor,
+                        ),
+                        tooltip: 'Edit profile',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          IconButton(
-            onPressed: onEditTap,
-            icon: const Icon(Icons.edit_outlined),
-            tooltip: 'Edit profile',
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
-// Section Header
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.title,
-    required this.icon,
-  });
+  const _SectionHeader({required this.title, required this.icon});
 
   final String title;
   final IconData icon;
@@ -467,28 +519,31 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
 
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(AppSpacing.xs),
+          padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: theme.colorScheme.primary.withOpacity(0.1),
+            color: primaryColor.withOpacity(0.08),
             borderRadius: AppRadii.sm,
+            border: Border.all(
+              color: primaryColor.withOpacity(0.12),
+              width: 0.5,
+            ),
           ),
-          child: Icon(
-            icon,
-            size: 16,
-            color: theme.colorScheme.primary,
-          ),
+          child: Icon(icon, size: 14, color: primaryColor),
         ),
         const SizedBox(width: AppSpacing.sm),
-        Text(
-          title.toUpperCase(),
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.primary,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.5,
+        Expanded(
+          child: Text(
+            title.toUpperCase(),
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: primaryColor.withOpacity(0.85),
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.5,
+            ),
           ),
         ),
       ],
@@ -496,7 +551,6 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-// Section Card
 class _SectionCard extends StatelessWidget {
   const _SectionCard({required this.children});
 
@@ -511,18 +565,28 @@ class _SectionCard extends StatelessWidget {
         color: theme.colorScheme.surface,
         borderRadius: AppRadii.lg,
         border: Border.all(
-          color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+          color: theme.colorScheme.outlineVariant.withOpacity(0.4),
         ),
         boxShadow: AppShadows.sm,
       ),
       child: Column(
         children: List.generate(children.length, (index) {
           final isLast = index == children.length - 1;
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: isLast ? 0 : 1,
-            ),
-            child: children[index],
+          return Column(
+            children: [
+              children[index],
+              if (!isLast)
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                  ),
+                  child: Divider(
+                    height: 1,
+                    thickness: 0.5,
+                    color: theme.colorScheme.outlineVariant.withOpacity(0.4),
+                  ),
+                ),
+            ],
           );
         }),
       ),
@@ -530,7 +594,6 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
-// Theme Selector Tile - Inline working theme switcher
 class _ThemeSelectorTile extends StatefulWidget {
   const _ThemeSelectorTile({
     required this.currentMode,
@@ -544,8 +607,44 @@ class _ThemeSelectorTile extends StatefulWidget {
   State<_ThemeSelectorTile> createState() => _ThemeSelectorTileState();
 }
 
-class _ThemeSelectorTileState extends State<_ThemeSelectorTile> {
+class _ThemeSelectorTileState extends State<_ThemeSelectorTile>
+    with SingleTickerProviderStateMixin {
   bool _expanded = false;
+  late final AnimationController _controller;
+  late final Animation<double> _rotateAnimation;
+  late final Animation<double> _heightAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+    _rotateAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
+    _heightAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toggle() {
+    setState(() => _expanded = !_expanded);
+    if (_expanded) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -560,21 +659,24 @@ class _ThemeSelectorTileState extends State<_ThemeSelectorTile> {
     return Column(
       children: [
         InkWell(
-          onTap: () => setState(() => _expanded = !_expanded),
-          borderRadius: AppRadii.md,
+          onTap: _toggle,
+          borderRadius: BorderRadius.zero,
           child: ListTile(
             leading: Container(
-              width: 42,
-              height: 42,
-              padding: const EdgeInsets.all(AppSpacing.sm),
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFFF59E0B).withOpacity(0.12),
+                color: const Color(0xFFF59E0B).withOpacity(0.1),
                 borderRadius: AppRadii.md,
+                border: Border.all(
+                  color: const Color(0xFFF59E0B).withOpacity(0.15),
+                  width: 0.5,
+                ),
               ),
               child: const Icon(
                 Icons.palette_outlined,
                 color: Color(0xFFF59E0B),
-                size: 22,
+                size: 20,
               ),
             ),
             title: Text(
@@ -584,14 +686,13 @@ class _ThemeSelectorTileState extends State<_ThemeSelectorTile> {
               ),
             ),
             subtitle: Text(
-              'Current: $modeLabel',
+              modeLabel,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            trailing: AnimatedRotation(
-              turns: _expanded ? 0.5 : 0,
-              duration: const Duration(milliseconds: 200),
+            trailing: RotationTransition(
+              turns: Tween(begin: 0.0, end: 0.5).animate(_rotateAnimation),
               child: Icon(
                 Icons.expand_more,
                 color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
@@ -604,14 +705,18 @@ class _ThemeSelectorTileState extends State<_ThemeSelectorTile> {
             ),
           ),
         ),
-        if (_expanded)
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
+        SizeTransition(
+          sizeFactor: _heightAnimation,
+          axisAlignment: -1.0,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              0,
+              AppSpacing.lg,
+              AppSpacing.md,
             ),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.2),
             ),
             child: Column(
               children: [
@@ -621,7 +726,7 @@ class _ThemeSelectorTileState extends State<_ThemeSelectorTile> {
                   isSelected: widget.currentMode == ThemeMode.system,
                   onTap: () {
                     widget.onSelected(ThemeMode.system);
-                    setState(() => _expanded = false);
+                    _toggle();
                   },
                 ),
                 _ThemeOption(
@@ -630,7 +735,7 @@ class _ThemeSelectorTileState extends State<_ThemeSelectorTile> {
                   isSelected: widget.currentMode == ThemeMode.light,
                   onTap: () {
                     widget.onSelected(ThemeMode.light);
-                    setState(() => _expanded = false);
+                    _toggle();
                   },
                 ),
                 _ThemeOption(
@@ -639,18 +744,18 @@ class _ThemeSelectorTileState extends State<_ThemeSelectorTile> {
                   isSelected: widget.currentMode == ThemeMode.dark,
                   onTap: () {
                     widget.onSelected(ThemeMode.dark);
-                    setState(() => _expanded = false);
+                    _toggle();
                   },
                 ),
               ],
             ),
           ),
+        ),
       ],
     );
   }
 }
 
-// Theme Option
 class _ThemeOption extends StatelessWidget {
   const _ThemeOption({
     required this.label,
@@ -667,45 +772,60 @@ class _ThemeOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
 
-    return InkWell(
-      onTap: onTap,
+    return Material(
+      color: isSelected ? primaryColor.withOpacity(0.06) : Colors.transparent,
       borderRadius: AppRadii.md,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xs,
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 20,
-              color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Text(
-              label,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              ),
-            ),
-            const Spacer(),
-            if (isSelected)
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: AppRadii.md,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.sm,
+          ),
+          child: Row(
+            children: [
               Icon(
-                Icons.check_circle,
-                size: 20,
-                color: theme.colorScheme.primary,
+                icon,
+                size: 18,
+                color: isSelected
+                    ? primaryColor
+                    : theme.colorScheme.onSurfaceVariant,
               ),
-          ],
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: isSelected
+                      ? primaryColor
+                      : theme.colorScheme.onSurface,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                ),
+              ),
+              const Spacer(),
+              if (isSelected)
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: primaryColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    size: 14,
+                    color: Colors.white,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-// Language Selector Tile - Inline working language switcher
 class _LanguageSelectorTile extends StatefulWidget {
   const _LanguageSelectorTile({
     required this.currentLocale,
@@ -719,8 +839,44 @@ class _LanguageSelectorTile extends StatefulWidget {
   State<_LanguageSelectorTile> createState() => _LanguageSelectorTileState();
 }
 
-class _LanguageSelectorTileState extends State<_LanguageSelectorTile> {
+class _LanguageSelectorTileState extends State<_LanguageSelectorTile>
+    with SingleTickerProviderStateMixin {
   bool _expanded = false;
+  late final AnimationController _controller;
+  late final Animation<double> _rotateAnimation;
+  late final Animation<double> _heightAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+    _rotateAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
+    _heightAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toggle() {
+    setState(() => _expanded = !_expanded);
+    if (_expanded) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -735,21 +891,24 @@ class _LanguageSelectorTileState extends State<_LanguageSelectorTile> {
     return Column(
       children: [
         InkWell(
-          onTap: () => setState(() => _expanded = !_expanded),
-          borderRadius: AppRadii.md,
+          onTap: _toggle,
+          borderRadius: BorderRadius.zero,
           child: ListTile(
             leading: Container(
-              width: 42,
-              height: 42,
-              padding: const EdgeInsets.all(AppSpacing.sm),
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFF8B5CF6).withOpacity(0.12),
+                color: const Color(0xFF8B5CF6).withOpacity(0.1),
                 borderRadius: AppRadii.md,
+                border: Border.all(
+                  color: const Color(0xFF8B5CF6).withOpacity(0.15),
+                  width: 0.5,
+                ),
               ),
               child: const Icon(
                 Icons.translate_outlined,
                 color: Color(0xFF8B5CF6),
-                size: 22,
+                size: 20,
               ),
             ),
             title: Text(
@@ -759,14 +918,13 @@ class _LanguageSelectorTileState extends State<_LanguageSelectorTile> {
               ),
             ),
             subtitle: Text(
-              'Current: $localeLabel',
+              localeLabel,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            trailing: AnimatedRotation(
-              turns: _expanded ? 0.5 : 0,
-              duration: const Duration(milliseconds: 200),
+            trailing: RotationTransition(
+              turns: Tween(begin: 0.0, end: 0.5).animate(_rotateAnimation),
               child: Icon(
                 Icons.expand_more,
                 color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
@@ -779,14 +937,18 @@ class _LanguageSelectorTileState extends State<_LanguageSelectorTile> {
             ),
           ),
         ),
-        if (_expanded)
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
+        SizeTransition(
+          sizeFactor: _heightAnimation,
+          axisAlignment: -1.0,
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              0,
+              AppSpacing.lg,
+              AppSpacing.md,
             ),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.2),
             ),
             child: Column(
               children: [
@@ -796,7 +958,7 @@ class _LanguageSelectorTileState extends State<_LanguageSelectorTile> {
                   isSelected: widget.currentLocale == null,
                   onTap: () {
                     widget.onSelected(null);
-                    setState(() => _expanded = false);
+                    _toggle();
                   },
                 ),
                 _LanguageOption(
@@ -805,7 +967,7 @@ class _LanguageSelectorTileState extends State<_LanguageSelectorTile> {
                   isSelected: widget.currentLocale?.languageCode == 'en',
                   onTap: () {
                     widget.onSelected(const Locale('en'));
-                    setState(() => _expanded = false);
+                    _toggle();
                   },
                 ),
                 _LanguageOption(
@@ -814,18 +976,18 @@ class _LanguageSelectorTileState extends State<_LanguageSelectorTile> {
                   isSelected: widget.currentLocale?.languageCode == 'hi',
                   onTap: () {
                     widget.onSelected(const Locale('hi'));
-                    setState(() => _expanded = false);
+                    _toggle();
                   },
                 ),
               ],
             ),
           ),
+        ),
       ],
     );
   }
 }
 
-// Language Option
 class _LanguageOption extends StatelessWidget {
   const _LanguageOption({
     required this.label,
@@ -842,48 +1004,67 @@ class _LanguageOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
 
-    return InkWell(
-      onTap: onTap,
+    return Material(
+      color: isSelected ? primaryColor.withOpacity(0.06) : Colors.transparent,
       borderRadius: AppRadii.md,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xs,
-        ),
-        child: Row(
-          children: [
-            Text(
-              label,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              ),
-            ),
-            if (subtitle.isNotEmpty) ...[
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                subtitle,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: AppRadii.md,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.sm,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: isSelected
+                            ? primaryColor
+                            : theme.colorScheme.onSurface,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                      ),
+                    ),
+                    if (subtitle.isNotEmpty)
+                      Text(
+                        subtitle,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                  ],
                 ),
               ),
+              if (isSelected)
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: primaryColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.check_rounded,
+                    size: 14,
+                    color: Colors.white,
+                  ),
+                ),
             ],
-            const Spacer(),
-            if (isSelected)
-              Icon(
-                Icons.check_circle,
-                size: 20,
-                color: theme.colorScheme.primary,
-              ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-// Menu Tile
 class _MenuTile extends StatelessWidget {
   const _MenuTile({
     required this.icon,
@@ -909,76 +1090,87 @@ class _MenuTile extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: AppRadii.md,
-      child: ListTile(
-        leading: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              width: 42,
-              height: 42,
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.12),
-                borderRadius: AppRadii.md,
-              ),
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: 22,
-              ),
-            ),
-            if (showBadge)
-              Positioned(
-                right: -4,
-                top: -4,
-                child: Container(
-                  width: 16,
-                  height: 16,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.error,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: theme.colorScheme.surface, width: 2),
-                  ),
-                ),
-              ),
-          ],
-        ),
-        title: Text(
-          title,
-          style: AppTextStyles.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        subtitle: subtitle != null
-            ? Text(
-                subtitle!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              )
-            : null,
-        trailing: trailing ??
-            Icon(
-              Icons.chevron_right,
-              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
-              size: 18,
-            ),
-        contentPadding: const EdgeInsets.symmetric(
+      borderRadius: BorderRadius.zero,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
-          vertical: AppSpacing.xs,
+          vertical: AppSpacing.sm + 2,
+        ),
+        child: Row(
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: iconColor.withOpacity(0.08),
+                    borderRadius: AppRadii.md,
+                    border: Border.all(
+                      color: iconColor.withOpacity(0.1),
+                      width: 0.5,
+                    ),
+                  ),
+                  child: Icon(icon, color: iconColor, size: 20),
+                ),
+                if (showBadge)
+                  Positioned(
+                    right: -2,
+                    top: -2,
+                    child: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.error,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: theme.colorScheme.surface,
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyles.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      height: 1.3,
+                    ),
+                  ),
+                  if (subtitle != null)
+                    Text(
+                      subtitle!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        height: 1.3,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            trailing ??
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.4),
+                  size: 18,
+                ),
+          ],
         ),
       ),
     );
   }
 }
 
-// Status Chip
 class _StatusChip extends StatelessWidget {
-  const _StatusChip({
-    required this.value,
-    required this.color,
-  });
+  const _StatusChip({required this.value, required this.color});
 
   final String value;
   final Color color;
@@ -993,8 +1185,9 @@ class _StatusChip extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withOpacity(0.08),
         borderRadius: AppRadii.sm,
+        border: Border.all(color: color.withOpacity(0.15), width: 0.5),
       ),
       child: Text(
         value,
@@ -1007,12 +1200,8 @@ class _StatusChip extends StatelessWidget {
   }
 }
 
-// Sign Out Card
 class _SignOutCard extends StatelessWidget {
-  const _SignOutCard({
-    required this.isBusy,
-    required this.onTap,
-  });
+  const _SignOutCard({required this.isBusy, required this.onTap});
 
   final bool isBusy;
   final VoidCallback onTap;
@@ -1020,47 +1209,54 @@ class _SignOutCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final errorColor = theme.colorScheme.error;
 
-    return InkWell(
-      onTap: isBusy ? null : onTap,
+    return Material(
+      color: Colors.transparent,
       borderRadius: AppRadii.lg,
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.errorContainer.withOpacity(0.3),
-          borderRadius: AppRadii.lg,
-          border: Border.all(
-            color: theme.colorScheme.error.withOpacity(0.3),
+      child: InkWell(
+        onTap: isBusy ? null : onTap,
+        borderRadius: AppRadii.lg,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md + 2,
           ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.logout_rounded,
-              color: theme.colorScheme.error,
-              size: 20,
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Text(
-              'Sign Out',
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.error,
-                fontWeight: FontWeight.w600,
+          decoration: BoxDecoration(
+            color: errorColor.withOpacity(0.06),
+            borderRadius: AppRadii.lg,
+            border: Border.all(color: errorColor.withOpacity(0.15)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.logout_rounded,
+                color: errorColor.withOpacity(0.8),
+                size: 18,
               ),
-            ),
-            if (isBusy) ...[
               const SizedBox(width: AppSpacing.sm),
-              SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: theme.colorScheme.error,
+              Text(
+                'Sign Out',
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: errorColor.withOpacity(0.9),
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.2,
                 ),
               ),
+              if (isBusy) ...[
+                const SizedBox(width: AppSpacing.sm),
+                SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: errorColor.withOpacity(0.7),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

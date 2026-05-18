@@ -65,6 +65,8 @@ class KpiCard extends StatelessWidget {
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
               if (subtitle != null || trend != null) ...[
                 const SizedBox(height: 4),
@@ -75,14 +77,14 @@ class KpiCard extends StatelessWidget {
                         trendPositive == true
                             ? Icons.trending_up
                             : trendPositive == false
-                                ? Icons.trending_down
-                                : Icons.trending_flat,
+                            ? Icons.trending_down
+                            : Icons.trending_flat,
                         size: 16,
                         color: trendPositive == true
                             ? Colors.green
                             : trendPositive == false
-                                ? Colors.red
-                                : theme.colorScheme.onSurfaceVariant,
+                            ? Colors.red
+                            : theme.colorScheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -91,8 +93,8 @@ class KpiCard extends StatelessWidget {
                           color: trendPositive == true
                               ? Colors.green
                               : trendPositive == false
-                                  ? Colors.red
-                                  : theme.colorScheme.onSurfaceVariant,
+                              ? Colors.red
+                              : theme.colorScheme.onSurfaceVariant,
                         ),
                       ),
                       if (subtitle != null) const SizedBox(width: 8),

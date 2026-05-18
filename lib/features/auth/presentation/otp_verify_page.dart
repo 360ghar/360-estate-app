@@ -2,7 +2,8 @@ import 'package:estate_app/core/presentation/animations/premium/premium_animatio
 import 'package:estate_app/core/presentation/widgets/glass/glass_toast.dart';
 import 'package:estate_app/core/presentation/widgets/glass/premium_glass_card.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
-import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart' show SimplePremiumBackground;
+import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart'
+    show SimplePremiumBackground;
 import 'package:estate_app/features/auth/presentation/widgets/premium_otp_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,12 +33,10 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
     final state = ref.watch(authControllerProvider);
 
     ref.listen<AuthState>(authControllerProvider, (previous, next) {
-      if (previous?.errorMessage != next.errorMessage && next.errorMessage != null) {
+      if (previous?.errorMessage != next.errorMessage &&
+          next.errorMessage != null) {
         if (!mounted) return;
-        GlassToast.showError(
-          context,
-          next.errorMessage!,
-        );
+        GlassToast.showError(context, next.errorMessage!);
       }
     });
 
@@ -164,6 +163,8 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
               ),
             ],
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 12),
         Text(
@@ -172,6 +173,8 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
             fontSize: 15,
             color: Colors.white.withValues(alpha: 0.6),
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 4),
         Text(
@@ -182,6 +185,8 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
             color: Color(0xFF3B82F6),
             letterSpacing: 1,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
@@ -221,7 +226,9 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
           onTap: state.isBusy
               ? null
               : () {
-                  ref.read(authControllerProvider.notifier).requestOtp(widget.phone);
+                  ref
+                      .read(authControllerProvider.notifier)
+                      .requestOtp(widget.phone);
                 },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -273,9 +280,8 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
       router.go('/login?phone=$encoded');
       return;
     }
-    await ref.read(authControllerProvider.notifier).verifyOtp(
-          phone: widget.phone,
-          otp: otp,
-        );
+    await ref
+        .read(authControllerProvider.notifier)
+        .verifyOtp(phone: widget.phone, otp: otp);
   }
 }

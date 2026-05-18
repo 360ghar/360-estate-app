@@ -40,10 +40,7 @@ class _PremiumOtpInputState extends State<PremiumOtpInput>
   @override
   void initState() {
     super.initState();
-    _controllers = List.generate(
-      widget.length,
-      (_) => TextEditingController(),
-    );
+    _controllers = List.generate(widget.length, (_) => TextEditingController());
     _focusNodes = List.generate(
       widget.length,
       (_) => FocusNode()..addListener(() => setState(() {})),
@@ -99,21 +96,33 @@ class _PremiumOtpInputState extends State<PremiumOtpInput>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        for (int i = 0; i < widget.length; i++)
-          _OtpDigitField(
-            index: i,
-            controller: _controllers[i],
-            focusNode: _focusNodes[i],
-            focusAnimation: _focusControllers[i],
-            isFocused: _focusNodes[i].hasFocus,
-            isDark: isDark,
-            onChanged: (value) => _onDigitChanged(i, value),
-            isLoading: widget.isLoading && _otp.length == widget.length,
-          ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final fieldWidth = (constraints.maxWidth / widget.length - 4).clamp(
+          36.0,
+          48.0,
+        );
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            for (int i = 0; i < widget.length; i++)
+              SizedBox(
+                width: fieldWidth,
+                child: _OtpDigitField(
+                  index: i,
+                  controller: _controllers[i],
+                  focusNode: _focusNodes[i],
+                  focusAnimation: _focusControllers[i],
+                  isFocused: _focusNodes[i].hasFocus,
+                  isDark: isDark,
+                  onChanged: (value) => _onDigitChanged(i, value),
+                  isLoading: widget.isLoading && _otp.length == widget.length,
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -184,15 +193,16 @@ class _OtpDigitFieldState extends State<_OtpDigitField>
         animation: widget.focusAnimation,
         builder: (context, child) {
           return Container(
-            width: 48,
+            width: double.infinity,
             height: 56,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               boxShadow: widget.isFocused
                   ? [
                       BoxShadow(
-                        color: const Color(0xFF3B82F6)
-                            .withValues(alpha: 0.3 * widget.focusAnimation.value),
+                        color: const Color(
+                          0xFF3B82F6,
+                        ).withValues(alpha: 0.3 * widget.focusAnimation.value),
                         blurRadius: 16,
                         spreadRadius: 0,
                       ),
@@ -336,13 +346,15 @@ class _StepDotState extends State<_StepDot>
       duration: const Duration(milliseconds: 300),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
-    _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _glowAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     Future.delayed(widget.delay, () {
       if (mounted) _controller.forward();
@@ -395,8 +407,9 @@ class _StepDotState extends State<_StepDot>
               boxShadow: widget.isActive
                   ? [
                       BoxShadow(
-                        color: const Color(0xFF3B82F6)
-                            .withValues(alpha: 0.5 * _glowAnimation.value),
+                        color: const Color(
+                          0xFF3B82F6,
+                        ).withValues(alpha: 0.5 * _glowAnimation.value),
                         blurRadius: 8,
                         spreadRadius: -2,
                       ),

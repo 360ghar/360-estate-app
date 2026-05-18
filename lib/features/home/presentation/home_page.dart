@@ -7,6 +7,7 @@ import 'package:estate_app/core/presentation/widgets/app_kpi_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_loading_shimmer.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/app_status_badge.dart';
+import 'package:estate_app/core/presentation/responsive/breakpoints.dart';
 import 'package:estate_app/features/home/home_providers.dart';
 import 'package:estate_app/features/home/models/dashboard_activity_item.dart';
 import 'package:estate_app/features/home/models/dashboard_overview.dart';
@@ -15,13 +16,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-/// Professional B2B dashboard with:
-/// - Personalized greeting
-/// - Quick action buttons
-/// - Urgent alerts (conditional)
-/// - KPI cards with trends
-/// - Collection summary
-/// - Recent activity feed
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
@@ -41,11 +35,9 @@ class HomePage extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
-            // Quick Actions Row
             const _QuickActionsRow(),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.xl),
 
-            // Overview Section
             overviewAsync.when(
               data: (overview) {
                 if (!_hasOverviewData(overview)) {
@@ -64,7 +56,8 @@ class HomePage extends ConsumerWidget {
                           label: const Text('Add property'),
                         ),
                         OutlinedButton.icon(
-                          onPressed: () => context.go('/collections/payments/new'),
+                          onPressed: () =>
+                              context.go('/collections/payments/new'),
                           icon: const Icon(Icons.payment_rounded),
                           label: const Text('Record payment'),
                         ),
@@ -75,17 +68,14 @@ class HomePage extends ConsumerWidget {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Urgent Alert Banner (only if overdue > 0)
                     if (overview.overdue > 0) ...[
                       _UrgentAlertBanner(overdueCount: overview.overdue),
                       const SizedBox(height: AppSpacing.lg),
                     ],
 
-                    // KPI Grid
                     _KpiGrid(overview: overview),
                     const SizedBox(height: AppSpacing.xl),
 
-                    // Collection Summary
                     _CollectionSummary(collected: overview.collected),
                     const SizedBox(height: AppSpacing.xl),
                   ],
@@ -100,7 +90,6 @@ class HomePage extends ConsumerWidget {
               ),
             ),
 
-            // Recent Activity Section
             _RecentActivitySection(
               activityAsync: activityAsync,
               onRefresh: () => ref.invalidate(dashboardActivityProvider),
@@ -122,18 +111,78 @@ class HomePage extends ConsumerWidget {
       greeting = 'Good evening';
     }
 
+    final scheme = Theme.of(context).colorScheme;
+
     return AppBar(
-      title: Text(
-        greeting,
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
+      title: Row(
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [scheme.primary, scheme.primary.withOpacity(0.7)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: scheme.primary.withOpacity(0.2),
+                  offset: const Offset(0, 2),
+                  blurRadius: 8,
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.person_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Flexible(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  greeting,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  'Manage your properties',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined),
-          onPressed: () => context.go('/more/notifications'),
-          tooltip: 'Notifications',
+        Container(
+          margin: const EdgeInsets.only(right: AppSpacing.xs),
+          child: Material(
+            color: scheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => context.go('/more/notifications'),
+              child: const Padding(
+                padding: EdgeInsets.all(AppSpacing.sm),
+                child: Icon(Icons.notifications_outlined, size: 22),
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -150,12 +199,12 @@ class HomePage extends ConsumerWidget {
   }
 }
 
-/// Quick action buttons for common tasks.
 class _QuickActionsRow extends StatelessWidget {
   const _QuickActionsRow();
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Row(
       children: [
         Expanded(
@@ -163,6 +212,13 @@ class _QuickActionsRow extends StatelessWidget {
             icon: Icons.payment_rounded,
             label: 'Record\nPayment',
             onTap: () => context.go('/collections/payments/new'),
+            gradient: LinearGradient(
+              colors: [scheme.primary, scheme.primary.withOpacity(0.8)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            iconColor: Colors.white,
+            labelColor: Colors.white,
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
@@ -171,6 +227,16 @@ class _QuickActionsRow extends StatelessWidget {
             icon: Icons.add_circle_outline_rounded,
             label: 'Add\nProperty',
             onTap: () => context.go('/properties/create'),
+            gradient: LinearGradient(
+              colors: [
+                AppColors.success.withOpacity(0.12),
+                AppColors.success.withOpacity(0.05),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            iconColor: AppColors.success,
+            labelColor: scheme.onSurface,
           ),
         ),
         const SizedBox(width: AppSpacing.sm),
@@ -179,6 +245,16 @@ class _QuickActionsRow extends StatelessWidget {
             icon: Icons.build_outlined,
             label: 'New\nTask',
             onTap: () => context.go('/tasks'),
+            gradient: LinearGradient(
+              colors: [
+                AppColors.accent.withOpacity(0.12),
+                AppColors.accent.withOpacity(0.05),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            iconColor: AppColors.accent,
+            labelColor: scheme.onSurface,
           ),
         ),
       ],
@@ -186,57 +262,67 @@ class _QuickActionsRow extends StatelessWidget {
   }
 }
 
-/// Individual quick action button.
 class _QuickActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final Gradient gradient;
+  final Color iconColor;
+  final Color labelColor;
 
   const _QuickActionButton({
     required this.icon,
     required this.label,
     required this.onTap,
+    required this.gradient,
+    required this.iconColor,
+    required this.labelColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Theme.of(context).colorScheme.outlineVariant,
-            width: 0.5,
+    return Material(
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            vertical: AppSpacing.lg,
+            horizontal: AppSpacing.sm,
           ),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: Theme.of(context).colorScheme.primary,
-              size: 24,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
+          decoration: BoxDecoration(
+            gradient: gradient,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: iconColor, size: 22),
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: labelColor,
+                  fontWeight: FontWeight.w600,
+                  height: 1.3,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// Urgent alert banner for overdue payments.
 class _UrgentAlertBanner extends StatelessWidget {
   final int overdueCount;
 
@@ -255,7 +341,6 @@ class _UrgentAlertBanner extends StatelessWidget {
   }
 }
 
-/// KPI grid displaying key metrics with the new AppKpiCard component.
 class _KpiGrid extends StatelessWidget {
   const _KpiGrid({required this.overview});
 
@@ -263,12 +348,10 @@ class _KpiGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= 600;
-        final isNarrow = constraints.maxWidth < 360;
-        final crossAxisCount = isWide ? 3 : (isNarrow ? 2 : 3);
-        final childAspectRatio = isWide ? 1.6 : 1.4;
+    return ResponsiveBuilder(
+      builder: (context, screenSize) {
+        final crossAxisCount = screenSize.gridColumns.clamp(2, 3);
+        final childAspectRatio = screenSize.isCompact ? 1.35 : 1.55;
         const kpiVariant = AppKpiVariant.compact;
         return GridView.count(
           crossAxisCount: crossAxisCount,
@@ -278,7 +361,6 @@ class _KpiGrid extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           childAspectRatio: childAspectRatio,
           children: [
-            // Charges Due
             AppKpiCard(
               title: 'Charges Due',
               value: overview.due.toString(),
@@ -286,18 +368,14 @@ class _KpiGrid extends StatelessWidget {
               onTap: () => context.go('/collections?status=due'),
               variant: kpiVariant,
             ),
-            // Overdue - highlighted if > 0
             AppKpiCard(
               title: 'Overdue',
               value: overview.overdue.toString(),
               icon: Icons.warning_amber_outlined,
               onTap: () => context.go('/collections?status=overdue'),
-              valueColor: overview.overdue > 0
-                ? AppColors.danger
-                : null,
+              valueColor: overview.overdue > 0 ? AppColors.danger : null,
               variant: kpiVariant,
             ),
-            // Maintenance
             AppKpiCard(
               title: 'Maintenance',
               value: overview.maintenance.toString(),
@@ -305,7 +383,6 @@ class _KpiGrid extends StatelessWidget {
               onTap: () => context.go('/tasks'),
               variant: kpiVariant,
             ),
-            // Tenants
             AppKpiCard(
               title: 'Tenants',
               value: overview.tenants.toString(),
@@ -313,7 +390,6 @@ class _KpiGrid extends StatelessWidget {
               onTap: () => context.go('/more/tenants'),
               variant: kpiVariant,
             ),
-            // Properties
             AppKpiCard(
               title: 'Properties',
               value: overview.properties.toString(),
@@ -321,7 +397,6 @@ class _KpiGrid extends StatelessWidget {
               onTap: () => context.go('/properties'),
               variant: kpiVariant,
             ),
-            // Occupancy with color based on rate
             AppKpiCard(
               title: 'Occupancy',
               value: '${overview.occupancy.toStringAsFixed(0)}%',
@@ -343,7 +418,6 @@ class _KpiGrid extends StatelessWidget {
   }
 }
 
-/// Collection summary showing total rent collected.
 class _CollectionSummary extends StatelessWidget {
   final double collected;
 
@@ -351,64 +425,100 @@ class _CollectionSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formatter = NumberFormat.currency(
-      symbol: '₹',
-      decimalDigits: 0,
-    );
+    final formatter = NumberFormat.currency(symbol: '₹', decimalDigits: 0);
     final collectedStr = formatter.format(collected);
+    final scheme = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: EdgeInsets.zero,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-          width: 0.5,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.account_balance_wallet_outlined,
-                size: 18,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'This Month',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            collectedStr,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: AppColors.success,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            'Collected',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            offset: const Offset(0, 2),
+            blurRadius: 8,
           ),
         ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Row(
+          children: [
+            Container(
+              width: 5,
+              constraints: const BoxConstraints(minHeight: 80, maxHeight: 120),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.success, AppColors.successLight],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.md,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(AppSpacing.xs),
+                          decoration: BoxDecoration(
+                            color: AppColors.success.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.account_balance_wallet_outlined,
+                            size: 16,
+                            color: AppColors.success,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Text(
+                          'This Month',
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      collectedStr,
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.success,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Collected',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-/// Recent activity section with enhanced activity items.
 class _RecentActivitySection extends StatelessWidget {
   final AsyncValue<List<DashboardActivityItem>> activityAsync;
   final VoidCallback onRefresh;
@@ -420,6 +530,7 @@ class _RecentActivitySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -428,17 +539,46 @@ class _RecentActivitySection extends StatelessWidget {
           children: [
             Text(
               'Recent Activity',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
-            TextButton(
-              onPressed: onRefresh,
-              child: const Text('Refresh'),
+            Material(
+              color: scheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(10),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: onRefresh,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.xs,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.refresh_rounded,
+                        size: 16,
+                        color: scheme.primary,
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      Text(
+                        'Refresh',
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: scheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.md),
         activityAsync.when(
           data: (items) {
             final visibleItems = items.where((item) {
@@ -472,7 +612,6 @@ class _RecentActivitySection extends StatelessWidget {
   }
 }
 
-/// Enhanced activity tile with semantic icons and better visual hierarchy.
 class _ActivityTile extends StatelessWidget {
   const _ActivityTile({required this.item});
 
@@ -481,91 +620,135 @@ class _ActivityTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final formatter = DateFormat('dd MMM, hh:mm a');
-    final time = item.createdAt == null
-        ? null
-        : formatter.format(item.createdAt!);
+    final DateTime? activityTime =
+        item.createdAt ??
+        (item.at != null ? DateTime.tryParse(item.at!) : null);
+    final time = activityTime == null ? null : formatter.format(activityTime);
 
     final (icon, color, type) = _getActivityIconAndColor(context, item.type);
     final title = item.title?.trim().isNotEmpty ?? false
         ? item.title!.trim()
         : 'Activity';
+    final scheme = Theme.of(context).colorScheme;
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            offset: const Offset(0, 1),
+            blurRadius: 4,
+          ),
+        ],
         border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
+          color: scheme.outlineVariant.withOpacity(0.5),
           width: 0.5,
         ),
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
-          vertical: AppSpacing.xs,
+          vertical: AppSpacing.sm + 2,
         ),
-        leading: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Icon(
-            icon,
-            color: color,
-            size: 20,
-          ),
-        ),
-        title: Text(
-          title,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        subtitle: item.message != null
-            ? Text(
-                item.message!,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              )
-            : null,
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.end,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (type != null)
-              AppStatusBadge(
-                label: type.name.toUpperCase(),
-                type: type,
-                variant: AppStatusVariant.dot,
-              ),
-            if (type != null && time != null) const SizedBox(height: 4),
-            if (time != null)
-              Text(
-                time,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppColors.textSecondary,
+            Container(
+              width: 40,
+              height: 40,
+              margin: const EdgeInsets.only(top: 2),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [color.withOpacity(0.15), color.withOpacity(0.05)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
+                borderRadius: BorderRadius.circular(12),
               ),
+              child: Icon(icon, color: color, size: 20),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (item.message != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      item.message!,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                        height: 1.4,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Flexible(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (type != null)
+                    AppStatusBadge(
+                      label: type.name.toUpperCase(),
+                      type: type,
+                      variant: AppStatusVariant.dot,
+                    ),
+                  if (type != null && time != null) const SizedBox(height: 4),
+                  if (time != null)
+                    Text(
+                      time,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  (IconData, Color, AppStatusType?) _getActivityIconAndColor(BuildContext context, String? type) {
+  (IconData, Color, AppStatusType?) _getActivityIconAndColor(
+    BuildContext context,
+    String? type,
+  ) {
     final lowerType = type?.toLowerCase() ?? '';
 
-    if (lowerType.contains('payment') || lowerType.contains('paid') || lowerType.contains('rent')) {
-      return (Icons.payments_outlined, AppColors.success, AppStatusType.success);
+    if (lowerType.contains('payment') ||
+        lowerType.contains('paid') ||
+        lowerType.contains('rent')) {
+      return (
+        Icons.payments_outlined,
+        AppColors.success,
+        AppStatusType.success,
+      );
     }
     if (lowerType.contains('overdue') || lowerType.contains('late')) {
-      return (Icons.warning_amber_rounded, AppColors.danger, AppStatusType.danger);
+      return (
+        Icons.warning_amber_rounded,
+        AppColors.danger,
+        AppStatusType.danger,
+      );
     }
     if (lowerType.contains('maintenance') || lowerType.contains('repair')) {
       return (Icons.build_outlined, AppColors.warning, AppStatusType.warning);
@@ -574,11 +757,14 @@ class _ActivityTile extends StatelessWidget {
       return (Icons.description_outlined, AppColors.info, AppStatusType.info);
     }
     if (lowerType.contains('property')) {
-      return (Icons.apartment_outlined, Theme.of(context).colorScheme.primary, null);
+      return (
+        Icons.apartment_outlined,
+        Theme.of(context).colorScheme.primary,
+        null,
+      );
     }
     return (Icons.notifications_outlined, AppColors.textSecondary, null);
   }
-
 }
 
 String _formatErrorMessage(Object error) {

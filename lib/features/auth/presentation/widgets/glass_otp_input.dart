@@ -162,26 +162,39 @@ class _GlassOtpInputState extends State<GlassOtpInput>
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(widget.length, (index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: _OtpDigitField(
-            index: index,
-            controller: _controllers[index],
-            focusNode: _focusNodes[index],
-            bounceController: _bounceControllers[index],
-            onChanged: (value) => _onDigitChanged(value, index),
-            onKeyDown: (event) => _onKeyDown(event, index),
-            blur: widget.blur,
-            opacity: widget.opacity,
-            borderRadius: widget.borderRadius,
-            size: widget.fieldSize,
-            textStyle: widget.textStyle,
-          ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalPadding = (widget.length - 1) * 8.0;
+        final available = constraints.maxWidth - totalPadding;
+        final fieldSize = (available / widget.length).clamp(
+          36.0,
+          widget.fieldSize,
         );
-      }),
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(widget.length, (index) {
+            return Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: totalPadding / (widget.length - 1) / 2,
+              ),
+              child: _OtpDigitField(
+                index: index,
+                controller: _controllers[index],
+                focusNode: _focusNodes[index],
+                bounceController: _bounceControllers[index],
+                onChanged: (value) => _onDigitChanged(value, index),
+                onKeyDown: (event) => _onKeyDown(event, index),
+                blur: widget.blur,
+                opacity: widget.opacity,
+                borderRadius: widget.borderRadius,
+                size: fieldSize,
+                textStyle: widget.textStyle,
+              ),
+            );
+          }),
+        );
+      },
     );
   }
 }
@@ -218,13 +231,27 @@ class _OtpDigitField extends StatefulWidget {
 }
 
 class _OtpDigitFieldState extends State<_OtpDigitField> {
+  late final FocusNode _keyboardFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _keyboardFocusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _keyboardFocusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final isFocused = widget.focusNode.hasFocus;
     final hasValue = widget.controller.text.isNotEmpty;
 
     return KeyboardListener(
-      focusNode: FocusNode(),
+      focusNode: _keyboardFocusNode,
       onKeyEvent: (event) => widget.onKeyDown(event),
       child: AnimatedScale(
         scale: 1.0,
@@ -275,7 +302,8 @@ class _OtpDigitFieldState extends State<_OtpDigitField> {
                         onChanged: widget.onChanged,
                         maxLength: 1,
                         textAlign: TextAlign.center,
-                        style: widget.textStyle ??
+                        style:
+                            widget.textStyle ??
                             const TextStyle(
                               color: Colors.white,
                               fontSize: 24,
@@ -345,10 +373,7 @@ class _GlassOtpInputCircleState extends State<GlassOtpInputCircle> {
       widget.length,
       (index) => TextEditingController(),
     );
-    _focusNodes = List.generate(
-      widget.length,
-      (index) => FocusNode(),
-    );
+    _focusNodes = List.generate(widget.length, (index) => FocusNode());
 
     // Auto-focus first field
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -400,19 +425,29 @@ class _GlassOtpInputCircleState extends State<GlassOtpInputCircle> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(widget.length, (index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          child: _CircleDigitField(
-            controller: _controllers[index],
-            focusNode: _focusNodes[index],
-            onChanged: (value) => _onDigitChanged(value, index),
-            size: widget.size,
-          ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final totalPadding = (widget.length - 1) * 12.0;
+        final available = constraints.maxWidth - totalPadding;
+        final fieldSize = (available / widget.length).clamp(36.0, widget.size);
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(widget.length, (index) {
+            return Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: totalPadding / (widget.length - 1) / 2,
+              ),
+              child: _CircleDigitField(
+                controller: _controllers[index],
+                focusNode: _focusNodes[index],
+                onChanged: (value) => _onDigitChanged(value, index),
+                size: fieldSize,
+              ),
+            );
+          }),
         );
-      }),
+      },
     );
   }
 }
@@ -437,7 +472,10 @@ class _CircleDigitField extends StatelessWidget {
 
     return ClipOval(
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: AppGlassBlur.medium, sigmaY: AppGlassBlur.medium),
+        filter: ImageFilter.blur(
+          sigmaX: AppGlassBlur.medium,
+          sigmaY: AppGlassBlur.medium,
+        ),
         child: Container(
           width: size,
           height: size,
@@ -475,9 +513,7 @@ class _CircleDigitField extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
               keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: const InputDecoration(
                 border: InputBorder.none,
                 counterText: '',

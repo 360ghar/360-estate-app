@@ -1,7 +1,9 @@
-﻿import 'package:estate_app/core/pagination/paged_list_controller.dart';
+import 'package:estate_app/core/pagination/paged_list_controller.dart';
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:estate_app/core/presentation/responsive/breakpoints.dart';
 import 'package:estate_app/core/presentation/widgets/app_empty_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loading_shimmer.dart';
@@ -17,11 +19,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-/// Professional B2B Properties page with:
-/// - Search bar with filter button
-/// - Horizontal filter chips
-/// - List/Grid view toggle
-/// - Enhanced property cards with status and occupancy
 class PropertiesPage extends ConsumerStatefulWidget {
   const PropertiesPage({super.key});
 
@@ -50,7 +47,6 @@ class _PropertiesPageState extends ConsumerState<PropertiesPage> {
     setState(() {
       _selectedFilter = filter;
     });
-    // TODO: Apply filter to provider
   }
 
   @override
@@ -68,15 +64,12 @@ class _PropertiesPageState extends ConsumerState<PropertiesPage> {
       ),
       body: Column(
         children: [
-          // Search bar and filters
           _SearchAndFiltersBar(
             searchController: _searchController,
             selectedFilter: _selectedFilter,
             onFilterChanged: _setFilter,
           ),
           const Divider(height: 1),
-
-          // Property list/grid
           Expanded(
             child: _isGridView
                 ? _PropertyGridView(
@@ -114,8 +107,16 @@ class _PropertiesPageState extends ConsumerState<PropertiesPage> {
       actions: [
         AppSegmentedButton<ViewMode>(
           segments: const [
-            AppSegment(value: ViewMode.list, label: 'List', icon: Icons.view_list),
-            AppSegment(value: ViewMode.grid, label: 'Grid', icon: Icons.grid_view),
+            AppSegment(
+              value: ViewMode.list,
+              label: 'List',
+              icon: Icons.view_list,
+            ),
+            AppSegment(
+              value: ViewMode.grid,
+              label: 'Grid',
+              icon: Icons.grid_view,
+            ),
           ],
           selected: _isGridView ? ViewMode.grid : ViewMode.list,
           onSelected: (mode) {
@@ -129,7 +130,6 @@ class _PropertiesPageState extends ConsumerState<PropertiesPage> {
   }
 }
 
-/// Search bar and filter chips row.
 class _SearchAndFiltersBar extends StatelessWidget {
   final TextEditingController searchController;
   final PropertyFilter selectedFilter;
@@ -144,6 +144,7 @@ class _SearchAndFiltersBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -154,49 +155,92 @@ class _SearchAndFiltersBar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Search bar
           ValueListenableBuilder<TextEditingValue>(
             valueListenable: searchController,
             builder: (context, value, _) {
               final hasQuery = value.text.trim().isNotEmpty;
               return Container(
                 decoration: BoxDecoration(
-                  color: scheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
+                  color: scheme.surface,
+                  borderRadius: AppRadii.xl,
                   border: Border.all(
-                    color: scheme.outlineVariant,
-                    width: 0.5,
+                    color: hasQuery
+                        ? scheme.primary.withOpacity(0.4)
+                        : scheme.outlineVariant,
+                    width: hasQuery ? 1.5 : 1,
                   ),
+                  boxShadow: isDark
+                      ? AppShadowsDark.sm
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.06),
+                            offset: const Offset(0, 2),
+                            blurRadius: 8,
+                          ),
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            offset: const Offset(0, 1),
+                            blurRadius: 3,
+                          ),
+                        ],
                 ),
                 child: TextField(
                   controller: searchController,
                   decoration: InputDecoration(
                     hintText: 'Search properties...',
-                    prefixIcon: const Icon(Icons.search_outlined),
+                    prefixIcon: Padding(
+                      padding: const EdgeInsets.only(
+                        left: AppSpacing.md,
+                        right: AppSpacing.sm,
+                      ),
+                      child: Icon(
+                        Icons.search_rounded,
+                        size: 22,
+                        color: hasQuery
+                            ? scheme.primary
+                            : AppColors.textTertiary,
+                      ),
+                    ),
                     suffixIcon: hasQuery
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () => searchController.clear(),
+                        ? Padding(
+                            padding: const EdgeInsets.only(
+                              right: AppSpacing.xs,
+                            ),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.cancel_rounded,
+                                size: 20,
+                                color: AppColors.textTertiary,
+                              ),
+                              onPressed: () => searchController.clear(),
+                            ),
                           )
-                        : IconButton(
-                            icon: const Icon(Icons.filter_list_outlined),
-                            onPressed: () => _showFilterSheet(context),
+                        : Padding(
+                            padding: const EdgeInsets.only(
+                              right: AppSpacing.xs,
+                            ),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.tune_rounded,
+                                size: 20,
+                                color: AppColors.textTertiary,
+                              ),
+                              onPressed: () => _showFilterSheet(context),
+                            ),
                           ),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: 12,
+                      horizontal: AppSpacing.sm,
+                      vertical: 14,
                     ),
                   ),
                 ),
               );
             },
           ),
-          const SizedBox(height: AppSpacing.sm),
-
-          // Filter chips
+          const SizedBox(height: AppSpacing.md),
           SizedBox(
-            height: 30,
+            height: 34,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: PropertyFilter.values.length,
@@ -205,26 +249,45 @@ class _SearchAndFiltersBar extends StatelessWidget {
                 final filter = PropertyFilter.values[index];
                 final isSelected = filter == selectedFilter;
 
-                return FilterChip(
-                  label: Text(filter.label),
-                  selected: isSelected,
-                  onSelected: (_) => onFilterChanged(filter),
-                  backgroundColor: Colors.transparent,
-                  selectedColor: scheme.primary.withOpacity(0.12),
-                  checkmarkColor: scheme.primary,
-                  labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: isSelected ? scheme.primary : AppColors.textSecondary,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(
-                      color: isSelected ? scheme.primary : scheme.outlineVariant,
-                      width: 1,
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOut,
+                  child: FilterChip(
+                    label: Text(filter.label),
+                    selected: isSelected,
+                    onSelected: (_) => onFilterChanged(filter),
+                    backgroundColor: scheme.surface,
+                    selectedColor: scheme.primary.withOpacity(0.10),
+                    checkmarkColor: scheme.primary,
+                    labelStyle: Theme.of(context).textTheme.labelSmall
+                        ?.copyWith(
+                          color: isSelected
+                              ? scheme.primary
+                              : AppColors.textSecondary,
+                          fontWeight: isSelected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: AppRadii.lg,
+                      side: BorderSide(
+                        color: isSelected
+                            ? scheme.primary.withOpacity(0.5)
+                            : scheme.outlineVariant,
+                        width: isSelected ? 1.5 : 1,
+                      ),
+                    ),
+                    elevation: isSelected ? 0 : 1,
+                    shadowColor: Colors.black.withOpacity(0.06),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
+                    visualDensity: const VisualDensity(
+                      horizontal: -2,
+                      vertical: -2,
                     ),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
                 );
               },
             ),
@@ -239,13 +302,15 @@ class _SearchAndFiltersBar extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) {
+        final scheme = Theme.of(context).colorScheme;
         return Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
+            color: scheme.surface,
             borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
             ),
+            boxShadow: AppShadows.lg,
           ),
           child: SafeArea(
             child: Padding(
@@ -254,13 +319,24 @@ class _SearchAndFiltersBar extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Filter Properties',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: scheme.outlineVariant,
+                        borderRadius: AppRadii.pill,
+                      ),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    'Filter Properties',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
                   _FilterOption(
                     icon: Icons.check_circle_outline,
                     title: 'Status',
@@ -272,11 +348,18 @@ class _SearchAndFiltersBar extends StatelessWidget {
                   _FilterOption(
                     icon: Icons.home_outlined,
                     title: 'Property Type',
-                    options: const ['All', 'PG', '1BHK', '2BHK', '3BHK', 'Commercial'],
+                    options: const [
+                      'All',
+                      'PG',
+                      '1BHK',
+                      '2BHK',
+                      '3BHK',
+                      'Commercial',
+                    ],
                     selected: 'All',
                     onTap: (_) {},
                   ),
-                  const SizedBox(height: AppSpacing.lg),
+                  const SizedBox(height: AppSpacing.xl),
                   SizedBox(
                     width: double.infinity,
                     child: FilledButton(
@@ -294,7 +377,6 @@ class _SearchAndFiltersBar extends StatelessWidget {
   }
 }
 
-/// Filter option widget for bottom sheet.
 class _FilterOption extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -312,17 +394,26 @@ class _FilterOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(icon, size: 20, color: AppColors.textSecondary),
-            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.xs),
+              decoration: BoxDecoration(
+                color: scheme.primaryContainer.withOpacity(0.5),
+                borderRadius: AppRadii.md,
+              ),
+              child: Icon(icon, size: 16, color: scheme.primary),
+            ),
+            const SizedBox(width: AppSpacing.sm),
             Text(
               title,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -333,20 +424,24 @@ class _FilterOption extends StatelessWidget {
           runSpacing: AppSpacing.sm,
           children: options.map((option) {
             final isSelected = option == selected;
-            final scheme = Theme.of(context).colorScheme;
             return FilterChip(
               label: Text(option),
               selected: isSelected,
               onSelected: (_) => onTap(option),
               backgroundColor: Colors.transparent,
               selectedColor: scheme.primary.withOpacity(0.12),
+              checkmarkColor: scheme.primary,
               labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: isSelected ? scheme.primary : AppColors.textSecondary,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: AppRadii.lg,
                 side: BorderSide(
-                  color: isSelected ? scheme.primary : scheme.outlineVariant,
+                  color: isSelected
+                      ? scheme.primary.withOpacity(0.5)
+                      : scheme.outlineVariant,
+                  width: isSelected ? 1.5 : 1,
                 ),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -359,7 +454,6 @@ class _FilterOption extends StatelessWidget {
   }
 }
 
-/// Grid view for properties.
 class _PropertyGridView extends StatelessWidget {
   const _PropertyGridView({
     required this.state,
@@ -382,7 +476,9 @@ class _PropertyGridView extends StatelessWidget {
     if (state.error != null && state.items.isEmpty) {
       return AppErrorView(
         title: 'Unable to load properties',
-        message: state.error?.message ?? 'Please check your connection and try again.',
+        message:
+            state.error?.message ??
+            'Please check your connection and try again.',
         onRetry: onRetry,
         retryLabel: 'Retry',
       );
@@ -395,10 +491,6 @@ class _PropertyGridView extends StatelessWidget {
       );
     }
 
-    final width = MediaQuery.of(context).size.width;
-    final crossAxisCount = width >= 900 ? 4 : (width >= 600 ? 3 : 2);
-    final childAspectRatio = width >= 900 ? 1.1 : (width >= 600 ? 1.0 : 0.95);
-
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: NotificationListener<ScrollNotification>(
@@ -409,41 +501,52 @@ class _PropertyGridView extends StatelessWidget {
           }
           return false;
         },
-        child: CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              sliver: SliverGrid(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  mainAxisSpacing: AppSpacing.sm,
-                  crossAxisSpacing: AppSpacing.sm,
-                  childAspectRatio: childAspectRatio,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    if (index >= state.items.length) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-                        child: Center(child: CircularProgressIndicator()),
-                      );
-                    }
+        child: ResponsiveBuilder(
+          builder: (context, screenSize) {
+            final crossAxisCount = screenSize.gridColumns;
+            final childAspectRatio = screenSize.isExpandedOrLarger
+                ? 1.1
+                : (screenSize.isMedium ? 1.0 : 0.95);
 
-                    final property = state.items[index];
-                    return _PropertyGridCard(property: property);
-                  },
-                  childCount: state.items.length + (state.isLoadingMore ? 1 : 0),
+            return CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  sliver: SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      mainAxisSpacing: AppSpacing.md,
+                      crossAxisSpacing: AppSpacing.md,
+                      childAspectRatio: childAspectRatio,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        if (index >= state.items.length) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: AppSpacing.md,
+                            ),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+
+                        final property = state.items[index];
+                        return _PropertyGridCard(property: property);
+                      },
+                      childCount:
+                          state.items.length + (state.isLoadingMore ? 1 : 0),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         ),
       ),
     );
   }
 }
 
-/// Enhanced property list card with better visual hierarchy.
 class _PropertyListCard extends StatelessWidget {
   const _PropertyListCard({required this.property});
 
@@ -451,10 +554,7 @@ class _PropertyListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formatter = NumberFormat.currency(
-      symbol: 'ƒ,1',
-      decimalDigits: 0,
-    );
+    final formatter = NumberFormat.currency(symbol: '₹', decimalDigits: 0);
     final scheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final title = _propertyTitle(property);
@@ -462,150 +562,173 @@ class _PropertyListCard extends StatelessWidget {
     final statusBadge = _buildStatusBadge(context);
     final typeLabel = _propertyTypeLabel(property);
     final occupancyLabel = _propertyOccupancyLabel(property);
-    final unitsLabel = occupancyLabel == null ? _propertyUnitsLabel(property) : null;
+    final unitsLabel = occupancyLabel == null
+        ? _propertyUnitsLabel(property)
+        : null;
     final rentLabel = property.monthlyRentInr != null
         ? formatter.format(property.monthlyRentInr!)
         : null;
     final metaChips = <Widget>[
       if (typeLabel != null)
-        _StatChip(
-          icon: Icons.home_outlined,
-          label: typeLabel,
-        ),
+        _StatChip(icon: Icons.home_outlined, label: typeLabel),
       if (unitsLabel != null)
-        _StatChip(
-          icon: Icons.door_front_door_outlined,
-          label: unitsLabel,
-        ),
+        _StatChip(icon: Icons.door_front_door_outlined, label: unitsLabel),
       if (occupancyLabel != null)
-        _StatChip(
-          icon: Icons.people_outline,
-          label: occupancyLabel,
-        ),
+        _StatChip(icon: Icons.people_outline, label: occupancyLabel),
       if (rentLabel != null)
-        _StatChip(
-          icon: Icons.currency_rupee_outlined,
-          label: rentLabel,
-        ),
+        _StatChip(icon: Icons.currency_rupee_outlined, label: rentLabel),
     ];
     final visibleChips = metaChips.take(3).toList();
-    final imageUrl =
-        property.images != null && property.images!.isNotEmpty
-            ? property.images!.first
-            : null;
+    final imageUrl = property.images != null && property.images!.isNotEmpty
+        ? property.images!.first
+        : null;
 
     return Container(
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadii.lg,
         border: Border.all(
-          color: scheme.outlineVariant,
-          width: 0.5,
+          color: scheme.outlineVariant.withOpacity(0.7),
+          width: 1,
         ),
-        boxShadow: isDark ? AppShadowsDark.sm : AppShadows.sm,
-      ),
-      child: InkWell(
-        onTap: () => context.go('/properties/${property.id}'),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Property image/placeholder
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Container(
-                  width: 64,
-                  height: 64,
-                  color: scheme.surfaceContainerHighest,
-                  child: imageUrl != null
-                      ? Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Center(
-                            child: Icon(
-                              _getPropertyIcon(property.type),
-                              size: 22,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        )
-                      : Center(
-                          child: Icon(
-                            _getPropertyIcon(property.type),
-                            size: 22,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
+        boxShadow: isDark
+            ? AppShadowsDark.sm
+            : [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  offset: const Offset(0, 1),
+                  blurRadius: 3,
                 ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-
-              // Property details
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            title,
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  offset: const Offset(0, 4),
+                  blurRadius: 8,
+                ),
+              ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => context.go('/properties/${property.id}'),
+          borderRadius: AppRadii.lg,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: AppRadii.md,
+                    boxShadow: isDark
+                        ? []
+                        : [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              offset: const Offset(0, 1),
+                              blurRadius: 4,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (statusBadge != null) ...[
-                          const SizedBox(width: AppSpacing.sm),
-                          statusBadge,
-                        ],
-                      ],
+                          ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: AppRadii.md,
+                    child: Container(
+                      width: 72,
+                      height: 72,
+                      color: scheme.surfaceContainerHighest,
+                      child: imageUrl != null
+                          ? Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Center(
+                                child: Icon(
+                                  _getPropertyIcon(property.type),
+                                  size: 24,
+                                  color: AppColors.textTertiary,
+                                ),
+                              ),
+                            )
+                          : Center(
+                              child: Icon(
+                                _getPropertyIcon(property.type),
+                                size: 24,
+                                color: AppColors.textTertiary,
+                              ),
+                            ),
                     ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: AppSpacing.xs),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Row(
                         children: [
-                          Icon(
-                            Icons.location_on_outlined,
-                            size: 14,
-                            color: AppColors.textSecondary,
-                          ),
-                          const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              subtitle,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                              title,
+                              style: Theme.of(context).textTheme.bodyLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.3,
+                                  ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          if (statusBadge != null) ...[
+                            const SizedBox(width: AppSpacing.sm),
+                            statusBadge,
+                          ],
                         ],
                       ),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: AppSpacing.xs),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.location_on_outlined,
+                              size: 13,
+                              color: AppColors.textTertiary,
+                            ),
+                            const SizedBox(width: 3),
+                            Expanded(
+                              child: Text(
+                                subtitle,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: AppColors.textSecondary,
+                                      height: 1.3,
+                                    ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                      if (visibleChips.isNotEmpty) ...[
+                        const SizedBox(height: AppSpacing.sm),
+                        Wrap(
+                          spacing: AppSpacing.xs,
+                          runSpacing: AppSpacing.xs,
+                          children: visibleChips,
+                        ),
+                      ],
                     ],
-                    if (visibleChips.isNotEmpty) ...[
-                      const SizedBox(height: AppSpacing.sm),
-                      Wrap(
-                        spacing: AppSpacing.xs,
-                        runSpacing: AppSpacing.xs,
-                        children: visibleChips,
-                      ),
-                    ],
-                  ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Icon(
-                Icons.chevron_right,
-                size: 18,
-                color: AppColors.textSecondary,
-              ),
-            ],
+                const SizedBox(width: AppSpacing.xs),
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Icon(
+                    Icons.chevron_right_rounded,
+                    size: 18,
+                    color: AppColors.textTertiary,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -625,7 +748,6 @@ class _PropertyListCard extends StatelessWidget {
   }
 }
 
-/// Property grid card with image header.
 class _PropertyGridCard extends StatelessWidget {
   const _PropertyGridCard({required this.property});
 
@@ -633,10 +755,7 @@ class _PropertyGridCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formatter = NumberFormat.currency(
-      symbol: 'ƒ,1',
-      decimalDigits: 0,
-    );
+    final formatter = NumberFormat.currency(symbol: '₹', decimalDigits: 0);
     final scheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final title = _propertyTitle(property);
@@ -650,132 +769,179 @@ class _PropertyGridCard extends StatelessWidget {
     final hasOccupancy = _hasOccupancyData(property);
     final metaChips = <Widget>[
       if (typeLabel != null)
-        _StatChip(
-          icon: Icons.home_outlined,
-          label: typeLabel,
-        ),
+        _StatChip(icon: Icons.home_outlined, label: typeLabel),
       if (unitsLabel != null)
-        _StatChip(
-          icon: Icons.door_front_door_outlined,
-          label: unitsLabel,
-        ),
+        _StatChip(icon: Icons.door_front_door_outlined, label: unitsLabel),
       if (rentLabel != null)
-        _StatChip(
-          icon: Icons.currency_rupee_outlined,
-          label: rentLabel,
-        ),
+        _StatChip(icon: Icons.currency_rupee_outlined, label: rentLabel),
     ];
     final visibleChips = metaChips.take(3).toList();
-    final imageUrl =
-        property.images != null && property.images!.isNotEmpty
-            ? property.images!.first
-            : null;
+    final imageUrl = property.images != null && property.images!.isNotEmpty
+        ? property.images!.first
+        : null;
 
     return Container(
       decoration: BoxDecoration(
         color: scheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadii.lg,
         border: Border.all(
-          color: scheme.outlineVariant,
-          width: 0.5,
+          color: scheme.outlineVariant.withOpacity(0.7),
+          width: 1,
         ),
-        boxShadow: isDark ? AppShadowsDark.sm : AppShadows.sm,
+        boxShadow: isDark
+            ? AppShadowsDark.sm
+            : [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  offset: const Offset(0, 1),
+                  blurRadius: 3,
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  offset: const Offset(0, 4),
+                  blurRadius: 8,
+                ),
+              ],
       ),
       clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => context.go('/properties/${property.id}'),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Container(
-                    color: scheme.surfaceContainerHighest,
-                    child: imageUrl != null
-                        ? Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Center(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => context.go('/properties/${property.id}'),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Container(
+                      color: scheme.surfaceContainerHighest,
+                      child: imageUrl != null
+                          ? Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Center(
+                                child: Icon(
+                                  _getPropertyIcon(property.type),
+                                  size: 44,
+                                  color: AppColors.textTertiary,
+                                ),
+                              ),
+                            )
+                          : Center(
                               child: Icon(
                                 _getPropertyIcon(property.type),
                                 size: 44,
-                                color: AppColors.textSecondary,
+                                color: AppColors.textTertiary,
                               ),
                             ),
-                          )
-                        : Center(
-                            child: Icon(
-                              _getPropertyIcon(property.type),
-                              size: 44,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                  ),
-                  if (statusBadge != null)
-                    Positioned(
-                      top: 8,
-                      left: 8,
-                      child: statusBadge,
                     ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          size: 12,
-                          color: AppColors.textSecondary,
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.15),
+                          ],
+                          stops: const [0.6, 1.0],
                         ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            subtitle,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
+                    if (statusBadge != null)
+                      Positioned(
+                        top: AppSpacing.sm,
+                        left: AppSpacing.sm,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: AppRadii.md,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                offset: const Offset(0, 1),
+                                blurRadius: 3,
+                              ),
+                            ],
+                          ),
+                          child: statusBadge,
+                        ),
+                      ),
                   ],
-                  const SizedBox(height: AppSpacing.sm),
-                  if (visibleChips.isNotEmpty)
-                    Wrap(
-                      spacing: AppSpacing.xs,
-                      runSpacing: AppSpacing.xs,
-                      children: visibleChips,
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: scheme.outlineVariant.withOpacity(0.3),
+                      width: 0.5,
                     ),
-                  if (hasOccupancy) ...[
+                  ),
+                ),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.md,
+                  AppSpacing.md,
+                  AppSpacing.md,
+                  AppSpacing.sm,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        height: 1.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (subtitle != null) ...[
+                      const SizedBox(height: AppSpacing.xxs),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on_outlined,
+                            size: 12,
+                            color: AppColors.textTertiary,
+                          ),
+                          const SizedBox(width: 3),
+                          Expanded(
+                            child: Text(
+                              subtitle,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: AppColors.textSecondary,
+                                    height: 1.3,
+                                  ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                     const SizedBox(height: AppSpacing.sm),
-                    AppOccupancyBar(
-                      occupancy: property.occupancyRate,
-                      showPercentage: true,
-                    ),
+                    if (visibleChips.isNotEmpty)
+                      Wrap(
+                        spacing: AppSpacing.xs,
+                        runSpacing: AppSpacing.xs,
+                        children: visibleChips,
+                      ),
+                    if (hasOccupancy) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      AppOccupancyBar(
+                        occupancy: property.occupancyRate,
+                        showPercentage: true,
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -794,44 +960,40 @@ class _PropertyGridCard extends StatelessWidget {
   }
 }
 
-/// Small stat chip for property cards.
 class _StatChip extends StatelessWidget {
   final IconData icon;
   final String label;
 
-  const _StatChip({
-    required this.icon,
-    required this.label,
-  });
+  const _StatChip({required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs + 1,
+      ),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(6),
+        color: scheme.surfaceContainerHighest.withOpacity(0.7),
+        borderRadius: AppRadii.sm,
         border: Border.all(
-          color: scheme.outlineVariant,
+          color: scheme.outlineVariant.withOpacity(0.5),
           width: 0.5,
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 12,
-            color: AppColors.textSecondary,
-          ),
-          const SizedBox(width: 4),
+          Icon(icon, size: 11, color: AppColors.textTertiary),
+          const SizedBox(width: 3),
           Flexible(
             child: Text(
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
+                height: 1.2,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -843,7 +1005,6 @@ class _StatChip extends StatelessWidget {
   }
 }
 
-/// Property filter options.
 enum PropertyFilter {
   all('All'),
   active('Active'),
@@ -856,10 +1017,8 @@ enum PropertyFilter {
   const PropertyFilter(this.label);
 }
 
-/// View mode for list/grid toggle.
 enum ViewMode { list, grid }
 
-/// Get property icon based on type.
 IconData _getPropertyIcon(String? type) {
   switch (type?.toLowerCase()) {
     case 'pg':
@@ -916,8 +1075,10 @@ bool _looksLikeId(String value, Property property) {
   final id = property.id?.toString();
   if (id != null && trimmed == id) return true;
   if (RegExp(r'^[0-9]+$').hasMatch(trimmed)) return true;
-  if (RegExp(r'^(prop|property)[-_ ]?\d+$', caseSensitive: false)
-      .hasMatch(trimmed)) {
+  if (RegExp(
+    r'^(prop|property)[-_ ]?\d+$',
+    caseSensitive: false,
+  ).hasMatch(trimmed)) {
     return true;
   }
   return false;
@@ -1005,7 +1166,3 @@ AppStatusType _propertyStatusType(String status) {
       return AppStatusType.neutral;
   }
 }
-
-
-
-

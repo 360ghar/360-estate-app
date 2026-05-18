@@ -28,6 +28,15 @@ mixin _$DashboardActivityItem {
   String? get type => throw _privateConstructorUsedError;
   String? get title => throw _privateConstructorUsedError;
   String? get message => throw _privateConstructorUsedError;
+  @JsonKey(name: 'at')
+  String? get at => throw _privateConstructorUsedError;
+  @JsonKey(name: 'property_id', fromJson: parseInt)
+  int? get propertyId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'lease_id', fromJson: parseInt)
+  int? get leaseId => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: parseDouble)
+  double? get amount => throw _privateConstructorUsedError;
+  String? get status => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at', fromJson: parseDateTime)
   DateTime? get createdAt => throw _privateConstructorUsedError;
 
@@ -53,6 +62,11 @@ abstract class $DashboardActivityItemCopyWith<$Res> {
     String? type,
     String? title,
     String? message,
+    @JsonKey(name: 'at') String? at,
+    @JsonKey(name: 'property_id', fromJson: parseInt) int? propertyId,
+    @JsonKey(name: 'lease_id', fromJson: parseInt) int? leaseId,
+    @JsonKey(fromJson: parseDouble) double? amount,
+    String? status,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) DateTime? createdAt,
   });
 }
@@ -79,6 +93,11 @@ class _$DashboardActivityItemCopyWithImpl<
     Object? type = freezed,
     Object? title = freezed,
     Object? message = freezed,
+    Object? at = freezed,
+    Object? propertyId = freezed,
+    Object? leaseId = freezed,
+    Object? amount = freezed,
+    Object? status = freezed,
     Object? createdAt = freezed,
   }) {
     return _then(
@@ -98,6 +117,26 @@ class _$DashboardActivityItemCopyWithImpl<
             message: freezed == message
                 ? _value.message
                 : message // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            at: freezed == at
+                ? _value.at
+                : at // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            propertyId: freezed == propertyId
+                ? _value.propertyId
+                : propertyId // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            leaseId: freezed == leaseId
+                ? _value.leaseId
+                : leaseId // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            amount: freezed == amount
+                ? _value.amount
+                : amount // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            status: freezed == status
+                ? _value.status
+                : status // ignore: cast_nullable_to_non_nullable
                       as String?,
             createdAt: freezed == createdAt
                 ? _value.createdAt
@@ -123,6 +162,11 @@ abstract class _$$DashboardActivityItemImplCopyWith<$Res>
     String? type,
     String? title,
     String? message,
+    @JsonKey(name: 'at') String? at,
+    @JsonKey(name: 'property_id', fromJson: parseInt) int? propertyId,
+    @JsonKey(name: 'lease_id', fromJson: parseInt) int? leaseId,
+    @JsonKey(fromJson: parseDouble) double? amount,
+    String? status,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) DateTime? createdAt,
   });
 }
@@ -146,6 +190,11 @@ class __$$DashboardActivityItemImplCopyWithImpl<$Res>
     Object? type = freezed,
     Object? title = freezed,
     Object? message = freezed,
+    Object? at = freezed,
+    Object? propertyId = freezed,
+    Object? leaseId = freezed,
+    Object? amount = freezed,
+    Object? status = freezed,
     Object? createdAt = freezed,
   }) {
     return _then(
@@ -166,6 +215,26 @@ class __$$DashboardActivityItemImplCopyWithImpl<$Res>
             ? _value.message
             : message // ignore: cast_nullable_to_non_nullable
                   as String?,
+        at: freezed == at
+            ? _value.at
+            : at // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        propertyId: freezed == propertyId
+            ? _value.propertyId
+            : propertyId // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        leaseId: freezed == leaseId
+            ? _value.leaseId
+            : leaseId // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        amount: freezed == amount
+            ? _value.amount
+            : amount // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        status: freezed == status
+            ? _value.status
+            : status // ignore: cast_nullable_to_non_nullable
+                  as String?,
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -183,6 +252,11 @@ class _$DashboardActivityItemImpl implements _DashboardActivityItem {
     this.type,
     this.title,
     this.message,
+    @JsonKey(name: 'at') this.at,
+    @JsonKey(name: 'property_id', fromJson: parseInt) this.propertyId,
+    @JsonKey(name: 'lease_id', fromJson: parseInt) this.leaseId,
+    @JsonKey(fromJson: parseDouble) this.amount,
+    this.status,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) this.createdAt,
   });
 
@@ -199,12 +273,26 @@ class _$DashboardActivityItemImpl implements _DashboardActivityItem {
   @override
   final String? message;
   @override
+  @JsonKey(name: 'at')
+  final String? at;
+  @override
+  @JsonKey(name: 'property_id', fromJson: parseInt)
+  final int? propertyId;
+  @override
+  @JsonKey(name: 'lease_id', fromJson: parseInt)
+  final int? leaseId;
+  @override
+  @JsonKey(fromJson: parseDouble)
+  final double? amount;
+  @override
+  final String? status;
+  @override
   @JsonKey(name: 'created_at', fromJson: parseDateTime)
   final DateTime? createdAt;
 
   @override
   String toString() {
-    return 'DashboardActivityItem(id: $id, type: $type, title: $title, message: $message, createdAt: $createdAt)';
+    return 'DashboardActivityItem(id: $id, type: $type, title: $title, message: $message, at: $at, propertyId: $propertyId, leaseId: $leaseId, amount: $amount, status: $status, createdAt: $createdAt)';
   }
 
   @override
@@ -216,14 +304,31 @@ class _$DashboardActivityItemImpl implements _DashboardActivityItem {
             (identical(other.type, type) || other.type == type) &&
             (identical(other.title, title) || other.title == title) &&
             (identical(other.message, message) || other.message == message) &&
+            (identical(other.at, at) || other.at == at) &&
+            (identical(other.propertyId, propertyId) ||
+                other.propertyId == propertyId) &&
+            (identical(other.leaseId, leaseId) || other.leaseId == leaseId) &&
+            (identical(other.amount, amount) || other.amount == amount) &&
+            (identical(other.status, status) || other.status == status) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, type, title, message, createdAt);
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    type,
+    title,
+    message,
+    at,
+    propertyId,
+    leaseId,
+    amount,
+    status,
+    createdAt,
+  );
 
   /// Create a copy of DashboardActivityItem
   /// with the given fields replaced by the non-null parameter values.
@@ -249,6 +354,11 @@ abstract class _DashboardActivityItem implements DashboardActivityItem {
     final String? type,
     final String? title,
     final String? message,
+    @JsonKey(name: 'at') final String? at,
+    @JsonKey(name: 'property_id', fromJson: parseInt) final int? propertyId,
+    @JsonKey(name: 'lease_id', fromJson: parseInt) final int? leaseId,
+    @JsonKey(fromJson: parseDouble) final double? amount,
+    final String? status,
     @JsonKey(name: 'created_at', fromJson: parseDateTime)
     final DateTime? createdAt,
   }) = _$DashboardActivityItemImpl;
@@ -265,6 +375,20 @@ abstract class _DashboardActivityItem implements DashboardActivityItem {
   String? get title;
   @override
   String? get message;
+  @override
+  @JsonKey(name: 'at')
+  String? get at;
+  @override
+  @JsonKey(name: 'property_id', fromJson: parseInt)
+  int? get propertyId;
+  @override
+  @JsonKey(name: 'lease_id', fromJson: parseInt)
+  int? get leaseId;
+  @override
+  @JsonKey(fromJson: parseDouble)
+  double? get amount;
+  @override
+  String? get status;
   @override
   @JsonKey(name: 'created_at', fromJson: parseDateTime)
   DateTime? get createdAt;

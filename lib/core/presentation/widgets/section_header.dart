@@ -1,3 +1,4 @@
+import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:flutter/material.dart';
 
 class SectionHeader extends StatelessWidget {
@@ -9,15 +10,29 @@ class SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
-        ),
-        if (action != null) action!,
-      ],
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.2,
+                color: scheme.onSurface,
+              ),
+            ),
+          ),
+          if (action != null) ...[
+            const SizedBox(width: AppSpacing.md),
+            action!,
+          ],
+        ],
+      ),
     );
   }
 }

@@ -4,11 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class ActivityFeed extends StatelessWidget {
-  const ActivityFeed({
-    super.key,
-    required this.activities,
-    this.onActivityTap,
-  });
+  const ActivityFeed({super.key, required this.activities, this.onActivityTap});
 
   final List<ActivityItem> activities;
   final void Function(ActivityItem)? onActivityTap;
@@ -32,11 +28,7 @@ class ActivityFeed extends StatelessWidget {
 }
 
 class ActivityFeedItem extends StatelessWidget {
-  const ActivityFeedItem({
-    super.key,
-    required this.activity,
-    this.onTap,
-  });
+  const ActivityFeedItem({super.key, required this.activity, this.onTap});
 
   final ActivityItem activity;
   final VoidCallback? onTap;
@@ -58,6 +50,8 @@ class ActivityFeedItem extends StatelessWidget {
         style: theme.textTheme.bodyMedium?.copyWith(
           fontWeight: FontWeight.w500,
         ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,6 +160,8 @@ class _StatusBadge extends StatelessWidget {
           fontWeight: FontWeight.w600,
           color: color,
         ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }

@@ -1,5 +1,8 @@
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/presentation/design_system/app_radii.dart';
+import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:estate_app/core/presentation/design_system/app_text_styles.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/app_segmented_button.dart';
 import 'package:estate_app/core/presentation/widgets/app_status_badge.dart';
@@ -11,20 +14,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-/// Extension to convert between MaintenanceStatus and string for UI compatibility
 extension MaintenanceRequestX on MaintenanceRequest {
-  /// Get status as string for filtering
   String get statusValue => status.apiValue;
 
-  /// Get priority as string for UI
   String get priorityValue => priority.name;
 }
 
-/// Professional B2B Tasks/Maintenance page with:
-/// - List/Pipeline (Kanban) view toggle
-/// - Status and priority filter chips
-/// - Color-coded priority badges
-/// - Enhanced task cards with assignee and due date
 class TasksPage extends ConsumerStatefulWidget {
   const TasksPage({super.key});
 
@@ -53,7 +48,6 @@ class _TasksPageState extends ConsumerState<TasksPage> {
     final state = ref.watch(maintenancePagedProvider);
     final controller = ref.read(maintenancePagedProvider.notifier);
 
-    // Filter items based on status
     final filteredItems = _filterItems(state.items);
 
     return AppScaffold(
@@ -66,14 +60,17 @@ class _TasksPageState extends ConsumerState<TasksPage> {
       ),
       body: Column(
         children: [
-          // Filter chips
           _FilterChipsBar(
             selectedFilter: _statusFilter,
             onFilterChanged: _setStatusFilter,
           ),
-          const Divider(height: 1),
-
-          // Content
+          Divider(
+            height: 1,
+            thickness: 0.5,
+            color: Theme.of(
+              context,
+            ).colorScheme.outlineVariant.withOpacity(0.5),
+          ),
           Expanded(
             child: _viewMode == TaskView.pipeline
                 ? _TaskPipelineView(tasks: filteredItems)
@@ -105,8 +102,16 @@ class _TasksPageState extends ConsumerState<TasksPage> {
         Flexible(
           child: AppSegmentedButton<TaskView>(
             segments: const [
-              AppSegment(value: TaskView.list, label: 'List', icon: Icons.view_list),
-              AppSegment(value: TaskView.pipeline, label: 'Board', icon: Icons.view_kanban),
+              AppSegment(
+                value: TaskView.list,
+                label: 'List',
+                icon: Icons.view_list,
+              ),
+              AppSegment(
+                value: TaskView.pipeline,
+                label: 'Board',
+                icon: Icons.view_kanban,
+              ),
             ],
             selected: _viewMode,
             onSelected: (mode) {
@@ -137,7 +142,6 @@ class _TasksPageState extends ConsumerState<TasksPage> {
   }
 }
 
-/// Filter chips for task status.
 class _FilterChipsBar extends StatelessWidget {
   final TaskStatusFilter selectedFilter;
   final ValueChanged<TaskStatusFilter> onFilterChanged;
@@ -149,6 +153,9 @@ class _FilterChipsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
@@ -161,29 +168,65 @@ class _FilterChipsBar extends StatelessWidget {
             final isSelected = filter == selectedFilter;
             return Padding(
               padding: const EdgeInsets.only(right: AppSpacing.sm),
-              child: FilterChip(
-                label: Text(filter.label),
-                selected: isSelected,
-                onSelected: (_) => onFilterChanged(filter),
-                backgroundColor: Colors.transparent,
-                selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.15),
-                checkmarkColor: Theme.of(context).colorScheme.primary,
-                labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : AppColors.textSecondary,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  side: BorderSide(
-                    color: isSelected
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.outlineVariant,
-                    width: 1,
+              child: Material(
+                color: isSelected
+                    ? primaryColor.withOpacity(0.12)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(20),
+                child: InkWell(
+                  onTap: () => onFilterChanged(filter),
+                  borderRadius: BorderRadius.circular(20),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOutCubic,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isSelected
+                            ? primaryColor.withOpacity(0.4)
+                            : theme.colorScheme.outlineVariant.withOpacity(0.6),
+                        width: isSelected ? 1.5 : 1,
+                      ),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: primaryColor.withOpacity(0.08),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (isSelected) ...[
+                          Icon(
+                            Icons.check_rounded,
+                            size: 14,
+                            color: primaryColor,
+                          ),
+                          const SizedBox(width: 4),
+                        ],
+                        Text(
+                          filter.label,
+                          style: AppTextStyles.chipLabel.copyWith(
+                            color: isSelected
+                                ? primaryColor
+                                : AppColors.textSecondary,
+                            fontWeight: isSelected
+                                ? FontWeight.w600
+                                : FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               ),
             );
           }).toList(),
@@ -193,7 +236,6 @@ class _FilterChipsBar extends StatelessWidget {
   }
 }
 
-/// Task list card with priority badge and status.
 class _TaskListCard extends StatelessWidget {
   const _TaskListCard({required this.task});
 
@@ -201,6 +243,7 @@ class _TaskListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final date = task.createdAt == null
         ? 'New'
         : DateFormat('dd MMM yyyy').format(task.createdAt!);
@@ -209,92 +252,132 @@ class _TaskListCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        color: theme.colorScheme.surface,
+        borderRadius: AppRadii.lg,
         border: Border.all(
           color: _getPriorityBorderColor(context, priority),
-          width: priority == TaskPriority.high ? 1.5 : 0.5,
+          width: priority == TaskPriority.high ? 1.5 : 0.75,
         ),
+        boxShadow: AppShadows.sm,
       ),
-      child: InkWell(
-        onTap: () => context.go(
-          '/tasks/${task.id}',
-          extra: task,
-        ),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header row with title and badges
-              Row(
-                children: [
-                  Expanded(
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: AppRadii.lg,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => context.go('/tasks/${task.id}', extra: task),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 3,
+                      height: 40,
+                      margin: const EdgeInsets.only(right: AppSpacing.md),
+                      decoration: BoxDecoration(
+                        color: _getPriorityColor(priority).withOpacity(0.6),
+                        borderRadius: AppRadii.pill,
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  task.title,
+                                  style: theme.textTheme.bodyLarge?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.3,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              priorityBadge,
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.apartment_outlined,
+                                size: 14,
+                                color: AppColors.textTertiary,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  task.propertyTitle,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondary,
+                                    height: 1.3,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                if (task.description.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Padding(
+                    padding: const EdgeInsets.only(left: AppSpacing.md + 3),
                     child: Text(
-                      task.title,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
+                      task.description,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.textTertiary,
+                        height: 1.4,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  priorityBadge,
                 ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-
-              // Property name
-              Row(
-                children: [
-                  Icon(
-                    Icons.apartment_outlined,
-                    size: 16,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      task.propertyTitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-
-              // Description (if available)
-              if (task.description.isNotEmpty) ...[
-                Text(
-                  task.description,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
                 const SizedBox(height: AppSpacing.sm),
-              ],
-
-              // Footer with status and date
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildStatusBadge(context),
-                  Text(
-                    date,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                Padding(
+                  padding: const EdgeInsets.only(left: AppSpacing.md + 3),
+                  child: Row(
+                    children: [
+                      Flexible(child: _buildStatusBadge(context)),
+                      const Spacer(),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.schedule_outlined,
+                            size: 12,
+                            color: AppColors.textTertiary,
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            date,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: AppColors.textTertiary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -305,8 +388,9 @@ class _TaskListCard extends StatelessWidget {
     final status = task.status.apiValue;
     final statusType = switch (status) {
       'completed' || 'resolved' || 'closed' => AppStatusType.success,
-      'in_progress' || 'work_order_created' || 'assigned' =>
-        AppStatusType.warning,
+      'in_progress' ||
+      'work_order_created' ||
+      'assigned' => AppStatusType.warning,
       'open' || 'in_review' || 'pending' => AppStatusType.info,
       _ => AppStatusType.neutral,
     };
@@ -319,7 +403,6 @@ class _TaskListCard extends StatelessWidget {
   }
 }
 
-/// Kanban-style pipeline view for tasks.
 class _TaskPipelineView extends StatelessWidget {
   final List<MaintenanceRequest> tasks;
 
@@ -333,32 +416,28 @@ class _TaskPipelineView extends StatelessWidget {
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              _PipelineColumn(
-                title: 'Open',
-                count: openTasks.length,
-                color: AppColors.info,
-                tasks: openTasks,
-              ),
-              const SizedBox(width: AppSpacing.md),
-              _PipelineColumn(
-                title: 'In Progress',
-                count: progressTasks.length,
-                color: AppColors.warning,
-                tasks: progressTasks,
-              ),
-              const SizedBox(width: AppSpacing.md),
-              _PipelineColumn(
-                title: 'Completed',
-                count: completedTasks.length,
-                color: AppColors.success,
-                tasks: completedTasks,
-              ),
-            ],
+          _PipelineColumn(
+            title: 'Open',
+            count: openTasks.length,
+            color: AppColors.info,
+            tasks: openTasks,
+          ),
+          const SizedBox(width: AppSpacing.md),
+          _PipelineColumn(
+            title: 'In Progress',
+            count: progressTasks.length,
+            color: AppColors.warning,
+            tasks: progressTasks,
+          ),
+          const SizedBox(width: AppSpacing.md),
+          _PipelineColumn(
+            title: 'Completed',
+            count: completedTasks.length,
+            color: AppColors.success,
+            tasks: completedTasks,
           ),
         ],
       ),
@@ -380,7 +459,6 @@ class _TaskPipelineView extends StatelessWidget {
   }
 }
 
-/// Individual column in the pipeline view.
 class _PipelineColumn extends StatelessWidget {
   final String title;
   final int count;
@@ -396,51 +474,99 @@ class _PipelineColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Column header
-          Row(
-            children: [
-              Text(
-                title,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 2,
-                ),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  '$count',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
+    final theme = Theme.of(context);
 
-          // Task cards
-          ...tasks.map((task) => _PipelineTaskCard(task: task)),
-        ],
+    return Expanded(
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+          borderRadius: AppRadii.lg,
+          border: Border.all(
+            color: theme.colorScheme.outlineVariant.withOpacity(0.4),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.md,
+                AppSpacing.md,
+                AppSpacing.sm,
+              ),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: color.withOpacity(0.2), width: 2),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: color.withOpacity(0.3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '$count',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: color,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.sm,
+                AppSpacing.sm,
+                AppSpacing.sm,
+                AppSpacing.sm,
+              ),
+              child: Column(
+                children: tasks
+                    .map((task) => _PipelineTaskCard(task: task))
+                    .toList(),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-/// Compact task card for pipeline view.
 class _PipelineTaskCard extends StatelessWidget {
   const _PipelineTaskCard({required this.task});
 
@@ -448,54 +574,110 @@ class _PipelineTaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final priority = _getPriority(task.priority);
+    final priorityColor = _getPriorityColor(priority);
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
+        color: theme.colorScheme.surface,
+        borderRadius: AppRadii.md,
         border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-          width: 0.5,
+          color: theme.colorScheme.outlineVariant.withOpacity(0.6),
+          width: 0.75,
+        ),
+        boxShadow: AppShadows.sm,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: AppRadii.md,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => context.go('/tasks/${task.id}', extra: task),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 4,
+                      height: 16,
+                      margin: const EdgeInsets.only(right: AppSpacing.sm),
+                      decoration: BoxDecoration(
+                        color: priorityColor.withOpacity(0.5),
+                        borderRadius: AppRadii.pill,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        task.title,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          height: 1.3,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Padding(
+                  padding: const EdgeInsets.only(left: AppSpacing.md + 4),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.apartment_outlined,
+                        size: 12,
+                        color: AppColors.textTertiary,
+                      ),
+                      const SizedBox(width: 3),
+                      Expanded(
+                        child: Text(
+                          task.propertyTitle,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: AppColors.textTertiary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      _PipelinePriorityDot(priority: priority),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Title with priority indicator
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  task.title,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              Container(
-                width: 6,
-                height: 6,
-                decoration: BoxDecoration(
-                  color: _getPriorityColor(priority),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          // Property name
-          Text(
-            task.propertyTitle,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppColors.textSecondary,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+    );
+  }
+}
+
+class _PipelinePriorityDot extends StatelessWidget {
+  const _PipelinePriorityDot({required this.priority});
+
+  final TaskPriority priority;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _getPriorityColor(priority);
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.8),
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.25),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
           ),
         ],
       ),
@@ -503,7 +685,6 @@ class _PipelineTaskCard extends StatelessWidget {
   }
 }
 
-/// Priority badge component.
 class _PriorityBadge extends StatelessWidget {
   final TaskPriority priority;
 
@@ -515,17 +696,15 @@ class _PriorityBadge extends StatelessWidget {
     final label = priority == TaskPriority.high
         ? 'HIGH'
         : priority == TaskPriority.medium
-            ? 'MED'
-            : 'LOW';
+        ? 'MED'
+        : 'LOW';
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 4,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(6),
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.2), width: 0.75),
       ),
       child: Text(
         label,
@@ -533,13 +712,13 @@ class _PriorityBadge extends StatelessWidget {
           color: color,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.5,
+          height: 1.2,
         ),
       ),
     );
   }
 }
 
-/// Get priority from MaintenancePriority enum.
 TaskPriority _getPriority(MaintenancePriority priority) {
   return switch (priority) {
     MaintenancePriority.urgent => TaskPriority.high,
@@ -549,7 +728,6 @@ TaskPriority _getPriority(MaintenancePriority priority) {
   };
 }
 
-/// Get color for priority.
 Color _getPriorityColor(TaskPriority priority) {
   return switch (priority) {
     TaskPriority.high => AppColors.danger,
@@ -558,18 +736,15 @@ Color _getPriorityColor(TaskPriority priority) {
   };
 }
 
-/// Get border color based on priority.
 Color _getPriorityBorderColor(BuildContext context, TaskPriority priority) {
   if (priority == TaskPriority.high) {
-    return AppColors.danger.withOpacity(0.5);
+    return AppColors.danger.withOpacity(0.35);
   }
-  return Theme.of(context).colorScheme.outlineVariant;
+  return Theme.of(context).colorScheme.outlineVariant.withOpacity(0.6);
 }
 
-/// Task view mode.
 enum TaskView { list, pipeline }
 
-/// Task status filter.
 enum TaskStatusFilter {
   all('All'),
   open('Open'),
@@ -580,5 +755,4 @@ enum TaskStatusFilter {
   const TaskStatusFilter(this.label);
 }
 
-/// Task priority level.
 enum TaskPriority { high, medium, low }

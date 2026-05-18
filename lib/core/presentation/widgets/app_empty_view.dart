@@ -1,3 +1,4 @@
+import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:flutter/material.dart';
 
@@ -18,6 +19,7 @@ class AppEmptyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Center(
       child: Padding(
         padding: AppInsets.screen,
@@ -25,32 +27,37 @@ class AppEmptyView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 64,
-              height: 64,
+              width: 88,
+              height: 88,
               decoration: BoxDecoration(
-                color: scheme.primary.withOpacity(0.12),
-                shape: BoxShape.circle,
+                color: scheme.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.all(
+                  Radius.circular(AppRadii.xlValue),
+                ),
               ),
-              child: Icon(icon, size: 32, color: scheme.primary),
+              child: Icon(icon, size: 40, color: scheme.primary),
             ),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.xl),
             Text(
               title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.3,
+                color: scheme.onSurface,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               message,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+              style: textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+                height: 1.5,
+              ),
               textAlign: TextAlign.center,
             ),
             if (action != null) ...[
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
               action!,
             ],
           ],

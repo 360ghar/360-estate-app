@@ -11,6 +11,11 @@ class DashboardActivityItem with _$DashboardActivityItem {
     String? type,
     String? title,
     String? message,
+    @JsonKey(name: 'at') String? at,
+    @JsonKey(name: 'property_id', fromJson: parseInt) int? propertyId,
+    @JsonKey(name: 'lease_id', fromJson: parseInt) int? leaseId,
+    @JsonKey(fromJson: parseDouble) double? amount,
+    String? status,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) DateTime? createdAt,
   }) = _DashboardActivityItem;
 

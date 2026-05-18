@@ -30,9 +30,16 @@ class AppScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget content = Padding(padding: padding, child: body);
-    // Apply SafeArea before SingleChildScrollView so padding respects safe areas
+
     if (safeArea) content = SafeArea(child: content);
-    if (scrollable) content = SingleChildScrollView(child: content);
+
+    if (scrollable) {
+      content = SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        child: content,
+      );
+    }
 
     final scaffoldBody = background == null
         ? content
@@ -50,6 +57,7 @@ class AppScaffold extends StatelessWidget {
       bottomNavigationBar: bottomNavigationBar,
       extendBodyBehindAppBar: extendBodyBehindAppBar,
       resizeToAvoidBottomInset: resizeToAvoidBottomInset,
+      backgroundColor: Theme.of(context).colorScheme.surface,
     );
   }
 }
