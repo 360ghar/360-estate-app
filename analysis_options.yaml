@@ -17,6 +17,9 @@ analyzer:
   errors:
     unused_import: error
     dead_code: error
+    # @JsonKey on freezed factory params is a legitimate pattern; the
+    # annotation is forwarded to the generated fields, not the constructor.
+    invalid_annotation_target: ignore
 
 linter:
   # The lint rules applied to this project can be customized in the
@@ -38,7 +41,9 @@ linter:
     collection_methods_unrelated_type: true
     depend_on_referenced_packages: true
     directives_ordering: true
-    discarded_futures: true
+    # discarded_futures is intentionally NOT enabled: it is stricter than the
+    # Dart-recommended `unawaited_futures` (kept below) and fires pervasively on
+    # legitimate fire-and-forget calls (animation controllers, showDialog, etc.).
     prefer_const_constructors: false
     prefer_final_locals: true
     require_trailing_commas: true

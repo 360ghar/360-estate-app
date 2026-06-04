@@ -1,6 +1,7 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
+
 import 'package:estate_app/core/presentation/design_system/design_system.dart';
+import 'package:flutter/material.dart';
 
 /// Glass button variants
 enum GlassButtonVariant {
@@ -204,11 +205,11 @@ class _GlassButtonState extends State<GlassButton>
         color: (isDark
                 ? AppGlassColors.glassSurfaceDark(widget.opacity)
                 : AppGlassColors.glassSurfaceLight(widget.opacity))
-            .withOpacity(_isEnabled ? 1 : 0.5),
+            .withValues(alpha: _isEnabled ? 1 : 0.5),
         borderRadius: BorderRadius.circular(widget.borderRadius),
         border: Border.all(
           color: (isDark ? AppGlassColors.borderDark : AppGlassColors.borderLight)
-              .withOpacity(_isEnabled ? 1 : 0.5),
+              .withValues(alpha: _isEnabled ? 1 : 0.5),
           width: 1.5,
         ),
       ),
@@ -241,8 +242,6 @@ class _GlassButtonState extends State<GlassButton>
   }
 
   Widget _buildGlowButton() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Container(
       decoration: BoxDecoration(
         gradient: widget.gradient ?? AppGradients.primary,
@@ -292,7 +291,7 @@ class _GlassButtonState extends State<GlassButton>
                       Text(
                         widget.label,
                         style: TextStyle(
-                          color: textColor.withOpacity(_isEnabled ? 1 : 0.5),
+                          color: textColor.withValues(alpha: _isEnabled ? 1 : 0.5),
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           letterSpacing: 0.2,
@@ -408,7 +407,7 @@ class _GlassIconButtonState extends State<GlassIconButton>
                 : (isDark
                         ? AppGlassColors.glassSurfaceDark(widget.opacity)
                         : AppGlassColors.glassSurfaceLight(widget.opacity))
-                    .withOpacity(_isEnabled ? 1 : 0.5)),
+                    .withValues(alpha: _isEnabled ? 1 : 0.5)),
         gradient: widget.variant == GlassButtonVariant.primary
             ? AppGradients.primary
             : null,
@@ -418,8 +417,7 @@ class _GlassIconButtonState extends State<GlassIconButton>
                 color: (isDark
                         ? AppGlassColors.borderDark
                         : AppGlassColors.borderLight)
-                    .withOpacity(_isEnabled ? 1 : 0.5),
-                width: 1,
+                    .withValues(alpha: _isEnabled ? 1 : 0.5),
               )
             : null,
         boxShadow: widget.variant == GlassButtonVariant.glow && _isEnabled

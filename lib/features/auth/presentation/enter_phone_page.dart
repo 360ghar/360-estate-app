@@ -1,4 +1,5 @@
-﻿import 'dart:ui';
+import 'dart:async';
+import 'dart:ui';
 import 'package:estate_app/core/presentation/animations/premium/premium_animations.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
@@ -82,7 +83,8 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
         appBar: AppBar(title: const Text('Enter phone')),
         body: const AppErrorView(
           title: 'Missing Supabase configuration',
-          message: 'Add SUPABASE_URL and SUPABASE_ANON_KEY to your .env file.',
+          message:
+              'Add SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY to your .env file.',
         ),
       );
     }
@@ -115,7 +117,6 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
                       PremiumGlassCard(
                         padding: const EdgeInsets.all(28),
                         borderRadius: 24,
-                        blur: 24,
                         opacity: 0.15,
                         child: PremiumStaggeredList(
                           itemCount: 3,
@@ -208,75 +209,10 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
   }
 
   Widget _buildPhoneInput() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'PHONE NUMBER',
-          style: _labelStyle(context),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF3B82F6).withValues(alpha: 0.1),
-                blurRadius: 16,
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(14),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    width: 1,
-                  ),
-                ),
-                child: TextFormField(
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => _continue(),
-                  validator: _validatePhone,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(10),
-                    _PhoneNumberFormatter(),
-                  ],
-                  style: _inputStyle(context),
-                  cursorColor: const Color(0xFF3B82F6),
-                  decoration: InputDecoration(
-                    hintText: '00000 00000',
-                    hintStyle: _hintStyle(context),
-                    prefixIcon: Icon(
-                      Icons.phone_outlined,
-                      color: _iconColor(context),
-                      size: 22,
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 18,
-                    ),
-                    errorStyle: const TextStyle(
-                      color: Color(0xFFFCA5A5),
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
+    return _AnimatedPhoneField(
+      controller: _phoneController,
+      onFieldSubmitted: (_) => _continue(),
+      validator: _validatePhone,
     );
   }
 
@@ -326,6 +262,152 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
         ],
       ),
       textAlign: TextAlign.center,
+    );
+  }
+}
+
+/// Phone input field with animated focus glow and border transition.
+class _AnimatedPhoneField extends StatefulWidget {
+  final TextEditingController controller;
+  final ValueChanged<String>? onFieldSubmitted;
+  final String? Function(String?)? validator;
+
+  const _AnimatedPhoneField({
+    required this.controller,
+    this.onFieldSubmitted,
+    this.validator,
+  });
+
+  @override
+  State<_AnimatedPhoneField> createState() => _AnimatedPhoneFieldState();
+}
+
+class _AnimatedPhoneFieldState extends State<_AnimatedPhoneField>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _focusGlowController;
+  late final Animation<double> _glowAnimation;
+  bool _isFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusGlowController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _glowAnimation = CurvedAnimation(
+      parent: _focusGlowController,
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
+  void dispose() {
+    _focusGlowController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'PHONE NUMBER',
+          style: _labelStyle(context),
+        ),
+        const SizedBox(height: 12),
+        Focus(
+          onFocusChange: (hasFocus) {
+            setState(() => _isFocused = hasFocus);
+            if (hasFocus) {
+              _focusGlowController.forward();
+            } else {
+              _focusGlowController.reverse();
+            }
+          },
+          child: AnimatedBuilder(
+            animation: _glowAnimation,
+            builder: (context, child) {
+              return Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color.lerp(
+                        const Color(0xFF3B82F6).withValues(alpha: 0.0),
+                        const Color(0xFF3B82F6).withValues(alpha: 0.25),
+                        _glowAnimation.value,
+                      )!,
+                      blurRadius: 20 * _glowAnimation.value,
+                    ),
+                  ],
+                ),
+                child: child,
+              );
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutCubic,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: _isFocused
+                          ? const Color(0xFF3B82F6)
+                          : Colors.white.withValues(alpha: 0.1),
+                      width: _isFocused ? 1.5 : 1,
+                    ),
+                  ),
+                  child: TextFormField(
+                    controller: widget.controller,
+                    keyboardType: TextInputType.phone,
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: widget.onFieldSubmitted,
+                    validator: widget.validator,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(10),
+                      _PhoneNumberFormatter(),
+                    ],
+                    style: _inputStyle(context),
+                    cursorColor: const Color(0xFF3B82F6),
+                    decoration: InputDecoration(
+                      hintText: '00000 00000',
+                      hintStyle: _hintStyle(context),
+                      prefixIcon: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: Icon(
+                          Icons.phone_outlined,
+                          key: ValueKey(_isFocused),
+                          color: _isFocused
+                              ? const Color(0xFF3B82F6)
+                              : _iconColor(context),
+                          size: 22,
+                        ),
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 18,
+                      ),
+                      errorStyle: const TextStyle(
+                        color: Color(0xFFFCA5A5),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

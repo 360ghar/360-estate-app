@@ -1,8 +1,9 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
+
+import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_glass_blur.dart';
 import 'package:estate_app/core/presentation/design_system/app_glass_colors.dart';
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:flutter/material.dart';
 
 /// Premium glass card with animated border glow and superior visual effects.
 ///
@@ -132,7 +133,6 @@ class _PremiumGlassCardState extends State<PremiumGlassCard>
                             color: isDark
                                 ? AppGlassColors.borderDark
                                 : AppGlassColors.borderLight,
-                            width: 1,
                           ),
                         ),
                         child: widget.child,
@@ -191,8 +191,6 @@ class _PremiumGlassCardState extends State<PremiumGlassCard>
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
                   colors: [
                     Colors.transparent,
                     Colors.white.withValues(alpha: 0.1),
@@ -453,7 +451,6 @@ class _PremiumGlassInputState extends State<PremiumGlassInput>
         BoxShadow(
           color: const Color(0xFFEF4444).withValues(alpha: 0.3 * _glowAnimation.value),
           blurRadius: 16,
-          spreadRadius: 0,
         ),
       ];
     }
@@ -461,12 +458,10 @@ class _PremiumGlassInputState extends State<PremiumGlassInput>
       BoxShadow(
         color: const Color(0xFF3B82F6).withValues(alpha: 0.25 * _glowAnimation.value),
         blurRadius: 20,
-        spreadRadius: 0,
       ),
       BoxShadow(
         color: const Color(0xFF8B5CF6).withValues(alpha: 0.15 * _glowAnimation.value),
         blurRadius: 24,
-        spreadRadius: 0,
       ),
     ];
   }
@@ -673,7 +668,6 @@ class _PremiumGlassButtonState extends State<PremiumGlassButton>
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.1),
-          width: 1,
         ),
       ),
       child: Material(

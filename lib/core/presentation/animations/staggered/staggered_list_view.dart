@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 /// A ListView with staggered item animations.
@@ -272,7 +273,7 @@ class _AnimatedStaggeredListState extends State<AnimatedStaggeredList> {
 
   void _insertItemsStaggered() async {
     for (int i = 0; i < _items.length; i++) {
-      await Future.delayed(widget.staggerDelay);
+      await Future<void>.delayed(widget.staggerDelay);
       if (mounted) {
         _listKey.currentState?.insertItem(i);
       }
@@ -295,7 +296,6 @@ class _AnimatedStaggeredListState extends State<AnimatedStaggeredList> {
   Widget build(BuildContext context) {
     return AnimatedList(
       key: _listKey,
-      initialItemCount: 0,
       itemBuilder: (context, index, animation) {
         return _buildAnimatedItem(widget.itemBuilder(context, index), animation);
       },

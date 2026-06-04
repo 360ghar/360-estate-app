@@ -1,5 +1,5 @@
+import 'package:estate_app/core/presentation/design_system/app_glass_colors.dart';
 import 'package:flutter/material.dart';
-import 'app_glass_colors.dart';
 
 /// Premium gradient definitions for glassmorphism UI.
 /// Includes aurora mesh gradients, surface gradients, and shimmer effects.
@@ -225,12 +225,11 @@ abstract final class AppGlassGradients {
   /// Orb gradient for floating decorative elements
   static RadialGradient orbGradient(Color color) {
     return RadialGradient(
-      center: Alignment.center,
       radius: 1.0,
       colors: [
-        color.withOpacity(0.4),
-        color.withOpacity(0.2),
-        color.withOpacity(0.0),
+        color.withValues(alpha: 0.4),
+        color.withValues(alpha: 0.2),
+        color.withValues(alpha: 0.0),
       ],
       stops: const [0.0, 0.5, 1.0],
     );

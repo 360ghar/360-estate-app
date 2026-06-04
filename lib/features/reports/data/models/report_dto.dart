@@ -1,3 +1,4 @@
+import 'package:estate_app/core/utils/parse.dart';
 import 'package:estate_app/features/reports/domain/entities/report.dart';
 
 // Rent Roll DTOs
@@ -17,18 +18,16 @@ final class RentRollItemDto {
 
   factory RentRollItemDto.fromJson(Map<String, dynamic> json) {
     return RentRollItemDto(
-      propertyId: json['property_id'] as int,
-      propertyTitle: json['property_title'] as String,
+      propertyId: parseInt(json['property_id']) ?? 0,
+      propertyTitle: parseString(json['property_title']) ?? '',
       propertyAddress: json['property_address'] as String?,
       tenantName: json['tenant_name'] as String?,
-      leaseId: json['lease_id'] as int?,
-      monthlyRent: (json['monthly_rent'] as num).toDouble(),
-      amountPaid: (json['amount_paid'] as num).toDouble(),
-      amountDue: (json['amount_due'] as num).toDouble(),
-      status: json['status'] as String,
-      dueDate: json['due_date'] != null
-          ? DateTime.parse(json['due_date'] as String)
-          : null,
+      leaseId: parseInt(json['lease_id']),
+      monthlyRent: parseDouble(json['monthly_rent']) ?? 0,
+      amountPaid: parseDouble(json['amount_paid']) ?? 0,
+      amountDue: parseDouble(json['amount_due']) ?? 0,
+      status: parseString(json['status']) ?? '',
+      dueDate: parseDateTime(json['due_date']),
     );
   }
 
@@ -69,18 +68,19 @@ final class RentRollReportDto {
 
   factory RentRollReportDto.fromJson(Map<String, dynamic> json) {
     return RentRollReportDto(
-      generatedAt: DateTime.parse(json['generated_at'] as String),
-      totalProperties: json['total_properties'] as int,
-      totalMonthlyRent: (json['total_monthly_rent'] as num).toDouble(),
-      totalCollected: (json['total_collected'] as num).toDouble(),
-      totalOutstanding: (json['total_outstanding'] as num).toDouble(),
-      items: (json['items'] as List<dynamic>)
-          .map((e) => RentRollItemDto.fromJson(e as Map<String, dynamic>))
+      generatedAt: parseDateTime(json['generated_at']),
+      totalProperties: parseInt(json['total_properties']) ?? 0,
+      totalMonthlyRent: parseDouble(json['total_monthly_rent']) ?? 0,
+      totalCollected: parseDouble(json['total_collected']) ?? 0,
+      totalOutstanding: parseDouble(json['total_outstanding']) ?? 0,
+      items: parseList(json['items'])
+          .whereType<Map<String, dynamic>>()
+          .map(RentRollItemDto.fromJson)
           .toList(),
     );
   }
 
-  final DateTime generatedAt;
+  final DateTime? generatedAt;
   final int totalProperties;
   final double totalMonthlyRent;
   final double totalCollected;
@@ -107,9 +107,9 @@ final class IncomeCategoryBreakdownDto {
 
   factory IncomeCategoryBreakdownDto.fromJson(Map<String, dynamic> json) {
     return IncomeCategoryBreakdownDto(
-      category: json['category'] as String,
-      amount: (json['amount'] as num).toDouble(),
-      percentage: (json['percentage'] as num).toDouble(),
+      category: parseString(json['category']) ?? '',
+      amount: parseDouble(json['amount']) ?? 0,
+      percentage: parseDouble(json['percentage']) ?? 0,
     );
   }
 
@@ -132,12 +132,12 @@ final class IncomeMonthlyBreakdownDto {
 
   factory IncomeMonthlyBreakdownDto.fromJson(Map<String, dynamic> json) {
     return IncomeMonthlyBreakdownDto(
-      month: DateTime.parse(json['month'] as String),
-      amount: (json['amount'] as num).toDouble(),
+      month: parseDateTime(json['month']),
+      amount: parseDouble(json['amount']) ?? 0,
     );
   }
 
-  final DateTime month;
+  final DateTime? month;
   final double amount;
 
   IncomeMonthlyBreakdown toEntity() => IncomeMonthlyBreakdown(
@@ -159,18 +159,18 @@ final class IncomeItemDto {
 
   factory IncomeItemDto.fromJson(Map<String, dynamic> json) {
     return IncomeItemDto(
-      id: json['id'] as int,
-      date: DateTime.parse(json['date'] as String),
-      category: json['category'] as String,
-      description: json['description'] as String,
-      amount: (json['amount'] as num).toDouble(),
-      propertyId: json['property_id'] as int?,
+      id: parseInt(json['id']) ?? 0,
+      date: parseDateTime(json['date']),
+      category: parseString(json['category']) ?? '',
+      description: parseString(json['description']) ?? '',
+      amount: parseDouble(json['amount']) ?? 0,
+      propertyId: parseInt(json['property_id']),
       propertyTitle: json['property_title'] as String?,
     );
   }
 
   final int id;
-  final DateTime date;
+  final DateTime? date;
   final String category;
   final String description;
   final double amount;
@@ -201,27 +201,28 @@ final class IncomeReportDto {
 
   factory IncomeReportDto.fromJson(Map<String, dynamic> json) {
     return IncomeReportDto(
-      generatedAt: DateTime.parse(json['generated_at'] as String),
-      startDate: DateTime.parse(json['start_date'] as String),
-      endDate: DateTime.parse(json['end_date'] as String),
-      totalIncome: (json['total_income'] as num).toDouble(),
-      byCategory: (json['by_category'] as List<dynamic>)
-          .map((e) =>
-              IncomeCategoryBreakdownDto.fromJson(e as Map<String, dynamic>))
+      generatedAt: parseDateTime(json['generated_at']),
+      startDate: parseDateTime(json['start_date']),
+      endDate: parseDateTime(json['end_date']),
+      totalIncome: parseDouble(json['total_income']) ?? 0,
+      byCategory: parseList(json['by_category'])
+          .whereType<Map<String, dynamic>>()
+          .map(IncomeCategoryBreakdownDto.fromJson)
           .toList(),
-      byMonth: (json['by_month'] as List<dynamic>)
-          .map((e) =>
-              IncomeMonthlyBreakdownDto.fromJson(e as Map<String, dynamic>))
+      byMonth: parseList(json['by_month'])
+          .whereType<Map<String, dynamic>>()
+          .map(IncomeMonthlyBreakdownDto.fromJson)
           .toList(),
-      items: (json['items'] as List<dynamic>)
-          .map((e) => IncomeItemDto.fromJson(e as Map<String, dynamic>))
+      items: parseList(json['items'])
+          .whereType<Map<String, dynamic>>()
+          .map(IncomeItemDto.fromJson)
           .toList(),
     );
   }
 
-  final DateTime generatedAt;
-  final DateTime startDate;
-  final DateTime endDate;
+  final DateTime? generatedAt;
+  final DateTime? startDate;
+  final DateTime? endDate;
   final double totalIncome;
   final List<IncomeCategoryBreakdownDto> byCategory;
   final List<IncomeMonthlyBreakdownDto> byMonth;
@@ -248,9 +249,9 @@ final class ExpenseCategoryBreakdownDto {
 
   factory ExpenseCategoryBreakdownDto.fromJson(Map<String, dynamic> json) {
     return ExpenseCategoryBreakdownDto(
-      category: json['category'] as String,
-      amount: (json['amount'] as num).toDouble(),
-      percentage: (json['percentage'] as num).toDouble(),
+      category: parseString(json['category']) ?? '',
+      amount: parseDouble(json['amount']) ?? 0,
+      percentage: parseDouble(json['percentage']) ?? 0,
     );
   }
 
@@ -273,12 +274,12 @@ final class ExpenseMonthlyBreakdownDto {
 
   factory ExpenseMonthlyBreakdownDto.fromJson(Map<String, dynamic> json) {
     return ExpenseMonthlyBreakdownDto(
-      month: DateTime.parse(json['month'] as String),
-      amount: (json['amount'] as num).toDouble(),
+      month: parseDateTime(json['month']),
+      amount: parseDouble(json['amount']) ?? 0,
     );
   }
 
-  final DateTime month;
+  final DateTime? month;
   final double amount;
 
   ExpenseMonthlyBreakdown toEntity() => ExpenseMonthlyBreakdown(
@@ -301,19 +302,19 @@ final class ExpenseItemDto {
 
   factory ExpenseItemDto.fromJson(Map<String, dynamic> json) {
     return ExpenseItemDto(
-      id: json['id'] as int,
-      date: DateTime.parse(json['date'] as String),
-      category: json['category'] as String,
-      description: json['description'] as String,
-      amount: (json['amount'] as num).toDouble(),
+      id: parseInt(json['id']) ?? 0,
+      date: parseDateTime(json['date']),
+      category: parseString(json['category']) ?? '',
+      description: parseString(json['description']) ?? '',
+      amount: parseDouble(json['amount']) ?? 0,
       vendor: json['vendor'] as String?,
-      propertyId: json['property_id'] as int?,
+      propertyId: parseInt(json['property_id']),
       propertyTitle: json['property_title'] as String?,
     );
   }
 
   final int id;
-  final DateTime date;
+  final DateTime? date;
   final String category;
   final String description;
   final double amount;
@@ -346,27 +347,28 @@ final class ExpensesReportDto {
 
   factory ExpensesReportDto.fromJson(Map<String, dynamic> json) {
     return ExpensesReportDto(
-      generatedAt: DateTime.parse(json['generated_at'] as String),
-      startDate: DateTime.parse(json['start_date'] as String),
-      endDate: DateTime.parse(json['end_date'] as String),
-      totalExpenses: (json['total_expenses'] as num).toDouble(),
-      byCategory: (json['by_category'] as List<dynamic>)
-          .map((e) =>
-              ExpenseCategoryBreakdownDto.fromJson(e as Map<String, dynamic>))
+      generatedAt: parseDateTime(json['generated_at']),
+      startDate: parseDateTime(json['start_date']),
+      endDate: parseDateTime(json['end_date']),
+      totalExpenses: parseDouble(json['total_expenses']) ?? 0,
+      byCategory: parseList(json['by_category'])
+          .whereType<Map<String, dynamic>>()
+          .map(ExpenseCategoryBreakdownDto.fromJson)
           .toList(),
-      byMonth: (json['by_month'] as List<dynamic>)
-          .map((e) =>
-              ExpenseMonthlyBreakdownDto.fromJson(e as Map<String, dynamic>))
+      byMonth: parseList(json['by_month'])
+          .whereType<Map<String, dynamic>>()
+          .map(ExpenseMonthlyBreakdownDto.fromJson)
           .toList(),
-      items: (json['items'] as List<dynamic>)
-          .map((e) => ExpenseItemDto.fromJson(e as Map<String, dynamic>))
+      items: parseList(json['items'])
+          .whereType<Map<String, dynamic>>()
+          .map(ExpenseItemDto.fromJson)
           .toList(),
     );
   }
 
-  final DateTime generatedAt;
-  final DateTime startDate;
-  final DateTime endDate;
+  final DateTime? generatedAt;
+  final DateTime? startDate;
+  final DateTime? endDate;
   final double totalExpenses;
   final List<ExpenseCategoryBreakdownDto> byCategory;
   final List<ExpenseMonthlyBreakdownDto> byMonth;
@@ -394,14 +396,14 @@ final class PnLMonthlyBreakdownDto {
 
   factory PnLMonthlyBreakdownDto.fromJson(Map<String, dynamic> json) {
     return PnLMonthlyBreakdownDto(
-      month: DateTime.parse(json['month'] as String),
-      income: (json['income'] as num).toDouble(),
-      expenses: (json['expenses'] as num).toDouble(),
-      netIncome: (json['net_income'] as num).toDouble(),
+      month: parseDateTime(json['month']),
+      income: parseDouble(json['income']) ?? 0,
+      expenses: parseDouble(json['expenses']) ?? 0,
+      netIncome: parseDouble(json['net_income']) ?? 0,
     );
   }
 
-  final DateTime month;
+  final DateTime? month;
   final double income;
   final double expenses;
   final double netIncome;
@@ -430,30 +432,31 @@ final class ProfitAndLossReportDto {
 
   factory ProfitAndLossReportDto.fromJson(Map<String, dynamic> json) {
     return ProfitAndLossReportDto(
-      generatedAt: DateTime.parse(json['generated_at'] as String),
-      startDate: DateTime.parse(json['start_date'] as String),
-      endDate: DateTime.parse(json['end_date'] as String),
-      totalIncome: (json['total_income'] as num).toDouble(),
-      totalExpenses: (json['total_expenses'] as num).toDouble(),
-      netIncome: (json['net_income'] as num).toDouble(),
-      profitMargin: (json['profit_margin'] as num).toDouble(),
-      incomeBreakdown: (json['income_breakdown'] as List<dynamic>)
-          .map((e) =>
-              IncomeCategoryBreakdownDto.fromJson(e as Map<String, dynamic>))
+      generatedAt: parseDateTime(json['generated_at']),
+      startDate: parseDateTime(json['start_date']),
+      endDate: parseDateTime(json['end_date']),
+      totalIncome: parseDouble(json['total_income']) ?? 0,
+      totalExpenses: parseDouble(json['total_expenses']) ?? 0,
+      netIncome: parseDouble(json['net_income']) ?? 0,
+      profitMargin: parseDouble(json['profit_margin']) ?? 0,
+      incomeBreakdown: parseList(json['income_breakdown'])
+          .whereType<Map<String, dynamic>>()
+          .map(IncomeCategoryBreakdownDto.fromJson)
           .toList(),
-      expenseBreakdown: (json['expense_breakdown'] as List<dynamic>)
-          .map((e) =>
-              ExpenseCategoryBreakdownDto.fromJson(e as Map<String, dynamic>))
+      expenseBreakdown: parseList(json['expense_breakdown'])
+          .whereType<Map<String, dynamic>>()
+          .map(ExpenseCategoryBreakdownDto.fromJson)
           .toList(),
-      byMonth: (json['by_month'] as List<dynamic>)
-          .map((e) => PnLMonthlyBreakdownDto.fromJson(e as Map<String, dynamic>))
+      byMonth: parseList(json['by_month'])
+          .whereType<Map<String, dynamic>>()
+          .map(PnLMonthlyBreakdownDto.fromJson)
           .toList(),
     );
   }
 
-  final DateTime generatedAt;
-  final DateTime startDate;
-  final DateTime endDate;
+  final DateTime? generatedAt;
+  final DateTime? startDate;
+  final DateTime? endDate;
   final double totalIncome;
   final double totalExpenses;
   final double netIncome;
@@ -488,11 +491,11 @@ final class OccupancyByTypeDto {
 
   factory OccupancyByTypeDto.fromJson(Map<String, dynamic> json) {
     return OccupancyByTypeDto(
-      propertyType: json['property_type'] as String,
-      total: json['total'] as int,
-      occupied: json['occupied'] as int,
-      vacant: json['vacant'] as int,
-      occupancyRate: (json['occupancy_rate'] as num).toDouble(),
+      propertyType: parseString(json['property_type']) ?? '',
+      total: parseInt(json['total']) ?? 0,
+      occupied: parseInt(json['occupied']) ?? 0,
+      vacant: parseInt(json['vacant']) ?? 0,
+      occupancyRate: parseDouble(json['occupancy_rate']) ?? 0,
     );
   }
 
@@ -525,18 +528,14 @@ final class OccupancyItemDto {
 
   factory OccupancyItemDto.fromJson(Map<String, dynamic> json) {
     return OccupancyItemDto(
-      propertyId: json['property_id'] as int,
-      propertyTitle: json['property_title'] as String,
-      propertyType: json['property_type'] as String,
-      isOccupied: json['is_occupied'] as bool,
+      propertyId: parseInt(json['property_id']) ?? 0,
+      propertyTitle: parseString(json['property_title']) ?? '',
+      propertyType: parseString(json['property_type']) ?? '',
+      isOccupied: json['is_occupied'] as bool? ?? false,
       tenantName: json['tenant_name'] as String?,
-      leaseEndDate: json['lease_end_date'] != null
-          ? DateTime.parse(json['lease_end_date'] as String)
-          : null,
-      vacantSince: json['vacant_since'] != null
-          ? DateTime.parse(json['vacant_since'] as String)
-          : null,
-      daysVacant: json['days_vacant'] as int?,
+      leaseEndDate: parseDateTime(json['lease_end_date']),
+      vacantSince: parseDateTime(json['vacant_since']),
+      daysVacant: parseInt(json['days_vacant']),
     );
   }
 
@@ -575,22 +574,24 @@ final class OccupancyReportDto {
 
   factory OccupancyReportDto.fromJson(Map<String, dynamic> json) {
     return OccupancyReportDto(
-      generatedAt: DateTime.parse(json['generated_at'] as String),
-      totalProperties: json['total_properties'] as int,
-      occupiedProperties: json['occupied_properties'] as int,
-      vacantProperties: json['vacant_properties'] as int,
-      occupancyRate: (json['occupancy_rate'] as num).toDouble(),
-      averageVacancyDays: json['average_vacancy_days'] as int,
-      byPropertyType: (json['by_property_type'] as List<dynamic>)
-          .map((e) => OccupancyByTypeDto.fromJson(e as Map<String, dynamic>))
+      generatedAt: parseDateTime(json['generated_at']),
+      totalProperties: parseInt(json['total_properties']) ?? 0,
+      occupiedProperties: parseInt(json['occupied_properties']) ?? 0,
+      vacantProperties: parseInt(json['vacant_properties']) ?? 0,
+      occupancyRate: parseDouble(json['occupancy_rate']) ?? 0,
+      averageVacancyDays: parseInt(json['average_vacancy_days']) ?? 0,
+      byPropertyType: parseList(json['by_property_type'])
+          .whereType<Map<String, dynamic>>()
+          .map(OccupancyByTypeDto.fromJson)
           .toList(),
-      items: (json['items'] as List<dynamic>)
-          .map((e) => OccupancyItemDto.fromJson(e as Map<String, dynamic>))
+      items: parseList(json['items'])
+          .whereType<Map<String, dynamic>>()
+          .map(OccupancyItemDto.fromJson)
           .toList(),
     );
   }
 
-  final DateTime generatedAt;
+  final DateTime? generatedAt;
   final int totalProperties;
   final int occupiedProperties;
   final int vacantProperties;
@@ -621,9 +622,9 @@ final class MaintenanceByPriorityDto {
 
   factory MaintenanceByPriorityDto.fromJson(Map<String, dynamic> json) {
     return MaintenanceByPriorityDto(
-      priority: json['priority'] as String,
-      count: json['count'] as int,
-      percentage: (json['percentage'] as num).toDouble(),
+      priority: parseString(json['priority']) ?? '',
+      count: parseInt(json['count']) ?? 0,
+      percentage: parseDouble(json['percentage']) ?? 0,
     );
   }
 
@@ -647,9 +648,9 @@ final class MaintenanceByCategoryDto {
 
   factory MaintenanceByCategoryDto.fromJson(Map<String, dynamic> json) {
     return MaintenanceByCategoryDto(
-      category: json['category'] as String,
-      count: json['count'] as int,
-      totalCost: (json['total_cost'] as num).toDouble(),
+      category: parseString(json['category']) ?? '',
+      count: parseInt(json['count']) ?? 0,
+      totalCost: parseDouble(json['total_cost']) ?? 0,
     );
   }
 
@@ -680,18 +681,16 @@ final class MaintenanceReportItemDto {
 
   factory MaintenanceReportItemDto.fromJson(Map<String, dynamic> json) {
     return MaintenanceReportItemDto(
-      id: json['id'] as int,
-      title: json['title'] as String,
-      propertyId: json['property_id'] as int,
-      propertyTitle: json['property_title'] as String,
-      priority: json['priority'] as String,
-      status: json['status'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      completedAt: json['completed_at'] != null
-          ? DateTime.parse(json['completed_at'] as String)
-          : null,
-      cost: json['cost'] != null ? (json['cost'] as num).toDouble() : null,
-      daysToComplete: json['days_to_complete'] as int?,
+      id: parseInt(json['id']) ?? 0,
+      title: parseString(json['title']) ?? '',
+      propertyId: parseInt(json['property_id']) ?? 0,
+      propertyTitle: parseString(json['property_title']) ?? '',
+      priority: parseString(json['priority']) ?? '',
+      status: parseString(json['status']) ?? '',
+      createdAt: parseDateTime(json['created_at']),
+      completedAt: parseDateTime(json['completed_at']),
+      cost: parseDouble(json['cost']),
+      daysToComplete: parseInt(json['days_to_complete']),
     );
   }
 
@@ -701,7 +700,7 @@ final class MaintenanceReportItemDto {
   final String propertyTitle;
   final String priority;
   final String status;
-  final DateTime createdAt;
+  final DateTime? createdAt;
   final DateTime? completedAt;
   final double? cost;
   final int? daysToComplete;
@@ -735,28 +734,28 @@ final class MaintenanceReportDto {
 
   factory MaintenanceReportDto.fromJson(Map<String, dynamic> json) {
     return MaintenanceReportDto(
-      generatedAt: DateTime.parse(json['generated_at'] as String),
-      totalRequests: json['total_requests'] as int,
-      openRequests: json['open_requests'] as int,
-      completedRequests: json['completed_requests'] as int,
-      totalCost: (json['total_cost'] as num).toDouble(),
-      averageCompletionDays: (json['average_completion_days'] as num).toDouble(),
-      byPriority: (json['by_priority'] as List<dynamic>)
-          .map((e) =>
-              MaintenanceByPriorityDto.fromJson(e as Map<String, dynamic>))
+      generatedAt: parseDateTime(json['generated_at']),
+      totalRequests: parseInt(json['total_requests']) ?? 0,
+      openRequests: parseInt(json['open_requests']) ?? 0,
+      completedRequests: parseInt(json['completed_requests']) ?? 0,
+      totalCost: parseDouble(json['total_cost']) ?? 0,
+      averageCompletionDays: parseDouble(json['average_completion_days']) ?? 0,
+      byPriority: parseList(json['by_priority'])
+          .whereType<Map<String, dynamic>>()
+          .map(MaintenanceByPriorityDto.fromJson)
           .toList(),
-      byCategory: (json['by_category'] as List<dynamic>)
-          .map((e) =>
-              MaintenanceByCategoryDto.fromJson(e as Map<String, dynamic>))
+      byCategory: parseList(json['by_category'])
+          .whereType<Map<String, dynamic>>()
+          .map(MaintenanceByCategoryDto.fromJson)
           .toList(),
-      items: (json['items'] as List<dynamic>)
-          .map((e) =>
-              MaintenanceReportItemDto.fromJson(e as Map<String, dynamic>))
+      items: parseList(json['items'])
+          .whereType<Map<String, dynamic>>()
+          .map(MaintenanceReportItemDto.fromJson)
           .toList(),
     );
   }
 
-  final DateTime generatedAt;
+  final DateTime? generatedAt;
   final int totalRequests;
   final int openRequests;
   final int completedRequests;

@@ -1,8 +1,9 @@
 import 'dart:ui';
+
+import 'package:estate_app/core/presentation/animations/animations.dart';
+import 'package:estate_app/core/presentation/design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:estate_app/core/presentation/design_system/design_system.dart';
-import 'package:estate_app/core/presentation/animations/animations.dart';
 
 /// A glassmorphism text field with focus glow animation.
 ///
@@ -255,7 +256,7 @@ class _GlassTextFieldState extends State<GlassTextField> {
         color: (isDark
                 ? AppGlassColors.glassSurfaceDark(widget.opacity)
                 : AppGlassColors.glassSurfaceLight(widget.opacity))
-            .withOpacity(widget.enabled ? 1 : 0.5),
+            .withValues(alpha: widget.enabled ? 1 : 0.5),
         borderRadius: BorderRadius.circular(widget.borderRadius),
         border: borderColor != null
             ? Border.all(
@@ -266,7 +267,6 @@ class _GlassTextFieldState extends State<GlassTextField> {
                 color: isDark
                     ? AppGlassColors.borderDark
                     : AppGlassColors.borderLight,
-                width: 1,
               ),
       ),
       child: TextField(
@@ -285,7 +285,7 @@ class _GlassTextFieldState extends State<GlassTextField> {
         onSubmitted: widget.onSubmitted,
         onTap: widget.onTap,
         style: TextStyle(
-          color: textColor.withOpacity(widget.enabled ? 1 : 0.5),
+          color: textColor.withValues(alpha: widget.enabled ? 1 : 0.5),
           fontSize: 16,
           fontWeight: FontWeight.w500,
         ),
@@ -293,7 +293,7 @@ class _GlassTextFieldState extends State<GlassTextField> {
         decoration: InputDecoration(
           hintText: widget.hint,
           hintStyle: TextStyle(
-            color: hintColor.withOpacity(0.7),
+            color: hintColor.withValues(alpha: 0.7),
             fontSize: 16,
           ),
           prefixIcon: widget.prefixIcon != null

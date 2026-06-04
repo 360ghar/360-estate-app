@@ -1,4 +1,5 @@
 import 'package:estate_app/core/pagination/page.dart';
+import 'package:estate_app/core/utils/parse.dart';
 import 'package:estate_app/features/finance/data/datasources/finance_remote_data_source.dart';
 import 'package:estate_app/features/finance/domain/entities/expense.dart';
 import 'package:estate_app/features/finance/domain/entities/rent_charge.dart';
@@ -75,7 +76,7 @@ final class FinanceRepositoryImpl implements FinanceRepository {
       'rent_charge_id': rentChargeId,
       'lease_id': leaseId,
       'amount': amount,
-      'payment_date': paymentDate.toIso8601String().split('T')[0],
+      'payment_date': toApiDateOnly(paymentDate),
       'payment_method': paymentMethod,
       if (referenceNumber != null) 'reference_number': referenceNumber,
       if (notes != null) 'notes': notes,
@@ -125,7 +126,7 @@ final class FinanceRepositoryImpl implements FinanceRepository {
       if (propertyId != null) 'property_id': propertyId,
       'category': category,
       'amount': amount,
-      'expense_date': expenseDate.toIso8601String().split('T')[0],
+      'expense_date': toApiDateOnly(expenseDate),
       'description': description,
       if (vendor != null) 'vendor': vendor,
       if (notes != null) 'notes': notes,

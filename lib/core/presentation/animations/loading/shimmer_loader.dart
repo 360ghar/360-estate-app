@@ -194,7 +194,7 @@ class _SlidingGradientTransform extends GradientTransform {
   final double slidePercent;
   final ShimmerDirection direction;
 
-  _SlidingGradientTransform({
+  const _SlidingGradientTransform({
     required this.slidePercent,
     required this.direction,
   });

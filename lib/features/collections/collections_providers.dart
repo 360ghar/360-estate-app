@@ -1,5 +1,5 @@
-import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/core/pagination/paged_list_controller.dart';
+import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/features/collections/data/rent_repository.dart';
 import 'package:estate_app/features/collections/models/rent_charge.dart';
 import 'package:estate_app/features/collections/models/rent_payment.dart';

@@ -33,17 +33,16 @@ final class MaintenanceRequestDto {
       leaseId: parseInt(json['lease_id'] ?? json['leaseId']),
       tenantName: parseString(json['tenant_name'] ?? json['tenantName']),
       category: parseString(json['category']) ?? 'other',
-      priority:
-          parseString(json['urgency'] ?? json['priority']) ?? 'medium',
+      priority: parseString(json['urgency'] ?? json['priority']) ?? 'medium',
       status: parseString(json['request_status'] ?? json['status']) ?? 'open',
       title: parseString(json['title']) ?? '',
       description: parseString(json['description']) ?? '',
       assignedTo: parseString(
-        json['assigned_to'] ??
-            json['assignedTo'] ??
-            json['assigned_agent_id'],
+        json['assigned_to'] ?? json['assignedTo'] ?? json['assigned_agent_id'],
       ),
-      estimatedCost: parseDouble(json['estimated_cost'] ?? json['estimatedCost']),
+      estimatedCost: parseDouble(
+        json['estimated_cost'] ?? json['estimatedCost'],
+      ),
       actualCost: parseDouble(json['actual_cost'] ?? json['actualCost']),
       scheduledDate: parseDateTime(
         json['scheduled_for'] ??
@@ -57,9 +56,7 @@ final class MaintenanceRequestDto {
             json['closed_at'],
       ),
       notes: parseString(
-        json['notes'] ??
-            json['completion_notes'] ??
-            json['availability_notes'],
+        json['notes'] ?? json['completion_notes'] ?? json['availability_notes'],
       ),
       imageUrls: parseStringList(
         json['image_urls'] ?? json['imageUrls'] ?? json['attachments'],
@@ -100,7 +97,7 @@ final class MaintenanceRequestDto {
       if (assignedTo != null) 'assigned_to': assignedTo,
       if (estimatedCost != null) 'estimated_cost': estimatedCost,
       if (scheduledDate != null)
-        'scheduled_for': scheduledDate!.toIso8601String(),
+        'scheduled_for': toApiUtcInstant(scheduledDate),
       if (notes != null) 'availability_notes': notes,
     };
   }

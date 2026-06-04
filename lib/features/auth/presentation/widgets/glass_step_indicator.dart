@@ -1,6 +1,7 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
+
 import 'package:estate_app/core/presentation/design_system/design_system.dart';
+import 'package:flutter/material.dart';
 
 /// A glassmorphism step indicator for authentication flow.
 ///
@@ -51,7 +52,7 @@ class GlassStepIndicator extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(opacity),
+        color: Colors.white.withValues(alpha: opacity),
         borderRadius: BorderRadius.circular(20),
       ),
       child: ClipRRect(
@@ -98,7 +99,7 @@ class _StepDot extends StatelessWidget {
   Widget build(BuildContext context) {
     final effectiveActiveColor = activeColor ?? AppColors.accent;
     final effectiveInactiveColor =
-        inactiveColor ?? Colors.white.withOpacity(0.3);
+        inactiveColor ?? Colors.white.withValues(alpha: 0.3);
 
     final width = isCurrent ? 32.0 : 10.0;
 
@@ -113,7 +114,7 @@ class _StepDot extends StatelessWidget {
             ? LinearGradient(
                 colors: [
                   effectiveActiveColor,
-                  effectiveActiveColor.withOpacity(0.8),
+                  effectiveActiveColor.withValues(alpha: 0.8),
                 ],
               )
             : null,
@@ -122,7 +123,7 @@ class _StepDot extends StatelessWidget {
         boxShadow: isActive
             ? [
                 BoxShadow(
-                  color: effectiveActiveColor.withOpacity(0.3),
+                  color: effectiveActiveColor.withValues(alpha: 0.3),
                   blurRadius: 8,
                   spreadRadius: 2,
                 ),
@@ -185,13 +186,13 @@ class GlassStepIndicatorCircular extends StatelessWidget {
                       ? LinearGradient(
                           colors: [
                             AppColors.accent,
-                            AppColors.accent.withOpacity(0.3),
+                            AppColors.accent.withValues(alpha: 0.3),
                           ],
                         )
                       : null,
                   color: isCompleted || isCurrent
                       ? null
-                      : Colors.white.withOpacity(0.2),
+                      : Colors.white.withValues(alpha: 0.2),
                 ),
               ),
           ],
@@ -235,17 +236,17 @@ class _CircularStepDot extends StatelessWidget {
             : null,
         color: isCompleted || isCurrent
             ? null
-            : Colors.white.withOpacity(0.1),
+            : Colors.white.withValues(alpha: 0.1),
         border: Border.all(
           color: isCompleted || isCurrent
               ? Colors.transparent
-              : Colors.white.withOpacity(0.3),
+              : Colors.white.withValues(alpha: 0.3),
           width: 2,
         ),
         boxShadow: isCurrent
             ? [
                 BoxShadow(
-                  color: AppColors.accent.withOpacity(0.4),
+                  color: AppColors.accent.withValues(alpha: 0.4),
                   blurRadius: 12,
                   spreadRadius: 2,
                 ),
@@ -262,7 +263,7 @@ class _CircularStepDot extends StatelessWidget {
             : Text(
                 step.toString(),
                 style: TextStyle(
-                  color: isCurrent ? Colors.white : Colors.white.withOpacity(0.5),
+                  color: isCurrent ? Colors.white : Colors.white.withValues(alpha: 0.5),
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),

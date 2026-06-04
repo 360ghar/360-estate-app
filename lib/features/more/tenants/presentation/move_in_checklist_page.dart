@@ -1,8 +1,12 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
-import 'package:estate_app/core/presentation/widgets/section_header.dart';
+import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -170,12 +174,13 @@ class _MoveInChecklistPageState extends ConsumerState<MoveInChecklistPage> {
       context: context,
       initialDate: _inspectionDate,
       firstDate: DateTime.now().subtract(const Duration(days: 30)),
-      lastDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 7)),
     );
     if (picked != null) {
       setState(() => _inspectionDate = picked);
     }
   }
+
 
   int get _completedCount {
     return _checklistItems.values
@@ -205,10 +210,13 @@ class _MoveInChecklistPageState extends ConsumerState<MoveInChecklistPage> {
 
   @override
   Widget build(BuildContext context) {
-    final itemsByCategory = {
-      for (var item in _checklistItems.values)
-        item.category: _checklistItems.values.where((i) => i.category == item.category).toList(),
-    };
+    final itemsByCategory = <String, List<ChecklistItem>>{};
+    for (var item in _checklistItems.values) {
+      itemsByCategory.putIfAbsent(item.category, () => []);
+      if (!itemsByCategory[item.category]!.any((i) => i.id == item.id)) {
+        itemsByCategory[item.category]!.add(item);
+      }
+    }
 
     return AppScaffold(
       appBar: AppBar(
@@ -230,33 +238,30 @@ class _MoveInChecklistPageState extends ConsumerState<MoveInChecklistPage> {
       body: Column(
         children: [
           // Summary Card
-          Card(
-            margin: const EdgeInsets.all(AppSpacing.lg),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: AppCard(
+              variant: AppCardVariant.tinted,
+              tintColor: Theme.of(context).colorScheme.primary,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _SummaryItem(
-                        label: 'Inspected',
-                        value: '$_completedCount',
-                        total: '$_totalItems',
-                        icon: Icons.fact_check,
-                      ),
-                      _SummaryItem(
-                        label: 'Issues',
-                        value: '$_issuesCount',
-                        icon: Icons.warning,
-                        color: _issuesCount > 0 ? Colors.red : null,
-                      ),
-                      _SummaryItem(
-                        label: 'Date',
-                        value: '${_inspectionDate.day}/${_inspectionDate.month}/${_inspectionDate.year}',
-                        icon: Icons.calendar_today,
-                      ),
-                    ],
+                  _SummaryItem(
+                    label: 'Inspected',
+                    value: '$_completedCount',
+                    total: '$_totalItems',
+                    icon: Icons.fact_check_outlined,
+                  ),
+                  _SummaryItem(
+                    label: 'Issues',
+                    value: '$_issuesCount',
+                    icon: Icons.warning_amber_rounded,
+                    color: _issuesCount > 0 ? AppColors.danger : null,
+                  ),
+                  _SummaryItem(
+                    label: 'Date',
+                    value: '${_inspectionDate.day}/${_inspectionDate.month}/${_inspectionDate.year}',
+                    icon: Icons.calendar_today_outlined,
                   ),
                 ],
               ),
@@ -266,11 +271,10 @@ class _MoveInChecklistPageState extends ConsumerState<MoveInChecklistPage> {
           // General Information
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: AppSectionCard(
+              title: 'General Information',
+              icon: Icons.info_outline,
               children: [
-                const SectionHeader(title: 'General Information'),
-                const SizedBox(height: AppSpacing.md),
                 TextFormField(
                   controller: _tenantNameController,
                   decoration: const InputDecoration(
@@ -286,36 +290,56 @@ class _MoveInChecklistPageState extends ConsumerState<MoveInChecklistPage> {
                     hintText: 'Enter property address',
                   ),
                 ),
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.md),
+                InkWell(
+                  onTap: _selectInspectionDate,
+                  borderRadius: AppRadii.md,
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'Inspection Date',
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.calendar_today_outlined, size: 18),
+                        const SizedBox(width: AppSpacing.sm),
+                        Text(
+                          '${_inspectionDate.day}/${_inspectionDate.month}/${_inspectionDate.year}',
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
+          const SizedBox(height: AppSpacing.lg),
 
           // Checklist Items by Category
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            child: const SectionHeader(title: 'Room Inspection'),
-          ),
-          const SizedBox(height: AppSpacing.md),
-
           ...itemsByCategory.entries.map((entry) {
-            return _CategorySection(
-              category: entry.key,
-              items: entry.value,
-              onConditionChanged: _updateCondition,
-              onNotesChanged: _updateNotes,
-              onAddPhoto: _addPhoto,
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                0,
+                AppSpacing.lg,
+                AppSpacing.lg,
+              ),
+              child: _CategorySection(
+                category: entry.key,
+                items: entry.value,
+                onConditionChanged: _updateCondition,
+                onNotesChanged: _updateNotes,
+                onAddPhoto: _addPhoto,
+              ),
             );
           }),
 
           // Additional Notes
           Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: AppSectionCard(
+              title: 'Additional Notes',
+              icon: Icons.note_outlined,
               children: [
-                const SectionHeader(title: 'Additional Notes'),
-                const SizedBox(height: AppSpacing.md),
                 TextFormField(
                   controller: _notesController,
                   decoration: const InputDecoration(
@@ -324,40 +348,38 @@ class _MoveInChecklistPageState extends ConsumerState<MoveInChecklistPage> {
                   ),
                   maxLines: 4,
                 ),
-                const SizedBox(height: AppSpacing.xl),
-
-                // Signatures Section
-                const SectionHeader(title: 'Signatures'),
-                const SizedBox(height: AppSpacing.md),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    child: Column(
-                      children: [
-                        _SignatureRow(
-                          label: 'Landlord/Manager',
-                          onTap: () => _showSignatureDialog(context, 'Landlord'),
-                        ),
-                        const Divider(height: AppSpacing.lg),
-                        _SignatureRow(
-                          label: 'Tenant',
-                          onTap: () => _showSignatureDialog(context, 'Tenant'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
               ],
             ),
           ),
+          const SizedBox(height: AppSpacing.lg),
+
+          // Signatures Section
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: AppSectionCard(
+              title: 'Signatures',
+              icon: Icons.draw_outlined,
+              children: [
+                _SignatureRow(
+                  label: 'Landlord/Manager',
+                  onTap: () => _showSignatureDialog(context, 'Landlord'),
+                ),
+                const Divider(height: AppSpacing.xl),
+                _SignatureRow(
+                  label: 'Tenant',
+                  onTap: () => _showSignatureDialog(context, 'Tenant'),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xl),
         ],
       ),
     );
   }
 
   void _showSignatureDialog(BuildContext context, String signer) {
-    showDialog(
+    unawaited(showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('$signer Signature'),
@@ -373,7 +395,7 @@ class _MoveInChecklistPageState extends ConsumerState<MoveInChecklistPage> {
           ),
         ],
       ),
-    );
+    ));
   }
 }
 
@@ -394,29 +416,53 @@ class _SummaryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final effectiveColor = color ?? Theme.of(context).colorScheme.primary;
+
     return Column(
       children: [
         if (icon != null)
-          Icon(
-            icon,
-            color: color ?? Theme.of(context).colorScheme.primary,
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: effectiveColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Icon(icon, color: effectiveColor, size: 18),
           ),
-        if (icon != null) const SizedBox(height: AppSpacing.xs),
+        if (icon != null) const SizedBox(height: AppSpacing.sm),
         Text(
           total != null ? '$value/$total' : value,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: color ?? Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
+          style: textTheme.titleMedium?.copyWith(
+            color: effectiveColor,
+            fontWeight: FontWeight.w700,
+          ),
         ),
+        const SizedBox(height: AppSpacing.xxs),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+          style: textTheme.bodySmall?.copyWith(
+            color: AppColors.textSecondary,
+          ),
         ),
       ],
     );
+  }
+}
+
+Color _semanticConditionColor(ItemCondition condition) {
+  switch (condition) {
+    case ItemCondition.excellent:
+      return AppColors.success;
+    case ItemCondition.good:
+      return AppColors.info;
+    case ItemCondition.fair:
+      return AppColors.warning;
+    case ItemCondition.poor:
+      return AppColors.danger;
+    case ItemCondition.notApplicable:
+      return AppColors.textTertiary;
   }
 }
 
@@ -431,24 +477,57 @@ class _CategorySection extends StatelessWidget {
 
   final String category;
   final List<ChecklistItem> items;
-  final Function(String itemId, ItemCondition condition) onConditionChanged;
-  final Function(String itemId, String notes) onNotesChanged;
-  final Function(String itemId) onAddPhoto;
+  final void Function(String itemId, ItemCondition condition) onConditionChanged;
+  final void Function(String itemId, String notes) onNotesChanged;
+  final void Function(String itemId) onAddPhoto;
+
+  IconData _categoryIcon(String category) {
+    switch (category.toLowerCase()) {
+      case 'living room':
+        return Icons.weekend_outlined;
+      case 'bedroom':
+        return Icons.bed_outlined;
+      case 'kitchen':
+        return Icons.kitchen_outlined;
+      case 'bathroom':
+        return Icons.bathroom_outlined;
+      default:
+        return Icons.room_outlined;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.md),
-      child: ExpansionTile(
-        title: Text(category),
-        initiallyExpanded: true,
-        children: items.map((item) => _ChecklistItemTile(
-              item: item,
-              onConditionChanged: (condition) => onConditionChanged(item.id, condition),
-              onNotesChanged: (notes) => onNotesChanged(item.id, notes),
-              onAddPhoto: () => onAddPhoto(item.id),
-            )).toList(),
-      ),
+    return AppSectionCard(
+      title: category,
+      icon: _categoryIcon(category),
+      contentPadding: EdgeInsets.zero,
+      children: [
+        ...items.asMap().entries.map((entry) {
+          final index = entry.key;
+          final item = entry.value;
+          return Column(
+            children: [
+              if (index > 0)
+                Divider(
+                  height: 0.5,
+                  thickness: 0.5,
+                  color: AppColors.cardBorder,
+                ),
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: _ChecklistItemTile(
+                  item: item,
+                  onConditionChanged: (condition) =>
+                      onConditionChanged(item.id, condition),
+                  onNotesChanged: (notes) => onNotesChanged(item.id, notes),
+                  onAddPhoto: () => onAddPhoto(item.id),
+                ),
+              ),
+            ],
+          );
+        }),
+      ],
     );
   }
 }
@@ -462,8 +541,8 @@ class _ChecklistItemTile extends StatefulWidget {
   });
 
   final ChecklistItem item;
-  final Function(ItemCondition) onConditionChanged;
-  final Function(String) onNotesChanged;
+  final void Function(ItemCondition) onConditionChanged;
+  final void Function(String) onNotesChanged;
   final VoidCallback onAddPhoto;
 
   @override
@@ -487,99 +566,143 @@ class _ChecklistItemTileState extends State<_ChecklistItemTile> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  widget.item.name,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
+    final textTheme = Theme.of(context).textTheme;
+    final conditionColor = _semanticConditionColor(widget.item.condition);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                widget.item.name,
+                style: textTheme.titleSmall,
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: widget.item.condition.color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: widget.item.condition.color),
-                ),
-                child: Text(
-                  widget.item.condition.label,
-                  style: TextStyle(
-                    color: widget.item.condition.color,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+            ),
+            // Current condition chip
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: conditionColor.withValues(alpha: 0.1),
+                borderRadius: AppRadii.pill,
               ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Wrap(
-            spacing: AppSpacing.xs,
-            children: ItemCondition.values.map((condition) {
-              final isSelected = widget.item.condition == condition;
-              return ChoiceChip(
-                label: Text(condition.label, style: const TextStyle(fontSize: 12)),
-                selected: isSelected,
-                onSelected: (selected) {
-                  if (selected) {
-                    widget.onConditionChanged(condition);
-                  }
-                },
-                selectedColor: condition.color.withOpacity(0.2),
-                labelStyle: TextStyle(
-                  color: isSelected ? condition.color : null,
+              child: Text(
+                widget.item.condition.label,
+                style: TextStyle(
+                  color: conditionColor,
                   fontSize: 12,
+                  fontWeight: FontWeight.w600,
                 ),
-              );
-            }).toList(),
-          ),
-          if (widget.item.photos.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              children: [
-                Icon(Icons.photo_camera, size: 16, color: Theme.of(context).colorScheme.primary),
-                const SizedBox(width: 4),
-                Text(
-                  '${widget.item.photos.length} photo(s)',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
+              ),
             ),
           ],
-          const SizedBox(height: AppSpacing.sm),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _notesController,
-                  decoration: const InputDecoration(
-                    hintText: 'Add notes...',
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        // Condition chips
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.xs,
+          children: ItemCondition.values.map((condition) {
+            final isSelected = widget.item.condition == condition;
+            final chipColor = _semanticConditionColor(condition);
+            return GestureDetector(
+              onTap: () => widget.onConditionChanged(condition),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? chipColor.withValues(alpha: 0.15)
+                      : Colors.transparent,
+                  borderRadius: AppRadii.pill,
+                  border: Border.all(
+                    color: isSelected
+                        ? chipColor
+                        : chipColor.withValues(alpha: 0.3),
+                    width: isSelected ? 1.5 : 1,
                   ),
-                  style: const TextStyle(fontSize: 12),
-                  onChanged: widget.onNotesChanged,
+                ),
+                child: Text(
+                  condition.label,
+                  style: TextStyle(
+                    color: isSelected ? chipColor : chipColor.withValues(alpha: 0.7),
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  ),
                 ),
               ),
-              const SizedBox(width: AppSpacing.sm),
-              IconButton(
-                icon: const Icon(Icons.add_a_photo),
-                onPressed: widget.onAddPhoto,
-                tooltip: 'Add photo',
-              ),
-            ],
+            );
+          }).toList(),
+        ),
+        // Photo thumbnails
+        if (widget.item.photos.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.sm),
+          SizedBox(
+            height: 56,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: widget.item.photos.length,
+              separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
+              itemBuilder: (context, index) {
+                return ClipRRect(
+                  borderRadius: AppRadii.sm,
+                  child: Image.file(
+                    widget.item.photos[index],
+                    width: 56,
+                    height: 56,
+                    fit: BoxFit.cover,
+                  ),
+                );
+              },
+            ),
           ),
         ],
-      ),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _notesController,
+                decoration: InputDecoration(
+                  hintText: 'Add notes...',
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  isDense: true,
+                  border: OutlineInputBorder(
+                    borderRadius: AppRadii.md,
+                  ),
+                ),
+                style: const TextStyle(fontSize: 12),
+                onChanged: widget.onNotesChanged,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.surfaceSecondary,
+                borderRadius: AppRadii.md,
+              ),
+              child: IconButton(
+                icon: Icon(
+                  Icons.add_a_photo_outlined,
+                  size: 18,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                onPressed: widget.onAddPhoto,
+                tooltip: 'Add photo',
+                constraints: const BoxConstraints(
+                  minWidth: 36,
+                  minHeight: 36,
+                ),
+                padding: EdgeInsets.zero,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -595,8 +718,11 @@ class _SignatureRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return InkWell(
       onTap: onTap,
+      borderRadius: AppRadii.md,
       child: Row(
         children: [
           Expanded(
@@ -605,23 +731,24 @@ class _SignatureRow extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                  style: textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Container(
-                  height: 40,
+                  height: 44,
                   decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
-                    borderRadius: BorderRadius.circular(4),
+                    color: AppColors.surfaceSecondary,
+                    border: Border.all(color: AppColors.cardBorder),
+                    borderRadius: AppRadii.md,
                   ),
-                  child: const Center(
+                  child: Center(
                     child: Text(
                       'Tap to sign',
-                      style: TextStyle(color: Colors.grey),
+                      style: textTheme.bodySmall?.copyWith(
+                        color: AppColors.textTertiary,
+                      ),
                     ),
                   ),
                 ),

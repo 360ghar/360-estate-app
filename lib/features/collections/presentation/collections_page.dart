@@ -1,6 +1,10 @@
 import 'package:estate_app/core/pagination/paged_list_controller.dart';
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/presentation/design_system/app_gradients.dart';
+import 'package:estate_app/core/presentation/design_system/app_radii.dart';
+import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/app_status_badge.dart';
 import 'package:estate_app/core/presentation/widgets/paged_list_view.dart';
@@ -12,7 +16,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 /// Professional B2B Collections page with:
-/// - Summary cards for Due/Overdue/Paid totals
+/// - Gradient summary cards for Due/Overdue/Paid totals
 /// - Color-coded urgency indicators
 /// - Quick action buttons for charge tiles
 /// - Visual hierarchy for payment status
@@ -46,7 +50,7 @@ class _CollectionsPageState extends ConsumerState<CollectionsPage> {
         ),
         body: Column(
           children: [
-            // Summary Cards (shown on all tabs)
+            // Summary Cards with gradient backgrounds
             const _CollectionsSummaryCards(),
             const Divider(height: 1),
 
@@ -67,6 +71,8 @@ class _CollectionsPageState extends ConsumerState<CollectionsPage> {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return AppBar(
       title: const Text('Collections'),
       actions: [
@@ -77,7 +83,19 @@ class _CollectionsPageState extends ConsumerState<CollectionsPage> {
         ),
       ],
       bottom: TabBar(
-        indicatorSize: TabBarIndicatorSize.label,
+        indicatorSize: TabBarIndicatorSize.tab,
+        indicator: BoxDecoration(
+          borderRadius: AppRadii.md,
+          color: scheme.primary.withValues(alpha: 0.12),
+        ),
+        dividerColor: Colors.transparent,
+        splashBorderRadius: AppRadii.md,
+        labelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+          fontWeight: FontWeight.w500,
+        ),
         tabs: [
           _buildTab('Due', AppColors.warning),
           _buildTab('Overdue', AppColors.danger),
@@ -95,8 +113,8 @@ class _CollectionsPageState extends ConsumerState<CollectionsPage> {
           Text(label),
           const SizedBox(width: 6),
           Container(
-            width: 6,
-            height: 6,
+            width: 8,
+            height: 8,
             decoration: BoxDecoration(
               color: color,
               shape: BoxShape.circle,
@@ -110,7 +128,7 @@ class _CollectionsPageState extends ConsumerState<CollectionsPage> {
   Future<void> _generateCharges(BuildContext context) async {
     try {
       await ref.read(rentRepositoryProvider).generateCharges();
-      if (mounted) {
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Charges generated successfully.')),
         );
@@ -118,17 +136,17 @@ class _CollectionsPageState extends ConsumerState<CollectionsPage> {
       ref.invalidate(rentChargesProvider);
       ref.invalidate(rentChargesPagedProvider);
     } catch (error) {
-      if (mounted) {
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: ${error.toString()}')),
         );
       }
     }
   }
-
 }
 
-/// Summary cards showing total Due, Overdue, and Paid amounts.
+/// Summary cards showing total Due, Overdue, and Paid amounts
+/// with subtle gradient backgrounds.
 class _CollectionsSummaryCards extends ConsumerWidget {
   const _CollectionsSummaryCards();
 
@@ -148,22 +166,28 @@ class _CollectionsSummaryCards extends ConsumerWidget {
               label: 'Due',
               amount: _calculateTotal(dueAsync),
               color: AppColors.warning,
+              gradient: AppGradients.warningSubtle,
+              icon: Icons.schedule_outlined,
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: _SummaryCard(
               label: 'Overdue',
               amount: _calculateTotal(overdueAsync),
               color: AppColors.danger,
+              gradient: AppGradients.dangerSubtle,
+              icon: Icons.warning_amber_outlined,
             ),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: _SummaryCard(
               label: 'Paid',
               amount: _calculateTotal(paidAsync),
               color: AppColors.success,
+              gradient: AppGradients.successSubtle,
+              icon: Icons.check_circle_outline,
             ),
           ),
         ],
@@ -179,47 +203,63 @@ class _CollectionsSummaryCards extends ConsumerWidget {
   }
 }
 
-/// Individual summary card.
+/// Individual summary card with gradient background and icon.
 class _SummaryCard extends StatelessWidget {
   final String label;
   final double amount;
   final Color color;
+  final LinearGradient gradient;
+  final IconData icon;
 
   const _SummaryCard({
     required this.label,
     required this.amount,
     required this.color,
+    required this.gradient,
+    required this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
     final formatter = NumberFormat.currency(
-      symbol: '₹',
+      symbol: '\u20B9',
       decimalDigits: 0,
     );
     final amountStr = formatter.format(amount);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(12),
+        gradient: gradient,
+        color: color.withValues(alpha: isDark ? 0.12 : 0.06),
+        borderRadius: AppRadii.lg,
         border: Border.all(
-          color: color.withOpacity(0.3),
-          width: 1,
+          color: color.withValues(alpha: isDark ? 0.25 : 0.15),
+          width: 0.5,
         ),
+        boxShadow: AppShadows.cardResting,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
+          Row(
+            children: [
+              Icon(icon, size: 16, color: color),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             amountStr,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -227,6 +267,8 @@ class _SummaryCard extends StatelessWidget {
               fontWeight: FontWeight.w700,
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -262,7 +304,8 @@ class _ChargesList extends ConsumerWidget {
   }
 }
 
-/// Enhanced charge tile with urgency indicators and quick actions.
+/// Enhanced charge tile with colored left border, bold amount,
+/// urgency indicators and quick actions using AppCard.
 class _ChargeTile extends StatelessWidget {
   const _ChargeTile({
     required this.charge,
@@ -272,10 +315,19 @@ class _ChargeTile extends StatelessWidget {
   final RentCharge charge;
   final String status;
 
+  Color _statusColor() {
+    return switch (status.toLowerCase()) {
+      'paid' => AppColors.success,
+      'overdue' => AppColors.danger,
+      'pending' => AppColors.warning,
+      _ => AppColors.textSecondary,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final formatter = NumberFormat.currency(
-      symbol: '₹',
+      symbol: '\u20B9',
       decimalDigits: 0,
     );
     final dueDate = charge.dueDate;
@@ -290,143 +342,139 @@ class _ChargeTile extends StatelessWidget {
 
     final statusType = _getStatusType();
     final urgencyLevel = _getUrgencyLevel(daysOverdue);
+    final accentColor = _statusColor();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(
+    return Padding(
+      padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
         vertical: AppSpacing.xs,
       ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: _getBorderColor(context, urgencyLevel),
-          width: urgencyLevel == _UrgencyLevel.critical ? 1.5 : 0.5,
-        ),
-      ),
-      child: InkWell(
+      child: AppCard(
+        headerColor: accentColor,
         onTap: () => context.go(
           '/collections/payments/new?chargeId=${charge.id}',
         ),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header row with tenant and status
-              Row(
-                children: [
-                  Expanded(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header row with tenant and status
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    charge.displayTenant,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                AppStatusBadge(
+                  label: status.toUpperCase(),
+                  type: statusType,
+                  variant: AppStatusVariant.subtle,
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+
+            // Property and due date
+            Row(
+              children: [
+                Icon(
+                  Icons.apartment_outlined,
+                  size: 16,
+                  color: AppColors.textSecondary,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    charge.displayProperty,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: 16,
+                  color: _getDueDateColor(urgencyLevel),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  dateStr,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: _getDueDateColor(urgencyLevel),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                if (daysOverdue > 0) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _getUrgencyColor(urgencyLevel).withValues(alpha: 
+                        isDark ? 0.2 : 0.1,
+                      ),
+                      borderRadius: AppRadii.pill,
+                    ),
                     child: Text(
-                      charge.displayTenant,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      '$daysOverdue days overdue',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: _getUrgencyColor(urgencyLevel),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                  AppStatusBadge(
-                    label: status.toUpperCase(),
-                    type: statusType,
-                    variant: AppStatusVariant.filled,
-                  ),
                 ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
+              ],
+            ),
 
-              // Property and due date
-              Row(
-                children: [
-                  Icon(
-                    Icons.apartment_outlined,
-                    size: 16,
-                    color: AppColors.textSecondary,
+            const SizedBox(height: AppSpacing.md),
+
+            // Amount (large + bold) and quick actions
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  formatter.format(charge.displayAmount),
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: accentColor,
+                    fontFeatures: const [FontFeature.tabularFigures()],
                   ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      charge.displayProperty,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _QuickActionButton(
+                      icon: Icons.sms_outlined,
+                      label: 'Remind',
+                      onTap: () => _sendReminder(context),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today_outlined,
-                    size: 16,
-                    color: _getDueDateColor(urgencyLevel),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    dateStr,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: _getDueDateColor(urgencyLevel),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  if (daysOverdue > 0) ...[
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _getUrgencyColor(urgencyLevel).withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        '$daysOverdue days overdue',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: _getUrgencyColor(urgencyLevel),
-                          fontWeight: FontWeight.w600,
-                        ),
+                    const SizedBox(width: AppSpacing.sm),
+                    _QuickActionButton(
+                      icon: Icons.payment_rounded,
+                      label: 'Pay',
+                      isPrimary: true,
+                      onTap: () => context.go(
+                        '/collections/payments/new?chargeId=${charge.id}',
                       ),
                     ),
                   ],
-                ],
-              ),
-
-              // Amount and quick actions
-              const SizedBox(height: AppSpacing.sm),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    formatter.format(charge.displayAmount),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).colorScheme.primary,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _QuickActionButton(
-                        icon: Icons.sms_outlined,
-                        label: 'Remind',
-                        onTap: () => _sendReminder(context),
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      _QuickActionButton(
-                        icon: Icons.payment_rounded,
-                        label: 'Pay',
-                        onTap: () => context.go(
-                          '/collections/payments/new?chargeId=${charge.id}',
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -449,13 +497,6 @@ class _ChargeTile extends StatelessWidget {
       return _UrgencyLevel.medium;
     }
     return _UrgencyLevel.low;
-  }
-
-  Color _getBorderColor(BuildContext context, _UrgencyLevel level) {
-    if (level == _UrgencyLevel.critical) {
-      return AppColors.danger.withOpacity(0.5);
-    }
-    return Theme.of(context).colorScheme.outlineVariant;
   }
 
   Color _getDueDateColor(_UrgencyLevel level) {
@@ -490,37 +531,56 @@ class _QuickActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final bool isPrimary;
 
   const _QuickActionButton({
     required this.icon,
     required this.label,
     required this.onTap,
+    this.isPrimary = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 16,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.w600,
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = scheme.primary;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: AppRadii.md,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: isPrimary
+              ? BoxDecoration(
+                  color: color.withValues(alpha: isDark ? 0.15 : 0.08),
+                  borderRadius: AppRadii.md,
+                  border: Border.all(
+                    color: color.withValues(alpha: isDark ? 0.25 : 0.15),
+                    width: 0.5,
+                  ),
+                )
+              : null,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: color,
               ),
-            ),
-          ],
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

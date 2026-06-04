@@ -1,9 +1,11 @@
+import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/widgets/app_empty_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loading_shimmer.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
-import 'package:estate_app/core/presentation/widgets/section_header.dart';
+import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
 import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/features/rental_applications/applications_providers.dart';
 import 'package:estate_app/features/rental_applications/data/applications_repository.dart';
@@ -145,73 +147,7 @@ class _PublicApplicationPageState
       appBar: AppBar(title: const Text('Rental application')),
       scrollable: true,
       body: formAsync.when(
-        data: (form) => Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                form.title ?? 'Application form',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(form.description ?? 'Fill the form to apply.'),
-              const SizedBox(height: AppSpacing.lg),
-              const SectionHeader(title: 'Applicant details'),
-              const SizedBox(height: AppSpacing.md),
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Full name'),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty
-                        ? 'Enter your name.'
-                        : null,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty
-                        ? 'Enter your email.'
-                        : null,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextFormField(
-                controller: _phoneController,
-                decoration: const InputDecoration(labelText: 'Phone'),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty
-                        ? 'Enter your phone number.'
-                        : null,
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              const SectionHeader(title: 'Additional info'),
-              const SizedBox(height: AppSpacing.md),
-              ..._buildFieldInputs(form.fields ?? const []),
-              const SizedBox(height: AppSpacing.md),
-              TextFormField(
-                controller: _notesController,
-                maxLines: 3,
-                decoration: const InputDecoration(labelText: 'Notes'),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _isSubmitting ? null : () => _submit(form),
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Submit application'),
-                ),
-              ),
-            ],
-          ),
-        ),
+        data: (form) => _buildForm(context, form),
         loading: () => const AppLoadingShimmer(itemCount: 3),
         error: (error, _) => AppErrorView(
           title: 'Unable to load form',
@@ -224,10 +160,193 @@ class _PublicApplicationPageState
     );
   }
 
+  Widget _buildForm(BuildContext context, ApplicationForm form) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // --- Property Header ---
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkAccentSoft : AppColors.accentSoft,
+              borderRadius: AppRadii.lg,
+              border: Border.all(
+                color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
+                width: 0.5,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (form.propertyName != null &&
+                    form.propertyName!.isNotEmpty) ...[
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.apartment_rounded,
+                        size: 16,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Flexible(
+                        child: Text(
+                          form.propertyName!,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
+                Text(
+                  form.title ?? 'Application Form',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                if (form.description != null &&
+                    form.description!.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    form.description!,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+
+          const SizedBox(height: AppSpacing.lg),
+
+          // --- Applicant Details ---
+          AppSectionCard(
+            title: 'Your Details',
+            icon: Icons.person_outline_rounded,
+            children: [
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Full name',
+                  prefixIcon: Icon(Icons.person_outline),
+                ),
+                validator: (value) =>
+                    value == null || value.trim().isEmpty
+                        ? 'Enter your name.'
+                        : null,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  prefixIcon: Icon(Icons.email_outlined),
+                ),
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) =>
+                    value == null || value.trim().isEmpty
+                        ? 'Enter your email.'
+                        : null,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              TextFormField(
+                controller: _phoneController,
+                decoration: const InputDecoration(
+                  labelText: 'Phone',
+                  prefixIcon: Icon(Icons.phone_outlined),
+                ),
+                keyboardType: TextInputType.phone,
+                validator: (value) =>
+                    value == null || value.trim().isEmpty
+                        ? 'Enter your phone number.'
+                        : null,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: AppSpacing.lg),
+
+          // --- Additional Info ---
+          AppSectionCard(
+            title: 'Additional Information',
+            icon: Icons.assignment_outlined,
+            children: [
+              ..._buildFieldInputs(form.fields ?? const []),
+              const SizedBox(height: AppSpacing.md),
+              TextFormField(
+                controller: _notesController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Notes (optional)',
+                  prefixIcon: Icon(Icons.notes_outlined),
+                  alignLabelWithHint: true,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: AppSpacing.xl),
+
+          // --- Submit Button ---
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: FilledButton.icon(
+              onPressed: _isSubmitting ? null : () => _submit(form),
+              icon: _isSubmitting
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Icon(Icons.send_rounded, size: 18),
+              label: Text(
+                _isSubmitting ? 'Submitting...' : 'Submit Application',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+        ],
+      ),
+    );
+  }
+
   List<Widget> _buildFieldInputs(List<ApplicationFormField> fields) {
     if (fields.isEmpty) {
       return [
-        const Text('No extra fields required for this application.'),
+        Row(
+          children: [
+            Icon(
+              Icons.info_outline_rounded,
+              size: 16,
+              color: AppColors.textTertiary,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              'No extra fields required for this application.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
       ];
     }
 
@@ -236,9 +355,9 @@ class _PublicApplicationPageState
       final type = field.fieldType ?? 'text';
       if (type == 'select' && (field.options?.isNotEmpty ?? false)) {
         return Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+          padding: const EdgeInsets.only(bottom: AppSpacing.lg),
           child: DropdownButtonFormField<String>(
-            value: _selectValues[key],
+            initialValue: _selectValues[key],
             items: field.options!
                 .map(
                   (option) =>
@@ -246,24 +365,52 @@ class _PublicApplicationPageState
                 )
                 .toList(),
             onChanged: (value) => setState(() => _selectValues[key] = value),
-            decoration: InputDecoration(labelText: field.label ?? 'Select'),
+            decoration: InputDecoration(
+              labelText: field.label ?? 'Select',
+              prefixIcon: const Icon(Icons.list_outlined),
+            ),
           ),
         );
       }
 
       if (type == 'checkbox') {
         final value = _checkboxValues[key] ?? false;
-        return SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(field.label ?? 'Checkbox'),
-          value: value,
-          onChanged: (updated) =>
-              setState(() => _checkboxValues[key] = updated),
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.xs,
+            ),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? AppColors.darkSurfaceSecondary
+                  : AppColors.surfaceSecondary,
+              borderRadius: AppRadii.md,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Text(
+                    field.label ?? 'Checkbox',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+                Switch(
+                  value: value,
+                  onChanged: (updated) =>
+                      setState(() => _checkboxValues[key] = updated),
+                ),
+              ],
+            ),
+          ),
         );
       }
 
       return Padding(
-        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+        padding: const EdgeInsets.only(bottom: AppSpacing.lg),
         child: TextFormField(
           controller: _controllerFor(field),
           keyboardType: type == 'number'

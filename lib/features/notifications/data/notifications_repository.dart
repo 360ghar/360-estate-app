@@ -23,14 +23,14 @@ class NotificationsRepository {
   final ApiClient _client;
 
   Future<void> registerDevice(DeviceRegistrationRequest request) async {
-    await _client.post(
+    await _client.post<dynamic>(
       '/notifications/devices/register',
       data: request.toJson(),
     );
   }
 
   Future<List<NotificationItem>> listForUser(String userId) async {
-    final response = await _client.get('/notifications/users/$userId/');
+    final response = await _client.get<dynamic>('/notifications/users/$userId/');
     final data = unwrapList(response.data);
     return data
         .whereType<Map<String, dynamic>>()

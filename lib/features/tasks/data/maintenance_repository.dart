@@ -48,7 +48,7 @@ class MaintenanceRepository {
       );
     }
 
-    final response = await _client.get(
+    final response = await _client.get<dynamic>(
       '/pm/maintenance/requests',
       queryParameters: {
         'page': page,
@@ -78,7 +78,7 @@ class MaintenanceRepository {
     String id,
     MaintenanceUpdate update,
   ) async {
-    final response = await _client.patch(
+    final response = await _client.patch<dynamic>(
       '/pm/maintenance/requests/$id',
       data: update.toJson(),
     );
@@ -107,7 +107,7 @@ class MaintenanceRepository {
       if (priority != null) 'urgency': priority,
     };
 
-    final response = await _client.post(
+    final response = await _client.post<dynamic>(
       '/pm/maintenance/requests',
       data: payload,
     );

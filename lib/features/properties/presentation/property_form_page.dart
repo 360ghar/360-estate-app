@@ -1,11 +1,15 @@
 import 'dart:io';
 
+import 'package:estate_app/core/errors/failure.dart';
+import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/presentation/design_system/app_durations.dart';
+import 'package:estate_app/core/presentation/design_system/app_radii.dart';
+import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
 import 'package:estate_app/core/presentation/widgets/wizard_progress_indicator.dart';
 import 'package:estate_app/core/providers.dart';
-import 'package:estate_app/core/services/file_upload_service.dart';
-import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/features/documents/domain/entities/document.dart';
 import 'package:estate_app/features/properties/domain/repositories/properties_repository.dart';
 import 'package:estate_app/features/properties/presentation/property_wizard_data.dart';
@@ -19,11 +23,12 @@ import 'package:image_picker/image_picker.dart';
 /// Multi-step wizard for creating/editing properties.
 ///
 /// Features:
-/// - 5-step wizard with progress indicator
+/// - 5-step wizard with enhanced progress indicator
 /// - Per-step validation
 /// - Image upload with progress
+/// - AppSectionCard wrapping for each step
 /// - Clean, focused UI for each step
-/// - Back/Next navigation
+/// - Back/Next navigation with animated transitions
 class PropertyFormPage extends ConsumerStatefulWidget {
   const PropertyFormPage({super.key, this.propertyId});
 
@@ -53,6 +58,24 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
     WizardStep(label: 'Specs', subtitle: 'Amenities', icon: Icons.list_alt_outlined),
     WizardStep(label: 'Financial', subtitle: 'Legal', icon: Icons.account_balance_outlined),
     WizardStep(label: 'Media', subtitle: 'Photos', icon: Icons.photo_library_outlined),
+  ];
+
+  /// Step titles for the section card headers.
+  static const List<String> _stepTitles = [
+    'Basic Details',
+    'Location & Address',
+    'Specifications & Amenities',
+    'Financial & Legal',
+    'Photos & Media',
+  ];
+
+  /// Step icons for the section card headers.
+  static const List<IconData> _stepIcons = [
+    Icons.info_outline_rounded,
+    Icons.location_on_outlined,
+    Icons.list_alt_outlined,
+    Icons.account_balance_outlined,
+    Icons.photo_library_outlined,
   ];
 
   @override
@@ -149,7 +172,6 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
         final file = File(image.path);
         final result = await uploadService.uploadFile(
           file: file,
-          target: UploadTarget.documents,
           type: DocumentType.other.apiValue,
           title: _data.name ?? 'Property image',
           propertyId: propertyId,
@@ -213,7 +235,6 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
         final file = File(image.path);
         final result = await uploadService.uploadFile(
           file: file,
-          target: UploadTarget.documents,
           type: DocumentType.other.apiValue,
           title: _data.name ?? 'Floor plan',
           propertyId: propertyId,
@@ -326,7 +347,6 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
           try {
             final result = await uploadService.uploadFile(
               file: file,
-              target: UploadTarget.documents,
               type: DocumentType.other.apiValue,
               title: _data.name ?? 'Property image',
               propertyId: propertyId,
@@ -335,13 +355,9 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
               uploadedImages.add(result.url!);
             } else {
               failedUploads++;
-              // Debug: upload returned no URL
-              print('Image upload returned no URL. Data: ${result.data}');
             }
           } catch (e) {
             failedUploads++;
-            // Debug: log the actual error
-            print('Image upload failed: ${e.toString()}');
           }
         }
 
@@ -350,7 +366,6 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
           try {
             final result = await uploadService.uploadFile(
               file: file,
-              target: UploadTarget.documents,
               type: DocumentType.other.apiValue,
               title: _data.name ?? 'Floor plan',
               propertyId: propertyId,
@@ -359,11 +374,9 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
               uploadedFloorPlans.add(result.url!);
             } else {
               failedUploads++;
-              print('Floor plan upload returned no URL. Data: ${result.data}');
             }
           } catch (e) {
             failedUploads++;
-            print('Floor plan upload failed: ${e.toString()}');
           }
         }
 
@@ -415,7 +428,6 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
         SnackBar(
           content: Text('Failed to save property: ${_formatError(error)}'),
           backgroundColor: Colors.red,
-          duration: const Duration(seconds: 4),
         ),
       );
     } finally {
@@ -499,27 +511,36 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
       appBar: AppBar(
         title: Text(isEdit ? 'Edit Property' : 'New Property'),
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(60),
+          preferredSize: const Size.fromHeight(72),
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.lg,
               vertical: AppSpacing.md,
             ),
-            child: WizardProgressIndicator(
+            child: _EnhancedWizardIndicator(
               steps: _wizardSteps,
               currentStep: _currentStep,
-              showLabels: true,
             ),
           ),
         ),
       ),
       body: Column(
         children: [
-          // Step content
+          // Step content wrapped in AppSectionCard
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: _buildStepContent(stepData),
+            child: AnimatedSwitcher(
+              duration: AppDurations.medium,
+              switchInCurve: AppDurations.entranceCurve,
+              switchOutCurve: AppDurations.exitCurve,
+              child: SingleChildScrollView(
+                key: ValueKey(_currentStep),
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: AppSectionCard(
+                  title: _stepTitles[_currentStep],
+                  icon: _stepIcons[_currentStep],
+                  child: _buildStepContent(stepData),
+                ),
+              ),
             ),
           ),
 
@@ -570,45 +591,150 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
   Widget _buildNavigationButtons(BuildContext context) {
     final isLastStep = _currentStep == _totalSteps - 1;
     final isFirstStep = _currentStep == 0;
+    final scheme = Theme.of(context).colorScheme;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: scheme.surface,
+        boxShadow: AppShadows.sectionDivider,
         border: Border(
           top: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant,
-            width: 1,
+            color: scheme.outlineVariant,
+            width: 0.5,
           ),
         ),
       ),
       child: SafeArea(
         top: false,
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            if (!isFirstStep)
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: _isSaving ? null : _previousStep,
-                  child: const Text('Back'),
+            // Step counter
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: Text(
+                'Step ${_currentStep + 1} of $_totalSteps',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-            if (!isFirstStep) const SizedBox(width: AppSpacing.md),
-            Expanded(
-              flex: 2,
-              child: FilledButton(
-                onPressed: _isSaving ? null : (isLastStep ? _submit : _nextStep),
-                child: _isSaving
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(isLastStep ? (widget.propertyId != null ? 'Save Changes' : 'Create Property') : 'Next'),
-              ),
+            ),
+            Row(
+              children: [
+                if (!isFirstStep)
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _isSaving ? null : _previousStep,
+                      child: const Text('Back'),
+                    ),
+                  ),
+                if (!isFirstStep) const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  flex: 2,
+                  child: FilledButton(
+                    onPressed: _isSaving ? null : (isLastStep ? _submit : _nextStep),
+                    child: _isSaving
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(isLastStep ? (widget.propertyId != null ? 'Save Changes' : 'Create Property') : 'Next'),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Enhanced wizard indicator with larger circles showing step number/check,
+/// colored active step, and connecting lines.
+class _EnhancedWizardIndicator extends StatelessWidget {
+  const _EnhancedWizardIndicator({
+    required this.steps,
+    required this.currentStep,
+  });
+
+  final List<WizardStep> steps;
+  final int currentStep;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Row(
+      children: [
+        for (int i = 0; i < steps.length; i++) ...[
+          if (i > 0)
+            Expanded(
+              child: Container(
+                height: 2,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  color: i <= currentStep
+                      ? scheme.primary
+                      : (isDark ? AppColors.darkSurfaceVariant : AppColors.borderLight),
+                  borderRadius: AppRadii.pill,
+                ),
+              ),
+            ),
+          _buildStepCircle(context, i, scheme, isDark),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildStepCircle(
+    BuildContext context,
+    int index,
+    ColorScheme scheme,
+    bool isDark,
+  ) {
+    final isCompleted = index < currentStep;
+    final isActive = index == currentStep;
+
+    Color bgColor;
+    Color fgColor;
+
+    if (isCompleted) {
+      bgColor = scheme.primary;
+      fgColor = Colors.white;
+    } else if (isActive) {
+      bgColor = scheme.primary;
+      fgColor = Colors.white;
+    } else {
+      bgColor = isDark ? AppColors.darkSurfaceVariant : AppColors.surfaceSecondary;
+      fgColor = isDark ? AppColors.darkTextSecondary : AppColors.textTertiary;
+    }
+
+    return AnimatedContainer(
+      duration: AppDurations.medium,
+      curve: AppDurations.defaultCurve,
+      width: isActive ? 36 : 28,
+      height: isActive ? 36 : 28,
+      decoration: BoxDecoration(
+        color: bgColor,
+        shape: BoxShape.circle,
+        boxShadow: isActive ? AppShadows.cardHovered : null,
+      ),
+      child: Center(
+        child: isCompleted
+            ? Icon(Icons.check_rounded, size: 16, color: fgColor)
+            : Text(
+                '${index + 1}',
+                style: TextStyle(
+                  color: fgColor,
+                  fontSize: isActive ? 14 : 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
       ),
     );
   }

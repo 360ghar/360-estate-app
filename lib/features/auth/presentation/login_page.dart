@@ -1,4 +1,5 @@
-﻿import 'dart:ui';
+import 'dart:async';
+import 'dart:ui';
 import 'package:estate_app/core/presentation/animations/premium/premium_animations.dart';
 import 'package:estate_app/core/presentation/widgets/glass/glass_toast.dart';
 import 'package:estate_app/core/presentation/widgets/glass/premium_glass_card.dart';
@@ -55,7 +56,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final lockPhone = normalizedParam != null && normalizedParam.isNotEmpty;
 
     if (lockPhone && !_prefilled) {
-      _phoneController.text = normalizedParam!;
+      _phoneController.text = normalizedParam;
       _prefilled = true;
     }
 
@@ -96,7 +97,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       PremiumGlassCard(
                         padding: const EdgeInsets.all(24),
                         borderRadius: 24,
-                        blur: 24,
                         opacity: 0.15,
                         child: Column(
                           children: [
@@ -158,7 +158,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.1),
-                width: 1,
               ),
             ),
             child: const Icon(
@@ -170,7 +169,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         ),
         const Spacer(),
         // Step indicator
-        const PremiumStepIndicator(currentStep: 1, totalSteps: 3),
+        const PremiumStepIndicator(currentStep: 1),
       ],
     );
   }
@@ -424,88 +423,144 @@ class _PasswordField extends StatefulWidget {
   State<_PasswordField> createState() => _PasswordFieldState();
 }
 
-class _PasswordFieldState extends State<_PasswordField> {
+class _PasswordFieldState extends State<_PasswordField>
+    with SingleTickerProviderStateMixin {
   bool _isFocused = false;
+  late final AnimationController _shakeController;
+  late final Animation<double> _shakeAnimation;
+  bool _prevHighlightError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _shakeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _shakeAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0, end: -8), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -8, end: 8), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: 8, end: -6), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: -6, end: 4), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: 4, end: 0), weight: 1),
+    ]).animate(CurvedAnimation(
+      parent: _shakeController,
+      curve: Curves.easeInOut,
+    ));
+  }
+
+  @override
+  void didUpdateWidget(covariant _PasswordField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Trigger shake when highlightError transitions from false to true
+    if (widget.highlightError && !_prevHighlightError) {
+      _shakeController.forward(from: 0);
+    }
+    _prevHighlightError = widget.highlightError;
+  }
+
+  @override
+  void dispose() {
+    _shakeController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'PASSWORD',
-          style: _labelStyle(context),
-        ),
-        const SizedBox(height: 10),
-        Focus(
-          onFocusChange: (hasFocus) => setState(() => _isFocused = hasFocus),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: _isFocused
-                  ? [
-                      BoxShadow(
-                        color: const Color(0xFF3B82F6).withValues(alpha: 0.2),
-                        blurRadius: 12,
+    return AnimatedBuilder(
+      animation: _shakeAnimation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(_shakeAnimation.value, 0),
+          child: child,
+        );
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'PASSWORD',
+            style: _labelStyle(context),
+          ),
+          const SizedBox(height: 10),
+          Focus(
+            onFocusChange: (hasFocus) => setState(() => _isFocused = hasFocus),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: _isFocused
+                    ? [
+                        BoxShadow(
+                          color: const Color(0xFF3B82F6).withValues(alpha: 0.2),
+                          blurRadius: 12,
+                        ),
+                      ]
+                    : widget.highlightError
+                        ? [
+                            BoxShadow(
+                              color: const Color(0xFFEF4444).withValues(alpha: 0.2),
+                              blurRadius: 12,
+                            ),
+                          ]
+                        : null,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: widget.highlightError
+                            ? const Color(0xFFEF4444)
+                            : _isFocused
+                                ? const Color(0xFF3B82F6)
+                                : Colors.white.withValues(alpha: 0.1),
+                        width: _isFocused || widget.highlightError ? 1.5 : 1,
                       ),
-                    ]
-                  : null,
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: widget.highlightError
-                          ? const Color(0xFFEF4444)
-                          : _isFocused
-                              ? const Color(0xFF3B82F6)
-                              : Colors.white.withValues(alpha: 0.1),
-                      width: _isFocused || widget.highlightError ? 1.5 : 1,
                     ),
-                  ),
-                  child: TextFormField(
-                    controller: widget.controller,
-                    obscureText: widget.obscure,
-                    style: _inputStyle(context),
-                    cursorColor: const Color(0xFF3B82F6),
-                    validator: widget.validator,
-                    decoration: InputDecoration(
-                      hintText: 'Enter password',
-                      hintStyle: _hintStyle(context),
-                      prefixIcon: Icon(
-                        Icons.lock_outline,
-                        color: _iconColor(context),
-                        size: 20,
-                      ),
-                      suffixIcon: GestureDetector(
-                        onTap: widget.onToggle,
-                        child: Icon(
-                          widget.obscure
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
+                    child: TextFormField(
+                      controller: widget.controller,
+                      obscureText: widget.obscure,
+                      style: _inputStyle(context),
+                      cursorColor: const Color(0xFF3B82F6),
+                      validator: widget.validator,
+                      decoration: InputDecoration(
+                        hintText: 'Enter password',
+                        hintStyle: _hintStyle(context),
+                        prefixIcon: Icon(
+                          Icons.lock_outline,
                           color: _iconColor(context),
                           size: 20,
                         ),
+                        suffixIcon: GestureDetector(
+                          onTap: widget.onToggle,
+                          child: Icon(
+                            widget.obscure
+                                ? Icons.visibility_outlined
+                                : Icons.visibility_off_outlined,
+                            color: _iconColor(context),
+                            size: 20,
+                          ),
+                        ),
+                        border: InputBorder.none,
+                        errorStyle: const TextStyle(
+                          color: Color(0xFFFCA5A5),
+                          fontSize: 12,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
-                      border: InputBorder.none,
-                      errorStyle: const TextStyle(
-                        color: Color(0xFFFCA5A5),
-                        fontSize: 12,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -524,7 +579,6 @@ class _LockedPhoneDisplay extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.1),
-          width: 1,
         ),
       ),
       child: Row(
@@ -570,7 +624,6 @@ class _GlassInputField extends StatefulWidget {
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final TextInputAction? textInputAction;
-  final ValueChanged<String>? onFieldSubmitted;
   final String? Function(String?)? validator;
 
   const _GlassInputField({
@@ -580,7 +633,6 @@ class _GlassInputField extends StatefulWidget {
     this.keyboardType,
     this.inputFormatters,
     this.textInputAction,
-    this.onFieldSubmitted,
     this.validator,
   });
 
@@ -627,7 +679,6 @@ class _GlassInputFieldState extends State<_GlassInputField> {
                 keyboardType: widget.keyboardType,
                 inputFormatters: widget.inputFormatters,
                 textInputAction: widget.textInputAction,
-                onFieldSubmitted: widget.onFieldSubmitted,
                 style: _inputStyle(context),
                 cursorColor: const Color(0xFF3B82F6),
                 validator: widget.validator,

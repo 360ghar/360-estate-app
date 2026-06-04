@@ -58,7 +58,7 @@ class _AppLoadingShimmerState extends State<AppLoadingShimmer>
           itemCount: widget.itemCount,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
+          separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
           itemBuilder: (context, index) {
             return Container(
               height: widget.itemHeight,

@@ -1,3 +1,4 @@
+import 'package:estate_app/core/utils/parse.dart';
 import 'package:estate_app/features/documents/domain/entities/document.dart';
 
 final class DocumentDto {
@@ -33,25 +34,23 @@ final class DocumentDto {
 
   factory DocumentDto.fromJson(Map<String, dynamic> json) {
     return DocumentDto(
-      id: json['id'] as int,
+      id: parseInt(json['id']) ?? 0,
       documentType: json['document_type'] as String? ?? 'other',
-      fileName: json['file_name'] as String? ?? json['filename'] as String? ?? '',
+      fileName:
+          json['file_name'] as String? ?? json['filename'] as String? ?? '',
       fileUrl: json['file_url'] as String? ?? json['url'] as String? ?? '',
       propertyId: json['property_id'] as int?,
-      propertyTitle: json['property_title'] as String? ?? json['property']?['title'] as String?,
+      propertyTitle:
+          json['property_title'] as String? ??
+          json['property']?['title'] as String?,
       leaseId: json['lease_id'] as int?,
-      tenantName: json['tenant_name'] as String? ?? json['tenant']?['name'] as String?,
+      tenantName:
+          json['tenant_name'] as String? ?? json['tenant']?['name'] as String?,
       description: json['description'] as String?,
       fileSize: json['file_size'] as int?,
       mimeType: json['mime_type'] as String? ?? json['content_type'] as String?,
-      uploadedAt: json['uploaded_at'] != null
-          ? DateTime.tryParse(json['uploaded_at'] as String)
-          : json['created_at'] != null
-              ? DateTime.tryParse(json['created_at'] as String)
-              : null,
-      expiryDate: json['expiry_date'] != null
-          ? DateTime.tryParse(json['expiry_date'] as String)
-          : null,
+      uploadedAt: parseDateTime(json['uploaded_at'] ?? json['created_at']),
+      expiryDate: parseDateTime(json['expiry_date']),
     );
   }
 
@@ -64,7 +63,7 @@ final class DocumentDto {
       if (propertyId != null) 'property_id': propertyId,
       if (leaseId != null) 'lease_id': leaseId,
       if (description != null) 'description': description,
-      if (expiryDate != null) 'expiry_date': expiryDate!.toIso8601String().split('T')[0],
+      if (expiryDate != null) 'expiry_date': toApiDateOnly(expiryDate),
     };
   }
 

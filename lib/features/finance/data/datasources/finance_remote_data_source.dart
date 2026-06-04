@@ -1,5 +1,6 @@
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/core/pagination/page.dart';
+import 'package:estate_app/core/utils/parse.dart';
 import 'package:estate_app/features/finance/data/models/expense_dto.dart';
 import 'package:estate_app/features/finance/data/models/rent_charge_dto.dart';
 import 'package:estate_app/features/finance/data/models/rent_payment_dto.dart';
@@ -69,11 +70,12 @@ final class ApiFinanceRemoteDataSource implements FinanceRemoteDataSource {
     );
 
     final data = response.data!;
-    final items = (data['items'] as List<dynamic>? ??
-            data['data'] as List<dynamic>? ??
-            [])
-        .map((e) => RentChargeDto.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final items =
+        (data['items'] as List<dynamic>? ??
+                data['data'] as List<dynamic>? ??
+                [])
+            .map((e) => RentChargeDto.fromJson(e as Map<String, dynamic>))
+            .toList();
 
     final total = data['total'] as int? ?? items.length;
     final hasMore = offset + items.length < total;
@@ -90,13 +92,10 @@ final class ApiFinanceRemoteDataSource implements FinanceRemoteDataSource {
   Future<void> generateRentCharges({DateTime? forMonth}) async {
     final data = <String, dynamic>{};
     if (forMonth != null) {
-      data['for_month'] = forMonth.toIso8601String().split('T')[0];
+      data['for_month'] = toApiDateOnly(forMonth);
     }
 
-    await _apiClient.post<void>(
-      '/pm/rent/charges/generate',
-      data: data,
-    );
+    await _apiClient.post<void>('/pm/rent/charges/generate', data: data);
   }
 
   @override
@@ -120,11 +119,12 @@ final class ApiFinanceRemoteDataSource implements FinanceRemoteDataSource {
     );
 
     final data = response.data!;
-    final items = (data['items'] as List<dynamic>? ??
-            data['data'] as List<dynamic>? ??
-            [])
-        .map((e) => RentPaymentDto.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final items =
+        (data['items'] as List<dynamic>? ??
+                data['data'] as List<dynamic>? ??
+                [])
+            .map((e) => RentPaymentDto.fromJson(e as Map<String, dynamic>))
+            .toList();
 
     final total = data['total'] as int? ?? items.length;
     final hasMore = offset + items.length < total;
@@ -162,8 +162,8 @@ final class ApiFinanceRemoteDataSource implements FinanceRemoteDataSource {
       'offset': offset,
       if (propertyId != null) 'property_id': propertyId,
       if (category != null) 'category': category,
-      if (startDate != null) 'start': startDate.toIso8601String().split('T')[0],
-      if (endDate != null) 'end': endDate.toIso8601String().split('T')[0],
+      if (startDate != null) 'start': toApiDateOnly(startDate),
+      if (endDate != null) 'end': toApiDateOnly(endDate),
     };
 
     final response = await _apiClient.get<Map<String, dynamic>>(
@@ -172,11 +172,12 @@ final class ApiFinanceRemoteDataSource implements FinanceRemoteDataSource {
     );
 
     final data = response.data!;
-    final items = (data['items'] as List<dynamic>? ??
-            data['data'] as List<dynamic>? ??
-            [])
-        .map((e) => ExpenseDto.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final items =
+        (data['items'] as List<dynamic>? ??
+                data['data'] as List<dynamic>? ??
+                [])
+            .map((e) => ExpenseDto.fromJson(e as Map<String, dynamic>))
+            .toList();
 
     final total = data['total'] as int? ?? items.length;
     final hasMore = offset + items.length < total;

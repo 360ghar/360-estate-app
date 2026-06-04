@@ -1,6 +1,7 @@
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/core/network/response_parser.dart';
 import 'package:estate_app/core/pagination/page.dart';
+import 'package:estate_app/core/utils/parse.dart';
 import 'package:estate_app/features/rental_applications/models/application_form.dart';
 import 'package:estate_app/features/rental_applications/models/application_submission.dart';
 
@@ -28,7 +29,7 @@ class ApplicationFormCreateRequest {
       if (title != null && title!.trim().isNotEmpty) 'title': title!.trim(),
       if (description != null && description!.trim().isNotEmpty)
         'description': description!.trim(),
-      if (expiresAt != null) 'expires_at': expiresAt!.toIso8601String(),
+      if (expiresAt != null) 'expires_at': toApiDateOnly(expiresAt),
       if (fields.isNotEmpty)
         'custom_fields': fields
             .map(
@@ -53,9 +54,7 @@ class ApplicationDecisionRequest {
   final String? notes;
 
   Map<String, dynamic> toJson() {
-    final payload = <String, dynamic>{
-      'decision': decision,
-    };
+    final payload = <String, dynamic>{'decision': decision};
     if (notes != null && notes!.trim().isNotEmpty) {
       payload['notes'] = notes!.trim();
     }
@@ -99,7 +98,7 @@ class ApplicationsRepository {
     required int page,
     required int limit,
   }) async {
-    final response = await _client.get(
+    final response = await _client.get<dynamic>(
       '/pm/applications/forms',
       queryParameters: {
         'page': page,
@@ -121,13 +120,15 @@ class ApplicationsRepository {
   }
 
   Future<ApplicationForm> fetchForm(String id) async {
-    final response = await _client.get('/pm/applications/forms/$id');
+    final response = await _client.get<dynamic>('/pm/applications/forms/$id');
     final data = unwrapMap(response.data);
     return ApplicationForm.fromJson(data);
   }
 
-  Future<ApplicationForm> createForm(ApplicationFormCreateRequest request) async {
-    final response = await _client.post(
+  Future<ApplicationForm> createForm(
+    ApplicationFormCreateRequest request,
+  ) async {
+    final response = await _client.post<dynamic>(
       '/pm/applications/forms',
       data: request.toJson(),
     );
@@ -140,7 +141,7 @@ class ApplicationsRepository {
     required int limit,
     String? status,
   }) async {
-    final response = await _client.get(
+    final response = await _client.get<dynamic>(
       '/pm/applications/',
       queryParameters: {
         if (status != null) 'status': status,
@@ -163,7 +164,7 @@ class ApplicationsRepository {
   }
 
   Future<ApplicationSubmission> fetchApplication(String id) async {
-    final response = await _client.get('/pm/applications/$id');
+    final response = await _client.get<dynamic>('/pm/applications/$id');
     final data = unwrapMap(response.data);
     return ApplicationSubmission.fromJson(data);
   }
@@ -172,7 +173,7 @@ class ApplicationsRepository {
     String id,
     ApplicationDecisionRequest request,
   ) async {
-    final response = await _client.post(
+    final response = await _client.post<dynamic>(
       '/pm/applications/$id/decision',
       data: request.toJson(),
     );
@@ -181,7 +182,7 @@ class ApplicationsRepository {
   }
 
   Future<ApplicationForm> fetchPublicForm(String slug) async {
-    final response = await _client.get('/pm/public/applications/$slug');
+    final response = await _client.get<dynamic>('/pm/public/applications/$slug');
     final data = unwrapMap(response.data);
     return ApplicationForm.fromJson(data);
   }
@@ -190,7 +191,7 @@ class ApplicationsRepository {
     String slug,
     PublicApplicationSubmitRequest request,
   ) async {
-    await _client.post(
+    await _client.post<dynamic>(
       '/pm/public/applications/$slug/submit',
       data: request.toJson(),
     );

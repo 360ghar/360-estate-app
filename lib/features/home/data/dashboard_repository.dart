@@ -14,7 +14,7 @@ class DashboardRepository {
   Future<DashboardOverview> fetchOverview() async {
     final cached = _cache.get<DashboardOverview>('dashboard:overview');
     if (cached != null) return cached;
-    final response = await _client.get('/pm/dashboard/overview');
+    final response = await _client.get<dynamic>('/pm/dashboard/overview');
     final data = unwrapMap(response.data);
     final overview = DashboardOverview.fromJson(data);
     _cache.set('dashboard:overview', overview, ttl: _cacheTtl);
@@ -25,7 +25,7 @@ class DashboardRepository {
     final cached =
         _cache.get<List<DashboardActivityItem>>('dashboard:activity');
     if (cached != null) return cached;
-    final response = await _client.get('/pm/dashboard/activity');
+    final response = await _client.get<dynamic>('/pm/dashboard/activity');
     final data = unwrapList(response.data);
     final items = data
         .whereType<Map<String, dynamic>>()

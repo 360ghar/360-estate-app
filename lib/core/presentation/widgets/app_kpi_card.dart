@@ -1,4 +1,5 @@
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/presentation/design_system/app_durations.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
 import 'package:estate_app/core/presentation/design_system/app_text_styles.dart';
@@ -55,12 +56,13 @@ class AppKpiTrend {
 /// KPI (Key Performance Indicator) card for dashboard metrics.
 ///
 /// Displays a metric with:
-/// - Icon or leading widget
+/// - Icon or leading widget with gradient background
 /// - Large value with optional currency formatting
 /// - Label/title
 /// - Optional trend indicator (up/down percentage)
 /// - Optional subtitle
-/// - Tap handler for navigation
+/// - Tap handler with scale feedback
+/// - Colored left accent border
 ///
 /// Example:
 /// ```dart
@@ -69,10 +71,11 @@ class AppKpiTrend {
 ///   value: '₹2,45,000',
 ///   trend: AppKpiTrend.positive(12.5),
 ///   icon: Icons.currency_rupee,
+///   accentColor: AppColors.success,
 ///   onTap: () => navigateToCollections(),
 /// )
 /// ```
-class AppKpiCard extends StatelessWidget {
+class AppKpiCard extends StatefulWidget {
   final String title;
   final String value;
   final String? subtitle;
@@ -82,6 +85,7 @@ class AppKpiCard extends StatelessWidget {
   final AppKpiVariant variant;
   final VoidCallback? onTap;
   final Color? valueColor;
+  final Color? accentColor;
   final bool isLoading;
 
   const AppKpiCard({
@@ -95,25 +99,57 @@ class AppKpiCard extends StatelessWidget {
     this.variant = AppKpiVariant.standard,
     this.onTap,
     this.valueColor,
+    this.accentColor,
     this.isLoading = false,
   });
 
   @override
+  State<AppKpiCard> createState() => _AppKpiCardState();
+}
+
+class _AppKpiCardState extends State<AppKpiCard>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _scaleController;
+  late final Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _scaleController = AnimationController(
+      vsync: this,
+      duration: AppDurations.fast,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
+      CurvedAnimation(parent: _scaleController, curve: AppDurations.pressCurve),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scaleController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final effectiveLeading = leading ??
-        (icon != null
-            ? _buildIcon(context, isDark)
-            : null);
+    final effectiveLeading = widget.leading ??
+        (widget.icon != null ? _buildIcon(context, isDark) : null);
 
     Widget card = _buildContent(context, effectiveLeading, isDark);
 
-    if (onTap != null) {
-      card = Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: AppRadii.md,
+    if (widget.onTap != null) {
+      card = GestureDetector(
+        onTapDown: (_) => _scaleController.forward(),
+        onTapUp: (_) => _scaleController.reverse(),
+        onTapCancel: () => _scaleController.reverse(),
+        onTap: widget.onTap,
+        child: AnimatedBuilder(
+          animation: _scaleAnimation,
+          builder: (context, child) => Transform.scale(
+            scale: _scaleAnimation.value,
+            child: child,
+          ),
           child: card,
         ),
       );
@@ -123,28 +159,41 @@ class AppKpiCard extends StatelessWidget {
   }
 
   Widget _buildIcon(BuildContext context, bool isDark) {
+    final iconSize = _getIconSize();
+    final color = widget.accentColor ?? AppColors.primary;
+
     return Container(
-      width: _getIconSize(),
-      height: _getIconSize(),
+      width: iconSize,
+      height: iconSize,
       decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.primaryLight.withOpacity(0.2)
-            : AppColors.primarySoft,
-        borderRadius: switch (variant) {
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDark
+              ? [
+                  color.withValues(alpha: 0.25),
+                  color.withValues(alpha: 0.15),
+                ]
+              : [
+                  color.withValues(alpha: 0.12),
+                  color.withValues(alpha: 0.06),
+                ],
+        ),
+        borderRadius: switch (widget.variant) {
           AppKpiVariant.prominent => AppRadii.md,
           _ => AppRadii.sm,
         },
       ),
       child: Icon(
-        icon,
-        size: _getIconSize() * 0.5,
-        color: isDark ? AppColors.primaryLight : AppColors.primary,
+        widget.icon,
+        size: iconSize * 0.5,
+        color: isDark ? color.withValues(alpha: 0.9) : color,
       ),
     );
   }
 
   double _getIconSize() {
-    return switch (variant) {
+    return switch (widget.variant) {
       AppKpiVariant.compact => 32,
       AppKpiVariant.minimal => 0,
       _ => 40,
@@ -152,106 +201,134 @@ class AppKpiCard extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context, Widget? leadingWidget, bool isDark) {
-    final padding = switch (variant) {
+    final padding = switch (widget.variant) {
       AppKpiVariant.compact => const EdgeInsets.all(12),
       AppKpiVariant.minimal => const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       _ => const EdgeInsets.all(16),
     };
-    final showLeadingRow = variant != AppKpiVariant.minimal && leadingWidget != null;
-    final showInlineTrend = trend != null && !showLeadingRow && variant != AppKpiVariant.minimal;
+    final showLeadingRow =
+        widget.variant != AppKpiVariant.minimal && leadingWidget != null;
+    final showInlineTrend = widget.trend != null &&
+        !showLeadingRow &&
+        widget.variant != AppKpiVariant.minimal;
 
     return Container(
       padding: padding,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: AppRadii.md,
+        borderRadius: AppRadii.lg,
         border: Border.all(
-          color: isDark
-              ? AppColors.darkBorder
-              : AppColors.border,
+          color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
           width: 0.5,
         ),
-        boxShadow: AppShadows.sm,
+        boxShadow: AppShadows.cardResting,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (showLeadingRow)
-            Row(
-              children: [
-                leadingWidget,
-                const Spacer(),
-                if (trend != null) _buildTrend(context, isDark),
-              ],
-            ),
-          if (showLeadingRow) const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: AppTextStyles.labelMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (variant != AppKpiVariant.compact && variant != AppKpiVariant.minimal)
-                      const SizedBox(height: 4),
-                    if (variant == AppKpiVariant.compact) const SizedBox(height: 6),
-                    if (isLoading)
-                      SizedBox(
-                        height: _getValueFontSize(),
-                        child: const Center(
-                          child: SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        ),
-                      )
-                    else
-                      Text(
-                        value,
-                        style: _getValueStyle(context),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    if (subtitle != null && variant != AppKpiVariant.compact) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle!,
-                        style: AppTextStyles.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ],
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            // Colored left accent border
+            if (widget.accentColor != null)
+              Container(
+                width: 3,
+                margin: const EdgeInsets.only(right: 12),
+                decoration: BoxDecoration(
+                  color: widget.accentColor,
+                  borderRadius: AppRadii.pill,
                 ),
               ),
-              if (showInlineTrend)
-                Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: _buildTrend(context, isDark),
-                ),
-            ],
-          ),
-        ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (showLeadingRow)
+                    Row(
+                      children: [
+                        leadingWidget,
+                        const Spacer(),
+                        if (widget.trend != null) _buildTrend(context, isDark),
+                      ],
+                    ),
+                  if (showLeadingRow) const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.title,
+                              style: AppTextStyles.labelMedium?.copyWith(
+                                color: isDark
+                                    ? AppColors.darkTextSecondary
+                                    : AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (widget.variant != AppKpiVariant.compact &&
+                                widget.variant != AppKpiVariant.minimal)
+                              const SizedBox(height: 4),
+                            if (widget.variant == AppKpiVariant.compact)
+                              const SizedBox(height: 6),
+                            if (widget.isLoading)
+                              SizedBox(
+                                height: _getValueFontSize(),
+                                child: const Center(
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            else
+                              Text(
+                                widget.value,
+                                style: _getValueStyle(context),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            if (widget.subtitle != null &&
+                                widget.variant != AppKpiVariant.compact) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                widget.subtitle!,
+                                style: AppTextStyles.bodySmall?.copyWith(
+                                  color: isDark
+                                      ? AppColors.darkTextSecondary
+                                      : AppColors.textSecondary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      if (showInlineTrend)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: _buildTrend(context, isDark),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildTrend(BuildContext context, bool isDark) {
-    if (trend == null) return const SizedBox.shrink();
+    if (widget.trend == null) return const SizedBox.shrink();
 
-    final trendData = trend!;
+    final trendData = widget.trend!;
     final trendColor = switch (trendData.direction) {
       AppKpiTrendDirection.up => AppColors.success,
       AppKpiTrendDirection.down => AppColors.danger,
@@ -259,35 +336,38 @@ class AppKpiCard extends StatelessWidget {
       AppKpiTrendDirection.neutral => AppColors.textSecondary,
     };
 
-    final icon = switch (trendData.direction) {
-      AppKpiTrendDirection.up => Icons.arrow_upward_rounded,
-      AppKpiTrendDirection.down => Icons.arrow_downward_rounded,
-      AppKpiTrendDirection.flat => Icons.remove_rounded,
-      AppKpiTrendDirection.neutral => Icons.remove_rounded,
+    final trendIcon = switch (trendData.direction) {
+      AppKpiTrendDirection.up => Icons.trending_up_rounded,
+      AppKpiTrendDirection.down => Icons.trending_down_rounded,
+      AppKpiTrendDirection.flat => Icons.trending_flat_rounded,
+      AppKpiTrendDirection.neutral => Icons.trending_flat_rounded,
     };
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          size: 14,
-          color: trendColor,
-        ),
-        const SizedBox(width: 2),
-        Text(
-          '${trendData.value.abs().toStringAsFixed(1)}%',
-          style: AppTextStyles.labelSmall?.copyWith(
-            color: trendColor,
-            fontWeight: FontWeight.w600,
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: trendColor.withValues(alpha: isDark ? 0.15 : 0.08),
+        borderRadius: AppRadii.pill,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(trendIcon, size: 14, color: trendColor),
+          const SizedBox(width: 2),
+          Text(
+            '${trendData.value.abs().toStringAsFixed(1)}%',
+            style: AppTextStyles.labelSmall?.copyWith(
+              color: trendColor,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   double _getValueFontSize() {
-    return switch (variant) {
+    return switch (widget.variant) {
       AppKpiVariant.prominent => 28,
       AppKpiVariant.compact => 20,
       AppKpiVariant.minimal => 16,
@@ -297,7 +377,7 @@ class AppKpiCard extends StatelessWidget {
 
   TextStyle _getValueStyle(BuildContext context) {
     final fontSize = _getValueFontSize();
-    final defaultColor = valueColor ?? Theme.of(context).colorScheme.onSurface;
+    final defaultColor = widget.valueColor ?? Theme.of(context).colorScheme.onSurface;
 
     return TextStyle(
       fontSize: fontSize,

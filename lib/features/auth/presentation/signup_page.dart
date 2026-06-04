@@ -1,14 +1,16 @@
-﻿import 'dart:ui';
+import 'dart:ui';
 import 'package:estate_app/core/presentation/animations/premium/premium_animations.dart';
 import 'package:estate_app/core/presentation/widgets/glass/premium_glass_card.dart';
 import 'package:estate_app/core/utils/phone_utils.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart' show SimplePremiumBackground;
 import 'package:estate_app/features/auth/presentation/widgets/premium_otp_input.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Premium signup page with glassmorphism design.
 class SignupPage extends ConsumerStatefulWidget {
@@ -31,6 +33,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
   bool _prefilled = false;
+  bool _termsAccepted = false;
 
   @override
   void dispose() {
@@ -50,7 +53,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     final lockPhone = normalizedParam != null && normalizedParam.isNotEmpty;
 
     if (lockPhone && !_prefilled) {
-      _phoneController.text = normalizedParam!;
+      _phoneController.text = normalizedParam;
       _prefilled = true;
     }
 
@@ -84,66 +87,92 @@ class _SignupPageState extends ConsumerState<SignupPage> {
 
                       const SizedBox(height: 32),
 
-                      // Form card
+                      // Form card with staggered field entrance
                       PremiumGlassCard(
                         padding: const EdgeInsets.all(24),
                         borderRadius: 24,
-                        blur: 24,
                         opacity: 0.15,
-                        child: Column(
-                          children: [
-                            _FullNameField(controller: _fullNameController),
-                            const SizedBox(height: 16),
-                            _EmailField(controller: _emailController),
-                            const SizedBox(height: 16),
-                            if (!lockPhone)
-                              _PhoneField(
-                                controller: _phoneController,
-                                lockPhone: lockPhone,
-                                normalizedParam: normalizedParam,
-                                validator: (value) {
-                                  if (!isValidPhone(value ?? '')) {
-                                    return 'Enter a valid phone number.';
-                                  }
-                                  return null;
-                                },
-                              )
-                            else
-                              _LockedPhoneDisplay(phone: normalizedParam!),
-                            const SizedBox(height: 16),
-                            _PasswordField(
-                              controller: _passwordController,
-                              label: 'PASSWORD',
-                              hint: 'Enter password',
-                              obscure: _obscurePassword,
-                              onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
-                              validator: (value) {
-                                final text = value?.trim() ?? '';
-                                if (text.length < 6) {
-                                  return 'Password must be 6+ characters.';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 16),
-                            _PasswordField(
-                              controller: _confirmController,
-                              label: 'CONFIRM PASSWORD',
-                              hint: 'Confirm password',
-                              obscure: _obscureConfirm,
-                              onToggle: () => setState(() => _obscureConfirm = !_obscureConfirm),
-                              validator: (value) {
-                                final text = value?.trim() ?? '';
-                                if (text.isEmpty) return 'Confirm your password.';
-                                if (text != _passwordController.text.trim()) {
-                                  return 'Passwords do not match.';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 24),
-                            _buildCreateAccountButton(state.isBusy, normalizedParam, lockPhone),
-                          ],
+                        child: PremiumStaggeredList(
+                          itemCount: 7,
+                          staggerDelay: const Duration(milliseconds: 100),
+                          itemBuilder: (context, index) {
+                            switch (index) {
+                              case 0:
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: _FullNameField(controller: _fullNameController),
+                                );
+                              case 1:
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: _EmailField(controller: _emailController),
+                                );
+                              case 2:
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: !lockPhone
+                                      ? _PhoneField(
+                                          controller: _phoneController,
+                                          lockPhone: lockPhone,
+                                          normalizedParam: normalizedParam,
+                                          validator: (value) {
+                                            if (!isValidPhone(value ?? '')) {
+                                              return 'Enter a valid phone number.';
+                                            }
+                                            return null;
+                                          },
+                                        )
+                                      : _LockedPhoneDisplay(phone: normalizedParam),
+                                );
+                              case 3:
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: _PasswordField(
+                                    controller: _passwordController,
+                                    label: 'PASSWORD',
+                                    hint: 'Enter password',
+                                    obscure: _obscurePassword,
+                                    onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
+                                    validator: (value) {
+                                      final text = value?.trim() ?? '';
+                                      if (text.length < 6) {
+                                        return 'Password must be 6+ characters.';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                );
+                              case 4:
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: _PasswordField(
+                                    controller: _confirmController,
+                                    label: 'CONFIRM PASSWORD',
+                                    hint: 'Confirm password',
+                                    obscure: _obscureConfirm,
+                                    onToggle: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                                    validator: (value) {
+                                      final text = value?.trim() ?? '';
+                                      if (text.isEmpty) return 'Confirm your password.';
+                                      if (text != _passwordController.text.trim()) {
+                                        return 'Passwords do not match.';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                );
+                              case 5:
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 24),
+                                  child: _TermsCheckbox(
+                                    accepted: _termsAccepted,
+                                    onChanged: (v) => setState(() => _termsAccepted = v),
+                                  ),
+                                );
+                              default:
+                                return _buildCreateAccountButton(state.isBusy, normalizedParam, lockPhone);
+                            }
+                          },
                         ),
                       ),
 
@@ -176,7 +205,6 @@ class _SignupPageState extends ConsumerState<SignupPage> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.1),
-                width: 1,
               ),
             ),
             child: const Icon(
@@ -190,7 +218,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
         const Spacer(),
 
         // Step indicator
-        const PremiumStepIndicator(currentStep: 1, totalSteps: 3),
+        const PremiumStepIndicator(currentStep: 1),
       ],
     );
   }
@@ -229,7 +257,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   Widget _buildCreateAccountButton(bool isBusy, String? normalizedParam, bool lockPhone) {
     return PremiumGlassButton(
       label: 'Create Account',
-      onPressed: isBusy
+      onPressed: (isBusy || !_termsAccepted)
           ? null
           : () async {
               if (_formKey.currentState?.validate() ?? false) {
@@ -406,7 +434,6 @@ class _LockedPhoneDisplay extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.1),
-              width: 1,
             ),
           ),
           child: Row(
@@ -634,6 +661,75 @@ class _GlassInputFieldState extends State<_GlassInputField> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _TermsCheckbox extends StatelessWidget {
+  final bool accepted;
+  final ValueChanged<bool> onChanged;
+
+  const _TermsCheckbox({required this.accepted, required this.onChanged});
+
+  Future<void> _launchPolicy(String url) async {
+    await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const linkColor = Color(0xFF3B82F6);
+    final linkStyle = const TextStyle(
+      color: linkColor,
+      fontSize: 13,
+      fontWeight: FontWeight.w600,
+      decoration: TextDecoration.underline,
+      decorationColor: linkColor,
+    );
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 24,
+          width: 24,
+          child: Checkbox(
+            value: accepted,
+            onChanged: (v) => onChanged(v ?? false),
+            activeColor: linkColor,
+            checkColor: Colors.white,
+            side: BorderSide(color: _mutedTextColor(context)),
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text.rich(
+            TextSpan(
+              children: [
+                const TextSpan(text: 'I agree to the '),
+                TextSpan(
+                  text: 'Terms of Service',
+                  style: linkStyle,
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () => _launchPolicy('https://360ghar.com/policies/terms-of-service'),
+                ),
+                const TextSpan(text: ' and '),
+                TextSpan(
+                  text: 'Privacy Policy',
+                  style: linkStyle,
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () => _launchPolicy('https://360ghar.com/policies/privacy-policy'),
+                ),
+              ],
+              style: TextStyle(
+                color: _mutedTextColor(context),
+                fontSize: 13,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

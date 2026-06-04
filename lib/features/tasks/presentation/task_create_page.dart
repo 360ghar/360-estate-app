@@ -4,7 +4,7 @@ import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loader.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
-import 'package:estate_app/core/presentation/widgets/section_header.dart';
+import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
 import 'package:estate_app/features/maintenance/domain/entities/maintenance_request.dart';
 import 'package:estate_app/features/properties/models/property.dart';
 import 'package:estate_app/features/properties/properties_providers.dart';
@@ -142,6 +142,19 @@ class _TaskCreatePageState extends ConsumerState<TaskCreatePage> {
     }
   }
 
+  Color _priorityColor(MaintenancePriority priority) {
+    switch (priority) {
+      case MaintenancePriority.low:
+        return AppColors.info;
+      case MaintenancePriority.medium:
+        return AppColors.warning;
+      case MaintenancePriority.high:
+        return AppColors.danger;
+      case MaintenancePriority.urgent:
+        return const Color(0xFFB91C1C); // darker red
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final propertiesAsync = ref.watch(propertiesListProvider);
@@ -157,205 +170,241 @@ class _TaskCreatePageState extends ConsumerState<TaskCreatePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Task Details Section
-            const SectionHeader(title: 'Task Details'),
-            const SizedBox(height: AppSpacing.md),
-
-            // Title field
-            TextFormField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-                hintText: 'e.g., Fix leaking faucet',
-                border: OutlineInputBorder(),
-              ),
-              textCapitalization: TextCapitalization.sentences,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a title';
-                }
-                if (value.trim().length < 3) {
-                  return 'Title must be at least 3 characters';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: AppSpacing.md),
-
-            // Description field
-            TextFormField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                hintText: 'Describe the task in detail...',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 4,
-              textCapitalization: TextCapitalization.sentences,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a description';
-                }
-                if (value.trim().length < 10) {
-                  return 'Description must be at least 10 characters';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: AppSpacing.xl),
-
-            // Category Section
-            const SectionHeader(title: 'Category *'),
-            const SizedBox(height: AppSpacing.md),
-
-            // Category selector
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: MaintenanceCategory.values.map((cat) {
-                final isSelected = _category == cat;
-                return ChoiceChip(
-                  label: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(cat.icon, size: 16, color: isSelected ? Colors.white : cat.color),
-                      const SizedBox(width: 4),
-                      Text(cat.displayName),
-                    ],
-                  ),
-                  selected: isSelected,
-                  onSelected: (_) => setState(() => _category = cat),
-                  selectedColor: AppColors.brand,
-                  labelStyle: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black,
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-
-            // Property Section
-            const SectionHeader(title: 'Property *'),
-            const SizedBox(height: AppSpacing.md),
-
-            // Property dropdown
-            propertiesAsync.when(
-              data: (properties) {
-                if (properties.isEmpty) {
-                  return const _PropertyEmptyState();
-                }
-                return DropdownButtonFormField<String>(
-                  value: _selectedPropertyId,
-                  isExpanded: true,
+            AppSectionCard(
+              title: 'Task Details',
+              icon: Icons.task_alt_outlined,
+              iconColor: AppColors.primary,
+              children: [
+                // Title field
+                TextFormField(
+                  controller: _titleController,
                   decoration: const InputDecoration(
-                    labelText: 'Select Property',
-                    hintText: 'Choose a property',
+                    labelText: 'Title',
+                    hintText: 'e.g., Fix leaking faucet',
+                    prefixIcon: Icon(Icons.title, size: 20),
                     border: OutlineInputBorder(),
                   ),
-                  items: properties.map((property) {
-                    return DropdownMenuItem<String>(
-                      value: property.id?.toString(),
-                      child: Text(
-                        property.displayName,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() => _selectedPropertyId = value);
-                  },
+                  textCapitalization: TextCapitalization.sentences,
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please select a property';
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter a title';
+                    }
+                    if (value.trim().length < 3) {
+                      return 'Title must be at least 3 characters';
                     }
                     return null;
                   },
-                );
-              },
-              loading: () => const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(AppSpacing.md),
-                  child: AppLoader(),
                 ),
-              ),
-              error: (error, _) => _PropertyErrorState(
-                message: error.toString(),
-                onRetry: () => ref.invalidate(propertiesListProvider),
-              ),
+                const SizedBox(height: AppSpacing.md),
+
+                // Description field
+                TextFormField(
+                  controller: _descriptionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Description',
+                    hintText: 'Describe the task in detail...',
+                    prefixIcon: Padding(
+                      padding: EdgeInsets.only(bottom: 48),
+                      child: Icon(Icons.description_outlined, size: 20),
+                    ),
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 4,
+                  textCapitalization: TextCapitalization.sentences,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter a description';
+                    }
+                    if (value.trim().length < 10) {
+                      return 'Description must be at least 10 characters';
+                    }
+                    return null;
+                  },
+                ),
+              ],
             ),
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.lg),
 
-            // Priority & Date Section
-            const SectionHeader(title: 'Priority & Due Date'),
-            const SizedBox(height: AppSpacing.md),
-
-            // Priority selector
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: MaintenancePriority.values.map((priority) {
-                final isSelected = _priority == priority;
-                return ChoiceChip(
-                  label: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(priority.icon, size: 16, color: isSelected ? Colors.white : priority.color),
-                      const SizedBox(width: 4),
-                      Text(priority.displayName),
-                    ],
-                  ),
-                  selected: isSelected,
-                  onSelected: (_) => setState(() => _priority = priority),
-                  selectedColor: priority.color,
-                  labelStyle: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black,
-                  ),
-                );
-              }).toList(),
+            // Category Section
+            AppSectionCard(
+              title: 'Category',
+              icon: Icons.category_outlined,
+              iconColor: AppColors.accent,
+              children: [
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: MaintenanceCategory.values.map((cat) {
+                    final isSelected = _category == cat;
+                    return ChoiceChip(
+                      label: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(cat.icon, size: 16, color: isSelected ? Colors.white : cat.color),
+                          const SizedBox(width: 4),
+                          Text(cat.displayName),
+                        ],
+                      ),
+                      selected: isSelected,
+                      onSelected: (_) => setState(() => _category = cat),
+                      selectedColor: AppColors.brand,
+                      labelStyle: TextStyle(
+                        color: isSelected ? Colors.white : Colors.black,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.lg),
 
-            // Due date picker
-            InkWell(
-              onTap: _pickDueDate,
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outlineVariant,
+            // Property Section
+            AppSectionCard(
+              title: 'Property',
+              icon: Icons.home_outlined,
+              iconColor: AppColors.info,
+              children: [
+                propertiesAsync.when(
+                  data: (properties) {
+                    if (properties.isEmpty) {
+                      return const _PropertyEmptyState();
+                    }
+                    return DropdownButtonFormField<String>(
+                      initialValue: _selectedPropertyId,
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Select Property',
+                        hintText: 'Choose a property',
+                        prefixIcon: Icon(Icons.home_work_outlined, size: 20),
+                        border: OutlineInputBorder(),
+                      ),
+                      items: properties.map((property) {
+                        return DropdownMenuItem<String>(
+                          value: property.id?.toString(),
+                          child: Text(
+                            property.displayName,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() => _selectedPropertyId = value);
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please select a property';
+                        }
+                        return null;
+                      },
+                    );
+                  },
+                  loading: () => const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(AppSpacing.md),
+                      child: AppLoader(),
+                    ),
                   ),
+                  error: (error, _) => _PropertyErrorState(
+                    message: error.toString(),
+                    onRetry: () => ref.invalidate(propertiesListProvider),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+
+            // Priority & Due Date Section
+            AppSectionCard(
+              title: 'Priority & Due Date',
+              icon: Icons.flag_outlined,
+              iconColor: AppColors.warning,
+              children: [
+                // Priority chips
+                Text(
+                  'Priority',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: MaintenancePriority.values.map((priority) {
+                    final isSelected = _priority == priority;
+                    final chipColor = _priorityColor(priority);
+                    return FilterChip(
+                      label: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            priority.icon,
+                            size: 16,
+                            color: isSelected ? Colors.white : chipColor,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(priority.displayName),
+                        ],
+                      ),
+                      selected: isSelected,
+                      onSelected: (_) =>
+                          setState(() => _priority = priority),
+                      selectedColor: chipColor,
+                      checkmarkColor: Colors.white,
+                      labelStyle: TextStyle(
+                        color: isSelected ? Colors.white : chipColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+
+                // Due date picker
+                InkWell(
+                  onTap: _pickDueDate,
                   borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.calendar_today_outlined,
-                      color: _dueDate != null
-                          ? Theme.of(context).colorScheme.primary
-                          : AppColors.textSecondary,
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Text(
-                        _dueDate == null
-                            ? 'Set due date (optional)'
-                            : 'Due: ${_formatDate(_dueDate!)}',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: _dueDate != null
-                                  ? Theme.of(context).colorScheme.primary
-                                  : AppColors.textSecondary,
-                            ),
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant,
                       ),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    if (_dueDate != null)
-                      IconButton(
-                        icon: const Icon(Icons.close, size: 20),
-                        onPressed: () => setState(() => _dueDate = null),
-                        tooltip: 'Clear due date',
-                      ),
-                  ],
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.calendar_today_outlined,
+                          color: _dueDate != null
+                              ? Theme.of(context).colorScheme.primary
+                              : AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Text(
+                            _dueDate == null
+                                ? 'Set due date (optional)'
+                                : 'Due: ${_formatDate(_dueDate!)}',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: _dueDate != null
+                                      ? Theme.of(context).colorScheme.primary
+                                      : AppColors.textSecondary,
+                                ),
+                          ),
+                        ),
+                        if (_dueDate != null)
+                          IconButton(
+                            icon: const Icon(Icons.close, size: 20),
+                            onPressed: () => setState(() => _dueDate = null),
+                            tooltip: 'Clear due date',
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
             const SizedBox(height: AppSpacing.xl),
 
@@ -406,9 +455,9 @@ class _PropertyEmptyState extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.danger.withOpacity(0.1),
+        color: AppColors.danger.withValues(alpha: 0.1),
         border: Border.all(
-          color: AppColors.danger.withOpacity(0.3),
+          color: AppColors.danger.withValues(alpha: 0.3),
         ),
         borderRadius: BorderRadius.circular(12),
       ),

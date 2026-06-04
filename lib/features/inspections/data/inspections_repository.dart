@@ -1,5 +1,6 @@
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/core/network/response_parser.dart';
+import 'package:estate_app/core/utils/parse.dart';
 import 'package:estate_app/features/inspections/models/inspection.dart';
 
 class InspectionCreateRequest {
@@ -22,7 +23,7 @@ class InspectionCreateRequest {
       'property_id': propertyId,
       'title': title,
       if (tenantId != null) 'tenant_id': tenantId,
-      if (scheduledAt != null) 'scheduled_at': scheduledAt!.toIso8601String(),
+      if (scheduledAt != null) 'scheduled_at': toApiUtcInstant(scheduledAt),
     };
     if (items.isNotEmpty) {
       payload['items'] = items.map((item) => {'title': item}).toList();
@@ -41,7 +42,7 @@ class InspectionsRepository {
     String? tenantId,
     String? status,
   }) async {
-    final response = await _client.get(
+    final response = await _client.get<dynamic>(
       '/pm/inspections/',
       queryParameters: {
         if (propertyId != null) 'property_id': propertyId,
@@ -57,13 +58,13 @@ class InspectionsRepository {
   }
 
   Future<Inspection> fetch(String inspectionId) async {
-    final response = await _client.get('/pm/inspections/$inspectionId');
+    final response = await _client.get<dynamic>('/pm/inspections/$inspectionId');
     final data = unwrapMap(response.data);
     return Inspection.fromJson(data);
   }
 
   Future<Inspection> create(InspectionCreateRequest request) async {
-    final response = await _client.post(
+    final response = await _client.post<dynamic>(
       '/pm/inspections/',
       data: request.toJson(),
     );
@@ -72,9 +73,7 @@ class InspectionsRepository {
   }
 
   Future<Inspection> sign(String inspectionId) async {
-    final response = await _client.post(
-      '/pm/inspections/$inspectionId/sign',
-    );
+    final response = await _client.post<dynamic>('/pm/inspections/$inspectionId/sign');
     final data = unwrapMap(response.data);
     if (data.isNotEmpty) return Inspection.fromJson(data);
     return fetch(inspectionId);

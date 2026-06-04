@@ -1,5 +1,6 @@
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/core/network/response_parser.dart';
+import 'package:estate_app/core/utils/parse.dart';
 import 'package:estate_app/features/more/expenses/models/expense.dart';
 
 class ExpensePayload {
@@ -23,7 +24,7 @@ class ExpensePayload {
     final payload = <String, dynamic>{
       'title': title,
       'amount': amount,
-      'expense_date': date.toIso8601String(),
+      'expense_date': toApiDateOnly(date),
     };
     if (category != null && category!.trim().isNotEmpty) {
       payload['category'] = category!.trim();
@@ -44,13 +45,16 @@ class ExpensesRepository {
   final ApiClient _client;
 
   Future<List<Expense>> list() async {
-    final response = await _client.get('/pm/expenses/');
+    final response = await _client.get<dynamic>('/pm/expenses/');
     final data = unwrapList(response.data);
-    return data.whereType<Map<String, dynamic>>().map(Expense.fromJson).toList();
+    return data
+        .whereType<Map<String, dynamic>>()
+        .map(Expense.fromJson)
+        .toList();
   }
 
   Future<Expense> create(ExpensePayload payload) async {
-    final response = await _client.post(
+    final response = await _client.post<dynamic>(
       '/pm/expenses/',
       data: payload.toJson(),
     );
@@ -59,7 +63,7 @@ class ExpensesRepository {
   }
 
   Future<Expense> update(String id, ExpensePayload payload) async {
-    final response = await _client.patch(
+    final response = await _client.patch<dynamic>(
       '/pm/expenses/$id',
       data: payload.toJson(),
     );

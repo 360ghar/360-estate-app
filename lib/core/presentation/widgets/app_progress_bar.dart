@@ -110,7 +110,7 @@ class AppProgressBar extends StatelessWidget {
       return _buildCircular(context, effectiveValue, effectiveColor);
     }
 
-    Widget bar = _buildLinear(context, effectiveValue, effectiveColor, effectiveHeight);
+    final Widget bar = _buildLinear(context, effectiveValue, effectiveColor, effectiveHeight);
 
     if (displayLabel != null) {
       return Row(
@@ -319,7 +319,6 @@ class AppOccupancyBar extends StatelessWidget {
       color: color,
       label: label,
       showPercentage: showPercentage,
-      variant: AppProgressVariant.linear,
     );
   }
 }

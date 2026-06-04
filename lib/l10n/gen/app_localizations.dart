@@ -167,7 +167,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorMissingConfigBody.
   ///
   /// In en, this message translates to:
-  /// **'Set SUPABASE_URL and SUPABASE_ANON_KEY with --dart-define to enable authentication.'**
+  /// **'Set SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY with --dart-define to enable authentication.'**
   String get errorMissingConfigBody;
 
   /// No description provided for @enterPhoneTitle.
@@ -487,6 +487,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Report a Problem'**
   String get reportProblem;
+
+  /// No description provided for @reportBug.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a Bug'**
+  String get reportBug;
+
+  /// No description provided for @reportBugSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Found an issue? Let us know'**
+  String get reportBugSubtitle;
+
+  /// No description provided for @requestFeature.
+  ///
+  /// In en, this message translates to:
+  /// **'Request a Feature'**
+  String get requestFeature;
+
+  /// No description provided for @requestFeatureSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest an improvement'**
+  String get requestFeatureSubtitle;
 
   /// No description provided for @appVersion.
   ///

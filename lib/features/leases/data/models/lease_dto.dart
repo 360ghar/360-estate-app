@@ -1,3 +1,4 @@
+import 'package:estate_app/core/utils/parse.dart';
 import 'package:estate_app/features/leases/domain/entities/lease.dart';
 
 final class LeaseDto {
@@ -24,27 +25,33 @@ final class LeaseDto {
 
   factory LeaseDto.fromJson(Map<String, dynamic> json) {
     return LeaseDto(
-      id: json['id'] as int,
-      propertyId: json['property_id'] as int? ?? json['propertyId'] as int? ?? 0,
-      propertyTitle: json['property_title'] as String? ??
+      id: parseInt(json['id']) ?? 0,
+      propertyId:
+          json['property_id'] as int? ?? json['propertyId'] as int? ?? 0,
+      propertyTitle:
+          json['property_title'] as String? ??
           json['propertyTitle'] as String? ??
           '',
-      tenantUserId: json['tenant_user_id'] as String? ??
+      tenantUserId:
+          json['tenant_user_id'] as String? ??
           json['tenantUserId'] as String? ??
           '',
-      tenantName: json['tenant_name'] as String? ??
-          json['tenantName'] as String? ??
-          '',
-      startDate: DateTime.parse(
-        json['start_date'] as String? ??
-            json['startDate'] as String? ??
-            DateTime.now().toIso8601String(),
-      ),
-      endDate: DateTime.parse(
-        json['end_date'] as String? ??
-            json['endDate'] as String? ??
-            DateTime.now().add(const Duration(days: 365)).toIso8601String(),
-      ),
+      tenantName:
+          json['tenant_name'] as String? ?? json['tenantName'] as String? ?? '',
+      startDate:
+          parseDateTime(
+            json['start_date'] as String? ??
+                json['startDate'] as String? ??
+                DateTime.now().toIso8601String(),
+          ) ??
+          DateTime.now(),
+      endDate:
+          parseDateTime(
+            json['end_date'] as String? ??
+                json['endDate'] as String? ??
+                DateTime.now().add(const Duration(days: 365)).toIso8601String(),
+          ) ??
+          DateTime.now().add(const Duration(days: 365)),
       monthlyRent: _parseDouble(json['monthly_rent'] ?? json['monthlyRent']),
       securityDeposit: _parseDoubleNullable(
         json['security_deposit'] ?? json['securityDeposit'],
@@ -54,25 +61,20 @@ final class LeaseDto {
       lateFeeAmount: _parseDoubleNullable(
         json['late_fee_amount'] ?? json['lateFeeAmount'],
       ),
-      lateFeeGraceDays: json['late_fee_grace_days'] as int? ??
+      lateFeeGraceDays:
+          json['late_fee_grace_days'] as int? ??
           json['lateFeeGraceDays'] as int?,
-      renewalNotifyDays: json['renewal_notify_days'] as int? ??
+      renewalNotifyDays:
+          json['renewal_notify_days'] as int? ??
           json['renewalNotifyDays'] as int? ??
           30,
-      signedDocumentUrl: json['signed_document_url'] as String? ??
+      signedDocumentUrl:
+          json['signed_document_url'] as String? ??
           json['signedDocumentUrl'] as String?,
       status: json['status'] as String?,
       notes: json['notes'] as String?,
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : json['createdAt'] != null
-              ? DateTime.parse(json['createdAt'] as String)
-              : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
-          : json['updatedAt'] != null
-              ? DateTime.parse(json['updatedAt'] as String)
-              : null,
+      createdAt: parseDateTime(json['created_at'] ?? json['createdAt']),
+      updatedAt: parseDateTime(json['updated_at'] ?? json['updatedAt']),
     );
   }
 
@@ -100,8 +102,8 @@ final class LeaseDto {
       'id': id,
       'property_id': propertyId,
       'tenant_user_id': tenantUserId,
-      'start_date': startDate.toIso8601String().split('T')[0],
-      'end_date': endDate.toIso8601String().split('T')[0],
+      'start_date': toApiDateOnly(startDate),
+      'end_date': toApiDateOnly(endDate),
       'monthly_rent': monthlyRent,
       if (securityDeposit != null) 'security_deposit': securityDeposit,
       'rent_due_day': rentDueDay,

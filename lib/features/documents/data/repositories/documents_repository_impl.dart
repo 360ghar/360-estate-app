@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:estate_app/core/pagination/page.dart';
+import 'package:estate_app/core/utils/parse.dart';
 import 'package:estate_app/features/documents/data/datasources/documents_remote_data_source.dart';
 import 'package:estate_app/features/documents/domain/entities/document.dart';
 import 'package:estate_app/features/documents/domain/repositories/documents_repository.dart';
@@ -55,7 +56,7 @@ final class DocumentsRepositoryImpl implements DocumentsRepository {
       propertyId: propertyId,
       leaseId: leaseId,
       description: description,
-      expiryDate: expiryDate?.toIso8601String().split('T')[0],
+      expiryDate: toApiDateOnly(expiryDate),
     );
     return dto.toEntity();
   }

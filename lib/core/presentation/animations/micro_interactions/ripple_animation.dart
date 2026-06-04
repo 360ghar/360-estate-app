@@ -78,7 +78,7 @@ class _RippleAnimationState extends State<RippleAnimation>
     final ripple = _Ripple(
       position: localPosition,
       maxRadius: maxRadius,
-      color: widget.rippleColor ?? Colors.white.withOpacity(0.3),
+      color: widget.rippleColor ?? Colors.white.withValues(alpha: 0.3),
       animation: Tween<double>(begin: 0, end: 1).animate(
         CurvedAnimation(
           parent: _controller,
@@ -163,7 +163,7 @@ class _RippleWidget extends StatelessWidget {
             height: radius * 2,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: ripple.color.withOpacity(opacity),
+              color: ripple.color.withValues(alpha: opacity),
             ),
           ),
         );

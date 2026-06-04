@@ -44,7 +44,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorMissingConfigBody =>
-      'Set SUPABASE_URL and SUPABASE_ANON_KEY with --dart-define to enable authentication.';
+      'Set SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY with --dart-define to enable authentication.';
 
   @override
   String get enterPhoneTitle => 'Enter phone number';
@@ -226,6 +226,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportProblem => 'Report a Problem';
+
+  @override
+  String get reportBug => 'Report a Bug';
+
+  @override
+  String get reportBugSubtitle => 'Found an issue? Let us know';
+
+  @override
+  String get requestFeature => 'Request a Feature';
+
+  @override
+  String get requestFeatureSubtitle => 'Suggest an improvement';
 
   @override
   String get appVersion => 'App Version';

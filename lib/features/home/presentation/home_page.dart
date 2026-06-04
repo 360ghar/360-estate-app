@@ -1,4 +1,8 @@
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/presentation/design_system/app_durations.dart';
+import 'package:estate_app/core/presentation/design_system/app_gradients.dart';
+import 'package:estate_app/core/presentation/design_system/app_radii.dart';
+import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/widgets/app_alert_banner.dart';
 import 'package:estate_app/core/presentation/widgets/app_empty_view.dart';
@@ -162,6 +166,7 @@ class _QuickActionsRow extends StatelessWidget {
           child: _QuickActionButton(
             icon: Icons.payment_rounded,
             label: 'Record\nPayment',
+            iconColor: AppColors.success,
             onTap: () => context.go('/collections/payments/new'),
           ),
         ),
@@ -170,6 +175,7 @@ class _QuickActionsRow extends StatelessWidget {
           child: _QuickActionButton(
             icon: Icons.add_circle_outline_rounded,
             label: 'Add\nProperty',
+            iconColor: AppColors.info,
             onTap: () => context.go('/properties/create'),
           ),
         ),
@@ -178,6 +184,7 @@ class _QuickActionsRow extends StatelessWidget {
           child: _QuickActionButton(
             icon: Icons.build_outlined,
             label: 'New\nTask',
+            iconColor: AppColors.warning,
             onTap: () => context.go('/tasks'),
           ),
         ),
@@ -186,50 +193,111 @@ class _QuickActionsRow extends StatelessWidget {
   }
 }
 
-/// Individual quick action button.
-class _QuickActionButton extends StatelessWidget {
+/// Individual quick action button with colored icon circle and press scale.
+class _QuickActionButton extends StatefulWidget {
   final IconData icon;
   final String label;
+  final Color iconColor;
   final VoidCallback onTap;
 
   const _QuickActionButton({
     required this.icon,
     required this.label,
+    required this.iconColor,
     required this.onTap,
   });
 
   @override
+  State<_QuickActionButton> createState() => _QuickActionButtonState();
+}
+
+class _QuickActionButtonState extends State<_QuickActionButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _scaleController;
+  late final Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _scaleController = AnimationController(
+      vsync: this,
+      duration: AppDurations.fast,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _scaleController, curve: AppDurations.pressCurve),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scaleController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Theme.of(context).colorScheme.outlineVariant,
-            width: 0.5,
-          ),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTapDown: (_) => _scaleController.forward(),
+      onTapUp: (_) => _scaleController.reverse(),
+      onTapCancel: () => _scaleController.reverse(),
+      onTap: widget.onTap,
+      child: AnimatedBuilder(
+        animation: _scaleAnimation,
+        builder: (context, child) => Transform.scale(
+          scale: _scaleAnimation.value,
+          child: child,
         ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: Theme.of(context).colorScheme.primary,
-              size: 24,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: AppRadii.lg,
+            border: Border.all(
+              color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
+              width: 0.5,
             ),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
+            boxShadow: AppShadows.cardResting,
+          ),
+          child: Column(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: isDark
+                        ? [
+                            widget.iconColor.withValues(alpha: 0.25),
+                            widget.iconColor.withValues(alpha: 0.15),
+                          ]
+                        : [
+                            widget.iconColor.withValues(alpha: 0.12),
+                            widget.iconColor.withValues(alpha: 0.06),
+                          ],
+                  ),
+                  borderRadius: AppRadii.md,
+                ),
+                child: Icon(
+                  widget.icon,
+                  color: widget.iconColor,
+                  size: 20,
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                widget.label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -284,6 +352,7 @@ class _KpiGrid extends StatelessWidget {
               value: overview.due.toString(),
               icon: Icons.notifications_outlined,
               onTap: () => context.go('/collections?status=due'),
+              accentColor: AppColors.warning,
               variant: kpiVariant,
             ),
             // Overdue - highlighted if > 0
@@ -295,6 +364,7 @@ class _KpiGrid extends StatelessWidget {
               valueColor: overview.overdue > 0
                 ? AppColors.danger
                 : null,
+              accentColor: AppColors.danger,
               variant: kpiVariant,
             ),
             // Maintenance
@@ -303,6 +373,7 @@ class _KpiGrid extends StatelessWidget {
               value: overview.maintenance.toString(),
               icon: Icons.build_outlined,
               onTap: () => context.go('/tasks'),
+              accentColor: AppColors.warning,
               variant: kpiVariant,
             ),
             // Tenants
@@ -311,6 +382,7 @@ class _KpiGrid extends StatelessWidget {
               value: overview.tenants.toString(),
               icon: Icons.people_outline,
               onTap: () => context.go('/more/tenants'),
+              accentColor: AppColors.info,
               variant: kpiVariant,
             ),
             // Properties
@@ -319,6 +391,7 @@ class _KpiGrid extends StatelessWidget {
               value: overview.properties.toString(),
               icon: Icons.apartment_outlined,
               onTap: () => context.go('/properties'),
+              accentColor: AppColors.primary,
               variant: kpiVariant,
             ),
             // Occupancy with color based on rate
@@ -328,6 +401,7 @@ class _KpiGrid extends StatelessWidget {
               icon: Icons.pie_chart_outline,
               onTap: () => context.go('/more/reports'),
               valueColor: _getOccupancyColor(overview.occupancy),
+              accentColor: AppColors.success,
               variant: kpiVariant,
             ),
           ],
@@ -357,36 +431,49 @@ class _CollectionSummary extends StatelessWidget {
     );
     final collectedStr = formatter.format(collected);
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
+        gradient: AppGradients.successSubtle,
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadii.lg,
         border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
+          color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
           width: 0.5,
         ),
+        boxShadow: AppShadows.cardResting,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                Icons.account_balance_wallet_outlined,
-                size: 18,
-                color: Theme.of(context).colorScheme.primary,
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: AppColors.success.withValues(alpha: isDark ? 0.2 : 0.1),
+                  borderRadius: AppRadii.sm,
+                ),
+                child: const Icon(
+                  Icons.account_balance_wallet_outlined,
+                  size: 16,
+                  color: AppColors.success,
+                ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Text(
                 'This Month',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: AppColors.textSecondary,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.xs),
+          const SizedBox(height: AppSpacing.md),
           Text(
             collectedStr,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -426,11 +513,24 @@ class _RecentActivitySection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              'Recent Activity',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+            Row(
+              children: [
+                Container(
+                  width: 4,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    color: AppColors.accent,
+                    borderRadius: AppRadii.pill,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Recent Activity',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
             TextButton(
               onPressed: onRefresh,
@@ -490,15 +590,18 @@ class _ActivityTile extends StatelessWidget {
         ? item.title!.trim()
         : 'Activity';
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppRadii.lg,
         border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
+          color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
           width: 0.5,
         ),
+        boxShadow: AppShadows.cardResting,
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(
@@ -506,16 +609,16 @@ class _ActivityTile extends StatelessWidget {
           vertical: AppSpacing.xs,
         ),
         leading: Container(
-          width: 36,
-          height: 36,
+          width: 32,
+          height: 32,
           decoration: BoxDecoration(
-            color: color.withOpacity(0.12),
-            borderRadius: BorderRadius.circular(10),
+            color: color.withValues(alpha: isDark ? 0.2 : 0.1),
+            shape: BoxShape.circle,
           ),
           child: Icon(
             icon,
             color: color,
-            size: 20,
+            size: 16,
           ),
         ),
         title: Text(
@@ -538,19 +641,20 @@ class _ActivityTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
+            if (time != null)
+              Text(
+                time,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: AppColors.textTertiary,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
+              ),
+            if (type != null && time != null) const SizedBox(height: 4),
             if (type != null)
               AppStatusBadge(
                 label: type.name.toUpperCase(),
                 type: type,
                 variant: AppStatusVariant.dot,
-              ),
-            if (type != null && time != null) const SizedBox(height: 4),
-            if (time != null)
-              Text(
-                time,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
               ),
           ],
         ),

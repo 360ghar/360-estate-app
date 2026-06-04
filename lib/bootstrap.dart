@@ -27,12 +27,15 @@ Future<void> bootstrap() async {
         AppLogger.w('No .env asset found; falling back to --dart-define values');
       }
 
-      if (config.isSupabaseConfigured) {
-        await Supabase.initialize(
-          url: config.supabaseUrl,
-          anonKey: config.supabaseAnonKey,
+      if (!config.isSupabaseConfigured) {
+        throw StateError(
+          'Missing SUPABASE_URL or SUPABASE_PUBLISHABLE_KEY for auth/session handling.',
         );
       }
+      await Supabase.initialize(
+        url: config.supabaseUrl,
+        anonKey: config.supabaseAnonKey,
+      );
 
       final preferences = await AppPreferences.create();
       final secureStore = SecureKvStore();
@@ -68,4 +71,3 @@ Future<void> bootstrap() async {
     },
   );
 }
-

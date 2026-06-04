@@ -1,8 +1,12 @@
+import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/presentation/design_system/app_radii.dart';
+import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/widgets/app_empty_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loading_shimmer.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/widgets/app_status_badge.dart';
 import 'package:estate_app/features/inspections/inspections_providers.dart';
 import 'package:estate_app/features/inspections/models/inspection.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +47,7 @@ class InspectionsPage extends ConsumerWidget {
           return ListView.separated(
             padding: const EdgeInsets.all(AppSpacing.lg),
             itemCount: inspections.length,
-            separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
+            separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
             itemBuilder: (context, index) {
               return _InspectionTile(inspection: inspections[index]);
             },
@@ -71,17 +75,155 @@ class _InspectionTile extends StatelessWidget {
     return DateFormat('d MMM yyyy').format(date);
   }
 
+  Color _statusBorderColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+      case 'signed':
+        return AppColors.success;
+      case 'in_progress':
+      case 'in progress':
+        return AppColors.warning;
+      case 'cancelled':
+      case 'canceled':
+        return AppColors.danger;
+      case 'scheduled':
+        return AppColors.info;
+      case 'open':
+      default:
+        return AppColors.accent;
+    }
+  }
+
+  AppStatusType _statusType(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+      case 'signed':
+        return AppStatusType.success;
+      case 'in_progress':
+      case 'in progress':
+        return AppStatusType.warning;
+      case 'cancelled':
+      case 'canceled':
+        return AppStatusType.danger;
+      case 'scheduled':
+        return AppStatusType.info;
+      case 'open':
+      default:
+        return AppStatusType.neutral;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final status = inspection.status ?? 'Open';
     final scheduled = _formatDate(inspection.scheduledAt);
+    final borderColor = _statusBorderColor(status);
 
-    return Card(
-      child: ListTile(
-        title: Text(inspection.displayName),
-        subtitle: Text('$status | $scheduled'),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () => context.go('/more/inspections/${inspection.id}'),
+    return GestureDetector(
+      onTap: () => context.go('/more/inspections/${inspection.id}'),
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: scheme.surface,
+          borderRadius: AppRadii.lg,
+          border: Border.all(
+            color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
+            width: 0.5,
+          ),
+          boxShadow: AppShadows.cardResting,
+        ),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Colored left border
+              Container(
+                width: 4,
+                decoration: BoxDecoration(
+                  color: borderColor,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(AppRadii.lgValue),
+                    bottomLeft: Radius.circular(AppRadii.lgValue),
+                  ),
+                ),
+              ),
+              // Content
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Top row: name + chevron
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              inspection.displayName,
+                              style: textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Icon(
+                            Icons.chevron_right,
+                            size: 20,
+                            color: AppColors.textTertiary,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      // Property name (if title is different from property)
+                      if (inspection.propertyName != null &&
+                          inspection.title != null &&
+                          inspection.propertyName != inspection.title)
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(bottom: AppSpacing.sm),
+                          child: Text(
+                            inspection.title!,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      // Bottom row: date + badges
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today_outlined,
+                            size: 14,
+                            color: AppColors.textTertiary,
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Text(
+                            scheduled,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const Spacer(),
+                          AppStatusBadge(
+                            label: status,
+                            type: _statusType(status),
+                            variant: AppStatusVariant.subtle,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

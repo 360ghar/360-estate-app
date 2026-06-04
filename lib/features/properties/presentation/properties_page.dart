@@ -1,12 +1,15 @@
-﻿import 'package:estate_app/core/pagination/paged_list_controller.dart';
+import 'dart:async';
+import 'package:estate_app/core/pagination/paged_list_controller.dart';
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
-import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
+import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_empty_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loading_shimmer.dart';
 import 'package:estate_app/core/presentation/widgets/app_progress_bar.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/widgets/app_search_bar.dart';
 import 'package:estate_app/core/presentation/widgets/app_segmented_button.dart';
 import 'package:estate_app/core/presentation/widgets/app_status_badge.dart';
 import 'package:estate_app/core/presentation/widgets/paged_list_view.dart';
@@ -18,10 +21,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 /// Professional B2B Properties page with:
-/// - Search bar with filter button
-/// - Horizontal filter chips
+/// - AppSearchBar with filter chips
 /// - List/Grid view toggle
-/// - Enhanced property cards with status and occupancy
+/// - Enhanced property cards with status accent and occupancy
 class PropertiesPage extends ConsumerStatefulWidget {
   const PropertiesPage({super.key});
 
@@ -68,11 +70,35 @@ class _PropertiesPageState extends ConsumerState<PropertiesPage> {
       ),
       body: Column(
         children: [
-          // Search bar and filters
-          _SearchAndFiltersBar(
-            searchController: _searchController,
-            selectedFilter: _selectedFilter,
-            onFilterChanged: _setFilter,
+          // Search bar and filters using AppSearchBar
+          AppSearchBar(
+            hintText: 'Search properties...',
+            controller: _searchController,
+            onFilterTap: () => _showFilterSheet(context),
+            filterChips: PropertyFilter.values.map((filter) {
+              final isSelected = filter == _selectedFilter;
+              final scheme = Theme.of(context).colorScheme;
+              return FilterChip(
+                label: Text(filter.label),
+                selected: isSelected,
+                onSelected: (_) => _setFilter(filter),
+                backgroundColor: Colors.transparent,
+                selectedColor: scheme.primary.withValues(alpha: 0.12),
+                checkmarkColor: scheme.primary,
+                labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: isSelected ? scheme.primary : AppColors.textSecondary,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: AppRadii.md,
+                  side: BorderSide(
+                    color: isSelected ? scheme.primary : scheme.outlineVariant,
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
+              );
+            }).toList(),
           ),
           const Divider(height: 1),
 
@@ -127,115 +153,9 @@ class _PropertiesPageState extends ConsumerState<PropertiesPage> {
       ],
     );
   }
-}
-
-/// Search bar and filter chips row.
-class _SearchAndFiltersBar extends StatelessWidget {
-  final TextEditingController searchController;
-  final PropertyFilter selectedFilter;
-  final ValueChanged<PropertyFilter> onFilterChanged;
-
-  const _SearchAndFiltersBar({
-    required this.searchController,
-    required this.selectedFilter,
-    required this.onFilterChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.lg,
-        AppSpacing.md,
-        AppSpacing.lg,
-        AppSpacing.sm,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Search bar
-          ValueListenableBuilder<TextEditingValue>(
-            valueListenable: searchController,
-            builder: (context, value, _) {
-              final hasQuery = value.text.trim().isNotEmpty;
-              return Container(
-                decoration: BoxDecoration(
-                  color: scheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: scheme.outlineVariant,
-                    width: 0.5,
-                  ),
-                ),
-                child: TextField(
-                  controller: searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search properties...',
-                    prefixIcon: const Icon(Icons.search_outlined),
-                    suffixIcon: hasQuery
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () => searchController.clear(),
-                          )
-                        : IconButton(
-                            icon: const Icon(Icons.filter_list_outlined),
-                            onPressed: () => _showFilterSheet(context),
-                          ),
-                    border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: 12,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(height: AppSpacing.sm),
-
-          // Filter chips
-          SizedBox(
-            height: 30,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: PropertyFilter.values.length,
-              separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
-              itemBuilder: (context, index) {
-                final filter = PropertyFilter.values[index];
-                final isSelected = filter == selectedFilter;
-
-                return FilterChip(
-                  label: Text(filter.label),
-                  selected: isSelected,
-                  onSelected: (_) => onFilterChanged(filter),
-                  backgroundColor: Colors.transparent,
-                  selectedColor: scheme.primary.withOpacity(0.12),
-                  checkmarkColor: scheme.primary,
-                  labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: isSelected ? scheme.primary : AppColors.textSecondary,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(
-                      color: isSelected ? scheme.primary : scheme.outlineVariant,
-                      width: 1,
-                    ),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _showFilterSheet(BuildContext context) {
-    showModalBottomSheet<void>(
+    unawaited(showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) {
@@ -290,7 +210,7 @@ class _SearchAndFiltersBar extends StatelessWidget {
           ),
         );
       },
-    );
+    ));
   }
 }
 
@@ -339,12 +259,12 @@ class _FilterOption extends StatelessWidget {
               selected: isSelected,
               onSelected: (_) => onTap(option),
               backgroundColor: Colors.transparent,
-              selectedColor: scheme.primary.withOpacity(0.12),
+              selectedColor: scheme.primary.withValues(alpha: 0.12),
               labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: isSelected ? scheme.primary : AppColors.textSecondary,
               ),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: AppRadii.md,
                 side: BorderSide(
                   color: isSelected ? scheme.primary : scheme.outlineVariant,
                 ),
@@ -443,20 +363,26 @@ class _PropertyGridView extends StatelessWidget {
   }
 }
 
-/// Enhanced property list card with better visual hierarchy.
+/// Enhanced property list card with AppCard, status accent border,
+/// scale press feedback, and occupancy bar.
 class _PropertyListCard extends StatelessWidget {
   const _PropertyListCard({required this.property});
 
   final Property property;
 
+  Color? _statusAccentColor() {
+    final status = property.managementStatus?.toLowerCase();
+    if (status == 'active') return AppColors.success;
+    if (status == 'inactive') return AppColors.textTertiary;
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final formatter = NumberFormat.currency(
-      symbol: 'ƒ,1',
+      symbol: '\u0192,1',
       decimalDigits: 0,
     );
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final title = _propertyTitle(property);
     final subtitle = _propertySubtitle(property);
     final statusBadge = _buildStatusBadge(context);
@@ -466,6 +392,7 @@ class _PropertyListCard extends StatelessWidget {
     final rentLabel = property.monthlyRentInr != null
         ? formatter.format(property.monthlyRentInr!)
         : null;
+    final hasOccupancy = _hasOccupancyData(property);
     final metaChips = <Widget>[
       if (typeLabel != null)
         _StatChip(
@@ -494,120 +421,116 @@ class _PropertyListCard extends StatelessWidget {
             ? property.images!.first
             : null;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: scheme.outlineVariant,
-          width: 0.5,
-        ),
-        boxShadow: isDark ? AppShadowsDark.sm : AppShadows.sm,
-      ),
-      child: InkWell(
-        onTap: () => context.go('/properties/${property.id}'),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Property image/placeholder
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Container(
-                  width: 64,
-                  height: 64,
-                  color: scheme.surfaceContainerHighest,
-                  child: imageUrl != null
-                      ? Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Center(
-                            child: Icon(
-                              _getPropertyIcon(property.type),
-                              size: 22,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        )
-                      : Center(
-                          child: Icon(
-                            _getPropertyIcon(property.type),
-                            size: 22,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                ),
+    return AppCard(
+      headerColor: _statusAccentColor(),
+      onTap: () => context.go('/properties/${property.id}'),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Property image/placeholder with building icon
+          ClipRRect(
+            borderRadius: AppRadii.md,
+            child: Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: AppRadii.md,
               ),
-              const SizedBox(width: AppSpacing.md),
-
-              // Property details
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            title,
-                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+              child: imageUrl != null
+                  ? Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Center(
+                        child: Icon(
+                          _getPropertyIcon(property.type),
+                          size: 28,
+                          color: AppColors.textTertiary,
                         ),
-                        if (statusBadge != null) ...[
-                          const SizedBox(width: AppSpacing.sm),
-                          statusBadge,
-                        ],
-                      ],
+                      ),
+                    )
+                  : Center(
+                      child: Icon(
+                        _getPropertyIcon(property.type),
+                        size: 28,
+                        color: AppColors.textTertiary,
+                      ),
                     ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: AppSpacing.xs),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.location_on_outlined,
-                            size: 14,
-                            color: AppColors.textSecondary,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              subtitle,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+
+          // Property details
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                    if (visibleChips.isNotEmpty) ...[
-                      const SizedBox(height: AppSpacing.sm),
-                      Wrap(
-                        spacing: AppSpacing.xs,
-                        runSpacing: AppSpacing.xs,
-                        children: visibleChips,
-                      ),
+                    ),
+                    if (statusBadge != null) ...[
+                      const SizedBox(width: AppSpacing.sm),
+                      statusBadge,
                     ],
                   ],
                 ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Icon(
-                Icons.chevron_right,
-                size: 18,
-                color: AppColors.textSecondary,
-              ),
-            ],
+                if (subtitle != null) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 14,
+                        color: AppColors.textSecondary,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          subtitle,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                if (visibleChips.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.xs,
+                    runSpacing: AppSpacing.xs,
+                    children: visibleChips,
+                  ),
+                ],
+                if (hasOccupancy) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  AppOccupancyBar(
+                    occupancy: property.occupancyRate,
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
+          const SizedBox(width: AppSpacing.sm),
+          Icon(
+            Icons.chevron_right,
+            size: 18,
+            color: AppColors.textTertiary,
+          ),
+        ],
       ),
     );
   }
@@ -625,20 +548,26 @@ class _PropertyListCard extends StatelessWidget {
   }
 }
 
-/// Property grid card with image header.
+/// Property grid card with image header and AppCard.
 class _PropertyGridCard extends StatelessWidget {
   const _PropertyGridCard({required this.property});
 
   final Property property;
 
+  Color? _statusAccentColor() {
+    final status = property.managementStatus?.toLowerCase();
+    if (status == 'active') return AppColors.success;
+    if (status == 'inactive') return AppColors.textTertiary;
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final formatter = NumberFormat.currency(
-      symbol: 'ƒ,1',
+      symbol: '\u0192,1',
       decimalDigits: 0,
     );
     final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final title = _propertyTitle(property);
     final subtitle = _propertySubtitle(property);
     final statusBadge = _buildStatusBadge(context);
@@ -671,112 +600,103 @@ class _PropertyGridCard extends StatelessWidget {
             ? property.images!.first
             : null;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: scheme.outlineVariant,
-          width: 0.5,
-        ),
-        boxShadow: isDark ? AppShadowsDark.sm : AppShadows.sm,
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => context.go('/properties/${property.id}'),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Container(
-                    color: scheme.surfaceContainerHighest,
-                    child: imageUrl != null
-                        ? Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Center(
-                              child: Icon(
-                                _getPropertyIcon(property.type),
-                                size: 44,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          )
-                        : Center(
+    return AppCard(
+      padding: EdgeInsets.zero,
+      onTap: () => context.go('/properties/${property.id}'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Status accent strip
+          if (_statusAccentColor() != null)
+            Container(height: 3, color: _statusAccentColor()),
+          Expanded(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Container(
+                  color: scheme.surfaceContainerHighest,
+                  child: imageUrl != null
+                      ? Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => Center(
                             child: Icon(
                               _getPropertyIcon(property.type),
                               size: 44,
-                              color: AppColors.textSecondary,
+                              color: AppColors.textTertiary,
                             ),
                           ),
+                        )
+                      : Center(
+                          child: Icon(
+                            _getPropertyIcon(property.type),
+                            size: 44,
+                            color: AppColors.textTertiary,
+                          ),
+                        ),
+                ),
+                if (statusBadge != null)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: statusBadge,
                   ),
-                  if (statusBadge != null)
-                    Positioned(
-                      top: 8,
-                      left: 8,
-                      child: statusBadge,
-                    ),
-                ],
-              ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.sm),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on_outlined,
-                          size: 12,
-                          color: AppColors.textSecondary,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            subtitle,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 12,
+                        color: AppColors.textSecondary,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          subtitle,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.textSecondary,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.sm),
+                if (visibleChips.isNotEmpty)
+                  Wrap(
+                    spacing: AppSpacing.xs,
+                    runSpacing: AppSpacing.xs,
+                    children: visibleChips,
+                  ),
+                if (hasOccupancy) ...[
                   const SizedBox(height: AppSpacing.sm),
-                  if (visibleChips.isNotEmpty)
-                    Wrap(
-                      spacing: AppSpacing.xs,
-                      runSpacing: AppSpacing.xs,
-                      children: visibleChips,
-                    ),
-                  if (hasOccupancy) ...[
-                    const SizedBox(height: AppSpacing.sm),
-                    AppOccupancyBar(
-                      occupancy: property.occupancyRate,
-                      showPercentage: true,
-                    ),
-                  ],
+                  AppOccupancyBar(
+                    occupancy: property.occupancyRate,
+                  ),
                 ],
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -789,7 +709,6 @@ class _PropertyGridCard extends StatelessWidget {
     return AppStatusBadge(
       label: label.toUpperCase(),
       type: _propertyStatusType(status),
-      variant: AppStatusVariant.filled,
     );
   }
 }
@@ -806,14 +725,14 @@ class _StatChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(6),
+        color: isDark ? AppColors.darkSurfaceSecondary : AppColors.surfaceSecondary,
+        borderRadius: AppRadii.sm,
         border: Border.all(
-          color: scheme.outlineVariant,
+          color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
           width: 0.5,
         ),
       ),
@@ -881,7 +800,7 @@ IconData _getPropertyIcon(String? type) {
 String _propertyTitle(Property property) {
   final name = _trimOrNull(property.name) ?? _trimOrNull(property.propertyName);
   final hasName = name != null && !_looksLikeId(name, property);
-  if (hasName) return name!;
+  if (hasName) return name;
   final address = _trimOrNull(property.address);
   if (address != null) return address;
   final city = _trimOrNull(property.city);
@@ -1005,7 +924,3 @@ AppStatusType _propertyStatusType(String status) {
       return AppStatusType.neutral;
   }
 }
-
-
-
-

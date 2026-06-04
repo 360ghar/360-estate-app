@@ -88,7 +88,7 @@ class AppStatusBadge extends StatelessWidget {
         border: variant == AppStatusVariant.outline
             ? Border.all(color: colors.foreground)
             : null,
-        borderRadius: AppRadii.sm,
+        borderRadius: AppRadii.pill,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -123,7 +123,7 @@ class AppStatusBadge extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: AppRadii.sm,
+          borderRadius: AppRadii.pill,
           child: badge,
         ),
       );
@@ -179,8 +179,8 @@ class AppStatusBadge extends StatelessWidget {
             ),
           AppStatusVariant.subtle => _StatusColors(
               background: isDark
-                  ? AppColors.success.withOpacity(0.15)
-                  : AppColors.success.withOpacity(0.1),
+                  ? AppColors.success.withValues(alpha: 0.15)
+                  : AppColors.success.withValues(alpha: 0.1),
               foreground: isDark ? AppColors.successLight : AppColors.success,
             ),
           AppStatusVariant.dot => _StatusColors(
@@ -200,8 +200,8 @@ class AppStatusBadge extends StatelessWidget {
             ),
           AppStatusVariant.subtle => _StatusColors(
               background: isDark
-                  ? AppColors.warning.withOpacity(0.15)
-                  : AppColors.warning.withOpacity(0.1),
+                  ? AppColors.warning.withValues(alpha: 0.15)
+                  : AppColors.warning.withValues(alpha: 0.1),
               foreground: isDark ? AppColors.warningLight : AppColors.warning,
             ),
           AppStatusVariant.dot => _StatusColors(
@@ -221,8 +221,8 @@ class AppStatusBadge extends StatelessWidget {
             ),
           AppStatusVariant.subtle => _StatusColors(
               background: isDark
-                  ? AppColors.danger.withOpacity(0.15)
-                  : AppColors.danger.withOpacity(0.1),
+                  ? AppColors.danger.withValues(alpha: 0.15)
+                  : AppColors.danger.withValues(alpha: 0.1),
               foreground: isDark ? AppColors.dangerLight : AppColors.danger,
             ),
           AppStatusVariant.dot => _StatusColors(
@@ -242,8 +242,8 @@ class AppStatusBadge extends StatelessWidget {
             ),
           AppStatusVariant.subtle => _StatusColors(
               background: isDark
-                  ? AppColors.info.withOpacity(0.15)
-                  : AppColors.info.withOpacity(0.1),
+                  ? AppColors.info.withValues(alpha: 0.15)
+                  : AppColors.info.withValues(alpha: 0.1),
               foreground: isDark ? AppColors.infoLight : AppColors.info,
             ),
           AppStatusVariant.dot => _StatusColors(

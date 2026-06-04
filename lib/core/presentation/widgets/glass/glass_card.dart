@@ -1,6 +1,7 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
+
 import 'package:estate_app/core/presentation/design_system/design_system.dart';
+import 'package:flutter/material.dart';
 
 /// Glass card variants
 enum GlassCardVariant {
@@ -178,7 +179,7 @@ class _GlassCardState extends State<GlassCard>
       height: widget.height,
       padding: widget.padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: widget.color?.withOpacity(widget.opacity) ??
+        color: widget.color?.withValues(alpha: widget.opacity) ??
             (isDark
                 ? AppGlassColors.glassSurfaceDark(widget.opacity)
                 : AppGlassColors.glassSurfaceLight(widget.opacity)),

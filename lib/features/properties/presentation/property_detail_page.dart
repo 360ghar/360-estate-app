@@ -1,8 +1,12 @@
+import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/presentation/design_system/app_radii.dart';
+import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loading_shimmer.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
-import 'package:estate_app/core/presentation/widgets/section_header.dart';
+import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
+import 'package:estate_app/core/presentation/widgets/app_status_badge.dart';
 import 'package:estate_app/features/properties/models/property.dart';
 import 'package:estate_app/features/properties/properties_providers.dart';
 import 'package:flutter/material.dart';
@@ -150,68 +154,8 @@ class _PropertyDetailContentState extends State<_PropertyDetailContent>
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Property header
-        Container(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.property.displayName,
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          widget.property.fullAddress,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  _PropertyStatusChip(status: widget.property.managementStatus),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Wrap(
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                children: [
-                  _InfoChip(
-                    icon: Icons.apartment,
-                    label: widget.property.typeDisplay,
-                  ),
-                  if (widget.property.unitCount != null)
-                    _InfoChip(
-                      icon: Icons.meeting_room,
-                      label: '${widget.property.unitCount} units',
-                    ),
-                  if (widget.property.isOccupied)
-                    _InfoChip(
-                      icon: Icons.person,
-                      label: 'Occupied',
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  if (widget.property.monthlyRentInr != null)
-                    _InfoChip(
-                      icon: Icons.currency_rupee,
-                      label: '${widget.property.monthlyRentInr!.toInt()}/mo',
-                    ),
-                ],
-              ),
-            ],
-          ),
-        ),
+        // Property header with large name + address hierarchy
+        _PropertyHeader(property: widget.property),
         // Tabs
         TabBar(
           controller: _tabController,
@@ -246,7 +190,229 @@ class _PropertyDetailContentState extends State<_PropertyDetailContent>
   }
 }
 
-// Overview Tab
+/// Premium property header with large name, secondary address, status badge,
+/// and quick-action row.
+class _PropertyHeader extends StatelessWidget {
+  const _PropertyHeader({required this.property});
+
+  final Property property;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurfaceSecondary : AppColors.surfaceSecondary,
+        boxShadow: AppShadows.sectionDivider,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Name + Status row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      property.displayName,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.location_on_outlined,
+                          size: 16,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            property.fullAddress,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              _buildStatusBadge(context),
+            ],
+          ),
+
+          const SizedBox(height: AppSpacing.lg),
+
+          // Quick info chips
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              _InfoChip(
+                icon: Icons.apartment,
+                label: property.typeDisplay,
+              ),
+              if (property.unitCount != null)
+                _InfoChip(
+                  icon: Icons.meeting_room,
+                  label: '${property.unitCount} units',
+                ),
+              if (property.isOccupied)
+                _InfoChip(
+                  icon: Icons.person,
+                  label: 'Occupied',
+                  color: scheme.primary,
+                ),
+              if (property.monthlyRentInr != null)
+                _InfoChip(
+                  icon: Icons.currency_rupee,
+                  label: '${property.monthlyRentInr!.toInt()}/mo',
+                ),
+            ],
+          ),
+
+          const SizedBox(height: AppSpacing.lg),
+
+          // Action buttons row as small cards
+          _QuickActionsRow(property: property),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(BuildContext context) {
+    final statusLower = property.managementStatus?.toLowerCase() ?? '';
+    final statusType = switch (statusLower) {
+      'active' => AppStatusType.success,
+      'inactive' => AppStatusType.neutral,
+      'sold' => AppStatusType.danger,
+      _ => AppStatusType.neutral,
+    };
+
+    return AppStatusBadge(
+      label: property.statusDisplay.toUpperCase(),
+      type: statusType,
+      variant: AppStatusVariant.subtle,
+    );
+  }
+}
+
+/// Row of quick-action small cards with icon + label.
+class _QuickActionsRow extends StatelessWidget {
+  const _QuickActionsRow({required this.property});
+
+  final Property property;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return Row(
+      children: [
+        _ActionMiniCard(
+          icon: Icons.payments_outlined,
+          label: 'Collect',
+          color: AppColors.success,
+          onTap: () => context.go('/collections'),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        _ActionMiniCard(
+          icon: Icons.build_outlined,
+          label: 'Tasks',
+          color: AppColors.warning,
+          onTap: () => context.go('/tasks'),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        _ActionMiniCard(
+          icon: Icons.folder_outlined,
+          label: 'Docs',
+          color: AppColors.info,
+          onTap: () => context.go('/more/documents'),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        _ActionMiniCard(
+          icon: Icons.edit_outlined,
+          label: 'Edit',
+          color: scheme.primary,
+          onTap: () => context.go('/properties/${property.id}/edit'),
+        ),
+      ],
+    );
+  }
+}
+
+/// Small action card with icon and label.
+class _ActionMiniCard extends StatelessWidget {
+  const _ActionMiniCard({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: AppRadii.md,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              vertical: AppSpacing.sm,
+              horizontal: AppSpacing.xs,
+            ),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: isDark ? 0.12 : 0.06),
+              borderRadius: AppRadii.md,
+              border: Border.all(
+                color: color.withValues(alpha: isDark ? 0.2 : 0.12),
+                width: 0.5,
+              ),
+            ),
+            child: Column(
+              children: [
+                Icon(icon, size: 20, color: color),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Overview Tab using AppSectionCard
 class _OverviewTab extends StatelessWidget {
   const _OverviewTab({required this.property});
 
@@ -261,50 +427,55 @@ class _OverviewTab extends StatelessWidget {
         children: [
           // Images section
           if (property.images != null && property.images!.isNotEmpty) ...[
-            const SectionHeader(title: 'Photos'),
-            const SizedBox(height: AppSpacing.md),
-            SizedBox(
-              height: 200,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: property.images!.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      right: index < property.images!.length - 1
-                          ? AppSpacing.md
-                          : 0,
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        property.images![index],
-                        width: 280,
-                        height: 200,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            width: 280,
-                            height: 200,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest,
-                            child: const Icon(Icons.broken_image),
-                          );
-                        },
+            AppSectionCard(
+              title: 'Photos',
+              icon: Icons.photo_library_outlined,
+              contentPadding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.lg,
+              ),
+              child: SizedBox(
+                height: 200,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: property.images!.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        right: index < property.images!.length - 1
+                            ? AppSpacing.md
+                            : 0,
                       ),
-                    ),
-                  );
-                },
+                      child: ClipRRect(
+                        borderRadius: AppRadii.md,
+                        child: Image.network(
+                          property.images![index],
+                          width: 280,
+                          height: 200,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: 280,
+                              height: 200,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest,
+                              child: const Icon(Icons.broken_image),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.lg),
           ],
 
           // Specifications
-          const SectionHeader(title: 'Specifications'),
-          const SizedBox(height: AppSpacing.md),
-          _InfoCard(
+          AppSectionCard(
+            title: 'Specifications',
+            icon: Icons.list_alt_outlined,
             children: [
               _InfoRow(label: 'Property type', value: property.typeDisplay),
               if (property.floorAreaSqft != null)
@@ -326,30 +497,41 @@ class _OverviewTab extends StatelessWidget {
 
           // Amenities
           if (property.amenities != null && property.amenities!.isNotEmpty) ...[
-            const SectionHeader(title: 'Amenities'),
-            const SizedBox(height: AppSpacing.md),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: property.amenities!
-                  .map((amenity) => Chip(
-                        label: Text(amenity),
-                        avatar: const Icon(Icons.check, size: 16),
-                      ))
-                  .toList(),
+            AppSectionCard(
+              title: 'Amenities',
+              icon: Icons.check_circle_outline,
+              iconColor: AppColors.success,
+              child: Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: property.amenities!
+                    .map((amenity) => Chip(
+                          label: Text(amenity),
+                          avatar: Icon(Icons.check, size: 16, color: AppColors.success),
+                          backgroundColor: AppColors.success.withValues(alpha: 0.06),
+                          side: BorderSide(
+                            color: AppColors.success.withValues(alpha: 0.15),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: AppRadii.md,
+                          ),
+                        ))
+                    .toList(),
+              ),
             ),
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.lg),
           ],
 
           // Financial Information
-          const SectionHeader(title: 'Financial Information'),
-          const SizedBox(height: AppSpacing.md),
-          _InfoCard(
+          AppSectionCard(
+            title: 'Financial Information',
+            icon: Icons.account_balance_outlined,
+            iconColor: AppColors.accent,
             children: [
               if (property.monthlyRentInr != null)
                 _InfoRow(
                   label: 'Monthly rent',
-                  value: '₹${property.monthlyRentInr!.toInt()}',
+                  value: '\u20B9${property.monthlyRentInr!.toInt()}',
                 ),
               if (property.paymentDueDay != null)
                 _InfoRow(
@@ -359,16 +541,17 @@ class _OverviewTab extends StatelessWidget {
               if (property.marketValue != null)
                 _InfoRow(
                   label: 'Market value',
-                  value: '₹${property.marketValue!.toInt()}',
+                  value: '\u20B9${property.marketValue!.toInt()}',
                 ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
 
           // Legal & Documentation
-          const SectionHeader(title: 'Legal & Documentation'),
-          const SizedBox(height: AppSpacing.md),
-          _InfoCard(
+          AppSectionCard(
+            title: 'Legal & Documentation',
+            icon: Icons.gavel_outlined,
+            iconColor: AppColors.warning,
             children: [
               if (property.propertyTaxId != null)
                 _InfoRow(label: 'Property Tax ID', value: property.propertyTaxId!),
@@ -381,9 +564,9 @@ class _OverviewTab extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
 
           // Management
-          const SectionHeader(title: 'Management'),
-          const SizedBox(height: AppSpacing.md),
-          _InfoCard(
+          AppSectionCard(
+            title: 'Management',
+            icon: Icons.settings_outlined,
             children: [
               _InfoRow(label: 'Status', value: property.statusDisplay),
               if (property.assignedManagerId != null)
@@ -397,15 +580,17 @@ class _OverviewTab extends StatelessWidget {
 
           // Notes
           if (property.notes != null && property.notes!.isNotEmpty) ...[
-            const SectionHeader(title: 'Notes'),
-            const SizedBox(height: AppSpacing.md),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Text(property.notes!),
+            AppSectionCard(
+              title: 'Notes',
+              icon: Icons.note_outlined,
+              child: Text(
+                property.notes!,
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
           ],
+
+          const SizedBox(height: AppSpacing.xl),
         ],
       ),
     );
@@ -599,25 +784,6 @@ class _InspectionsTab extends StatelessWidget {
 }
 
 // Helper widgets
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: children,
-        ),
-      ),
-    );
-  }
-}
-
 class _InfoRow extends StatelessWidget {
   const _InfoRow({required this.label, required this.value});
 
@@ -631,16 +797,19 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+          Flexible(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ),
+          const SizedBox(width: AppSpacing.md),
           Text(
             value,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -662,73 +831,33 @@ class _InfoChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Chip(
-      avatar: Icon(
-        icon,
-        size: 16,
-        color: color ?? theme.colorScheme.onSurfaceVariant,
-      ),
-      label: Text(label),
-      visualDensity: VisualDensity.compact,
-      backgroundColor: color?.withOpacity(0.1),
-    );
-  }
-}
-
-class _PropertyStatusChip extends StatelessWidget {
-  const _PropertyStatusChip({required this.status});
-
-  final String? status;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final statusLower = status?.toLowerCase() ?? '';
-
-    Color backgroundColor;
-    Color foregroundColor;
-    IconData icon;
-
-    switch (statusLower) {
-      case 'active':
-        backgroundColor = theme.colorScheme.primaryContainer;
-        foregroundColor = theme.colorScheme.onPrimaryContainer;
-        icon = Icons.check_circle;
-        break;
-      case 'inactive':
-        backgroundColor = theme.colorScheme.surfaceContainerHighest;
-        foregroundColor = theme.colorScheme.onSurface;
-        icon = Icons.pause_circle;
-        break;
-      case 'sold':
-        backgroundColor = theme.colorScheme.errorContainer;
-        foregroundColor = theme.colorScheme.onErrorContainer;
-        icon = Icons.sell;
-        break;
-      default:
-        backgroundColor = theme.colorScheme.surfaceContainerHighest;
-        foregroundColor = theme.colorScheme.onSurface;
-        icon = Icons.help;
-    }
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final effectiveColor = color ?? AppColors.textSecondary;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(16),
+        color: effectiveColor.withValues(alpha: isDark ? 0.12 : 0.06),
+        borderRadius: AppRadii.md,
+        border: Border.all(
+          color: effectiveColor.withValues(alpha: isDark ? 0.2 : 0.12),
+          width: 0.5,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: foregroundColor),
-          const SizedBox(width: 4),
+          Icon(
+            icon,
+            size: 16,
+            color: effectiveColor,
+          ),
+          const SizedBox(width: 6),
           Text(
-            status?.toUpperCase() ?? 'UNKNOWN',
-            style: TextStyle(
-              color: foregroundColor,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: effectiveColor,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],

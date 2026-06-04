@@ -9,7 +9,7 @@ class CacheStore {
       return null;
     }
     final value = entry.value;
-    if (value is T) return value as T;
+    if (value is T) return value;
     return null;
   }
 

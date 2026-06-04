@@ -1,4 +1,4 @@
-﻿import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:flutter/material.dart';
 
 /// Premium gradient definitions for glassmorphism UI.
@@ -57,6 +57,58 @@ abstract final class AppGradients {
     colors: [
       Color(0xFFDC2626), // Red
       Color(0xFFEF4444), // Light red
+    ],
+  );
+
+  // === Subtle Status-Tinted Gradients (for card backgrounds) ===
+
+  /// Very subtle navy-to-transparent — card header accent
+  static const LinearGradient primarySubtle = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0x0A1E3A5F), // 4% navy
+      Color(0x001E3A5F), // transparent navy
+    ],
+  );
+
+  /// Success-tinted background — for paid/completed items
+  static const LinearGradient successSubtle = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0x0A059669), // 4% emerald
+      Color(0x00059669), // transparent
+    ],
+  );
+
+  /// Warning-tinted background — for due/expiring items
+  static const LinearGradient warningSubtle = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0x0AF59E0B), // 4% amber
+      Color(0x00F59E0B), // transparent
+    ],
+  );
+
+  /// Danger-tinted background — for overdue/critical items
+  static const LinearGradient dangerSubtle = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0x0ADC2626), // 4% red
+      Color(0x00DC2626), // transparent
+    ],
+  );
+
+  /// White-to-transparent sheen — glass-like depth overlay for cards
+  static const LinearGradient surfaceSheen = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      Color(0x0DFFFFFF), // 5% white
+      Color(0x00FFFFFF), // transparent
     ],
   );
 
@@ -160,12 +212,11 @@ abstract final class AppGradients {
   /// Orb gradient for floating decorative elements
   static RadialGradient orbGradient(Color color) {
     return RadialGradient(
-      center: Alignment.center,
       radius: 1.0,
       colors: [
-        color.withOpacity(0.4),
-        color.withOpacity(0.2),
-        color.withOpacity(0.0),
+        color.withValues(alpha: 0.4),
+        color.withValues(alpha: 0.2),
+        color.withValues(alpha: 0.0),
       ],
       stops: const [0.0, 0.5, 1.0],
     );

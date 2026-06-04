@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 /// Multi-level shadow system for B2B SaaS elevation.
 /// Provides clear visual hierarchy through subtle elevation differences.
@@ -39,6 +39,57 @@ abstract final class AppShadows {
     ),
   ];
 
+  // Interactive card shadows for press feedback
+  /// Very subtle resting shadow — default for all cards
+  static const List<BoxShadow> cardResting = [
+    BoxShadow(
+      color: Color(0x08000000), // 3% black
+      offset: Offset(0, 1),
+      blurRadius: 3,
+    ),
+    BoxShadow(
+      color: Color(0x05000000), // 2% black
+      offset: Offset(0, 1),
+      blurRadius: 1,
+    ),
+  ];
+
+  /// Slightly raised — for hovered/pressed card feedback
+  static const List<BoxShadow> cardHovered = [
+    BoxShadow(
+      color: Color(0x0D000000), // 5% black
+      offset: Offset(0, 2),
+      blurRadius: 6,
+    ),
+    BoxShadow(
+      color: Color(0x08000000), // 3% black
+      offset: Offset(0, 1),
+      blurRadius: 2,
+    ),
+  ];
+
+  /// Prominent — for floating elements (FABs, dragged cards, bottom sheets)
+  static const List<BoxShadow> cardElevated = [
+    BoxShadow(
+      color: Color(0x14000000), // 8% black
+      offset: Offset(0, 4),
+      blurRadius: 12,
+    ),
+    BoxShadow(
+      color: Color(0x0A000000), // 4% black
+      offset: Offset(0, 2),
+      blurRadius: 4,
+    ),
+  ];
+
+  /// Ultra-subtle — visual separator between content sections
+  static const List<BoxShadow> sectionDivider = [
+    BoxShadow(
+      color: Color(0x06000000), // 2.5% black
+      offset: Offset(0, 1),
+    ),
+  ];
+
   // Legacy aliases for gradual migration
   static const List<BoxShadow> card = md;
   static const List<BoxShadow> subtle = sm;
@@ -49,9 +100,7 @@ abstract final class AppShadows {
   static const List<BoxShadow> glowBlue = [
     BoxShadow(
       color: Color(0x1A3B82F6), // 10% blue
-      offset: Offset(0, 0),
       blurRadius: 8,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: Color(0x1A3B82F6),
@@ -65,9 +114,7 @@ abstract final class AppShadows {
   static const List<BoxShadow> glowPurple = [
     BoxShadow(
       color: Color(0x1A8B5CF6), // 10% purple
-      offset: Offset(0, 0),
       blurRadius: 8,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: Color(0x1A8B5CF6),
@@ -81,9 +128,7 @@ abstract final class AppShadows {
   static const List<BoxShadow> glowTeal = [
     BoxShadow(
       color: Color(0x1A14B8A6), // 10% teal
-      offset: Offset(0, 0),
       blurRadius: 8,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: Color(0x1A14B8A6),
@@ -97,9 +142,7 @@ abstract final class AppShadows {
   static const List<BoxShadow> glowRed = [
     BoxShadow(
       color: Color(0x1ADC2626), // 10% red
-      offset: Offset(0, 0),
       blurRadius: 8,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: Color(0x1ADC2626),
@@ -160,7 +203,6 @@ abstract final class AppShadows {
       color: Color(0x403B82F6), // 25% blue
       offset: Offset(0, 2),
       blurRadius: 8,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: Color(0x203B82F6), // 12% blue
@@ -175,7 +217,6 @@ abstract final class AppShadows {
       color: Color(0x408B5CF6), // 25% purple
       offset: Offset(0, 2),
       blurRadius: 8,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: Color(0x208B5CF6), // 12% purple
@@ -190,9 +231,7 @@ abstract final class AppShadows {
   static const List<BoxShadow> inputFocus = [
     BoxShadow(
       color: Color(0x303B82F6), // 19% blue
-      offset: Offset(0, 0),
       blurRadius: 4,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: Color(0x1A3B82F6), // 10% blue
@@ -205,9 +244,7 @@ abstract final class AppShadows {
   static const List<BoxShadow> inputError = [
     BoxShadow(
       color: Color(0x30DC2626), // 19% red
-      offset: Offset(0, 0),
       blurRadius: 4,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: Color(0x1ADC2626), // 10% red
@@ -220,9 +257,7 @@ abstract final class AppShadows {
   static const List<BoxShadow> inputSuccess = [
     BoxShadow(
       color: Color(0x30059669), // 19% green
-      offset: Offset(0, 0),
       blurRadius: 4,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: Color(0x1A059669), // 10% green

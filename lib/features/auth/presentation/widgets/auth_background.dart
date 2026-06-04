@@ -1,6 +1,5 @@
-import 'dart:ui';
-import 'package:flutter/material.dart';
 import 'package:estate_app/core/presentation/design_system/design_system.dart';
+import 'package:flutter/material.dart';
 
 /// A premium animated background for authentication screens.
 ///
@@ -86,7 +85,6 @@ class _AuthBackgroundState extends State<AuthBackground>
             baseX: 0.2,
             baseY: 0.3,
             color: AppGlassColors.auroraPurple,
-            size: 200,
           ),
         if (widget.orbCount > 1)
           _FloatingOrb(
@@ -175,12 +173,11 @@ class _FloatingOrb extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: RadialGradient(
-                center: Alignment.center,
                 radius: 1.0,
                 colors: [
-                  color.withOpacity(0.4),
-                  color.withOpacity(0.2),
-                  color.withOpacity(0),
+                  color.withValues(alpha: 0.4),
+                  color.withValues(alpha: 0.2),
+                  color.withValues(alpha: 0),
                 ],
                 stops: const [0.0, 0.5, 1.0],
               ),
@@ -216,7 +213,7 @@ class _GridPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.03)
+      ..color = Colors.white.withValues(alpha: 0.03)
       ..strokeWidth = 1;
 
     const gridSize = 40.0;
@@ -316,7 +313,7 @@ class _GridPatternPainterLight extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF6366F1).withOpacity(0.05)
+      ..color = const Color(0xFF6366F1).withValues(alpha: 0.05)
       ..strokeWidth = 1;
 
     const gridSize = 40.0;

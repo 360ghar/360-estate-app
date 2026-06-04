@@ -1,6 +1,6 @@
-﻿import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// Professional B2B typography system with Poppins font.
 /// Includes financial display styles with tabular figures for data.
@@ -327,7 +327,6 @@ abstract final class AppTextStyles {
       ),
       Shadow(
         color: Color(0x203B82F6), // 12% blue glow
-        offset: Offset(0, 0),
         blurRadius: 16,
       ),
     ],
@@ -373,7 +372,6 @@ abstract final class AppTextStyles {
     shadows: [
       Shadow(
         color: Color(0x40059669), // 25% green glow
-        offset: Offset(0, 0),
         blurRadius: 4,
       ),
     ],
@@ -388,7 +386,6 @@ abstract final class AppTextStyles {
     shadows: [
       Shadow(
         color: Color(0x40DC2626), // 25% red glow
-        offset: Offset(0, 0),
         blurRadius: 4,
       ),
     ],

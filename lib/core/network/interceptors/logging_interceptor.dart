@@ -71,5 +71,5 @@ String _formatTokenMeta(Map<String, dynamic> extras) {
     parts.add('iss=$iss');
   }
   if (parts.isEmpty) return '';
-  return ' token[' + parts.join(',') + ']';
+  return ' token[${parts.join(',')}]';
 }

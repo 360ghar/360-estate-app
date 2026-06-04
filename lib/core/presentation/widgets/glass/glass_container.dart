@@ -1,6 +1,7 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
+
 import 'package:estate_app/core/presentation/design_system/design_system.dart';
+import 'package:flutter/material.dart';
 
 /// A glassmorphism container with frosted glass effect.
 ///
@@ -82,7 +83,6 @@ class GlassContainer extends StatelessWidget {
   }) {
     return GlassContainer(
       key: key,
-      child: child,
       blur: blur,
       opacity: opacity,
       color: Colors.white,
@@ -91,6 +91,7 @@ class GlassContainer extends StatelessWidget {
       width: width,
       height: height,
       shadow: shadow ?? AppShadows.glass,
+      child: child,
     );
   }
 
@@ -108,7 +109,6 @@ class GlassContainer extends StatelessWidget {
   }) {
     return GlassContainer(
       key: key,
-      child: child,
       blur: blur,
       opacity: opacity,
       color: const Color(0xFF1E293B),
@@ -117,12 +117,13 @@ class GlassContainer extends StatelessWidget {
       width: width,
       height: height,
       shadow: shadow ?? AppShadows.glassDark,
+      child: child,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = color?.withOpacity(opacity) ??
+    final effectiveColor = color?.withValues(alpha: opacity) ??
         (Theme.of(context).brightness == Brightness.dark
             ? AppGlassColors.glassSurfaceDark(opacity)
             : AppGlassColors.glassSurfaceLight(opacity));
@@ -140,7 +141,6 @@ class GlassContainer extends StatelessWidget {
               color: Theme.of(context).brightness == Brightness.dark
                   ? AppGlassColors.borderDark
                   : AppGlassColors.borderLight,
-              width: 1,
             ),
         boxShadow: shadow,
       ),

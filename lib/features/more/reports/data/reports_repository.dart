@@ -1,5 +1,6 @@
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/core/network/response_parser.dart';
+import 'package:estate_app/core/utils/parse.dart';
 import 'package:estate_app/features/more/reports/models/report_row.dart';
 
 enum ReportType { rentRoll, income, expenses, pnl, occupancy, maintenance }
@@ -21,11 +22,11 @@ class ReportsRepository {
     DateTime? from,
     DateTime? to,
   }) async {
-    final response = await _client.get(
+    final response = await _client.get<dynamic>(
       '/pm/reports/${_endpointFor(type)}',
       queryParameters: {
-        if (from != null) 'from': from.toIso8601String(),
-        if (to != null) 'to': to.toIso8601String(),
+        if (from != null) 'from': toApiDateOnly(from),
+        if (to != null) 'to': toApiDateOnly(to),
       },
     );
 
@@ -45,10 +46,8 @@ class ReportsRepository {
       } else {
         rows.addAll(
           data.entries.map(
-            (entry) => ReportRow(
-              label: entry.key,
-              value: entry.value?.toString(),
-            ),
+            (entry) =>
+                ReportRow(label: entry.key, value: entry.value?.toString()),
           ),
         );
       }

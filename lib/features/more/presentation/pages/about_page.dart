@@ -1,7 +1,11 @@
+import 'dart:async';
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/presentation/design_system/app_radii.dart';
+import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -20,7 +24,7 @@ class _AboutPageState extends State<AboutPage> {
   @override
   void initState() {
     super.initState();
-    _loadPackageInfo();
+    unawaited(_loadPackageInfo());
   }
 
   Future<void> _loadPackageInfo() async {
@@ -32,6 +36,9 @@ class _AboutPageState extends State<AboutPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return AppScaffold(
       appBar: AppBar(
         title: Text(context.l10n?.about ?? 'About'),
@@ -41,25 +48,31 @@ class _AboutPageState extends State<AboutPage> {
         children: [
           const SizedBox(height: AppSpacing.xl),
 
-          // App Logo/Icon
+          // App Icon with shadow
           Container(
-            width: 100,
-            height: 100,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.primary,
-                  AppColors.primaryLight,
-                ],
-              ),
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: AppShadows.cardElevated,
             ),
-            child: const Icon(
-              Icons.home_work,
-              size: 50,
-              color: Colors.white,
+            child: Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.primary,
+                    AppColors.primaryLight,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(28),
+              ),
+              child: const Icon(
+                Icons.home_work,
+                size: 50,
+                color: Colors.white,
+              ),
             ),
           ),
 
@@ -68,7 +81,7 @@ class _AboutPageState extends State<AboutPage> {
           // App Name
           Text(
             _packageInfo?.appName ?? context.l10n?.appName ?? '360 Estate',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
@@ -78,111 +91,182 @@ class _AboutPageState extends State<AboutPage> {
           // Tagline
           Text(
             context.l10n?.tagline ?? 'Complete Property Management Solution',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+            style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
             textAlign: TextAlign.center,
           ),
 
           const SizedBox(height: AppSpacing.lg),
 
-          // Version Info
+          // Version info card
           Container(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.lg,
-              vertical: AppSpacing.sm,
+              vertical: AppSpacing.md,
             ),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(20),
+              color: isDark ? AppColors.darkSurfaceSecondary : AppColors.surfaceSecondary,
+              borderRadius: AppRadii.pill,
+              border: Border.all(
+                color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
+                width: 0.5,
+              ),
             ),
-            child: Text(
-              '${context.l10n?.version ?? 'Version'} ${_packageInfo?.version ?? '1.0.0'} (${_packageInfo?.buildNumber ?? '1'})',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.08),
+                    shape: BoxShape.circle,
                   ),
+                  child: Icon(
+                    Icons.info_outline,
+                    size: 14,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  '${context.l10n?.version ?? 'Version'} ${_packageInfo?.version ?? '1.0.0'} (${_packageInfo?.buildNumber ?? '1'})',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+              ],
             ),
           ),
 
           const SizedBox(height: AppSpacing.xl),
 
           // Legal Section
-          _Section(title: context.l10n?.legal ?? 'Legal', children: [
-            _ListTile(
-              icon: Icons.description_outlined,
-              title: context.l10n?.termsOfService ?? 'Terms of Service',
-              onTap: () => _launchUrl('https://360estate.app/terms'),
-            ),
-            _ListTile(
-              icon: Icons.policy_outlined,
-              title: context.l10n?.privacyPolicy ?? 'Privacy Policy',
-              onTap: () => _launchUrl('https://360estate.app/privacy'),
-            ),
-            _ListTile(
-              icon: Icons.copyright_outlined,
-              title: context.l10n?.licenses ?? 'Licenses',
-              onTap: () => showLicensePage(
-                context: context,
-                applicationName: _packageInfo?.appName ?? '360 Estate',
-                applicationVersion: _packageInfo?.version ?? '1.0.0',
+          AppSectionCard(
+            title: context.l10n?.legal ?? 'Legal',
+            icon: Icons.gavel_outlined,
+            iconColor: const Color(0xFF64748B),
+            contentPadding: EdgeInsets.zero,
+            children: [
+              _AboutTile(
+                icon: Icons.description_outlined,
+                iconColor: const Color(0xFF3B82F6),
+                title: context.l10n?.termsOfService ?? 'Terms of Service',
+                onTap: () => _launchUrl('https://360estate.app/terms'),
               ),
-            ),
-          ]),
+              _tileDivider(isDark),
+              _AboutTile(
+                icon: Icons.policy_outlined,
+                iconColor: const Color(0xFF8B5CF6),
+                title: context.l10n?.privacyPolicy ?? 'Privacy Policy',
+                onTap: () => _launchUrl('https://360estate.app/privacy'),
+              ),
+              _tileDivider(isDark),
+              _AboutTile(
+                icon: Icons.copyright_outlined,
+                iconColor: const Color(0xFFF59E0B),
+                title: context.l10n?.licenses ?? 'Licenses',
+                onTap: () => showLicensePage(
+                  context: context,
+                  applicationName: _packageInfo?.appName ?? '360 Estate',
+                  applicationVersion: _packageInfo?.version ?? '1.0.0',
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: AppSpacing.lg),
 
           // Support Section
-          _Section(title: context.l10n?.support ?? 'Support', children: [
-            _ListTile(
-              icon: Icons.language_outlined,
-              title: context.l10n?.website ?? 'Website',
-              subtitle: 'www.360estate.app',
-              onTap: () => _launchUrl('https://360estate.app'),
-            ),
-            _ListTile(
-              icon: Icons.email_outlined,
-              title: context.l10n?.contactSupport ?? 'Contact Support',
-              subtitle: 'support@360estate.app',
-              onTap: () => _launchUrl('mailto:support@360estate.app'),
-            ),
-          ]),
+          AppSectionCard(
+            title: context.l10n?.support ?? 'Support',
+            icon: Icons.support_agent_outlined,
+            iconColor: const Color(0xFF0EA5E9),
+            contentPadding: EdgeInsets.zero,
+            children: [
+              _AboutTile(
+                icon: Icons.language_outlined,
+                iconColor: const Color(0xFF10B981),
+                title: context.l10n?.website ?? 'Website',
+                subtitle: 'www.360estate.app',
+                onTap: () => _launchUrl('https://360estate.app'),
+              ),
+              _tileDivider(isDark),
+              _AboutTile(
+                icon: Icons.email_outlined,
+                iconColor: const Color(0xFF3B82F6),
+                title: context.l10n?.contactSupport ?? 'Contact Support',
+                subtitle: 'support@360estate.app',
+                onTap: () => _launchUrl('mailto:support@360estate.app'),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: AppSpacing.lg),
 
           // Social Section
-          _Section(title: context.l10n?.followUs ?? 'Follow Us', children: [
-            _ListTile(
-              icon: Icons.chat_outlined,
-              title: 'Twitter',
-              subtitle: '@360estate',
-              onTap: () => _launchUrl('https://twitter.com/360estate'),
-            ),
-            _ListTile(
-              icon: Icons.business_outlined,
-              title: 'LinkedIn',
-              onTap: () => _launchUrl('https://linkedin.com/company/360estate'),
-            ),
-            _ListTile(
-              icon: Icons.facebook_outlined,
-              title: 'Facebook',
-              onTap: () => _launchUrl('https://facebook.com/360estate'),
-            ),
-          ]),
+          AppSectionCard(
+            title: context.l10n?.followUs ?? 'Follow Us',
+            icon: Icons.share_outlined,
+            iconColor: const Color(0xFFEC4899),
+            contentPadding: EdgeInsets.zero,
+            children: [
+              _AboutTile(
+                icon: Icons.chat_outlined,
+                iconColor: const Color(0xFF0EA5E9),
+                title: 'Twitter',
+                subtitle: '@360estate',
+                onTap: () => _launchUrl('https://twitter.com/360estate'),
+              ),
+              _tileDivider(isDark),
+              _AboutTile(
+                icon: Icons.business_outlined,
+                iconColor: const Color(0xFF3B82F6),
+                title: 'LinkedIn',
+                onTap: () => _launchUrl('https://linkedin.com/company/360estate'),
+              ),
+              _tileDivider(isDark),
+              _AboutTile(
+                icon: Icons.facebook_outlined,
+                iconColor: const Color(0xFF1877F2),
+                title: 'Facebook',
+                onTap: () => _launchUrl('https://facebook.com/360estate'),
+              ),
+            ],
+          ),
 
           const SizedBox(height: AppSpacing.xl),
 
           // Footer
           Text(
-            context.l10n?.madeWithLove ?? 'Made with ❤️ for property managers',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+            context.l10n?.madeWithLove ?? 'Made with love for property managers',
+            style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
           ),
+          const SizedBox(height: AppSpacing.xs),
           Text(
-            '© 2024 360 Estate. ${context.l10n?.allRightsReserved ?? 'All rights reserved.'}',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+            '2024 360 Estate. ${context.l10n?.allRightsReserved ?? 'All rights reserved.'}',
+            style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
           ),
 
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.xl),
         ],
+      ),
+    );
+  }
+
+  Widget _tileDivider(bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 68),
+      child: Divider(
+        height: 0.5,
+        thickness: 0.5,
+        color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
       ),
     );
   }
@@ -201,97 +285,72 @@ class _AboutPageState extends State<AboutPage> {
   }
 }
 
-class _Section extends StatelessWidget {
-  const _Section({
-    required this.title,
-    required this.children,
-  });
-
-  final String title;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.sm,
-          ),
-          child: Text(
-            title,
-            style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-          ),
-          child: Column(
-            children: List.generate(
-              children.length,
-              (index) => index < children.length - 1
-                  ? Column(
-                      children: [
-                        children[index],
-                        Divider(
-                          height: 1,
-                          indent: AppSpacing.md + 24 + AppSpacing.md,
-                          color: Theme.of(context).colorScheme.outlineVariant,
-                        ),
-                      ],
-                    )
-                  : children[index],
-            ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-      ],
-    );
-  }
-}
-
-class _ListTile extends StatelessWidget {
-  const _ListTile({
+// About tile styled as a menu tile with colored icon
+class _AboutTile extends StatelessWidget {
+  const _AboutTile({
     required this.icon,
+    required this.iconColor,
     required this.title,
     this.subtitle,
     required this.onTap,
   });
 
   final IconData icon;
+  final Color iconColor;
   final String title;
   final String? subtitle;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon, size: 22),
-      title: Text(title),
-      subtitle: subtitle != null
-          ? Text(
-              subtitle!,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            )
-          : null,
-      trailing: const Icon(Icons.chevron_right, size: 20),
+    final theme = Theme.of(context);
+
+    return InkWell(
       onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.xs,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: iconColor, size: 20),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  if (subtitle != null)
+                    Text(
+                      subtitle!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+              size: 20,
+            ),
+          ],
+        ),
       ),
     );
   }

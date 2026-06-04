@@ -6,7 +6,6 @@ import 'package:estate_app/core/network/response_parser.dart';
 import 'package:estate_app/core/storage/auth_token_storage.dart';
 import 'package:estate_app/core/utils/phone_utils.dart';
 import 'package:estate_app/features/auth/models/user_profile.dart';
-import 'package:gotrue/gotrue.dart';
 import 'package:mime/mime.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -187,7 +186,7 @@ class AuthRepository {
   }
 
   Future<UserProfile> fetchProfile() async {
-    final response = await _client.get('/users/profile/');
+    final response = await _client.get<dynamic>('/users/profile/');
     final data = unwrapMap(response.data);
     return UserProfile.fromJson(data);
   }
@@ -206,7 +205,7 @@ class AuthRepository {
   }
 
   Future<UserProfile> updateProfile(UserProfileUpdate update) async {
-    final response = await _client.put(
+    final response = await _client.put<dynamic>(
       '/users/profile/',
       data: update.toJson(),
     );
@@ -247,7 +246,7 @@ class AuthRepository {
       final filePath = 'avatars/${user.id}/$fileName';
 
       // Upload to Supabase Storage
-      final storageResponse = await _supabase.storage
+      await _supabase.storage
           .from('profiles')
           .upload(filePath, imageFile);
 
@@ -306,7 +305,7 @@ class AuthRepository {
   /// Update only the profile photo URL (after upload)
   Future<UserProfile> updateProfilePhoto(String photoUrl) async {
     try {
-      final response = await _client.put(
+      final response = await _client.put<dynamic>(
         '/users/profile/',
         data: {'avatar_url': photoUrl},
       );
@@ -328,35 +327,4 @@ UserProfile _profileFromSupabase(User user) {
     email: user.email,
     role: metadata['role'] as String?,
   );
-}
-
-String? _extractToken(Object? payload) {
-  if (payload is Map<String, dynamic>) {
-    final direct = payload['token'] ??
-        payload['access_token'] ??
-        payload['access'] ??
-        payload['auth_token'];
-    if (direct is String && direct.isNotEmpty) return direct;
-
-    final data = payload['data'];
-    if (data is Map<String, dynamic>) {
-      final nested = data['token'] ?? data['access_token'] ?? data['access'];
-      if (nested is String && nested.isNotEmpty) return nested;
-    }
-  }
-  return null;
-}
-
-Map<String, dynamic>? _extractUser(Object? payload) {
-  if (payload is Map<String, dynamic>) {
-    final direct = payload['user'];
-    if (direct is Map<String, dynamic>) return direct;
-
-    final data = payload['data'];
-    if (data is Map<String, dynamic>) {
-      final nested = data['user'] ?? data['profile'];
-      if (nested is Map<String, dynamic>) return nested;
-    }
-  }
-  return null;
 }

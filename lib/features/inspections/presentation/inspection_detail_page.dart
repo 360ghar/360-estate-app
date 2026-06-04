@@ -1,8 +1,10 @@
+import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loading_shimmer.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
-import 'package:estate_app/core/presentation/widgets/section_header.dart';
+import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
+import 'package:estate_app/core/presentation/widgets/app_status_badge.dart';
 import 'package:estate_app/features/inspections/inspections_providers.dart';
 import 'package:estate_app/features/inspections/models/inspection.dart';
 import 'package:flutter/material.dart';
@@ -99,38 +101,219 @@ class _InspectionDetail extends StatelessWidget {
   final bool isProcessing;
   final VoidCallback onSign;
 
+  AppStatusType _statusType(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+      case 'signed':
+        return AppStatusType.success;
+      case 'in_progress':
+      case 'in progress':
+        return AppStatusType.warning;
+      case 'cancelled':
+      case 'canceled':
+        return AppStatusType.danger;
+      case 'scheduled':
+        return AppStatusType.info;
+      case 'open':
+      default:
+        return AppStatusType.neutral;
+    }
+  }
+
+  Color _itemStatusColor(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'pass':
+      case 'passed':
+      case 'good':
+      case 'completed':
+        return AppColors.success;
+      case 'fail':
+      case 'failed':
+      case 'poor':
+        return AppColors.danger;
+      case 'fair':
+      case 'needs_attention':
+      case 'warning':
+        return AppColors.warning;
+      case 'pending':
+      default:
+        return AppColors.textTertiary;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final status = inspection.status ?? 'Open';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Title and status header
         Text(
           inspection.displayName,
-          style: Theme.of(context).textTheme.headlineSmall,
+          style: textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        Text(inspection.status ?? 'Open'),
+        AppStatusBadge(
+          label: status,
+          type: _statusType(status),
+          variant: AppStatusVariant.subtle,
+        ),
         const SizedBox(height: AppSpacing.lg),
-        const SectionHeader(title: 'Schedule'),
-        const SizedBox(height: AppSpacing.md),
-        _InfoRow(label: 'Scheduled', value: formattedDate),
+
+        // Schedule section
+        AppSectionCard(
+          title: 'Schedule',
+          icon: Icons.calendar_today_outlined,
+          iconColor: AppColors.info,
+          children: [
+            _InfoRow(label: 'Scheduled', value: formattedDate),
+            if (inspection.signedAt != null)
+              _InfoRow(
+                label: 'Signed',
+                value: DateFormat('d MMM yyyy').format(inspection.signedAt!),
+              ),
+          ],
+        ),
         const SizedBox(height: AppSpacing.lg),
-        const SectionHeader(title: 'Checklist'),
-        const SizedBox(height: AppSpacing.md),
-        if (inspection.items == null || inspection.items!.isEmpty)
-          const Text('No checklist items yet.'),
-        if (inspection.items != null && inspection.items!.isNotEmpty)
-          Column(
-            children: inspection.items!
-                .map(
-                  (item) => ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(item.title ?? 'Checklist item'),
-                    subtitle: Text(item.status ?? 'Pending'),
+
+        // Property Details section
+        if (inspection.propertyName != null || inspection.tenantName != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+            child: AppSectionCard(
+              title: 'Property Details',
+              icon: Icons.home_outlined,
+              iconColor: AppColors.primary,
+              children: [
+                if (inspection.propertyName != null)
+                  _InfoRow(
+                    label: 'Property',
+                    value: inspection.propertyName!,
                   ),
-                )
-                .toList(),
+                if (inspection.tenantName != null)
+                  _InfoRow(
+                    label: 'Tenant',
+                    value: inspection.tenantName!,
+                  ),
+              ],
+            ),
           ),
+
+        // Checklist section
+        AppSectionCard(
+          title: 'Checklist Items',
+          icon: Icons.checklist_outlined,
+          iconColor: AppColors.warning,
+          children: [
+            if (inspection.items == null || inspection.items!.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                child: Text(
+                  'No checklist items yet.',
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            if (inspection.items != null && inspection.items!.isNotEmpty)
+              ...inspection.items!.asMap().entries.map(
+                (entry) {
+                  final item = entry.value;
+                  final isLast = entry.key == inspection.items!.length - 1;
+                  final statusColor = _itemStatusColor(item.status);
+
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.sm,
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Status dot indicator
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Container(
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: statusColor,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.title ?? 'Checklist item',
+                                    style: textTheme.bodyMedium?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  if (item.status != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        top: AppSpacing.xxs,
+                                      ),
+                                      child: Text(
+                                        item.status!,
+                                        style: textTheme.bodySmall?.copyWith(
+                                          color: statusColor,
+                                        ),
+                                      ),
+                                    ),
+                                  if (item.notes != null &&
+                                      item.notes!.trim().isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        top: AppSpacing.xxs,
+                                      ),
+                                      child: Text(
+                                        item.notes!,
+                                        style: textTheme.bodySmall?.copyWith(
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            if (item.isRequired == true)
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(left: AppSpacing.sm),
+                                child: Text(
+                                  'Required',
+                                  style: textTheme.labelSmall?.copyWith(
+                                    color: AppColors.danger,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      if (!isLast)
+                        Divider(
+                          height: 1,
+                          thickness: 0.5,
+                          color: AppColors.cardBorder,
+                        ),
+                    ],
+                  );
+                },
+              ),
+          ],
+        ),
+
+        // Sign button
         if (allowSign) ...[
           const SizedBox(height: AppSpacing.lg),
           SizedBox(
@@ -155,13 +338,24 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label),
-          Text(value),
+          Text(
+            label,
+            style: textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          Text(
+            value,
+            style: textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
+          ),
         ],
       ),
     );

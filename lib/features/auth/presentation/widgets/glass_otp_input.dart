@@ -1,7 +1,8 @@
 import 'dart:ui';
+
+import 'package:estate_app/core/presentation/design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:estate_app/core/presentation/design_system/design_system.dart';
 
 /// A glassmorphism OTP input with bounce animation.
 ///
@@ -249,21 +250,20 @@ class _OtpDigitFieldState extends State<_OtpDigitField> {
                     height: widget.size,
                     decoration: BoxDecoration(
                       color: (isFocused || hasValue)
-                          ? Colors.white.withOpacity(widget.opacity + 0.1)
-                          : Colors.white.withOpacity(widget.opacity),
+                          ? Colors.white.withValues(alpha: widget.opacity + 0.1)
+                          : Colors.white.withValues(alpha: widget.opacity),
                       borderRadius: BorderRadius.circular(widget.borderRadius),
                       border: Border.all(
                         color: isFocused
-                            ? AppColors.accent.withOpacity(0.6)
-                            : Colors.white.withOpacity(0.2),
+                            ? AppColors.accent.withValues(alpha: 0.6)
+                            : Colors.white.withValues(alpha: 0.2),
                         width: isFocused ? 1.5 : 1,
                       ),
                       boxShadow: isFocused
                           ? [
                               BoxShadow(
-                                color: AppColors.accent.withOpacity(0.3),
+                                color: AppColors.accent.withValues(alpha: 0.3),
                                 blurRadius: 8,
-                                spreadRadius: 0,
                               ),
                             ]
                           : null,
@@ -444,20 +444,19 @@ class _CircleDigitField extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: (isFocused || hasValue)
-                ? Colors.white.withOpacity(0.2)
-                : Colors.white.withOpacity(0.1),
+                ? Colors.white.withValues(alpha: 0.2)
+                : Colors.white.withValues(alpha: 0.1),
             border: Border.all(
               color: isFocused
-                  ? AppColors.accent.withOpacity(0.6)
-                  : Colors.white.withOpacity(0.2),
+                  ? AppColors.accent.withValues(alpha: 0.6)
+                  : Colors.white.withValues(alpha: 0.2),
               width: isFocused ? 2 : 1.5,
             ),
             boxShadow: isFocused
                 ? [
                     BoxShadow(
-                      color: AppColors.accent.withOpacity(0.3),
+                      color: AppColors.accent.withValues(alpha: 0.3),
                       blurRadius: 8,
-                      spreadRadius: 0,
                     ),
                   ]
                 : null,

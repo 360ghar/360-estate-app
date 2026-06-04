@@ -35,12 +35,8 @@ final authTokenStorageProvider = Provider<AuthTokenStorage>((ref) {
 });
 
 final authTokenProvider = Provider<AuthTokenProvider>((ref) {
-  final config = ref.read(appConfigProvider);
   final storage = ref.read(authTokenStorageProvider);
-  if (config.isSupabaseConfigured) {
-    return RefreshingAuthTokenProvider(storage, config: config);
-  }
-  return SecureAuthTokenProvider(storage);
+  return RefreshingAuthTokenProvider(storage);
 });
 
 final apiClientProvider = Provider<ApiClient>((ref) {

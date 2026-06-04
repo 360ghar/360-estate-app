@@ -1,6 +1,5 @@
-import 'dart:ui';
-import 'package:flutter/material.dart';
 import 'package:estate_app/core/presentation/design_system/design_system.dart';
+import 'package:flutter/material.dart';
 
 /// An animated gradient background with floating aurora orbs.
 ///
@@ -183,12 +182,11 @@ class _AnimatedGradientBackgroundState extends State<AnimatedGradientBackground>
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: RadialGradient(
-                center: Alignment.center,
                 radius: 1.0,
                 colors: [
-                  orbColor.withOpacity(0.3),
-                  orbColor.withOpacity(0.1),
-                  orbColor.withOpacity(0),
+                  orbColor.withValues(alpha: 0.3),
+                  orbColor.withValues(alpha: 0.1),
+                  orbColor.withValues(alpha: 0),
                 ],
                 stops: const [0.0, 0.5, 1.0],
               ),
@@ -203,7 +201,7 @@ class _AnimatedGradientBackgroundState extends State<AnimatedGradientBackground>
     return IgnorePointer(
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.03),
+          color: Colors.white.withValues(alpha: 0.03),
         ),
         child: CustomPaint(
           size: Size.infinite,
@@ -241,7 +239,7 @@ class _GridPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.05)
+      ..color = Colors.white.withValues(alpha: 0.05)
       ..strokeWidth = 1;
 
     const gridSize = 40.0;
@@ -295,7 +293,6 @@ class AuthGradientBackground extends StatelessWidget {
         Color(0xFF312E81), // Indigo 900
         Color(0xFF1E3A5F), // Navy
       ],
-      orbCount: 2,
       showGrid: showGrid,
       child: child,
     );

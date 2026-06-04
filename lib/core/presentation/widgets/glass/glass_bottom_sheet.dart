@@ -1,6 +1,7 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
+
 import 'package:estate_app/core/presentation/design_system/design_system.dart';
+import 'package:flutter/material.dart';
 
 /// A glassmorphism bottom sheet with frosted glass effect.
 ///
@@ -130,7 +131,7 @@ class GlassBottomSheet extends StatelessWidget {
                   color: (isDark
                           ? AppGlassColors.glassSurfaceDark(opacity)
                           : AppGlassColors.glassSurfaceLight(opacity))
-                      .withOpacity(0.95),
+                      .withValues(alpha: 0.95),
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(borderRadius),
                     topRight: Radius.circular(borderRadius),
@@ -140,12 +141,11 @@ class GlassBottomSheet extends StatelessWidget {
                       color: isDark
                           ? AppGlassColors.borderDark
                           : AppGlassColors.borderLight,
-                      width: 1,
                     ),
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Colors.black.withValues(alpha: 0.2),
                       blurRadius: 20,
                       offset: const Offset(0, -5),
                     ),
@@ -189,7 +189,7 @@ class GlassBottomSheet extends StatelessWidget {
           height: 4,
           margin: const EdgeInsets.only(top: 12, bottom: 8),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.3),
+            color: Colors.white.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -221,7 +221,7 @@ class GlassBottomSheet extends StatelessWidget {
               child: Text(
                 subtitle!,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   fontSize: 14,
                 ),
               ),
@@ -229,7 +229,7 @@ class GlassBottomSheet extends StatelessWidget {
           Divider(
             height: 16,
             thickness: 1,
-            color: Colors.white.withOpacity(0.1),
+            color: Colors.white.withValues(alpha: 0.1),
           ),
         ],
       ),
@@ -336,7 +336,7 @@ class _ScrollableGlassBottomSheetContent extends StatelessWidget {
           filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
           child: Container(
             decoration: BoxDecoration(
-              color: AppGlassColors.glassSurfaceDark(opacity).withOpacity(0.95),
+              color: AppGlassColors.glassSurfaceDark(opacity).withValues(alpha: 0.95),
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(borderRadius),
                 topRight: Radius.circular(borderRadius),
@@ -344,7 +344,6 @@ class _ScrollableGlassBottomSheetContent extends StatelessWidget {
               border: Border(
                 top: BorderSide(
                   color: AppGlassColors.borderDark,
-                  width: 1,
                 ),
               ),
             ),
@@ -359,7 +358,7 @@ class _ScrollableGlassBottomSheetContent extends StatelessWidget {
                       height: 4,
                       margin: const EdgeInsets.only(top: 12, bottom: 8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),

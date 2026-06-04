@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
@@ -271,7 +272,6 @@ class _PremiumShimmerState extends State<PremiumShimmer>
           shaderCallback: (bounds) {
             return LinearGradient(
               begin: Alignment.topLeft,
-              end: Alignment.centerRight,
               colors: [
                 widget.baseColor,
                 widget.highlightColor,
@@ -498,7 +498,7 @@ class _PremiumBlurTransitionState extends State<PremiumBlurTransition>
 /// Premium page transition for navigation.
 ///
 /// Provides smooth, premium page transitions with fade and slide effects.
-class PremiumPageTransition extends PageRouteBuilder {
+class PremiumPageTransition extends PageRouteBuilder<void> {
   final Widget child;
 
   PremiumPageTransition({required this.child})

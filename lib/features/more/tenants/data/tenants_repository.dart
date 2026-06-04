@@ -26,7 +26,7 @@ class TenantsRepository {
       );
     }
 
-    final response = await _client.get(
+    final response = await _client.get<dynamic>(
       '/pm/tenants/',
       queryParameters: {
         'page': page,
@@ -53,7 +53,7 @@ class TenantsRepository {
   }
 
   Future<Tenant> fetch(String id) async {
-    final response = await _client.get('/pm/tenants/$id');
+    final response = await _client.get<dynamic>('/pm/tenants/$id');
     final data = unwrapMap(response.data);
     return Tenant.fromJson(data);
   }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:estate_app/core/presentation/animations/premium/premium_animations.dart';
 import 'package:estate_app/core/presentation/widgets/glass/glass_toast.dart';
 import 'package:estate_app/core/presentation/widgets/glass/premium_glass_card.dart';
@@ -68,13 +69,11 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
                       PremiumGlassCard(
                         padding: const EdgeInsets.all(28),
                         borderRadius: 24,
-                        blur: 24,
                         opacity: 0.15,
                         child: Column(
                           children: [
                             // OTP Input
                             PremiumOtpInput(
-                              length: 6,
                               onCompleted: (otp) async {
                                 setState(() => _otp = otp);
                                 await _verifyOtp(otp);
@@ -129,7 +128,6 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.1),
-                width: 1,
               ),
             ),
             child: const Icon(
@@ -141,7 +139,7 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
         ),
         const Spacer(),
         // Step indicator
-        const PremiumStepIndicator(currentStep: 2, totalSteps: 3),
+        const PremiumStepIndicator(currentStep: 2),
       ],
     );
   }
@@ -174,13 +172,20 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
           ),
         ),
         const SizedBox(height: 4),
-        Text(
-          widget.phone,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF3B82F6),
-            letterSpacing: 1,
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: const Color(0xFF3B82F6).withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            widget.phone,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF3B82F6),
+              letterSpacing: 1,
+            ),
           ),
         ),
       ],
@@ -230,7 +235,6 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.1),
-                width: 1,
               ),
             ),
             child: Row(

@@ -48,7 +48,7 @@ extension PropertyX on Property {
 
   String get fullAddress {
     final parts = [address, city, state]
-        .where((value) => value != null && value!.trim().isNotEmpty)
+        .where((value) => value != null && value.trim().isNotEmpty)
         .map((value) => value!.trim())
         .toList();
     if (pincode != null && pincode!.trim().isNotEmpty) {

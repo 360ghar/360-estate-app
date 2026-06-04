@@ -27,7 +27,7 @@ extension UserProfileX on UserProfile {
     if (full != null && full.isNotEmpty) return full;
 
     final combined = [firstName, lastName]
-        .where((value) => value != null && value!.trim().isNotEmpty)
+        .where((value) => value != null && value.trim().isNotEmpty)
         .map((value) => value!.trim())
         .join(' ');
     if (combined.trim().isNotEmpty) return combined;

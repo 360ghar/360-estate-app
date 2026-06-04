@@ -17,19 +17,20 @@ import 'package:estate_app/features/inspections/presentation/inspections_page.da
 import 'package:estate_app/features/leases/presentation/lease_detail_page.dart';
 import 'package:estate_app/features/leases/presentation/lease_form_page.dart';
 import 'package:estate_app/features/leases/presentation/leases_page.dart';
+import 'package:estate_app/features/maintenance/domain/entities/maintenance_request.dart';
 import 'package:estate_app/features/more/documents/presentation/document_upload_page.dart';
 import 'package:estate_app/features/more/documents/presentation/documents_page.dart';
 import 'package:estate_app/features/more/expenses/presentation/expense_form_page.dart';
 import 'package:estate_app/features/more/expenses/presentation/expenses_page.dart';
+import 'package:estate_app/features/more/presentation/more_page.dart';
 import 'package:estate_app/features/more/presentation/pages/about_page.dart';
 import 'package:estate_app/features/more/presentation/pages/contact_support_page.dart';
 import 'package:estate_app/features/more/presentation/pages/help_page.dart';
-import 'package:estate_app/features/more/presentation/more_page.dart';
 import 'package:estate_app/features/more/profile/presentation/pages/change_password_page.dart';
 import 'package:estate_app/features/more/profile/presentation/pages/profile_edit_page.dart';
 import 'package:estate_app/features/more/profile/presentation/profile_page.dart';
-import 'package:estate_app/features/more/reports/presentation/reports_page.dart';
 import 'package:estate_app/features/more/reports/presentation/report_drilldown_page.dart';
+import 'package:estate_app/features/more/reports/presentation/reports_page.dart';
 import 'package:estate_app/features/more/tenants/presentation/tenant_detail_page.dart';
 import 'package:estate_app/features/more/tenants/presentation/tenants_page.dart';
 import 'package:estate_app/features/notifications/presentation/notifications_page.dart';
@@ -45,7 +46,6 @@ import 'package:estate_app/features/rental_applications/presentation/public_appl
 import 'package:estate_app/features/settings/presentation/pages/app_settings_page.dart';
 import 'package:estate_app/features/settings/presentation/pages/notification_settings_page.dart';
 import 'package:estate_app/features/settings/presentation/pages/privacy_settings_page.dart';
-import 'package:estate_app/features/maintenance/domain/entities/maintenance_request.dart';
 import 'package:estate_app/features/tasks/presentation/maintenance_detail_page.dart';
 import 'package:estate_app/features/tasks/presentation/task_create_page.dart';
 import 'package:estate_app/features/tasks/presentation/tasks_page.dart';
@@ -411,7 +411,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                       ),
                       GoRoute(
                         path: 'contact',
-                        builder: (context, state) => const ContactSupportPage(),
+                        builder: (context, state) => ContactSupportPage(
+                          initialCategory:
+                              state.uri.queryParameters['category'],
+                        ),
                       ),
                       GoRoute(
                         path: 'about',

@@ -1,3 +1,4 @@
+import 'package:estate_app/core/utils/parse.dart';
 import 'package:estate_app/features/finance/domain/entities/rent_payment.dart';
 
 final class RentPaymentDto {
@@ -16,33 +17,28 @@ final class RentPaymentDto {
 
   factory RentPaymentDto.fromJson(Map<String, dynamic> json) {
     return RentPaymentDto(
-      id: json['id'] as int,
-      rentChargeId: json['rent_charge_id'] as int? ??
-          json['rentChargeId'] as int? ??
-          0,
+      id: parseInt(json['id']) ?? 0,
+      rentChargeId:
+          json['rent_charge_id'] as int? ?? json['rentChargeId'] as int? ?? 0,
       leaseId: json['lease_id'] as int? ?? json['leaseId'] as int? ?? 0,
       amount: _parseDouble(json['amount']),
-      paymentDate: DateTime.parse(
-        json['payment_date'] as String? ??
-            json['paymentDate'] as String? ??
-            DateTime.now().toIso8601String(),
-      ),
-      paymentMethod: json['payment_method'] as String? ??
+      paymentDate:
+          parseDateTime(
+            json['payment_date'] as String? ??
+                json['paymentDate'] as String? ??
+                DateTime.now().toIso8601String(),
+          ) ??
+          DateTime.now(),
+      paymentMethod:
+          json['payment_method'] as String? ??
           json['paymentMethod'] as String? ??
           'other',
-      referenceNumber: json['reference_number'] as String? ??
+      referenceNumber:
+          json['reference_number'] as String? ??
           json['referenceNumber'] as String?,
       notes: json['notes'] as String?,
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : json['createdAt'] != null
-              ? DateTime.parse(json['createdAt'] as String)
-              : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
-          : json['updatedAt'] != null
-              ? DateTime.parse(json['updatedAt'] as String)
-              : null,
+      createdAt: parseDateTime(json['created_at'] ?? json['createdAt']),
+      updatedAt: parseDateTime(json['updated_at'] ?? json['updatedAt']),
     );
   }
 
@@ -62,7 +58,7 @@ final class RentPaymentDto {
       'rent_charge_id': rentChargeId,
       'lease_id': leaseId,
       'amount': amount,
-      'payment_date': paymentDate.toIso8601String().split('T')[0],
+      'payment_date': toApiDateOnly(paymentDate),
       'payment_method': paymentMethod,
       if (referenceNumber != null) 'reference_number': referenceNumber,
       if (notes != null) 'notes': notes,

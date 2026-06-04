@@ -1,5 +1,5 @@
-import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/core/pagination/paged_list_controller.dart';
+import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:estate_app/features/properties/data/properties_repository.dart';
 import 'package:estate_app/features/properties/domain/repositories/properties_repository.dart';

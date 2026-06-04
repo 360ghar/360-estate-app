@@ -54,11 +54,11 @@ abstract final class AppGlassColors {
   // Glass Surface Colors (with alpha applied)
   /// Light mode glass surface (white with alpha)
   static Color glassSurfaceLight(double opacity) =>
-      Colors.white.withOpacity(opacity);
+      Colors.white.withValues(alpha: opacity);
 
   /// Dark mode glass surface (dark with alpha)
   static Color glassSurfaceDark(double opacity) =>
-      const Color(0xFF1E293B).withOpacity(opacity);
+      const Color(0xFF1E293B).withValues(alpha: opacity);
 
   // Border Colors
   /// Subtle light mode border

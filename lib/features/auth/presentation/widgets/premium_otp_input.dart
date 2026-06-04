@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:ui';
+
+import 'package:estate_app/core/presentation/design_system/app_glass_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:estate_app/core/presentation/design_system/app_glass_colors.dart';
 
 /// Premium OTP input with smooth animations and glassmorphism design.
 ///
@@ -194,7 +196,6 @@ class _OtpDigitFieldState extends State<_OtpDigitField>
                         color: const Color(0xFF3B82F6)
                             .withValues(alpha: 0.3 * widget.focusAnimation.value),
                         blurRadius: 16,
-                        spreadRadius: 0,
                       ),
                     ]
                   : null,

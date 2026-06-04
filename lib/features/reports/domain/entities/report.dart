@@ -66,7 +66,7 @@ final class RentRollReport {
     required this.items,
   });
 
-  final DateTime generatedAt;
+  final DateTime? generatedAt;
   final int totalProperties;
   final double totalMonthlyRent;
   final double totalCollected;
@@ -119,9 +119,9 @@ final class IncomeReport {
     required this.items,
   });
 
-  final DateTime generatedAt;
-  final DateTime startDate;
-  final DateTime endDate;
+  final DateTime? generatedAt;
+  final DateTime? startDate;
+  final DateTime? endDate;
   final double totalIncome;
   final List<IncomeCategoryBreakdown> byCategory;
   final List<IncomeMonthlyBreakdown> byMonth;
@@ -146,7 +146,7 @@ final class IncomeMonthlyBreakdown {
     required this.amount,
   });
 
-  final DateTime month;
+  final DateTime? month;
   final double amount;
 }
 
@@ -162,7 +162,7 @@ final class IncomeItem {
   });
 
   final int id;
-  final DateTime date;
+  final DateTime? date;
   final String category;
   final String description;
   final double amount;
@@ -182,9 +182,9 @@ final class ExpensesReport {
     required this.items,
   });
 
-  final DateTime generatedAt;
-  final DateTime startDate;
-  final DateTime endDate;
+  final DateTime? generatedAt;
+  final DateTime? startDate;
+  final DateTime? endDate;
   final double totalExpenses;
   final List<ExpenseCategoryBreakdown> byCategory;
   final List<ExpenseMonthlyBreakdown> byMonth;
@@ -209,7 +209,7 @@ final class ExpenseMonthlyBreakdown {
     required this.amount,
   });
 
-  final DateTime month;
+  final DateTime? month;
   final double amount;
 }
 
@@ -226,7 +226,7 @@ final class ExpenseItem {
   });
 
   final int id;
-  final DateTime date;
+  final DateTime? date;
   final String category;
   final String description;
   final double amount;
@@ -250,9 +250,9 @@ final class ProfitAndLossReport {
     required this.byMonth,
   });
 
-  final DateTime generatedAt;
-  final DateTime startDate;
-  final DateTime endDate;
+  final DateTime? generatedAt;
+  final DateTime? startDate;
+  final DateTime? endDate;
   final double totalIncome;
   final double totalExpenses;
   final double netIncome;
@@ -270,7 +270,7 @@ final class PnLMonthlyBreakdown {
     required this.netIncome,
   });
 
-  final DateTime month;
+  final DateTime? month;
   final double income;
   final double expenses;
   final double netIncome;
@@ -289,7 +289,7 @@ final class OccupancyReport {
     required this.items,
   });
 
-  final DateTime generatedAt;
+  final DateTime? generatedAt;
   final int totalProperties;
   final int occupiedProperties;
   final int vacantProperties;
@@ -351,7 +351,7 @@ final class MaintenanceReport {
     required this.items,
   });
 
-  final DateTime generatedAt;
+  final DateTime? generatedAt;
   final int totalRequests;
   final int openRequests;
   final int completedRequests;
@@ -409,7 +409,7 @@ final class MaintenanceReportItem {
   final String propertyTitle;
   final String priority;
   final String status;
-  final DateTime createdAt;
+  final DateTime? createdAt;
   final DateTime? completedAt;
   final double? cost;
   final int? daysToComplete;

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:estate_app/core/presentation/design_system/design_system.dart';
+import 'package:flutter/material.dart';
 
 /// An animated input wrapper that provides focus glow effects.
 ///
@@ -141,12 +141,11 @@ class _InputFocusAnimationState extends State<InputFocusAnimation>
             boxShadow: glowOpacity > 0
                 ? [
                     BoxShadow(
-                      color: _glowColor.withOpacity(0.3 * glowOpacity),
+                      color: _glowColor.withValues(alpha: 0.3 * glowOpacity),
                       blurRadius: 8 * glowOpacity,
-                      spreadRadius: 0,
                     ),
                     BoxShadow(
-                      color: _glowColor.withOpacity(0.15 * glowOpacity),
+                      color: _glowColor.withValues(alpha: 0.15 * glowOpacity),
                       blurRadius: 16 * glowOpacity,
                       offset: const Offset(0, 2),
                     ),
@@ -154,7 +153,7 @@ class _InputFocusAnimationState extends State<InputFocusAnimation>
                 : null,
             border: glowOpacity > 0
                 ? Border.all(
-                    color: _glowColor.withOpacity(0.5 * glowOpacity),
+                    color: _glowColor.withValues(alpha: 0.5 * glowOpacity),
                     width: 1.5,
                   )
                 : null,

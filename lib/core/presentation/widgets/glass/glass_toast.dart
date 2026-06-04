@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:ui';
-import 'package:flutter/material.dart';
+
 import 'package:estate_app/core/presentation/design_system/design_system.dart';
+import 'package:flutter/material.dart';
 
 /// Toast notification types
 enum GlassToastType {
@@ -140,7 +142,6 @@ class GlassToast extends StatelessWidget {
     show(
       context,
       message: message,
-      type: GlassToastType.info,
       title: title,
       duration: duration,
     );
@@ -202,15 +203,14 @@ class GlassToast extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppGlassColors.toastDark.withOpacity(opacity),
+              color: AppGlassColors.toastDark.withValues(alpha: opacity),
               borderRadius: BorderRadius.circular(borderRadius),
               border: Border.all(
                 color: AppGlassColors.borderDark,
-                width: 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -222,7 +222,7 @@ class GlassToast extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: accentColor.withOpacity(0.2),
+                    color: accentColor.withValues(alpha: 0.2),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -249,7 +249,7 @@ class GlassToast extends StatelessWidget {
                       Text(
                         message,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 14,
                           fontWeight: title != null ? FontWeight.w400 : FontWeight.w500,
                         ),
@@ -441,11 +441,10 @@ class GlassSnackbar extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppGlassColors.toastDark.withOpacity(0.9),
+            color: AppGlassColors.toastDark.withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: AppGlassColors.borderDark,
-              width: 1,
             ),
           ),
           child: Row(

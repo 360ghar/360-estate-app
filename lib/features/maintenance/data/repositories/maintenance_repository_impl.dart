@@ -1,4 +1,5 @@
 import 'package:estate_app/core/pagination/page.dart';
+import 'package:estate_app/core/utils/parse.dart';
 import 'package:estate_app/features/maintenance/data/datasources/maintenance_remote_data_source.dart';
 import 'package:estate_app/features/maintenance/domain/entities/maintenance_request.dart';
 import 'package:estate_app/features/maintenance/domain/repositories/maintenance_repository.dart';
@@ -67,7 +68,7 @@ final class MaintenanceRepositoryImpl implements MaintenanceRepository {
         'availability_notes': notes.trim(),
       if (estimatedCost != null) 'estimated_cost': estimatedCost,
       if (scheduledDate != null)
-        'scheduled_for': scheduledDate.toIso8601String(),
+        'scheduled_for': toApiUtcInstant(scheduledDate),
     };
     final trimmedAssignee = assignedTo?.trim();
     if (trimmedAssignee != null && trimmedAssignee.isNotEmpty) {
@@ -85,7 +86,9 @@ final class MaintenanceRepositoryImpl implements MaintenanceRepository {
 
   @override
   Future<MaintenanceRequest> updateRequest(
-      int id, Map<String, dynamic> updates) async {
+    int id,
+    Map<String, dynamic> updates,
+  ) async {
     final payload = _normalizeUpdate(updates);
     final dto = await _remoteDataSource.updateRequest(id, payload);
     return dto.toEntity();
@@ -217,8 +220,8 @@ Map<String, dynamic> _normalizeUpdate(Map<String, dynamic> updates) {
 
 String? _normalizeDate(dynamic value) {
   if (value is DateTime) {
-    return value.toIso8601String();
+    return toApiUtcInstant(value);
   }
-  final parsed = DateTime.tryParse(value.toString());
-  return parsed?.toIso8601String();
+  final parsed = parseDateTime(value);
+  return toApiUtcInstant(parsed);
 }

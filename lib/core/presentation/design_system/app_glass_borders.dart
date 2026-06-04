@@ -1,5 +1,5 @@
+import 'package:estate_app/core/presentation/design_system/app_glass_colors.dart';
 import 'package:flutter/material.dart';
-import 'app_glass_colors.dart';
 
 /// Glassmorphism border utilities.
 /// Provides subtle borders with alpha, gradient borders, and focus states.
@@ -23,19 +23,16 @@ abstract final class AppGlassBorders {
   /// Subtle glass border for light mode
   static const BorderSide light = BorderSide(
     color: AppGlassColors.borderLight,
-    width: thicknessThin,
   );
 
   /// Medium glass border for light mode
   static const BorderSide lightMedium = BorderSide(
     color: Color(0x4DFFFFFF), // 30% white
-    width: thicknessThin,
   );
 
   /// Defined glass border for light mode
   static const BorderSide lightDefined = BorderSide(
     color: Color(0x66FFFFFF), // 40% white
-    width: thicknessThin,
   );
 
   // === Dark Mode Borders ===
@@ -43,19 +40,16 @@ abstract final class AppGlassBorders {
   /// Subtle glass border for dark mode
   static const BorderSide dark = BorderSide(
     color: AppGlassColors.borderDark,
-    width: thicknessThin,
   );
 
   /// Medium glass border for dark mode
   static const BorderSide darkMedium = BorderSide(
     color: Color(0x33FFFFFF), // 20% white
-    width: thicknessThin,
   );
 
   /// Defined glass border for dark mode
   static const BorderSide darkDefined = BorderSide(
     color: Color(0x4DFFFFFF), // 30% white
-    width: thicknessThin,
   );
 
   // === State Borders ===
@@ -87,7 +81,6 @@ abstract final class AppGlassBorders {
   /// Disabled border - subtle gray
   static const BorderSide disabled = BorderSide(
     color: Color(0x1AD1D5DB), // 10% gray
-    width: thicknessThin,
   );
 
   // === Border Radius for Glass Containers ===
@@ -124,7 +117,7 @@ abstract final class AppGlassBorders {
     double width = thicknessThin,
   }) {
     return BorderSide(
-      color: Colors.white.withOpacity(opacity),
+      color: Colors.white.withValues(alpha: opacity),
       width: width,
     );
   }
@@ -136,7 +129,7 @@ abstract final class AppGlassBorders {
     double width = thicknessThin,
   }) {
     return BorderSide(
-      color: color.withOpacity(opacity),
+      color: color.withValues(alpha: opacity),
       width: width,
     );
   }
@@ -144,7 +137,7 @@ abstract final class AppGlassBorders {
   /// Creates a focus border with custom color
   static BorderSide focusBorder(Color color) {
     return BorderSide(
-      color: color.withOpacity(0.5),
+      color: color.withValues(alpha: 0.5),
       width: thicknessMedium,
     );
   }

@@ -17,7 +17,7 @@ class LeasesRepositoryImpl implements LeasesRepository {
     String? tenantId,
     String? status,
   }) async {
-    final response = await _client.get(
+    final response = await _client.get<dynamic>(
       '/pm/leases/',
       queryParameters: {
         if (propertyId != null) 'property_id': propertyId,
@@ -34,14 +34,14 @@ class LeasesRepositoryImpl implements LeasesRepository {
 
   @override
   Future<Lease> fetch(String leaseId) async {
-    final response = await _client.get('/pm/leases/$leaseId');
+    final response = await _client.get<dynamic>('/pm/leases/$leaseId');
     final data = unwrapMap(response.data);
     return Lease.fromJson(data);
   }
 
   @override
   Future<Lease> create(LeaseCreateRequest request) async {
-    final response = await _client.post(
+    final response = await _client.post<dynamic>(
       '/pm/leases/',
       data: request.toJson(),
     );
@@ -56,7 +56,7 @@ class LeasesRepositoryImpl implements LeasesRepository {
       'file': await MultipartFile.fromFile(file.path, filename: fileName),
     });
 
-    final response = await _client.upload(
+    final response = await _client.upload<dynamic>(
       '/pm/leases/$leaseId/upload-signed',
       data: formData,
     );
@@ -67,7 +67,7 @@ class LeasesRepositoryImpl implements LeasesRepository {
 
   @override
   Future<Lease> renew(String leaseId, LeaseRenewRequest request) async {
-    final response = await _client.post(
+    final response = await _client.post<dynamic>(
       '/pm/leases/$leaseId/renew',
       data: request.toJson(),
     );
@@ -78,7 +78,7 @@ class LeasesRepositoryImpl implements LeasesRepository {
 
   @override
   Future<Lease> terminate(String leaseId, LeaseTerminateRequest request) async {
-    final response = await _client.post(
+    final response = await _client.post<dynamic>(
       '/pm/leases/$leaseId/terminate',
       data: request.toJson(),
     );

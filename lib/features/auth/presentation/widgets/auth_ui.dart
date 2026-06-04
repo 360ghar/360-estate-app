@@ -39,7 +39,7 @@ TextStyle? authLabelStyle(BuildContext context) {
 
 TextStyle? authHintStyle(BuildContext context) {
   return Theme.of(context).textTheme.bodyLarge?.copyWith(
-        color: authMuted.withOpacity(0.6),
+        color: authMuted.withValues(alpha: 0.6),
         fontSize: 16,
       );
 }
@@ -94,17 +94,17 @@ InputDecoration authInputDecoration(
     filled: true,
     fillColor: authFieldFill,
     prefixIcon: prefixIcon,
-    prefixIconConstraints: const BoxConstraints(minWidth: 0),
+    prefixIconConstraints: const BoxConstraints(),
     suffixIcon: suffixIcon,
     contentPadding:
         contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: authFieldBorder, width: 1),
+      borderSide: const BorderSide(color: authFieldBorder),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: authFieldBorder, width: 1),
+      borderSide: const BorderSide(color: authFieldBorder),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
@@ -112,7 +112,7 @@ InputDecoration authInputDecoration(
     ),
     errorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: errorColor, width: 1),
+      borderSide: BorderSide(color: errorColor),
     ),
     focusedErrorBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
@@ -255,7 +255,7 @@ class AuthPillContainer extends StatelessWidget {
       decoration: BoxDecoration(
         color: authFieldFill,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: authFieldBorder, width: 1),
+        border: Border.all(color: authFieldBorder),
       ),
       child: child,
     );

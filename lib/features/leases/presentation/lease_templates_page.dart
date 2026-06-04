@@ -1,6 +1,9 @@
+import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
-import 'package:estate_app/core/presentation/widgets/section_header.dart';
+import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
 import 'package:flutter/material.dart';
 
 /// Predefined lease templates for different property types
@@ -190,6 +193,8 @@ class LeaseTemplatesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return AppScaffold(
       appBar: AppBar(
         title: const Text('Lease Templates'),
@@ -201,57 +206,93 @@ class LeaseTemplatesPage extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
+      scrollable: true,
+      body: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SectionHeader(
-                title: 'Predefined Templates',
-              ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                child: Text(
-                  'Select a template to use for a new lease',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Predefined Templates Header
+            Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: 0.08),
+                    borderRadius: AppRadii.sm,
+                  ),
+                  child: Icon(
+                    Icons.article_outlined,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  'Predefined Templates',
+                  style: textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Padding(
+              padding: const EdgeInsets.only(left: 44),
+              child: Text(
+                'Select a template to use for a new lease',
+                style: textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
                 ),
               ),
-            ],
-          ),
-          ...availableTemplates.map((template) => _TemplateCard(
-                template: template,
-                onTap: () => _showTemplatePreview(context, template),
-              )),
-          const SizedBox(height: AppSpacing.xl),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SectionHeader(
-                title: 'Custom Templates',
+            ),
+            const SizedBox(height: AppSpacing.lg),
+
+            // Grid of templates (2 columns)
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: AppSpacing.md,
+                mainAxisSpacing: AppSpacing.md,
+                childAspectRatio: 0.85,
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                child: Text(
-                  'Your saved custom templates',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                ),
-              ),
-            ],
-          ),
-          _CustomTemplatesSection(),
-        ],
+              itemCount: availableTemplates.length,
+              itemBuilder: (context, index) {
+                return _TemplateGridTile(
+                  template: availableTemplates[index],
+                  onTap: () => _showTemplatePreview(
+                    context,
+                    availableTemplates[index],
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: AppSpacing.xl),
+
+            // Custom Templates Section
+            AppSectionCard(
+              title: 'Custom Templates',
+              icon: Icons.edit_note_outlined,
+              children: [
+                const _CustomTemplatesSection(),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xl),
+          ],
+        ),
       ),
     );
   }
 
   void _showTemplatePreview(BuildContext context, LeaseTemplate template) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) => _TemplatePreviewPage(template: template),
       ),
     );
@@ -265,8 +306,8 @@ class LeaseTemplatesPage extends StatelessWidget {
   }
 }
 
-class _TemplateCard extends StatelessWidget {
-  const _TemplateCard({
+class _TemplateGridTile extends StatelessWidget {
+  const _TemplateGridTile({
     required this.template,
     required this.onTap,
   });
@@ -288,70 +329,75 @@ class _TemplateCard extends StatelessWidget {
   }
 
   Color _getTypeColor(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     switch (template.type) {
       case LeaseTemplateType.residential:
-        return scheme.primary;
+        return AppColors.primary;
       case LeaseTemplateType.commercial:
-        return scheme.tertiary;
+        return AppColors.info;
       case LeaseTemplateType.pg:
-        return scheme.secondary;
+        return AppColors.success;
       case LeaseTemplateType.monthToMonth:
-        return scheme.outline;
+        return AppColors.warning;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: _getTypeColor(context).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  _typeIcon,
-                  color: _getTypeColor(context),
-                  size: 28,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      template.name,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      template.description,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ],
+    final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final typeColor = _getTypeColor(context);
+
+    return AppCard(
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Icon
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: typeColor.withValues(alpha: isDark ? 0.15 : 0.08),
+              borderRadius: AppRadii.md,
+            ),
+            child: Icon(
+              _typeIcon,
+              color: typeColor,
+              size: 24,
+            ),
           ),
-        ),
+          const SizedBox(height: AppSpacing.md),
+          // Title
+          Text(
+            template.name,
+            style: textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          // Description
+          Expanded(
+            child: Text(
+              template.description,
+              style: textTheme.bodySmall?.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          // Arrow indicator
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Icon(
+              Icons.arrow_forward_rounded,
+              size: 18,
+              color: typeColor.withValues(alpha: 0.6),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -362,32 +408,34 @@ class _CustomTemplatesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     // Placeholder for custom templates
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          children: [
-            Icon(
-              Icons.description_outlined,
-              size: 48,
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              'No custom templates yet',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Create your own lease templates for reuse',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-          ],
+    return Column(
+      children: [
+        const SizedBox(height: AppSpacing.md),
+        Icon(
+          Icons.description_outlined,
+          size: 40,
+          color: AppColors.textDisabled,
         ),
-      ),
+        const SizedBox(height: AppSpacing.md),
+        Text(
+          'No custom templates yet',
+          style: textTheme.titleSmall?.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          'Create your own lease templates for reuse',
+          style: textTheme.bodySmall?.copyWith(
+            color: AppColors.textTertiary,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: AppSpacing.md),
+      ],
     );
   }
 }
@@ -411,8 +459,8 @@ class _TemplatePreviewPageState extends State<_TemplatePreviewPage> {
     'property_address': 'Property Address',
     'start_date': 'Start Date (YYYY-MM-DD)',
     'end_date': 'End Date (YYYY-MM-DD)',
-    'rent_amount': 'Monthly Rent (₹)',
-    'deposit_amount': 'Security Deposit (₹)',
+    'rent_amount': 'Monthly Rent (\u20B9)',
+    'deposit_amount': 'Security Deposit (\u20B9)',
     'due_day': 'Payment Due Day (1-31)',
     'date': 'Agreement Date',
   };
@@ -424,13 +472,13 @@ class _TemplatePreviewPageState extends State<_TemplatePreviewPage> {
     'utilities': 'Utilities (water, electricity, etc.)',
     'grace_period': 'Grace Period (days)',
     'termination_notice_days': 'Termination Notice (days)',
-    'base_rent': 'Base Rent (₹)',
-    'food_charges': 'Food Charges (₹)',
-    'utility_charges': 'Utility Charges (₹)',
-    'service_charges': 'Service Charges (₹)',
+    'base_rent': 'Base Rent (\u20B9)',
+    'food_charges': 'Food Charges (\u20B9)',
+    'utility_charges': 'Utility Charges (\u20B9)',
+    'service_charges': 'Service Charges (\u20B9)',
     'facilities': 'Facilities Included',
     'business_type': 'Business Type',
-    'maintenance_charge': 'Maintenance Charges (₹)',
+    'maintenance_charge': 'Maintenance Charges (\u20B9)',
     'start_time': 'Business Start Time',
     'end_time': 'Business End Time',
   };
@@ -470,101 +518,106 @@ class _TemplatePreviewPageState extends State<_TemplatePreviewPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AppScaffold(
       appBar: AppBar(
         title: Text(widget.template.name),
         actions: [
           TextButton.icon(
             onPressed: _useTemplate,
-            icon: const Icon(Icons.check),
+            icon: const Icon(Icons.check, size: 18),
             label: const Text('Use Template'),
           ),
         ],
       ),
+      scrollable: true,
       body: Form(
         key: _formKey,
-        child: ListView(
+        child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
-          children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Required Information',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    ..._fields.entries.map((entry) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                        child: TextFormField(
-                          controller: _controllers[entry.key],
-                          decoration: InputDecoration(
-                            labelText: entry.value,
-                            border: const OutlineInputBorder(),
-                          ),
-                          validator: (value) =>
-                              value == null || value.trim().isEmpty
-                                  ? 'Required'
-                                  : null,
-                          onChanged: (_) => setState(() {}),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Required Information
+              AppSectionCard(
+                title: 'Required Information',
+                icon: Icons.edit_outlined,
+                children: [
+                  ..._fields.entries.map((entry) {
+                    final isAmount = entry.value.contains('\u20B9');
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                      child: TextFormField(
+                        controller: _controllers[entry.key],
+                        decoration: InputDecoration(
+                          labelText: entry.value,
+                          prefixText: isAmount ? '\u20B9 ' : null,
                         ),
-                      );
-                    }),
-                  ],
-                ),
+                        keyboardType: isAmount
+                            ? TextInputType.number
+                            : TextInputType.text,
+                        validator: (value) =>
+                            value == null || value.trim().isEmpty
+                                ? 'Required'
+                                : null,
+                        onChanged: (_) => setState(() {}),
+                      ),
+                    );
+                  }),
+                ],
               ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Optional Information',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    ..._optionalFields.entries.map((entry) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                        child: TextFormField(
-                          controller: _controllers[entry.key],
-                          decoration: InputDecoration(
-                            labelText: entry.value,
-                            border: const OutlineInputBorder(),
-                          ),
-                          onChanged: (_) => setState(() {}),
+              const SizedBox(height: AppSpacing.lg),
+
+              // Optional Information
+              AppSectionCard(
+                title: 'Optional Information',
+                icon: Icons.tune_outlined,
+                children: [
+                  ..._optionalFields.entries.map((entry) {
+                    final isAmount = entry.value.contains('\u20B9');
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                      child: TextFormField(
+                        controller: _controllers[entry.key],
+                        decoration: InputDecoration(
+                          labelText: entry.value,
+                          prefixText: isAmount ? '\u20B9 ' : null,
                         ),
-                      );
-                    }),
-                  ],
-                ),
+                        keyboardType: isAmount
+                            ? TextInputType.number
+                            : TextInputType.text,
+                        onChanged: (_) => setState(() {}),
+                      ),
+                    );
+                  }),
+                ],
               ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            const SectionHeader(title: 'Preview'),
-            const SizedBox(height: AppSpacing.md),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: SelectableText(
-                  _generatePreview(),
-                  style: TextStyle(
-                    fontFamily: 'monospace',
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurface,
+              const SizedBox(height: AppSpacing.lg),
+
+              // Preview
+              AppSectionCard(
+                title: 'Preview',
+                icon: Icons.preview_outlined,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceSecondary,
+                    borderRadius: AppRadii.md,
+                  ),
+                  child: SelectableText(
+                    _generatePreview(),
+                    style: TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      height: 1.5,
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-          ],
+              const SizedBox(height: AppSpacing.xl),
+            ],
+          ),
         ),
       ),
     );

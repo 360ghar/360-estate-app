@@ -1,6 +1,5 @@
-import 'dart:ui';
-import 'package:flutter/material.dart';
 import 'package:estate_app/core/presentation/design_system/design_system.dart';
+import 'package:flutter/material.dart';
 
 /// An authentication success page with celebration animation.
 ///
@@ -158,7 +157,7 @@ class _AuthSuccessPageState extends State<AuthSuccessPage>
                       child: Text(
                         widget.message,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 16,
                         ),
                         textAlign: TextAlign.center,
@@ -208,16 +207,42 @@ class _SuccessCheckmarkAnimation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 120,
-      height: 120,
+      width: 140,
+      height: 140,
       child: AnimatedBuilder(
         animation: scaleController,
         builder: (context, child) {
+          final scale = Curves.elasticOut.transform(scaleController.value);
           return Transform.scale(
-            scale: Curves.elasticOut.transform(scaleController.value),
-            child: _CheckmarkCanvas(
-              controller: checkmarkController,
-              icon: icon,
+            scale: scale,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Outer glow ring
+                Container(
+                  width: 140,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.success.withValues(alpha: 0.15 * scaleController.value),
+                        blurRadius: 30,
+                        spreadRadius: 5,
+                      ),
+                    ],
+                  ),
+                ),
+                // Checkmark canvas
+                SizedBox(
+                  width: 120,
+                  height: 120,
+                  child: _CheckmarkCanvas(
+                    controller: checkmarkController,
+                    icon: icon,
+                  ),
+                ),
+              ],
             ),
           );
         },
@@ -260,19 +285,19 @@ class _CheckmarkPainter extends CustomPainter {
 
     // Draw glow background
     final glowPaint = Paint()
-      ..color = AppColors.success.withOpacity(0.2)
+      ..color = AppColors.success.withValues(alpha: 0.2)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
     canvas.drawCircle(center, radius, glowPaint);
 
     // Draw background circle
     final bgPaint = Paint()
-      ..color = Colors.white.withOpacity(0.1)
+      ..color = Colors.white.withValues(alpha: 0.1)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, radius, bgPaint);
 
     // Draw border circle
     final borderPaint = Paint()
-      ..color = Colors.white.withOpacity(0.2)
+      ..color = Colors.white.withValues(alpha: 0.2)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
     canvas.drawCircle(center, radius, borderPaint);
@@ -346,7 +371,7 @@ class _CheckmarkPainter extends CustomPainter {
   }
 }
 
-class _ContinueButton extends StatelessWidget {
+class _ContinueButton extends StatefulWidget {
   final String label;
   final VoidCallback? onPressed;
 
@@ -356,35 +381,74 @@ class _ContinueButton extends StatelessWidget {
   });
 
   @override
+  State<_ContinueButton> createState() => _ContinueButtonState();
+}
+
+class _ContinueButtonState extends State<_ContinueButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _scaleController;
+  late final Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _scaleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 120),
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.easeOutCubic),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scaleController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        width: double.infinity,
-        height: 52,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [
-              Color(0xFF3B82F6),
-              Color(0xFF2563EB),
+      onTapDown: (_) => _scaleController.forward(),
+      onTapUp: (_) {
+        _scaleController.reverse();
+        widget.onPressed?.call();
+      },
+      onTapCancel: () => _scaleController.reverse(),
+      child: AnimatedBuilder(
+        animation: _scaleAnimation,
+        builder: (context, child) => Transform.scale(
+          scale: _scaleAnimation.value,
+          child: child,
+        ),
+        child: Container(
+          width: double.infinity,
+          height: 52,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xFF3B82F6),
+                Color(0xFF2563EB),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
             ],
           ),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF3B82F6).withOpacity(0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+          child: Center(
+            child: Text(
+              widget.label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
@@ -432,7 +496,7 @@ class AuthSuccessWidget extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.success.withOpacity(0.3),
+                color: AppColors.success.withValues(alpha: 0.3),
                 blurRadius: 12,
               ),
             ],
@@ -462,7 +526,7 @@ class AuthSuccessWidget extends StatelessWidget {
           Text(
             message!,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               fontSize: 14,
             ),
             textAlign: TextAlign.center,
@@ -594,7 +658,7 @@ class _ConfettiPainter extends CustomPainter {
 
       if (y > 1.0) continue;
 
-      final paint = Paint()..color = particle.color.withOpacity(1 - progress * 0.5);
+      final paint = Paint()..color = particle.color.withValues(alpha: 1 - progress * 0.5);
 
       final screenX = size.width / 2 + x * size.width / 2;
       final screenY = size.height * y;

@@ -79,14 +79,16 @@ final class ActiveLease {
 
   final int id;
   final String tenantName;
-  final DateTime startDate;
-  final DateTime endDate;
+  final DateTime? startDate;
+  final DateTime? endDate;
   final double monthlyRent;
   final double? securityDeposit;
   final String? status;
 
   bool get isExpiringSoon {
-    final daysUntilExpiry = endDate.difference(DateTime.now()).inDays;
+    final end = endDate;
+    if (end == null) return false;
+    final daysUntilExpiry = end.difference(DateTime.now()).inDays;
     return daysUntilExpiry >= 0 && daysUntilExpiry <= 30;
   }
 }

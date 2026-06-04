@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:estate_app/core/config/app_config.dart';
 import 'package:estate_app/core/storage/auth_token_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
@@ -9,41 +8,25 @@ abstract interface class AuthTokenProvider {
   Future<void> clearSession();
 }
 
-final class SecureAuthTokenProvider implements AuthTokenProvider {
-  SecureAuthTokenProvider(this._storage);
-
-  final AuthTokenStorage _storage;
-
-  @override
-  Future<String?> getAccessToken() => _storage.read();
-
-  @override
-  Future<void> clearSession() => _storage.clear();
-}
-
 final class RefreshingAuthTokenProvider implements AuthTokenProvider {
-  RefreshingAuthTokenProvider(this._storage, {required AppConfig config})
-      : _config = config;
+  RefreshingAuthTokenProvider(this._storage);
 
   final AuthTokenStorage _storage;
-  final AppConfig _config;
 
   @override
   Future<String?> getAccessToken() async {
-    if (!_config.isSupabaseConfigured) {
-      return _readStoredToken();
+    supabase.SupabaseClient client;
+    try {
+      client = supabase.Supabase.instance.client;
+    } catch (_) {
+      await _storage.clear();
+      return null;
     }
 
-    final client = supabase.Supabase.instance.client;
     var session = client.auth.currentSession;
     if (session == null) {
-      final stored = await _readStoredToken();
-      if (stored == null) return null;
-      if (!_isSupabaseToken(stored, _config)) {
-        await _storage.clear();
-        return null;
-      }
-      return stored;
+      await _storage.clear();
+      return null;
     }
 
     if (session.isExpired || _isJwtExpired(session.accessToken)) {
@@ -62,29 +45,18 @@ final class RefreshingAuthTokenProvider implements AuthTokenProvider {
       return token;
     }
 
-    return _readStoredToken();
+    await _storage.clear();
+    return null;
   }
 
   @override
   Future<void> clearSession() async {
     await _storage.clear();
-    if (_config.isSupabaseConfigured) {
-      try {
-        await supabase.Supabase.instance.client.auth.signOut();
-      } catch (_) {
-        // Ignore sign-out failures from the auth SDK.
-      }
+    try {
+      await supabase.Supabase.instance.client.auth.signOut();
+    } catch (_) {
+      // Ignore sign-out failures from the auth SDK.
     }
-  }
-
-  Future<String?> _readStoredToken() async {
-    final token = await _storage.read();
-    if (token == null || token.isEmpty) return null;
-    if (_isJwtExpired(token)) {
-      await _storage.clear();
-      return null;
-    }
-    return token;
   }
 }
 
@@ -103,22 +75,6 @@ bool _isJwtExpired(String token, {Duration skew = const Duration(seconds: 10)}) 
   return DateTime.now().add(skew).isAfter(expiry);
 }
 
-bool _isSupabaseToken(String token, AppConfig config) {
-  final payload = _decodeJwtPayload(token);
-  if (payload == null) return false;
-  final issuer = payload['iss']?.toString();
-  final ref = payload['ref']?.toString();
-  final supabaseUrl = config.supabaseUrl.trim();
-  if (issuer != null && supabaseUrl.isNotEmpty) {
-    if (issuer.contains(supabaseUrl)) return true;
-  }
-  if (ref != null) {
-    final projectRef = _extractProjectRef(supabaseUrl);
-    if (projectRef != null && ref == projectRef) return true;
-  }
-  return false;
-}
-
 Map<String, dynamic>? _decodeJwtPayload(String token) {
   final parts = token.split('.');
   if (parts.length < 2) return null;
@@ -134,14 +90,4 @@ Map<String, dynamic>? _decodeJwtPayload(String token) {
   } catch (_) {
     return null;
   }
-}
-
-String? _extractProjectRef(String supabaseUrl) {
-  if (supabaseUrl.isEmpty) return null;
-  final uri = Uri.tryParse(supabaseUrl);
-  final host = uri?.host ?? supabaseUrl;
-  if (host.isEmpty) return null;
-  final parts = host.split('.');
-  if (parts.isEmpty) return null;
-  return parts.first.trim().isEmpty ? null : parts.first.trim();
 }

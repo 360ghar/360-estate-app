@@ -11,7 +11,7 @@ class DocumentsRepository {
   final ApiClient _client;
 
   Future<List<DocumentItem>> list() async {
-    final response = await _client.get('/pm/documents/');
+    final response = await _client.get<dynamic>('/pm/documents/');
     final data = unwrapList(response.data);
     return data
         .whereType<Map<String, dynamic>>()
@@ -31,7 +31,7 @@ class DocumentsRepository {
       if (type != null && type.trim().isNotEmpty) 'type': type.trim(),
     });
 
-    final response = await _client.upload(
+    final response = await _client.upload<dynamic>(
       '/pm/documents/upload',
       data: formData,
     );
@@ -40,7 +40,7 @@ class DocumentsRepository {
   }
 
   Future<String?> fetchDownloadUrl(String id) async {
-    final response = await _client.get('/pm/documents/$id/download');
+    final response = await _client.get<dynamic>('/pm/documents/$id/download');
     final data = unwrapData(response.data);
     if (data is String) return data;
     if (data is Map<String, dynamic>) {

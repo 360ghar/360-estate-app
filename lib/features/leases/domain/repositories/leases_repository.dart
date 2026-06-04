@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:estate_app/core/utils/parse.dart';
 import 'package:estate_app/features/leases/models/lease.dart';
 
 abstract interface class LeasesRepository {
@@ -49,8 +50,8 @@ class LeaseCreateRequest {
     final payload = <String, dynamic>{
       'property_id': propertyId,
       'tenant_id': tenantId,
-      'start_date': startDate.toIso8601String(),
-      'end_date': endDate.toIso8601String(),
+      'start_date': toApiDateOnly(startDate),
+      'end_date': toApiDateOnly(endDate),
       'rent_amount': rentAmount,
     };
     if (depositAmount != null) {
@@ -73,7 +74,7 @@ class LeaseRenewRequest {
   Map<String, dynamic> toJson() {
     final payload = <String, dynamic>{};
     if (newEndDate != null) {
-      payload['end_date'] = newEndDate!.toIso8601String();
+      payload['end_date'] = toApiDateOnly(newEndDate);
     }
     if (newRentAmount != null) {
       payload['rent_amount'] = newRentAmount;
@@ -95,7 +96,7 @@ class LeaseTerminateRequest {
       payload['reason'] = reason!.trim();
     }
     if (terminatedAt != null) {
-      payload['terminated_at'] = terminatedAt!.toIso8601String();
+      payload['terminated_at'] = toApiUtcInstant(terminatedAt);
     }
     return payload;
   }

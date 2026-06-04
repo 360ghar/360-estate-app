@@ -33,7 +33,7 @@ class PropertiesRepositoryImpl implements PropertiesRepository {
       );
     }
 
-    final response = await _client.get(
+    final response = await _client.get<dynamic>(
       '/pm/properties/',
       queryParameters: {
         'page': page,
@@ -57,6 +57,7 @@ class PropertiesRepositoryImpl implements PropertiesRepository {
   }
 
   /// List all properties (up to limit)
+  @override
   Future<List<Property>> list({int limit = 200}) async {
     final page = await listPage(page: 1, limit: limit);
     return page.items;
@@ -64,7 +65,7 @@ class PropertiesRepositoryImpl implements PropertiesRepository {
 
   @override
   Future<Property> fetch(String id) async {
-    final response = await _client.get('/pm/properties/$id');
+    final response = await _client.get<dynamic>('/pm/properties/$id');
     final data = _normalizePropertyJson(
       unwrapMap(response.data),
       baseUrl: _client.dio.options.baseUrl,
@@ -74,7 +75,7 @@ class PropertiesRepositoryImpl implements PropertiesRepository {
 
   @override
   Future<Property> create(PropertyPayload payload) async {
-    final response = await _client.post(
+    final response = await _client.post<dynamic>(
       '/pm/properties/',
       data: payload.toJson(),
     );
@@ -88,7 +89,7 @@ class PropertiesRepositoryImpl implements PropertiesRepository {
 
   @override
   Future<Property> update(String id, PropertyPayload payload) async {
-    final response = await _client.patch(
+    final response = await _client.patch<dynamic>(
       '/pm/properties/$id',
       data: payload.toJson(),
     );
@@ -102,7 +103,7 @@ class PropertiesRepositoryImpl implements PropertiesRepository {
 
   @override
   Future<void> delete(String id) async {
-    await _client.delete('/pm/properties/$id');
+    await _client.delete<dynamic>('/pm/properties/$id');
     _cache.invalidatePrefix('properties:$_cacheScope:');
   }
 }

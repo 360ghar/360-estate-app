@@ -1,3 +1,4 @@
+import 'package:estate_app/core/utils/parse.dart';
 import 'package:estate_app/features/finance/domain/entities/rent_charge.dart';
 
 final class RentChargeDto {
@@ -20,44 +21,43 @@ final class RentChargeDto {
 
   factory RentChargeDto.fromJson(Map<String, dynamic> json) {
     return RentChargeDto(
-      id: json['id'] as int,
+      id: parseInt(json['id']) ?? 0,
       leaseId: json['lease_id'] as int? ?? json['leaseId'] as int? ?? 0,
-      propertyId: json['property_id'] as int? ?? json['propertyId'] as int? ?? 0,
-      propertyTitle: json['property_title'] as String? ??
+      propertyId:
+          json['property_id'] as int? ?? json['propertyId'] as int? ?? 0,
+      propertyTitle:
+          json['property_title'] as String? ??
           json['propertyTitle'] as String? ??
           '',
-      tenantName: json['tenant_name'] as String? ??
-          json['tenantName'] as String? ??
-          '',
-      periodStart: DateTime.parse(
-        json['period_start'] as String? ??
-            json['periodStart'] as String? ??
-            DateTime.now().toIso8601String(),
-      ),
-      periodEnd: DateTime.parse(
-        json['period_end'] as String? ??
-            json['periodEnd'] as String? ??
-            DateTime.now().toIso8601String(),
-      ),
-      dueDate: DateTime.parse(
-        json['due_date'] as String? ??
-            json['dueDate'] as String? ??
-            DateTime.now().toIso8601String(),
-      ),
+      tenantName:
+          json['tenant_name'] as String? ?? json['tenantName'] as String? ?? '',
+      periodStart:
+          parseDateTime(
+            json['period_start'] as String? ??
+                json['periodStart'] as String? ??
+                DateTime.now().toIso8601String(),
+          ) ??
+          DateTime.now(),
+      periodEnd:
+          parseDateTime(
+            json['period_end'] as String? ??
+                json['periodEnd'] as String? ??
+                DateTime.now().toIso8601String(),
+          ) ??
+          DateTime.now(),
+      dueDate:
+          parseDateTime(
+            json['due_date'] as String? ??
+                json['dueDate'] as String? ??
+                DateTime.now().toIso8601String(),
+          ) ??
+          DateTime.now(),
       amountDue: _parseDouble(json['amount_due'] ?? json['amountDue']),
       amountPaid: _parseDouble(json['amount_paid'] ?? json['amountPaid']),
       lateFee: _parseDouble(json['late_fee'] ?? json['lateFee']),
       status: json['status'] as String? ?? 'pending',
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : json['createdAt'] != null
-              ? DateTime.parse(json['createdAt'] as String)
-              : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
-          : json['updatedAt'] != null
-              ? DateTime.parse(json['updatedAt'] as String)
-              : null,
+      createdAt: parseDateTime(json['created_at'] ?? json['createdAt']),
+      updatedAt: parseDateTime(json['updated_at'] ?? json['updatedAt']),
     );
   }
 

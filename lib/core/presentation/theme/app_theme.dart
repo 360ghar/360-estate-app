@@ -1,9 +1,8 @@
-﻿import 'package:estate_app/core/presentation/design_system/app_borders.dart';
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/presentation/design_system/app_glass_blur.dart';
+import 'package:estate_app/core/presentation/design_system/app_glass_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_text_styles.dart';
-import 'package:estate_app/core/presentation/design_system/app_glass_colors.dart';
-import 'package:estate_app/core/presentation/design_system/app_glass_blur.dart';
 import 'package:flutter/material.dart';
 
 /// Professional B2B theme with navy/indigo primary color.
@@ -16,7 +15,7 @@ abstract final class AppTheme {
       brightness: scheme.brightness,
       colorScheme: scheme,
       textTheme: textTheme,
-      scaffoldBackgroundColor: scheme.background,
+      scaffoldBackgroundColor: scheme.surface,
       appBarTheme: AppBarTheme(
         backgroundColor: scheme.surface,
         foregroundColor: scheme.onSurface,
@@ -32,7 +31,7 @@ abstract final class AppTheme {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         shadowColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: AppRadii.md),
+        shape: RoundedRectangleBorder(borderRadius: AppRadii.lg),
         margin: const EdgeInsets.all(0),
       ),
       dividerTheme: DividerThemeData(
@@ -41,22 +40,40 @@ abstract final class AppTheme {
         space: 1,
       ),
       inputDecorationTheme: InputDecorationTheme(
-        border: AppBorders.input(scheme.outline),
-        enabledBorder: AppBorders.input(scheme.outline),
-        focusedBorder: AppBorders.input(scheme.primary),
-        errorBorder: AppBorders.input(scheme.error),
-        focusedErrorBorder: AppBorders.input(scheme.error),
+        border: OutlineInputBorder(
+          borderRadius: AppRadii.lg,
+          borderSide: BorderSide(color: scheme.outline),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: AppRadii.lg,
+          borderSide: BorderSide(color: scheme.outline),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: AppRadii.lg,
+          borderSide: BorderSide(color: scheme.primary, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: AppRadii.lg,
+          borderSide: BorderSide(color: scheme.error),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: AppRadii.lg,
+          borderSide: BorderSide(color: scheme.error, width: 1.5),
+        ),
         filled: true,
-        fillColor: scheme.surfaceVariant,
+        fillColor: scheme.brightness == Brightness.dark
+            ? scheme.surfaceContainerHighest
+            : const Color(0xFFF1F5F9),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
         ),
+        floatingLabelBehavior: FloatingLabelBehavior.auto,
         labelStyle: textTheme.bodyMedium?.copyWith(
           color: scheme.onSurfaceVariant,
         ),
         hintStyle: textTheme.bodyMedium?.copyWith(
-          color: scheme.onSurfaceVariant.withOpacity(0.7),
+          color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
         ),
       ),
       filledButtonTheme: FilledButtonThemeData(
@@ -84,15 +101,25 @@ abstract final class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: scheme.surface,
-        indicatorColor: scheme.primary.withOpacity(0.12),
-        height: 72,
+        indicatorColor: scheme.primary.withValues(alpha: 0.1),
+        height: 64,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        labelTextStyle: WidgetStateProperty.all(textTheme.labelSmall),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: scheme.primary,
+            );
+          }
+          return textTheme.labelSmall?.copyWith(
+            color: scheme.onSurfaceVariant,
+          );
+        }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return IconThemeData(color: scheme.primary);
+            return IconThemeData(color: scheme.primary, size: 24);
           }
-          return IconThemeData(color: scheme.onSurfaceVariant);
+          return IconThemeData(color: scheme.onSurfaceVariant, size: 22);
         }),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -125,7 +152,7 @@ abstract final class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: AppRadii.xl),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: scheme.surfaceVariant,
+        backgroundColor: scheme.surfaceContainerHighest,
         labelStyle: textTheme.labelMedium,
         shape: RoundedRectangleBorder(borderRadius: AppRadii.sm),
         side: BorderSide(color: scheme.outlineVariant),
@@ -155,7 +182,7 @@ abstract final class AppTheme {
     return base.copyWith(
       scaffoldBackgroundColor: const Color(0xFFF9FAFB),
       cardTheme: CardThemeData(
-        color: Colors.white.withOpacity(AppGlassColors.opacityMedium),
+        color: Colors.white.withValues(alpha: AppGlassColors.opacityMedium),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         shadowColor: Colors.transparent,
@@ -163,7 +190,7 @@ abstract final class AppTheme {
         margin: const EdgeInsets.all(0),
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: Colors.white.withOpacity(AppGlassColors.opacityStrong),
+        backgroundColor: Colors.white.withValues(alpha: AppGlassColors.opacityStrong),
         foregroundColor: scheme.onSurface,
         elevation: 0,
         centerTitle: false,
@@ -181,15 +208,25 @@ abstract final class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: scheme.surface,
-        indicatorColor: scheme.primary.withOpacity(0.12),
-        height: 72,
+        indicatorColor: scheme.primary.withValues(alpha: 0.1),
+        height: 64,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        labelTextStyle: WidgetStateProperty.all(textTheme.labelSmall),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: scheme.primary,
+            );
+          }
+          return textTheme.labelSmall?.copyWith(
+            color: scheme.onSurfaceVariant,
+          );
+        }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return IconThemeData(color: scheme.primary);
+            return IconThemeData(color: scheme.primary, size: 24);
           }
-          return IconThemeData(color: scheme.onSurfaceVariant);
+          return IconThemeData(color: scheme.onSurfaceVariant, size: 22);
         }),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -222,7 +259,7 @@ abstract final class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: AppRadii.xl),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: scheme.surfaceVariant,
+        backgroundColor: scheme.surfaceContainerHighest,
         labelStyle: textTheme.labelMedium,
         shape: RoundedRectangleBorder(borderRadius: AppRadii.sm),
         side: BorderSide(color: scheme.outlineVariant),
@@ -273,7 +310,6 @@ abstract final class AppTheme {
     return base.copyWith(
       scaffoldBackgroundColor: Colors.transparent,
       colorScheme: base.colorScheme.copyWith(
-        background: Colors.transparent,
         surface: Colors.transparent,
       ),
       appBarTheme: AppBarTheme(

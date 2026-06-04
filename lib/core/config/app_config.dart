@@ -105,10 +105,17 @@ final class AppConfig {
         ? supabaseUrlDefine
         : (dotenv.env['SUPABASE_URL'] ?? '');
 
+    const supabasePublishableKeyDefine = String.fromEnvironment(
+      'SUPABASE_PUBLISHABLE_KEY',
+    );
     const supabaseAnonKeyDefine = String.fromEnvironment('SUPABASE_ANON_KEY');
-    final supabaseAnonKey = supabaseAnonKeyDefine.trim().isNotEmpty
-        ? supabaseAnonKeyDefine
-        : (dotenv.env['SUPABASE_ANON_KEY'] ?? '');
+    final supabaseAnonKey = supabasePublishableKeyDefine.trim().isNotEmpty
+        ? supabasePublishableKeyDefine
+        : (supabaseAnonKeyDefine.trim().isNotEmpty
+              ? supabaseAnonKeyDefine
+              : (dotenv.env['SUPABASE_PUBLISHABLE_KEY'] ??
+                    dotenv.env['SUPABASE_ANON_KEY'] ??
+                    ''));
 
     const enableCrashReportingDefine = String.fromEnvironment(
       'ENABLE_CRASH_REPORTING',
@@ -133,6 +140,15 @@ final class AppConfig {
         enableDebugLogsDefault;
 
     final featureFlags = FeatureFlags.fromEnvironment(environment);
+
+    if (apiBaseUrl.trim().isEmpty) {
+      throw StateError('Missing API_BASE_URL configuration.');
+    }
+    if (supabaseUrl.trim().isEmpty || supabaseAnonKey.trim().isEmpty) {
+      throw StateError(
+        'Missing SUPABASE_URL or SUPABASE_PUBLISHABLE_KEY configuration.',
+      );
+    }
 
     return AppConfig(
       environment: environment,

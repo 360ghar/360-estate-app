@@ -233,8 +233,8 @@ final class ActiveLeaseDto {
 
   final int id;
   final String tenantName;
-  final DateTime startDate;
-  final DateTime endDate;
+  final DateTime? startDate;
+  final DateTime? endDate;
   final double monthlyRent;
   final double? securityDeposit;
   final String? status;
@@ -243,8 +243,8 @@ final class ActiveLeaseDto {
     return ActiveLeaseDto(
       id: PropertyDto._parseInt(json['id'] ?? json['lease_id']),
       tenantName: (json['tenant_name'] ?? json['tenant']?['name'] ?? '').toString(),
-      startDate: DateTime.parse(json['start_date'] as String),
-      endDate: DateTime.parse(json['end_date'] as String),
+      startDate: PropertyDto._parseDateTime(json['start_date']),
+      endDate: PropertyDto._parseDateTime(json['end_date']),
       monthlyRent: PropertyDto._parseDoubleOrNull(json['monthly_rent']) ?? 0,
       securityDeposit: PropertyDto._parseDoubleOrNull(json['security_deposit']),
       status: json['status'] as String?,

@@ -35,15 +35,29 @@ abstract final class AppColors {
   // Surfaces
   static const Color surface = Color(0xFFFFFFFF);
   static const Color surfaceVariant = Color(0xFFF9FAFB);
+  static const Color surfaceSecondary = Color(0xFFF1F5F9);   // Nested/grouped content
+  static const Color surfaceTertiary = Color(0xFFE2E8F0);    // Pressed/hovered states
   static const Color surfaceElevated = Color(0xFFFFFFFF);
+  static const Color accentSoft = Color(0xFFEFF6FF);          // Blue-tinted highlight bg
   static const Color background = Color(0xFFF9FAFB);
   static const Color backgroundDark = Color(0xFF111827);
+
+  // Gradient endpoints for primary gradient buttons/headers
+  static const Color primaryGradientStart = Color(0xFF1E3A5F);
+  static const Color primaryGradientEnd = Color(0xFF3B82F6);
+
+  // Card-specific border (lighter than general border)
+  static const Color cardBorder = Color(0xFFEDF0F3);
 
   // Dark mode colors
   static const Color darkSurface = Color(0xFF1F2937);
   static const Color darkSurfaceVariant = Color(0xFF374151);
+  static const Color darkSurfaceSecondary = Color(0xFF1A2332);  // Nested/grouped
+  static const Color darkSurfaceTertiary = Color(0xFF2D3B4E);   // Pressed/hovered
+  static const Color darkAccentSoft = Color(0xFF172554);         // Blue-tinted highlight
   static const Color darkBackground = Color(0xFF111827);
   static const Color darkBorder = Color(0xFF374151);
+  static const Color darkCardBorder = Color(0xFF2D3748);
 
   static const Color darkTextPrimary = Color(0xFFF9FAFB);
   static const Color darkTextSecondary = Color(0xFF9CA3AF);
@@ -61,7 +75,6 @@ abstract final class AppColors {
   static ColorScheme lightScheme() {
     return ColorScheme.fromSeed(
       seedColor: primary,
-      brightness: Brightness.light,
       primary: primary,
       onPrimary: Colors.white,
       primaryContainer: primarySoft,
@@ -77,12 +90,9 @@ abstract final class AppColors {
       surface: surface,
       onSurface: textPrimary,
       surfaceContainerHighest: surfaceVariant,
-      surfaceVariant: surfaceVariant,
       onSurfaceVariant: textSecondary,
       outline: border,
       outlineVariant: borderLight,
-      background: background,
-      onBackground: textPrimary,
     );
   }
 
@@ -105,12 +115,9 @@ abstract final class AppColors {
       surface: darkSurface,
       onSurface: darkTextPrimary,
       surfaceContainerHighest: darkSurfaceVariant,
-      surfaceVariant: darkSurfaceVariant,
       onSurfaceVariant: darkTextSecondary,
       outline: darkBorder,
       outlineVariant: darkSurfaceVariant,
-      background: darkBackground,
-      onBackground: darkTextPrimary,
     );
   }
 }

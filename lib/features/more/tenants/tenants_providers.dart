@@ -1,5 +1,5 @@
-import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/core/pagination/paged_list_controller.dart';
+import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/features/more/tenants/data/tenants_repository.dart';
 import 'package:estate_app/features/more/tenants/models/tenant.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -141,7 +141,7 @@ class _StepIndicator extends StatelessWidget {
       backgroundColor = scheme.primary;
       elevation = 2;
     } else if (isActive) {
-      backgroundColor = scheme.primary.withOpacity(0.15);
+      backgroundColor = scheme.primary.withValues(alpha: 0.15);
       elevation = 1;
     } else {
       backgroundColor = isDark
@@ -159,7 +159,7 @@ class _StepIndicator extends StatelessWidget {
         boxShadow: elevation > 0
             ? [
                 BoxShadow(
-                  color: scheme.primary.withOpacity(0.3),
+                  color: scheme.primary.withValues(alpha: 0.3),
                   blurRadius: elevation * 2,
                   offset: Offset(0, elevation),
                 ),
@@ -214,7 +214,7 @@ class _StepLabel extends StatelessWidget {
           Text(
             subtitle!,
             style: AppTextStyles.labelSmall?.copyWith(
-              color: textColor.withOpacity(0.8),
+              color: textColor.withValues(alpha: 0.8),
               fontSize: 10,
             ),
             textAlign: TextAlign.center,
@@ -319,7 +319,7 @@ class _VerticalStepItem extends StatelessWidget {
                 height: 24,
                 margin: const EdgeInsets.symmetric(vertical: 4),
                 color: isCompleted
-                    ? scheme.primary.withOpacity(0.5)
+                    ? scheme.primary.withValues(alpha: 0.5)
                     : (isDark ? AppColors.darkBorder : AppColors.border),
               ),
           ],

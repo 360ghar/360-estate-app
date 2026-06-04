@@ -1,3 +1,4 @@
+import 'package:estate_app/core/utils/parse.dart';
 import 'package:estate_app/features/home/domain/entities/activity_item.dart';
 
 final class ActivityItemDto {
@@ -16,9 +17,9 @@ final class ActivityItemDto {
 
   factory ActivityItemDto.fromJson(Map<String, dynamic> json) {
     return ActivityItemDto(
-      id: (json['id'] as num).toInt(),
+      id: parseInt(json['id']) ?? 0,
       type: json['type'] as String? ?? 'unknown',
-      timestamp: DateTime.parse(json['at'] as String),
+      timestamp: parseDateTime(json['at']) ?? DateTime.now(),
       title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
       propertyId: (json['property_id'] as num?)?.toInt(),

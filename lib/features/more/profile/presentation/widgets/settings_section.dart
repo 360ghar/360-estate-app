@@ -51,7 +51,7 @@ class SettingsSection extends StatelessWidget {
             borderRadius: AppRadii.md,
             border: Border.all(
               color: isDanger
-                  ? AppColors.danger.withOpacity(0.3)
+                  ? AppColors.danger.withValues(alpha: 0.3)
                   : Theme.of(context).colorScheme.outlineVariant,
             ),
           ),

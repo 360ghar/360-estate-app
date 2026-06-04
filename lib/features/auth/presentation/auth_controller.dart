@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:estate_app/core/auth/user_role.dart';
-import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/core/config/app_config.dart';
+import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/core/storage/app_preferences.dart';
 import 'package:estate_app/core/storage/auth_token_storage.dart';
@@ -143,7 +143,7 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   Future<void> requestOtp(String phone) async {
-    state = state.copyWith(isBusy: true, errorMessage: null, phone: phone);
+    state = state.copyWith(isBusy: true, phone: phone);
     try {
       await _repository.requestOtp(phone);
       state = state.copyWith(status: AuthStatus.otpSent, isBusy: false);
@@ -157,7 +157,7 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   Future<bool?> checkPhoneRegistered(String phone) async {
-    state = state.copyWith(isBusy: true, errorMessage: null);
+    state = state.copyWith(isBusy: true);
     try {
       if (!_config.isSupabaseConfigured) {
         throw const UnknownFailure('Missing Supabase configuration');
@@ -178,7 +178,7 @@ class AuthController extends StateNotifier<AuthState> {
     required String phone,
     required String password,
   }) async {
-    state = state.copyWith(isBusy: true, errorMessage: null, phone: phone);
+    state = state.copyWith(isBusy: true, phone: phone);
     try {
       if (!_config.isSupabaseConfigured) {
         throw const UnknownFailure('Missing Supabase configuration');
@@ -201,7 +201,7 @@ class AuthController extends StateNotifier<AuthState> {
     String? fullName,
     String? email,
   }) async {
-    state = state.copyWith(isBusy: true, errorMessage: null, phone: phone);
+    state = state.copyWith(isBusy: true, phone: phone);
     try {
       if (!_config.isSupabaseConfigured) {
         throw const UnknownFailure('Missing Supabase configuration');
@@ -234,7 +234,7 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   Future<void> verifyOtp({required String phone, required String otp}) async {
-    state = state.copyWith(isBusy: true, errorMessage: null, phone: phone);
+    state = state.copyWith(isBusy: true, phone: phone);
     try {
       final user = await _repository.verifyOtp(phone: phone, otp: otp);
       await _setAuthenticated(user, phone: phone);
@@ -251,7 +251,7 @@ class AuthController extends StateNotifier<AuthState> {
     required String phone,
     required String otp,
   }) async {
-    state = state.copyWith(isBusy: true, errorMessage: null, phone: phone);
+    state = state.copyWith(isBusy: true, phone: phone);
     try {
       await _repository.verifyOtp(phone: phone, otp: otp);
       try {
@@ -278,7 +278,7 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   Future<void> updateProfile(UserProfileUpdate update) async {
-    state = state.copyWith(isBusy: true, errorMessage: null);
+    state = state.copyWith(isBusy: true);
     try {
       final user = await _repository.updateProfile(update);
       state = AuthState(
@@ -367,7 +367,7 @@ class AuthController extends StateNotifier<AuthState> {
     required String currentPassword,
     required String newPassword,
   }) async {
-    state = state.copyWith(isBusy: true, errorMessage: null);
+    state = state.copyWith(isBusy: true);
     try {
       await _repository.changePassword(
         currentPassword: currentPassword,

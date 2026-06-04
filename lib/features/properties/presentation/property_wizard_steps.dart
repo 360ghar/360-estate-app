@@ -113,7 +113,7 @@ class _PropertyWizardStep1State extends State<PropertyWizardStep1> {
 
         // Property type
         DropdownButtonFormField<String>(
-          value: selectedType,
+          initialValue: selectedType,
           decoration: const InputDecoration(
             labelText: 'Property type',
             hintText: 'Select type',
@@ -131,7 +131,7 @@ class _PropertyWizardStep1State extends State<PropertyWizardStep1> {
 
         // Management status
         DropdownButtonFormField<String>(
-          value: widget.data.managementStatus ?? 'active',
+          initialValue: widget.data.managementStatus ?? 'active',
           decoration: const InputDecoration(
             labelText: 'Management status',
             prefixIcon: Icon(Icons.settings_outlined),
@@ -510,7 +510,7 @@ class _PropertyWizardStep3State extends State<PropertyWizardStep3> {
                 });
               },
               backgroundColor: Colors.transparent,
-              selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.15),
+              selectedColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
               checkmarkColor: Theme.of(context).colorScheme.primary,
               labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: isSelected
@@ -524,7 +524,6 @@ class _PropertyWizardStep3State extends State<PropertyWizardStep3> {
                   color: isSelected
                       ? Theme.of(context).colorScheme.primary
                       : Theme.of(context).colorScheme.outlineVariant,
-                  width: 1,
                 ),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -735,8 +734,8 @@ class PropertyWizardStep5 extends StatelessWidget {
   final ValueChanged<PropertyWizardStepData> onChanged;
   final VoidCallback onAddImages;
   final VoidCallback onAddFloorPlans;
-  final Function(int) onRemoveImage;
-  final Function(int) onRemoveFloorPlan;
+  final void Function(int) onRemoveImage;
+  final void Function(int) onRemoveFloorPlan;
   final bool isUploading;
 
   const PropertyWizardStep5({
@@ -793,7 +792,7 @@ class PropertyWizardStep5 extends StatelessWidget {
     required int maxItems,
     required IconData icon,
     required VoidCallback? onAdd,
-    required Function(int) onRemove,
+    required void Function(int) onRemove,
     required bool isUploading,
   }) {
     return Column(
@@ -851,7 +850,6 @@ class PropertyWizardStep5 extends StatelessWidget {
               crossAxisCount: 3,
               crossAxisSpacing: AppSpacing.sm,
               mainAxisSpacing: AppSpacing.sm,
-              childAspectRatio: 1,
             ),
             itemCount: items.length,
             itemBuilder: (context, index) {
@@ -864,11 +862,10 @@ class PropertyWizardStep5 extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(AppSpacing.xl),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: Theme.of(context).colorScheme.outlineVariant,
-                width: 1,
               ),
             ),
             child: Center(
@@ -878,7 +875,7 @@ class PropertyWizardStep5 extends StatelessWidget {
                   Icon(
                     icon,
                     size: 48,
-                    color: AppColors.textSecondary.withOpacity(0.5),
+                    color: AppColors.textSecondary.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
@@ -902,7 +899,7 @@ class PropertyWizardStep5 extends StatelessWidget {
     );
   }
 
-  Widget _buildImageItem(BuildContext context, String imageUrl, int index, Function(int) onRemove) {
+  Widget _buildImageItem(BuildContext context, String imageUrl, int index, void Function(int) onRemove) {
     final uri = Uri.tryParse(imageUrl);
     final isFile = uri != null && uri.scheme == 'file';
     final imageWidget = isFile

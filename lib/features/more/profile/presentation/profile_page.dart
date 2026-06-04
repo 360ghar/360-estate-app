@@ -1,12 +1,13 @@
+import 'dart:async';
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_gradients.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
-import 'package:estate_app/core/presentation/design_system/app_text_styles.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/widgets/app_avatar.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
 import 'package:estate_app/features/auth/models/user_profile.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    _loadPackageInfo();
+    unawaited(_loadPackageInfo());
   }
 
   Future<void> _loadPackageInfo() async {
@@ -50,7 +51,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),
-      scrollable: false,
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
@@ -63,15 +63,42 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             onEditTap: () => context.push('/more/profile/edit'),
           ),
 
+          const SizedBox(height: AppSpacing.xl),
+
+          // Personal Information - Read-only fields
+          AppSectionCard(
+            title: 'Personal Information',
+            icon: Icons.person_outline,
+            iconColor: const Color(0xFF3B82F6),
+            children: [
+              _ReadOnlyField(
+                label: context.l10n?.fullNameLabel ?? 'Full Name',
+                value: profile?.displayName ?? '--',
+                icon: Icons.person_outline,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _ReadOnlyField(
+                label: context.l10n?.emailLabel ?? 'Email',
+                value: profile?.email ?? '--',
+                icon: Icons.email_outlined,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _ReadOnlyField(
+                label: context.l10n?.phoneNumberLabel ?? 'Phone',
+                value: profile?.phone ?? '--',
+                icon: Icons.phone_outlined,
+              ),
+            ],
+          ),
+
           const SizedBox(height: AppSpacing.lg),
 
           // Account Security Section
-          _SectionHeader(
+          AppSectionCard(
             title: 'Account Security',
             icon: Icons.shield_outlined,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          _SectionCard(
+            iconColor: const Color(0xFF8B5CF6),
+            contentPadding: EdgeInsets.zero,
             children: [
               _SettingsTile(
                 icon: Icons.lock_outline,
@@ -79,6 +106,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 title: context.l10n?.changePassword ?? 'Change Password',
                 subtitle: 'Update your password',
                 onTap: () => context.push('/more/profile/change-password'),
+                isLast: true,
               ),
             ],
           ),
@@ -86,12 +114,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           const SizedBox(height: AppSpacing.lg),
 
           // Preferences Section
-          _SectionHeader(
+          AppSectionCard(
             title: 'Preferences',
             icon: Icons.tune_outlined,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          _SectionCard(
+            iconColor: const Color(0xFFF59E0B),
+            contentPadding: EdgeInsets.zero,
             children: [
               _SettingsTile(
                 icon: Icons.palette_outlined,
@@ -113,6 +140,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 title: context.l10n?.privacy ?? 'Privacy',
                 subtitle: 'Privacy settings',
                 onTap: () => context.push('/more/profile/settings/privacy'),
+                isLast: true,
               ),
             ],
           ),
@@ -120,33 +148,42 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           const SizedBox(height: AppSpacing.lg),
 
           // Support Section
-          _SectionHeader(
+          AppSectionCard(
             title: 'Support',
             icon: Icons.support_agent_outlined,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          _SectionCard(
+            iconColor: const Color(0xFF64748B),
+            contentPadding: EdgeInsets.zero,
             children: [
               _SettingsTile(
                 icon: Icons.help_outline,
-                iconColor: const Color(0xFF64748B),
+                iconColor: const Color(0xFF0EA5E9),
                 title: context.l10n?.helpCenter ?? 'Help Center',
                 subtitle: 'FAQs & guides',
                 onTap: () => context.push('/more/profile/help'),
               ),
               _SettingsTile(
                 icon: Icons.contact_support_outlined,
-                iconColor: const Color(0xFF64748B),
+                iconColor: const Color(0xFF8B5CF6),
                 title: context.l10n?.contactUs ?? 'Contact Us',
                 subtitle: 'Get support',
                 onTap: () => context.push('/more/profile/contact'),
               ),
               _SettingsTile(
                 icon: Icons.bug_report_outlined,
-                iconColor: const Color(0xFF64748B),
-                title: context.l10n?.reportProblem ?? 'Report a Problem',
+                iconColor: const Color(0xFFEF4444),
+                title: context.l10n?.reportBug ?? 'Report a Bug',
                 subtitle: 'Found an issue? Let us know',
-                onTap: () => context.push('/more/profile/contact?report=true'),
+                onTap: () =>
+                    context.push('/more/profile/contact?category=technical'),
+              ),
+              _SettingsTile(
+                icon: Icons.lightbulb_outline,
+                iconColor: const Color(0xFFF59E0B),
+                title: context.l10n?.requestFeature ?? 'Request a Feature',
+                subtitle: 'Suggest an improvement',
+                onTap: () =>
+                    context.push('/more/profile/contact?category=feature'),
+                isLast: true,
               ),
             ],
           ),
@@ -154,12 +191,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           const SizedBox(height: AppSpacing.lg),
 
           // About Section
-          _SectionHeader(
+          AppSectionCard(
             title: 'About',
             icon: Icons.info_outline,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          _SectionCard(
+            iconColor: AppColors.primary,
+            contentPadding: EdgeInsets.zero,
             children: [
               _SettingsTile(
                 icon: Icons.phone_android_outlined,
@@ -173,7 +209,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primaryContainer,
-                    borderRadius: AppRadii.sm,
+                    borderRadius: AppRadii.pill,
                   ),
                   child: Text(
                     _packageInfo?.version ?? '...',
@@ -184,11 +220,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   ),
                 ),
                 onTap: () {},
+                isLast: true,
               ),
             ],
           ),
 
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.xl),
 
           // Sign Out Button
           _SignOutCard(
@@ -203,7 +240,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
+    unawaited(showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: AppRadii.lg),
@@ -223,11 +260,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ],
       ),
-    );
+    ));
   }
 }
 
-// Enhanced Profile Card
+// Enhanced Profile Card with gradient
 class _ProfileCard extends StatelessWidget {
   const _ProfileCard({
     required this.userName,
@@ -252,46 +289,22 @@ class _ProfileCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: AppGradients.hero,
         borderRadius: AppRadii.xl,
-        boxShadow: AppShadows.md,
+        boxShadow: AppShadows.cardElevated,
       ),
       child: Column(
         children: [
-          // Avatar
-          Stack(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 4),
-                  boxShadow: AppShadows.sm,
-                ),
-                child: AppAvatar(
-                  imageUrl: avatarUrl,
-                  name: userName,
-                  size: AppAvatarSize.xl,
-                ),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: InkWell(
-                  onTap: onEditTap,
-                  child: Container(
-                    padding: const EdgeInsets.all(AppSpacing.xs),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: AppShadows.sm,
-                    ),
-                    child: const Icon(
-                      Icons.edit,
-                      size: 16,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          // Avatar with shadow
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 4),
+              boxShadow: AppShadows.md,
+            ),
+            child: AppAvatar(
+              imageUrl: avatarUrl,
+              name: userName,
+              size: AppAvatarSize.xl,
+            ),
           ),
 
           const SizedBox(height: AppSpacing.md),
@@ -343,83 +356,71 @@ class _ProfileCard extends StatelessWidget {
   }
 }
 
-// Section Header
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.title,
+// Read-only styled field
+class _ReadOnlyField extends StatelessWidget {
+  const _ReadOnlyField({
+    required this.label,
+    required this.value,
     required this.icon,
   });
 
-  final String title;
+  final String label;
+  final String value;
   final IconData icon;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(AppSpacing.xs),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primary.withOpacity(0.1),
-            borderRadius: AppRadii.sm,
-          ),
-          child: Icon(
-            icon,
-            size: 16,
-            color: theme.colorScheme.primary,
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Text(
-          title.toUpperCase(),
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: theme.colorScheme.primary,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.5,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// Section Card
-class _SectionCard extends StatelessWidget {
-  const _SectionCard({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: AppRadii.lg,
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withOpacity(0.5),
-        ),
-        boxShadow: AppShadows.sm,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.md,
       ),
-      child: Column(
-        children: List.generate(children.length, (index) {
-          final isLast = index == children.length - 1;
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: isLast ? 0 : 1,
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurfaceSecondary : AppColors.surfaceSecondary,
+        borderRadius: AppRadii.md,
+        border: Border.all(
+          color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
+          width: 0.5,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 18,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  value,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
-            child: children[index],
-          );
-        }),
+          ),
+        ],
       ),
     );
   }
 }
 
-// Settings Tile
+// Settings Tile with colored icon circles
 class _SettingsTile extends StatelessWidget {
   const _SettingsTile({
     required this.icon,
@@ -428,6 +429,7 @@ class _SettingsTile extends StatelessWidget {
     required this.onTap,
     this.subtitle,
     this.trailing,
+    this.isLast = false,
   });
 
   final IconData icon;
@@ -436,54 +438,78 @@ class _SettingsTile extends StatelessWidget {
   final String? subtitle;
   final Widget? trailing;
   final VoidCallback onTap;
+  final bool isLast;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: AppRadii.md,
-      child: ListTile(
-        leading: Container(
-          width: 42,
-          height: 42,
-          padding: const EdgeInsets.all(AppSpacing.sm),
-          decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.12),
-            borderRadius: AppRadii.md,
-          ),
-          child: Icon(
-            icon,
-            color: iconColor,
-            size: 22,
-          ),
-        ),
-        title: Text(
-          title,
-          style: AppTextStyles.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        subtitle: subtitle != null
-            ? Text(
-                subtitle!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              )
-            : null,
-        trailing: trailing ??
-            Icon(
-              Icons.chevron_right,
-              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
-              size: 18,
+    return Column(
+      children: [
+        InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
             ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.xs,
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    color: iconColor,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      if (subtitle != null)
+                        Text(
+                          subtitle!,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                trailing ??
+                    Icon(
+                      Icons.chevron_right,
+                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                      size: 18,
+                    ),
+              ],
+            ),
+          ),
         ),
-      ),
+        if (!isLast)
+          Padding(
+            padding: const EdgeInsets.only(left: 68),
+            child: Divider(
+              height: 0.5,
+              thickness: 0.5,
+              color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
+            ),
+          ),
+      ],
     );
   }
 }
@@ -501,32 +527,40 @@ class _SignOutCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return InkWell(
       onTap: isBusy ? null : onTap,
       borderRadius: AppRadii.lg,
       child: Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.lg,
+          horizontal: AppSpacing.xl,
+        ),
         decoration: BoxDecoration(
-          color: theme.colorScheme.errorContainer.withOpacity(0.3),
+          gradient: AppGradients.dangerSubtle,
+          color: isDark
+              ? AppColors.danger.withValues(alpha: 0.08)
+              : AppColors.danger.withValues(alpha: 0.04),
           borderRadius: AppRadii.lg,
           border: Border.all(
-            color: theme.colorScheme.error.withOpacity(0.3),
+            color: AppColors.danger.withValues(alpha: isDark ? 0.2 : 0.15),
           ),
+          boxShadow: AppShadows.cardResting,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.logout_rounded,
-              color: theme.colorScheme.error,
+              color: AppColors.danger,
               size: 20,
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
               'Sign Out',
               style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.error,
+                color: AppColors.danger,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -537,7 +571,7 @@ class _SignOutCard extends StatelessWidget {
                 height: 16,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: theme.colorScheme.error,
+                  color: AppColors.danger,
                 ),
               ),
             ],

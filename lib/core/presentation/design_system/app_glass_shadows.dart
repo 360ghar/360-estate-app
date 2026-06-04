@@ -1,5 +1,5 @@
+import 'package:estate_app/core/presentation/design_system/app_glass_colors.dart';
 import 'package:flutter/material.dart';
-import 'app_glass_colors.dart';
 
 /// Glassmorphism shadow system with colored ambient glows.
 /// Provides depth through multi-layer colored shadows and glow effects.
@@ -124,9 +124,7 @@ abstract final class AppGlassShadows {
   static const List<BoxShadow> glowBlue = [
     BoxShadow(
       color: AppGlassColors.glowBlue,
-      offset: Offset(0, 0),
       blurRadius: 8,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: AppGlassColors.glowBlue,
@@ -140,9 +138,7 @@ abstract final class AppGlassShadows {
   static const List<BoxShadow> glowPurple = [
     BoxShadow(
       color: AppGlassColors.glowPurple,
-      offset: Offset(0, 0),
       blurRadius: 8,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: AppGlassColors.glowPurple,
@@ -156,9 +152,7 @@ abstract final class AppGlassShadows {
   static const List<BoxShadow> glowTeal = [
     BoxShadow(
       color: AppGlassColors.glowTeal,
-      offset: Offset(0, 0),
       blurRadius: 8,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: AppGlassColors.glowTeal,
@@ -172,9 +166,7 @@ abstract final class AppGlassShadows {
   static const List<BoxShadow> glowRed = [
     BoxShadow(
       color: Color(0x1ADC2626), // 10% red
-      offset: Offset(0, 0),
       blurRadius: 8,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: Color(0x1ADC2626),
@@ -188,9 +180,7 @@ abstract final class AppGlassShadows {
   static const List<BoxShadow> glowPink = [
     BoxShadow(
       color: AppGlassColors.glowPink,
-      offset: Offset(0, 0),
       blurRadius: 12,
-      spreadRadius: 0,
     ),
   ];
 
@@ -202,7 +192,6 @@ abstract final class AppGlassShadows {
       color: Color(0x403B82F6), // 25% blue
       offset: Offset(0, 2),
       blurRadius: 8,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: Color(0x203B82F6), // 12% blue
@@ -217,7 +206,6 @@ abstract final class AppGlassShadows {
       color: Color(0x408B5CF6), // 25% purple
       offset: Offset(0, 2),
       blurRadius: 8,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: Color(0x208B5CF6), // 12% purple
@@ -241,9 +229,7 @@ abstract final class AppGlassShadows {
   static const List<BoxShadow> inputFocus = [
     BoxShadow(
       color: Color(0x303B82F6), // 19% blue
-      offset: Offset(0, 0),
       blurRadius: 4,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: Color(0x1A3B82F6), // 10% blue
@@ -256,9 +242,7 @@ abstract final class AppGlassShadows {
   static const List<BoxShadow> inputError = [
     BoxShadow(
       color: Color(0x30DC2626), // 19% red
-      offset: Offset(0, 0),
       blurRadius: 4,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: Color(0x1ADC2626), // 10% red
@@ -271,9 +255,7 @@ abstract final class AppGlassShadows {
   static const List<BoxShadow> inputSuccess = [
     BoxShadow(
       color: Color(0x30059669), // 19% green
-      offset: Offset(0, 0),
       blurRadius: 4,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: Color(0x1A059669), // 10% green
@@ -305,7 +287,6 @@ abstract final class AppGlassShadows {
       color: Color(0x403B82F6), // 25% blue
       offset: Offset(0, 4),
       blurRadius: 12,
-      spreadRadius: 0,
     ),
     BoxShadow(
       color: Color(0x203B82F6), // 12% blue

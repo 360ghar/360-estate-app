@@ -44,7 +44,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get errorMissingConfigBody =>
-      'ऑथेंटिकेशन सक्षम करने के लिए --dart-define के साथ SUPABASE_URL और SUPABASE_ANON_KEY सेट करें।';
+      'ऑथेंटिकेशन सक्षम करने के लिए --dart-define के साथ SUPABASE_URL और SUPABASE_PUBLISHABLE_KEY सेट करें।';
 
   @override
   String get enterPhoneTitle => 'फोन नंबर दर्ज करें';
@@ -226,6 +226,18 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get reportProblem => 'समस्या की रिपोर्ट करें';
+
+  @override
+  String get reportBug => 'बग की रिपोर्ट करें';
+
+  @override
+  String get reportBugSubtitle => 'कोई समस्या मिली? हमें बताएं';
+
+  @override
+  String get requestFeature => 'सुविधा का अनुरोध करें';
+
+  @override
+  String get requestFeatureSubtitle => 'सुधार का सुझाव दें';
 
   @override
   String get appVersion => 'ऐप संस्करण';

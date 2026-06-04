@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:estate_app/core/pagination/paged_list_controller.dart';
+import 'package:estate_app/core/presentation/design_system/app_durations.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/widgets/app_empty_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
@@ -17,6 +19,7 @@ class PagedListView<T> extends StatelessWidget {
     required this.emptyMessage,
     this.padding = const EdgeInsets.all(AppSpacing.lg),
     this.separatorSpacing = AppSpacing.md,
+    this.enableStagger = true,
   });
 
   final PagedListState<T> state;
@@ -28,6 +31,9 @@ class PagedListView<T> extends StatelessWidget {
   final String emptyMessage;
   final EdgeInsetsGeometry padding;
   final double separatorSpacing;
+
+  /// Enable staggered entrance animation for list items
+  final bool enableStagger;
 
   bool _onScroll(ScrollNotification notification) {
     if (notification.metrics.pixels >=
@@ -46,7 +52,8 @@ class PagedListView<T> extends StatelessWidget {
     if (state.error != null && state.items.isEmpty) {
       return AppErrorView(
         title: 'Unable to load',
-        message: state.error?.message ?? 'Please check your connection and try again.',
+        message:
+            state.error?.message ?? 'Please check your connection and try again.',
         onRetry: onRetry,
         retryLabel: 'Retry',
       );
@@ -63,17 +70,97 @@ class PagedListView<T> extends StatelessWidget {
         child: ListView.separated(
           padding: padding,
           itemCount: state.items.length + (state.isLoadingMore ? 1 : 0),
-          separatorBuilder: (_, __) => SizedBox(height: separatorSpacing),
+          separatorBuilder: (_, _) => SizedBox(height: separatorSpacing),
           itemBuilder: (context, index) {
             if (index >= state.items.length) {
               return const Padding(
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-                child: Center(child: CircularProgressIndicator()),
+                child: Center(
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                  ),
+                ),
               );
             }
-            return itemBuilder(context, state.items[index]);
+
+            final child = itemBuilder(context, state.items[index]);
+
+            if (!enableStagger) return child;
+
+            return _StaggeredItem(
+              index: index,
+              child: child,
+            );
           },
         ),
+      ),
+    );
+  }
+}
+
+/// Animates a list item with a staggered slide + fade entrance.
+class _StaggeredItem extends StatefulWidget {
+  const _StaggeredItem({
+    required this.index,
+    required this.child,
+  });
+
+  final int index;
+  final Widget child;
+
+  @override
+  State<_StaggeredItem> createState() => _StaggeredItemState();
+}
+
+class _StaggeredItemState extends State<_StaggeredItem>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Cap the stagger delay so items beyond ~10 don't wait too long
+    final delay = (widget.index.clamp(0, 10) * 50);
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: AppDurations.slow,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: AppDurations.entranceCurve),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.08),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _controller, curve: AppDurations.defaultCurve),
+    );
+
+    Future.delayed(Duration(milliseconds: delay), () {
+      if (mounted) _controller.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: widget.child,
       ),
     );
   }

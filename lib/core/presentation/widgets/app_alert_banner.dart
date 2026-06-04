@@ -69,7 +69,6 @@ class AppAlertBanner extends StatelessWidget {
         borderRadius: AppRadii.md,
         border: Border.all(
           color: colors.border,
-          width: 1,
         ),
       ),
       child: Row(
@@ -94,7 +93,7 @@ class AppAlertBanner extends StatelessWidget {
                   Text(
                     message!,
                     style: AppTextStyles.bodySmall?.copyWith(
-                      color: colors.text.withOpacity(0.9),
+                      color: colors.text.withValues(alpha: 0.9),
                     ),
                   ),
                 ],
@@ -155,44 +154,44 @@ class AppAlertBanner extends StatelessWidget {
     return switch (type) {
       AppAlertType.info => _AlertColors(
           background: isDark
-              ? AppColors.info.withOpacity(0.15)
-              : AppColors.info.withOpacity(0.1),
+              ? AppColors.info.withValues(alpha: 0.15)
+              : AppColors.info.withValues(alpha: 0.1),
           border: isDark
-              ? AppColors.infoLight.withOpacity(0.3)
-              : AppColors.info.withOpacity(0.2),
+              ? AppColors.infoLight.withValues(alpha: 0.3)
+              : AppColors.info.withValues(alpha: 0.2),
           icon: isDark ? AppColors.infoLight : AppColors.info,
           text: isDark ? AppColors.infoLight : AppColors.info,
         ),
 
       AppAlertType.success => _AlertColors(
           background: isDark
-              ? AppColors.success.withOpacity(0.15)
-              : AppColors.success.withOpacity(0.1),
+              ? AppColors.success.withValues(alpha: 0.15)
+              : AppColors.success.withValues(alpha: 0.1),
           border: isDark
-              ? AppColors.successLight.withOpacity(0.3)
-              : AppColors.success.withOpacity(0.2),
+              ? AppColors.successLight.withValues(alpha: 0.3)
+              : AppColors.success.withValues(alpha: 0.2),
           icon: isDark ? AppColors.successLight : AppColors.success,
           text: isDark ? AppColors.successLight : AppColors.success,
         ),
 
       AppAlertType.warning => _AlertColors(
           background: isDark
-              ? AppColors.warning.withOpacity(0.15)
-              : AppColors.warning.withOpacity(0.1),
+              ? AppColors.warning.withValues(alpha: 0.15)
+              : AppColors.warning.withValues(alpha: 0.1),
           border: isDark
-              ? AppColors.warningLight.withOpacity(0.3)
-              : AppColors.warning.withOpacity(0.2),
+              ? AppColors.warningLight.withValues(alpha: 0.3)
+              : AppColors.warning.withValues(alpha: 0.2),
           icon: isDark ? AppColors.warningLight : AppColors.warning,
           text: isDark ? AppColors.warningLight : AppColors.warning,
         ),
 
       AppAlertType.danger => _AlertColors(
           background: isDark
-              ? AppColors.danger.withOpacity(0.15)
-              : AppColors.danger.withOpacity(0.1),
+              ? AppColors.danger.withValues(alpha: 0.15)
+              : AppColors.danger.withValues(alpha: 0.1),
           border: isDark
-              ? AppColors.dangerLight.withOpacity(0.3)
-              : AppColors.danger.withOpacity(0.2),
+              ? AppColors.dangerLight.withValues(alpha: 0.3)
+              : AppColors.danger.withValues(alpha: 0.2),
           icon: isDark ? AppColors.dangerLight : AppColors.danger,
           text: isDark ? AppColors.dangerLight : AppColors.danger,
         ),
@@ -245,13 +244,11 @@ class AppAlertBannerInline extends StatelessWidget {
         type: type,
         onAction: onAction,
         actionLabel: actionLabel,
-        isDismissible: false,
       );
     }
 
     return Dismissible(
       key: key ?? UniqueKey(),
-      direction: DismissDirection.horizontal,
       onDismissed: (_) => onDismiss?.call(),
       child: AppAlertBanner(
         title: title,
