@@ -69,6 +69,10 @@ mixin _$Property {
   String? get hoaInfo => throw _privateConstructorUsedError;
   @JsonKey(name: 'assigned_manager_id', fromJson: parseInt)
   int? get assignedManagerId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'latitude', fromJson: parseDouble)
+  double? get latitude => throw _privateConstructorUsedError;
+  @JsonKey(name: 'longitude', fromJson: parseDouble)
+  double? get longitude => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at', fromJson: parseDateTime)
   DateTime? get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at', fromJson: parseDateTime)
@@ -120,6 +124,8 @@ abstract class $PropertyCopyWith<$Res> {
     @JsonKey(name: 'hoa_info') String? hoaInfo,
     @JsonKey(name: 'assigned_manager_id', fromJson: parseInt)
     int? assignedManagerId,
+    @JsonKey(name: 'latitude', fromJson: parseDouble) double? latitude,
+    @JsonKey(name: 'longitude', fromJson: parseDouble) double? longitude,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) DateTime? createdAt,
     @JsonKey(name: 'updated_at', fromJson: parseDateTime) DateTime? updatedAt,
   });
@@ -167,6 +173,8 @@ class _$PropertyCopyWithImpl<$Res, $Val extends Property>
     Object? insurancePolicy = freezed,
     Object? hoaInfo = freezed,
     Object? assignedManagerId = freezed,
+    Object? latitude = freezed,
+    Object? longitude = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -280,6 +288,14 @@ class _$PropertyCopyWithImpl<$Res, $Val extends Property>
                 ? _value.assignedManagerId
                 : assignedManagerId // ignore: cast_nullable_to_non_nullable
                       as int?,
+            latitude: freezed == latitude
+                ? _value.latitude
+                : latitude // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            longitude: freezed == longitude
+                ? _value.longitude
+                : longitude // ignore: cast_nullable_to_non_nullable
+                      as double?,
             createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -334,6 +350,8 @@ abstract class _$$PropertyImplCopyWith<$Res>
     @JsonKey(name: 'hoa_info') String? hoaInfo,
     @JsonKey(name: 'assigned_manager_id', fromJson: parseInt)
     int? assignedManagerId,
+    @JsonKey(name: 'latitude', fromJson: parseDouble) double? latitude,
+    @JsonKey(name: 'longitude', fromJson: parseDouble) double? longitude,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) DateTime? createdAt,
     @JsonKey(name: 'updated_at', fromJson: parseDateTime) DateTime? updatedAt,
   });
@@ -380,6 +398,8 @@ class __$$PropertyImplCopyWithImpl<$Res>
     Object? insurancePolicy = freezed,
     Object? hoaInfo = freezed,
     Object? assignedManagerId = freezed,
+    Object? latitude = freezed,
+    Object? longitude = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -493,6 +513,14 @@ class __$$PropertyImplCopyWithImpl<$Res>
             ? _value.assignedManagerId
             : assignedManagerId // ignore: cast_nullable_to_non_nullable
                   as int?,
+        latitude: freezed == latitude
+            ? _value.latitude
+            : latitude // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        longitude: freezed == longitude
+            ? _value.longitude
+            : longitude // ignore: cast_nullable_to_non_nullable
+                  as double?,
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -539,6 +567,8 @@ class _$PropertyImpl implements _Property {
     @JsonKey(name: 'hoa_info') this.hoaInfo,
     @JsonKey(name: 'assigned_manager_id', fromJson: parseInt)
     this.assignedManagerId,
+    @JsonKey(name: 'latitude', fromJson: parseDouble) this.latitude,
+    @JsonKey(name: 'longitude', fromJson: parseDouble) this.longitude,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) this.createdAt,
     @JsonKey(name: 'updated_at', fromJson: parseDateTime) this.updatedAt,
   }) : _images = images,
@@ -650,6 +680,12 @@ class _$PropertyImpl implements _Property {
   @JsonKey(name: 'assigned_manager_id', fromJson: parseInt)
   final int? assignedManagerId;
   @override
+  @JsonKey(name: 'latitude', fromJson: parseDouble)
+  final double? latitude;
+  @override
+  @JsonKey(name: 'longitude', fromJson: parseDouble)
+  final double? longitude;
+  @override
   @JsonKey(name: 'created_at', fromJson: parseDateTime)
   final DateTime? createdAt;
   @override
@@ -658,7 +694,7 @@ class _$PropertyImpl implements _Property {
 
   @override
   String toString() {
-    return 'Property(id: $id, name: $name, propertyName: $propertyName, address: $address, city: $city, state: $state, pincode: $pincode, unitCount: $unitCount, occupiedUnits: $occupiedUnits, type: $type, floorAreaSqft: $floorAreaSqft, bedroomCount: $bedroomCount, bathroomCount: $bathroomCount, balconyCount: $balconyCount, monthlyRentInr: $monthlyRentInr, paymentDueDay: $paymentDueDay, managementStatus: $managementStatus, notes: $notes, images: $images, floorPlans: $floorPlans, marketValue: $marketValue, amenities: $amenities, yearBuilt: $yearBuilt, propertyTaxId: $propertyTaxId, insurancePolicy: $insurancePolicy, hoaInfo: $hoaInfo, assignedManagerId: $assignedManagerId, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Property(id: $id, name: $name, propertyName: $propertyName, address: $address, city: $city, state: $state, pincode: $pincode, unitCount: $unitCount, occupiedUnits: $occupiedUnits, type: $type, floorAreaSqft: $floorAreaSqft, bedroomCount: $bedroomCount, bathroomCount: $bathroomCount, balconyCount: $balconyCount, monthlyRentInr: $monthlyRentInr, paymentDueDay: $paymentDueDay, managementStatus: $managementStatus, notes: $notes, images: $images, floorPlans: $floorPlans, marketValue: $marketValue, amenities: $amenities, yearBuilt: $yearBuilt, propertyTaxId: $propertyTaxId, insurancePolicy: $insurancePolicy, hoaInfo: $hoaInfo, assignedManagerId: $assignedManagerId, latitude: $latitude, longitude: $longitude, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -714,6 +750,10 @@ class _$PropertyImpl implements _Property {
             (identical(other.hoaInfo, hoaInfo) || other.hoaInfo == hoaInfo) &&
             (identical(other.assignedManagerId, assignedManagerId) ||
                 other.assignedManagerId == assignedManagerId) &&
+            (identical(other.latitude, latitude) ||
+                other.latitude == latitude) &&
+            (identical(other.longitude, longitude) ||
+                other.longitude == longitude) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -751,6 +791,8 @@ class _$PropertyImpl implements _Property {
     insurancePolicy,
     hoaInfo,
     assignedManagerId,
+    latitude,
+    longitude,
     createdAt,
     updatedAt,
   ]);
@@ -805,6 +847,8 @@ abstract class _Property implements Property {
     @JsonKey(name: 'hoa_info') final String? hoaInfo,
     @JsonKey(name: 'assigned_manager_id', fromJson: parseInt)
     final int? assignedManagerId,
+    @JsonKey(name: 'latitude', fromJson: parseDouble) final double? latitude,
+    @JsonKey(name: 'longitude', fromJson: parseDouble) final double? longitude,
     @JsonKey(name: 'created_at', fromJson: parseDateTime)
     final DateTime? createdAt,
     @JsonKey(name: 'updated_at', fromJson: parseDateTime)
@@ -889,6 +933,12 @@ abstract class _Property implements Property {
   @override
   @JsonKey(name: 'assigned_manager_id', fromJson: parseInt)
   int? get assignedManagerId;
+  @override
+  @JsonKey(name: 'latitude', fromJson: parseDouble)
+  double? get latitude;
+  @override
+  @JsonKey(name: 'longitude', fromJson: parseDouble)
+  double? get longitude;
   @override
   @JsonKey(name: 'created_at', fromJson: parseDateTime)
   DateTime? get createdAt;

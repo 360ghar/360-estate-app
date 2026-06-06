@@ -255,6 +255,14 @@ class AppLocalizationsHi extends AppLocalizations {
   String get deleteAccount => 'खाता हटाएं';
 
   @override
+  String deleteAccountConfirmLabel(String word) {
+    return 'पुष्टि करने के लिए $word टाइप करें';
+  }
+
+  @override
+  String get deleteAccountConfirmHint => 'DELETE';
+
+  @override
   String get signOutTitle => 'साइन आउट';
 
   @override
@@ -275,7 +283,12 @@ class AppLocalizationsHi extends AppLocalizations {
       'इस कार्य को पूर्ववत नहीं किया जा सकता। आपका सभी डेटा स्थायी रूप से हटा दिया जाएगा।';
 
   @override
-  String get deleteSuccess => 'खाता हटाने का अनुरोध प्राप्त हुआ';
+  String get deleteAccountEmailSent =>
+      'ईमेल ऐप खुल गया है। अनुरोध पूरा करने के लिए कृपया संदेश भेजें।';
+
+  @override
+  String get deleteAccountManualFallback =>
+      'आपका ईमेल ऐप नहीं खोला जा सका। कृपया विषय \"Account Deletion Request\" के साथ info@360ghar.com पर ईमेल करें।';
 
   @override
   String get delete => 'हटाएं';

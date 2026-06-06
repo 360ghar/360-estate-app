@@ -7,10 +7,12 @@ import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
+import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:estate_app/features/settings/presentation/providers/settings_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AppSettingsPage extends ConsumerWidget {
   const AppSettingsPage({
@@ -164,6 +166,28 @@ class AppSettingsPage extends ConsumerWidget {
             ],
           ),
 
+          const SizedBox(height: AppSpacing.lg),
+
+          // Danger Zone
+          AppSectionCard(
+            title: 'Danger Zone',
+            icon: Icons.warning_amber_outlined,
+            iconColor: const Color(0xFFEF4444),
+            contentPadding: EdgeInsets.zero,
+            children: [
+              _SettingsTile(
+                icon: Icons.delete_outline,
+                iconColor: const Color(0xFFEF4444),
+                label: context.l10n?.deleteAccount ?? 'Delete Account',
+                subtitle:
+                    context.l10n?.deleteAccountWarning ??
+                        'This action cannot be undone. All your data will be permanently deleted.',
+                onTap: () =>
+                    _showDeleteAccountDialog(context, ref),
+              ),
+            ],
+          ),
+
           const SizedBox(height: AppSpacing.xl),
         ],
       ),
@@ -207,6 +231,86 @@ class AppSettingsPage extends ConsumerWidget {
         ],
       ),
     ));
+  }
+
+  Future<void> _showDeleteAccountDialog(BuildContext context, WidgetRef ref) async {
+    const supportEmail = 'info@360ghar.com';
+    const emailSubject = 'Account Deletion Request';
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: AppRadii.lg),
+        title: Text(
+          context.l10n?.deleteAccount ?? 'Delete Account',
+          style: TextStyle(
+            color: isDark ? AppColors.danger : AppColors.danger,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Text(
+          context.l10n?.deleteAccountWarning ??
+              'This action cannot be undone. All your data will be permanently deleted.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(context.l10n?.commonCancel ?? 'Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.danger),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(context.l10n?.commonConfirm ?? 'Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    final registeredEmail = ref.read(authControllerProvider).user?.email?.trim();
+    final emailLine = (registeredEmail != null && registeredEmail.isNotEmpty)
+        ? registeredEmail
+        : 'Not available';
+    final body = 'Hello 360 Ghar Support,\n\n'
+        'I would like to request the deletion of my account.\n\n'
+        'Registered email: $emailLine\n\n'
+        'Thank you.';
+    final uri = Uri(
+      scheme: 'mailto',
+      path: supportEmail,
+      queryParameters: <String, String>{
+        'subject': emailSubject,
+        'body': body,
+      },
+    );
+
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n?.deleteAccountEmailSent ??
+                'Email app opened. Please send the message to complete your request.',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n?.deleteAccountManualFallback ??
+                'Could not open your email app. Please email $supportEmail with subject "$emailSubject".',
+          ),
+          backgroundColor: AppColors.danger,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 6),
+        ),
+      );
+    }
   }
 
   void _showDownloadDataDialog(BuildContext context) {

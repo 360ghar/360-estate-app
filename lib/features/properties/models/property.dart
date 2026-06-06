@@ -35,6 +35,8 @@ class Property with _$Property {
     @JsonKey(name: 'insurance_policy') String? insurancePolicy,
     @JsonKey(name: 'hoa_info') String? hoaInfo,
     @JsonKey(name: 'assigned_manager_id', fromJson: parseInt) int? assignedManagerId,
+    @JsonKey(name: 'latitude', fromJson: parseDouble) double? latitude,
+    @JsonKey(name: 'longitude', fromJson: parseDouble) double? longitude,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) DateTime? createdAt,
     @JsonKey(name: 'updated_at', fromJson: parseDateTime) DateTime? updatedAt,
   }) = _Property;

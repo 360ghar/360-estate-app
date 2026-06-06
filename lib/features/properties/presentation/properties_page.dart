@@ -13,6 +13,7 @@ import 'package:estate_app/core/presentation/widgets/app_search_bar.dart';
 import 'package:estate_app/core/presentation/widgets/app_segmented_button.dart';
 import 'package:estate_app/core/presentation/widgets/app_status_badge.dart';
 import 'package:estate_app/core/presentation/widgets/paged_list_view.dart';
+import 'package:estate_app/features/properties/data/models/location_result.dart';
 import 'package:estate_app/features/properties/models/property.dart';
 import 'package:estate_app/features/properties/properties_providers.dart';
 import 'package:flutter/material.dart';
@@ -35,11 +36,31 @@ class _PropertiesPageState extends ConsumerState<PropertiesPage> {
   bool _isGridView = false;
   PropertyFilter _selectedFilter = PropertyFilter.all;
   final TextEditingController _searchController = TextEditingController();
+  LocationResult? _locationResult;
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _openLocationSearch() async {
+    final result = await context.push<LocationResult>(
+      '/location-search',
+    );
+    if (result != null && mounted) {
+      setState(() {
+        _locationResult = result;
+        _searchController.text = result.name;
+      });
+    }
+  }
+
+  void _clearLocationFilter() {
+    setState(() {
+      _locationResult = null;
+      _searchController.clear();
+    });
   }
 
   void _toggleView() {
@@ -100,6 +121,22 @@ class _PropertiesPageState extends ConsumerState<PropertiesPage> {
               );
             }).toList(),
           ),
+          if (_locationResult != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.xs,
+              ),
+              child: ActionChip(
+                avatar: const Icon(Icons.location_on, size: 16),
+                label: Text(
+                  _locationResult!.name,
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+                onPressed: _clearLocationFilter,
+                side: BorderSide(color: Theme.of(context).colorScheme.primary),
+              ),
+            ),
           const Divider(height: 1),
 
           // Property list/grid
@@ -138,6 +175,11 @@ class _PropertiesPageState extends ConsumerState<PropertiesPage> {
     return AppBar(
       title: const Text('Properties'),
       actions: [
+        IconButton(
+          onPressed: _openLocationSearch,
+          icon: const Icon(Icons.location_on_outlined),
+          tooltip: 'Search by location',
+        ),
         AppSegmentedButton<ViewMode>(
           segments: const [
             AppSegment(value: ViewMode.list, label: 'List', icon: Icons.view_list),

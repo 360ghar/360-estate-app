@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:estate_app/app/router/routes.dart';
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
@@ -7,6 +8,7 @@ import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -154,14 +156,14 @@ class _AboutPageState extends State<AboutPage> {
                 icon: Icons.description_outlined,
                 iconColor: const Color(0xFF3B82F6),
                 title: context.l10n?.termsOfService ?? 'Terms of Service',
-                onTap: () => _launchUrl('https://360estate.app/terms'),
+                onTap: () => context.push(Routes.termsOfService),
               ),
               _tileDivider(isDark),
               _AboutTile(
                 icon: Icons.policy_outlined,
                 iconColor: const Color(0xFF8B5CF6),
                 title: context.l10n?.privacyPolicy ?? 'Privacy Policy',
-                onTap: () => _launchUrl('https://360estate.app/privacy'),
+                onTap: () => context.push(Routes.privacyPolicy),
               ),
               _tileDivider(isDark),
               _AboutTile(

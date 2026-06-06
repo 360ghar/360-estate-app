@@ -8,6 +8,7 @@ import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_status_badge.dart';
 import 'package:estate_app/features/properties/models/property.dart';
+import 'package:estate_app/features/properties/presentation/pages/property_map_page.dart';
 import 'package:estate_app/features/properties/properties_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -346,6 +347,24 @@ class _QuickActionsRow extends StatelessWidget {
           label: 'Edit',
           color: scheme.primary,
           onTap: () => context.go('/properties/${property.id}/edit'),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        _ActionMiniCard(
+          icon: Icons.map_outlined,
+          label: 'Map',
+          color: AppColors.info,
+          onTap: () {
+            final markers = <PropertyMarker>[];
+            if (property.latitude != null && property.longitude != null) {
+              markers.add(PropertyMarker(
+                id: property.id.toString(),
+                label: property.displayName,
+                latitude: property.latitude!,
+                longitude: property.longitude!,
+              ));
+            }
+            context.go('/properties/map', extra: markers);
+          },
         ),
       ],
     );

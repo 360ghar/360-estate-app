@@ -255,6 +255,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteAccount => 'Delete Account';
 
   @override
+  String deleteAccountConfirmLabel(String word) {
+    return 'Type $word to confirm';
+  }
+
+  @override
+  String get deleteAccountConfirmHint => 'DELETE';
+
+  @override
   String get signOutTitle => 'Sign Out';
 
   @override
@@ -275,7 +283,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'This action cannot be undone. All your data will be permanently deleted.';
 
   @override
-  String get deleteSuccess => 'Account deletion requested';
+  String get deleteAccountEmailSent =>
+      'Email app opened. Please send the message to complete your request.';
+
+  @override
+  String get deleteAccountManualFallback =>
+      'Could not open your email app. Please email info@360ghar.com with subject \"Account Deletion Request\".';
 
   @override
   String get delete => 'Delete';

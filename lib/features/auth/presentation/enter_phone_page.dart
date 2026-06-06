@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:estate_app/app/router/routes.dart';
 import 'package:estate_app/core/presentation/animations/premium/premium_animations.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
@@ -8,6 +9,7 @@ import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/core/utils/phone_utils.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart' show SimplePremiumBackground;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -250,6 +252,8 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
               color: _helperEmphasisColor(context),
               fontWeight: FontWeight.w500,
             ),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => context.push(Routes.termsOfService),
           ),
           const TextSpan(text: ' and '),
           TextSpan(
@@ -258,6 +262,8 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
               color: _helperEmphasisColor(context),
               fontWeight: FontWeight.w500,
             ),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => context.push(Routes.privacyPolicy),
           ),
         ],
       ),

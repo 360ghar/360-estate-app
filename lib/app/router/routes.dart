@@ -17,8 +17,9 @@ abstract final class Routes {
   static const tasks = '/tasks';
   static const more = '/more';
 
-  // Properties sub-routes
+// Properties sub-routes
   static const propertiesCreate = '/properties/create';
+  static const locationSearch = '/location-search';
   static String propertyDetail(String id) => '/properties/$id';
   static String propertyEdit(String id) => '/properties/$id/edit';
 
@@ -64,6 +65,8 @@ abstract final class Routes {
   static const settings = '/more/profile/settings';
   static const notificationSettings = '/more/profile/settings/notifications';
   static const privacySettings = '/more/profile/settings/privacy';
+  static const privacyPolicy = '/more/profile/settings/privacy-policy';
+  static const termsOfService = '/more/profile/settings/terms-of-service';
   static const help = '/more/profile/help';
   static const contact = '/more/profile/contact';
   static const about = '/more/profile/about';

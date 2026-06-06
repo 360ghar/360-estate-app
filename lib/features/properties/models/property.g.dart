@@ -41,6 +41,8 @@ _$PropertyImpl _$$PropertyImplFromJson(Map<String, dynamic> json) =>
       insurancePolicy: json['insurance_policy'] as String?,
       hoaInfo: json['hoa_info'] as String?,
       assignedManagerId: parseInt(json['assigned_manager_id']),
+      latitude: parseDouble(json['latitude']),
+      longitude: parseDouble(json['longitude']),
       createdAt: parseDateTime(json['created_at']),
       updatedAt: parseDateTime(json['updated_at']),
     );
@@ -74,6 +76,8 @@ Map<String, dynamic> _$$PropertyImplToJson(_$PropertyImpl instance) =>
       'insurance_policy': instance.insurancePolicy,
       'hoa_info': instance.hoaInfo,
       'assigned_manager_id': instance.assignedManagerId,
+      'latitude': instance.latitude,
+      'longitude': instance.longitude,
       'created_at': instance.createdAt?.toIso8601String(),
       'updated_at': instance.updatedAt?.toIso8601String(),
     };

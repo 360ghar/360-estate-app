@@ -542,6 +542,18 @@ abstract class AppLocalizations {
   /// **'Delete Account'**
   String get deleteAccount;
 
+  /// No description provided for @deleteAccountConfirmLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Type {word} to confirm'**
+  String deleteAccountConfirmLabel(String word);
+
+  /// No description provided for @deleteAccountConfirmHint.
+  ///
+  /// In en, this message translates to:
+  /// **'DELETE'**
+  String get deleteAccountConfirmHint;
+
   /// No description provided for @signOutTitle.
   ///
   /// In en, this message translates to:
@@ -578,11 +590,17 @@ abstract class AppLocalizations {
   /// **'This action cannot be undone. All your data will be permanently deleted.'**
   String get deleteAccountWarning;
 
-  /// No description provided for @deleteSuccess.
+  /// No description provided for @deleteAccountEmailSent.
   ///
   /// In en, this message translates to:
-  /// **'Account deletion requested'**
-  String get deleteSuccess;
+  /// **'Email app opened. Please send the message to complete your request.'**
+  String get deleteAccountEmailSent;
+
+  /// No description provided for @deleteAccountManualFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open your email app. Please email info@360ghar.com with subject \"Account Deletion Request\".'**
+  String get deleteAccountManualFallback;
 
   /// No description provided for @delete.
   ///

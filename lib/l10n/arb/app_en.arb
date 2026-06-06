@@ -122,13 +122,23 @@
   "privacyPolicy": "Privacy Policy",
   "deactivateAccount": "Deactivate Account",
   "deleteAccount": "Delete Account",
+  "deleteAccountConfirmLabel": "Type {word} to confirm",
+  "@deleteAccountConfirmLabel": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteAccountConfirmHint": "DELETE",
   "signOutTitle": "Sign Out",
   "signOutConfirm": "Are you sure you want to sign out?",
   "deactivateConfirm": "Deactivating your account will temporarily disable it. You can reactivate by signing back in.",
   "deactivateSuccess": "Account deactivated",
   "deactivate": "Deactivate",
   "deleteAccountWarning": "This action cannot be undone. All your data will be permanently deleted.",
-  "deleteSuccess": "Account deletion requested",
+  "deleteAccountEmailSent": "Email app opened. Please send the message to complete your request.",
+  "deleteAccountManualFallback": "Could not open your email app. Please email info@360ghar.com with subject \"Account Deletion Request\".",
   "delete": "Delete",
   "featureComingSoon": "This feature is coming soon",
   "enterPasswordConfirm": "Enter password to confirm",

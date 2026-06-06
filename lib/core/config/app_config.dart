@@ -59,6 +59,7 @@ final class AppConfig {
     required this.enableCrashReporting,
     required this.enableDebugLogs,
     required this.featureFlags,
+    this.googlePlacesApiKey = '',
   });
 
   final AppEnvironment environment;
@@ -68,6 +69,7 @@ final class AppConfig {
   final bool enableCrashReporting;
   final bool enableDebugLogs;
   final FeatureFlags featureFlags;
+  final String googlePlacesApiKey;
 
   bool get isProd => environment == AppEnvironment.prod;
 
@@ -139,6 +141,13 @@ final class AppConfig {
         ) ??
         enableDebugLogsDefault;
 
+    const googlePlacesApiKeyDefine = String.fromEnvironment(
+      'GOOGLE_PLACES_API_KEY',
+    );
+    final googlePlacesApiKey = googlePlacesApiKeyDefine.trim().isNotEmpty
+        ? googlePlacesApiKeyDefine
+        : (dotenv.env['GOOGLE_PLACES_API_KEY'] ?? '');
+
     final featureFlags = FeatureFlags.fromEnvironment(environment);
 
     if (apiBaseUrl.trim().isEmpty) {
@@ -158,6 +167,7 @@ final class AppConfig {
       enableCrashReporting: enableCrashReporting,
       enableDebugLogs: enableDebugLogs,
       featureFlags: featureFlags,
+      googlePlacesApiKey: googlePlacesApiKey,
     );
   }
 }

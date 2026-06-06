@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:estate_app/app/router/routes.dart';
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
@@ -7,6 +8,7 @@ import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 /// Privacy settings page with privacy and data sharing preferences
 class PrivacySettingsPage extends ConsumerWidget {
@@ -117,6 +119,33 @@ class PrivacySettingsPage extends ConsumerWidget {
                 title: 'Clear Activity History',
                 description: context.l10n?.clearActivityDesc ?? 'Clear your recent activity',
                 onTap: () => _showClearHistoryDialog(context),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: AppSpacing.lg),
+
+          // Legal Section
+          AppSectionCard(
+            title: context.l10n?.legal ?? 'Legal',
+            icon: Icons.gavel_outlined,
+            iconColor: const Color(0xFF64748B),
+            contentPadding: EdgeInsets.zero,
+            children: [
+              _PrivacyActionTile(
+                icon: Icons.policy_outlined,
+                iconColor: const Color(0xFF8B5CF6),
+                title: context.l10n?.privacyPolicy ?? 'Privacy Policy',
+                description: 'View our privacy practices',
+                onTap: () => context.push(Routes.privacyPolicy),
+              ),
+              _tileDivider(isDark),
+              _PrivacyActionTile(
+                icon: Icons.description_outlined,
+                iconColor: const Color(0xFF3B82F6),
+                title: context.l10n?.termsOfService ?? 'Terms of Service',
+                description: 'View our terms and conditions',
+                onTap: () => context.push(Routes.termsOfService),
               ),
             ],
           ),

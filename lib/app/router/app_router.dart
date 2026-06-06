@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:estate_app/app/app_shell.dart';
+import 'package:estate_app/core/config/constants.dart';
 import 'package:estate_app/core/providers.dart';
+import 'package:estate_app/core/services/deep_link_service.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:estate_app/features/auth/presentation/enter_phone_page.dart';
 import 'package:estate_app/features/auth/presentation/login_page.dart';
@@ -34,6 +36,8 @@ import 'package:estate_app/features/more/reports/presentation/reports_page.dart'
 import 'package:estate_app/features/more/tenants/presentation/tenant_detail_page.dart';
 import 'package:estate_app/features/more/tenants/presentation/tenants_page.dart';
 import 'package:estate_app/features/notifications/presentation/notifications_page.dart';
+import 'package:estate_app/features/properties/presentation/pages/location_search_page.dart';
+import 'package:estate_app/features/properties/presentation/pages/property_map_page.dart';
 import 'package:estate_app/features/properties/presentation/properties_page.dart';
 import 'package:estate_app/features/properties/presentation/property_detail_page.dart';
 import 'package:estate_app/features/properties/presentation/property_form_page.dart';
@@ -44,6 +48,7 @@ import 'package:estate_app/features/rental_applications/presentation/application
 import 'package:estate_app/features/rental_applications/presentation/public_application_page.dart';
 import 'package:estate_app/features/rental_applications/presentation/public_application_success_page.dart';
 import 'package:estate_app/features/settings/presentation/pages/app_settings_page.dart';
+import 'package:estate_app/features/settings/presentation/pages/legal_content_page.dart';
 import 'package:estate_app/features/settings/presentation/pages/notification_settings_page.dart';
 import 'package:estate_app/features/settings/presentation/pages/privacy_settings_page.dart';
 import 'package:estate_app/features/tasks/presentation/maintenance_detail_page.dart';
@@ -52,6 +57,17 @@ import 'package:estate_app/features/tasks/presentation/tasks_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+/// Paths that originate from external deep links and must be reachable
+/// without going through the home shell. The /public/applications/* path
+/// is intentionally public; the others require authentication which is
+/// enforced by [AuthMiddleware] in the route definitions.
+bool _isEstateDeepLinkPath(String location) {
+  return location.startsWith('/properties/') ||
+      location.startsWith('/tasks/') ||
+      location.startsWith('/more/tenants/') ||
+      location.startsWith('/more/leases/');
+}
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authController = ref.read(authControllerProvider.notifier);
@@ -73,6 +89,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           location == '/signup';
       final isPublicRoute = location.startsWith('/public');
       final isApplicationsRoute = location.startsWith('/more/applications');
+      final isDeepLinkPath = _isEstateDeepLinkPath(location);
 
       if (isPublicRoute) {
         if (!flags.enablePublicApplications) {
@@ -86,7 +103,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return isSplash ? null : '/splash';
       }
 
+      // Replay any pending deep link captured during cold start once the
+      // user is authenticated and the splash has been processed.
+      if (isLoggedIn && !isSplash && !isAuthRoute) {
+        final pending = DeepLinkService.consumePendingPath();
+        if (pending != null && pending != location) {
+          return pending;
+        }
+      }
+
       if (!isLoggedIn) {
+        // Allow public deep links (rental applications) through the
+        // unauthenticated state. Authenticated deep links are stored as
+        // pending paths and replayed after login.
+        if (isDeepLinkPath) {
+          return null;
+        }
         return isAuthRoute ? null : '/enter-phone';
       }
 
@@ -120,6 +152,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SplashPage(),
       ),
       GoRoute(
+        path: '/properties/map',
+        builder: (context, state) {
+          final markers = state.extra as List<PropertyMarker>? ?? [];
+          final lat = double.tryParse(
+                state.uri.queryParameters['lat'] ?? '',
+              ) ??
+              20.5937;
+          final lng = double.tryParse(
+                state.uri.queryParameters['lng'] ?? '',
+              ) ??
+              78.9629;
+          return PropertyMapPage(
+            markers: markers,
+            initialLatitude: lat,
+            initialLongitude: lng,
+          );
+        },
+      ),
+      GoRoute(
         path: '/enter-phone',
         builder: (context, state) => const EnterPhonePage(),
       ),
@@ -147,6 +198,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             isSignupFlow: flow == 'signup',
           );
         },
+      ),
+      GoRoute(
+        path: '/location-search',
+        builder: (context, state) => const LocationSearchPage(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -402,6 +457,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                           GoRoute(
                             path: 'privacy',
                             builder: (context, state) => const PrivacySettingsPage(),
+                          ),
+                          GoRoute(
+                            path: 'privacy-policy',
+                            builder: (context, state) => LegalContentPage(
+                              title: 'Privacy Policy',
+                              url: kPrivacyPolicyUrl,
+                            ),
+                          ),
+                          GoRoute(
+                            path: 'terms-of-service',
+                            builder: (context, state) => LegalContentPage(
+                              title: 'Terms of Service',
+                              url: kTermsOfServiceUrl,
+                            ),
                           ),
                         ],
                       ),

@@ -86,13 +86,23 @@
   "privacyPolicy": "गोपनीयता नीति",
   "deactivateAccount": "खाता निष्क्रिय करें",
   "deleteAccount": "खाता हटाएं",
+  "deleteAccountConfirmLabel": "पुष्टि करने के लिए {word} टाइप करें",
+  "@deleteAccountConfirmLabel": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteAccountConfirmHint": "DELETE",
   "signOutTitle": "साइन आउट",
   "signOutConfirm": "क्या आप वाकई साइन आउट करना चाहते हैं?",
   "deactivateConfirm": "अपना खाता निष्क्रिय करने से यह अस्थायी रूप से अक्षम हो जाएगा। आप वापस साइन इन करके इसे पुनः सक्षम कर सकते हैं।",
   "deactivateSuccess": "खाता निष्क्रिय कर दिया गया",
   "deactivate": "निष्क्रिय करें",
   "deleteAccountWarning": "इस कार्य को पूर्ववत नहीं किया जा सकता। आपका सभी डेटा स्थायी रूप से हटा दिया जाएगा।",
-  "deleteSuccess": "खाता हटाने का अनुरोध प्राप्त हुआ",
+  "deleteAccountEmailSent": "ईमेल ऐप खुल गया है। अनुरोध पूरा करने के लिए कृपया संदेश भेजें।",
+  "deleteAccountManualFallback": "आपका ईमेल ऐप नहीं खोला जा सका। कृपया विषय \"Account Deletion Request\" के साथ info@360ghar.com पर ईमेल करें।",
   "delete": "हटाएं",
   "featureComingSoon": "यह सुविधा जल्द आ रही है",
   "enterPasswordConfirm": "पुष्टि के लिए पासवर्ड दर्ज करें",

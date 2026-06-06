@@ -4,6 +4,7 @@ import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/core/network/auth_token_provider.dart';
 import 'package:estate_app/core/network/network_info.dart';
 import 'package:estate_app/core/services/cache_store.dart';
+import 'package:estate_app/core/services/deep_link_service.dart';
 import 'package:estate_app/core/services/file_upload_service.dart';
 import 'package:estate_app/core/storage/app_preferences.dart';
 import 'package:estate_app/core/storage/auth_token_storage.dart';
@@ -51,4 +52,10 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 
 final fileUploadServiceProvider = Provider<FileUploadService>((ref) {
   return FileUploadService(ref.read(apiClientProvider));
+});
+
+final deepLinkServiceProvider = Provider<DeepLinkService>((ref) {
+  final service = DeepLinkService();
+  ref.onDispose(service.dispose);
+  return service;
 });
