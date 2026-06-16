@@ -29,14 +29,16 @@ final class FeatureFlags {
       'ENABLE_PUBLIC_APPLICATIONS',
     );
 
-    final enableApplicationsModule = _parseBool(
+    final enableApplicationsModule =
+        _parseBool(
           enableApplicationsModuleDefine.trim().isNotEmpty
               ? enableApplicationsModuleDefine
               : dotenv.env['ENABLE_APPLICATIONS_MODULE'],
         ) ??
         true;
 
-    final enablePublicApplications = _parseBool(
+    final enablePublicApplications =
+        _parseBool(
           enablePublicApplicationsDefine.trim().isNotEmpty
               ? enablePublicApplicationsDefine
               : dotenv.env['ENABLE_PUBLIC_APPLICATIONS'],
@@ -60,6 +62,8 @@ final class AppConfig {
     required this.enableDebugLogs,
     required this.featureFlags,
     this.googlePlacesApiKey = '',
+    this.googleWebClientId = '',
+    this.googleIosClientId = '',
   });
 
   final AppEnvironment environment;
@@ -71,10 +75,23 @@ final class AppConfig {
   final FeatureFlags featureFlags;
   final String googlePlacesApiKey;
 
+  /// Google OAuth Web client id. On Android this is used as the
+  /// `serverClientId` for the native ID-token flow; it is also required for
+  /// Supabase to validate the returned ID token.
+  final String googleWebClientId;
+
+  /// Google OAuth iOS client id, used as the `clientId` on iOS.
+  final String googleIosClientId;
+
   bool get isProd => environment == AppEnvironment.prod;
 
   bool get isSupabaseConfigured =>
       supabaseUrl.trim().isNotEmpty && supabaseAnonKey.trim().isNotEmpty;
+
+  /// Google Sign-In can only be attempted when at least the web client id is
+  /// configured (required as the Android `serverClientId` and for Supabase to
+  /// validate the ID token). The iOS client id is additionally required on iOS.
+  bool get isGoogleSignInConfigured => googleWebClientId.trim().isNotEmpty;
 
   static AppEnvironment _parseEnv(String value) {
     switch (value.trim().toLowerCase()) {
@@ -148,6 +165,20 @@ final class AppConfig {
         ? googlePlacesApiKeyDefine
         : (dotenv.env['GOOGLE_PLACES_API_KEY'] ?? '');
 
+    const googleWebClientIdDefine = String.fromEnvironment(
+      'GOOGLE_WEB_CLIENT_ID',
+    );
+    final googleWebClientId = googleWebClientIdDefine.trim().isNotEmpty
+        ? googleWebClientIdDefine
+        : (dotenv.env['GOOGLE_WEB_CLIENT_ID'] ?? '');
+
+    const googleIosClientIdDefine = String.fromEnvironment(
+      'GOOGLE_IOS_CLIENT_ID',
+    );
+    final googleIosClientId = googleIosClientIdDefine.trim().isNotEmpty
+        ? googleIosClientIdDefine
+        : (dotenv.env['GOOGLE_IOS_CLIENT_ID'] ?? '');
+
     final featureFlags = FeatureFlags.fromEnvironment(environment);
 
     if (apiBaseUrl.trim().isEmpty) {
@@ -168,6 +199,8 @@ final class AppConfig {
       enableDebugLogs: enableDebugLogs,
       featureFlags: featureFlags,
       googlePlacesApiKey: googlePlacesApiKey,
+      googleWebClientId: googleWebClientId,
+      googleIosClientId: googleIosClientId,
     );
   }
 }

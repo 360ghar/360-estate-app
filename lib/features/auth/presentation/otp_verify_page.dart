@@ -3,42 +3,88 @@ import 'package:estate_app/core/presentation/animations/premium/premium_animatio
 import 'package:estate_app/core/presentation/widgets/glass/glass_toast.dart';
 import 'package:estate_app/core/presentation/widgets/glass/premium_glass_card.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
-import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart' show SimplePremiumBackground;
+import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart'
+    show SimplePremiumBackground;
 import 'package:estate_app/features/auth/presentation/widgets/premium_otp_input.dart';
+import 'package:estate_app/features/auth/presentation/widgets/resend_otp_timer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 
-/// Premium OTP verification page with glassmorphism design.
+/// Premium OTP verification page. Handles both SMS (phone) and email OTP, with
+/// Android SMS autofill via [CodeAutoFill].
 class OtpVerifyPage extends ConsumerStatefulWidget {
   const OtpVerifyPage({
     super.key,
-    required this.phone,
+    required this.identifier,
     this.isSignupFlow = false,
+    this.isEmailChannel = false,
+    this.requirePassword = false,
+    this.isResetFlow = false,
   });
 
-  final String phone;
+  /// The phone (E.164) or email the OTP was sent to.
+  final String identifier;
   final bool isSignupFlow;
+  final bool isEmailChannel;
+
+  /// When true, the account has no password yet, so after a successful verify
+  /// the user is routed to the mandatory set-password step (req 6).
+  final bool requirePassword;
+
+  /// When true, this is a forgot/reset flow: after a successful verify the user
+  /// is forced to set a NEW password (`updateUser(password)`).
+  final bool isResetFlow;
 
   @override
   ConsumerState<OtpVerifyPage> createState() => _OtpVerifyPageState();
 }
 
-class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
+class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage>
+    with CodeAutoFill, ResendOtpTimer {
   final _formKey = GlobalKey<FormState>();
   String _otp = '';
+  String? _autofilledCode;
+
+  @override
+  void initState() {
+    super.initState();
+    // SMS autofill only applies to the phone channel (Android-gated inside the
+    // mixin); harmless to register for email too but we skip it for clarity.
+    if (!widget.isEmailChannel) {
+      listenForCode();
+    }
+    // The OTP was already sent before navigating here, so begin the cooldown.
+    startResendCountdown();
+  }
+
+  @override
+  void codeUpdated() {
+    final value = code;
+    if (value == null) return;
+    if (!mounted) return;
+    setState(() {
+      _autofilledCode = value;
+      _otp = value;
+    });
+  }
+
+  @override
+  void dispose() {
+    cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(authControllerProvider);
 
     ref.listen<AuthState>(authControllerProvider, (previous, next) {
-      if (previous?.errorMessage != next.errorMessage && next.errorMessage != null) {
+      if (previous?.errorMessage != next.errorMessage &&
+          next.errorMessage != null) {
         if (!mounted) return;
-        GlassToast.showError(
-          context,
-          next.errorMessage!,
-        );
+        GlassToast.showError(context, next.errorMessage!);
       }
     });
 
@@ -55,25 +101,18 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Back button and step indicator
                       _buildTopBar(),
-
                       const SizedBox(height: 24),
-
-                      // Title
                       _buildTitle(),
-
                       const SizedBox(height: 48),
-
-                      // OTP card
                       PremiumGlassCard(
                         padding: const EdgeInsets.all(28),
                         borderRadius: 24,
                         opacity: 0.15,
                         child: Column(
                           children: [
-                            // OTP Input
                             PremiumOtpInput(
+                              incomingCode: _autofilledCode,
                               onCompleted: (otp) async {
                                 setState(() => _otp = otp);
                                 await _verifyOtp(otp);
@@ -84,10 +123,7 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
                               },
                               isLoading: state.isBusy && _otp.length == 6,
                             ),
-
                             const SizedBox(height: 32),
-
-                            // Verify button (manual trigger)
                             PremiumGlassButton(
                               label: 'Verify',
                               onPressed: state.isBusy || _otp.length != 6
@@ -95,10 +131,7 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
                                   : () => _verifyOtp(_otp),
                               isLoading: state.isBusy,
                             ),
-
                             const SizedBox(height: 24),
-
-                            // Resend section
                             _buildResendSection(state),
                           ],
                         ),
@@ -117,7 +150,6 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
   Widget _buildTopBar() {
     return Row(
       children: [
-        // Back button
         GestureDetector(
           onTap: () => context.go('/enter-phone'),
           child: Container(
@@ -126,9 +158,7 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
             child: const Icon(
               Icons.arrow_back_rounded,
@@ -138,17 +168,22 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
           ),
         ),
         const Spacer(),
-        // Step indicator
         const PremiumStepIndicator(currentStep: 2),
       ],
     );
   }
 
   Widget _buildTitle() {
+    final destinationLabel = widget.isEmailChannel
+        ? 'Verify Your Email'
+        : 'Verify Your Phone';
+    final sentLabel = widget.isEmailChannel
+        ? 'Enter the 6-digit code sent to your email'
+        : 'Enter the 6-digit code sent to';
     return Column(
       children: [
         Text(
-          'Verify Your Phone',
+          destinationLabel,
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w700,
@@ -165,7 +200,8 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
         ),
         const SizedBox(height: 12),
         Text(
-          'Enter the 6-digit code sent to',
+          sentLabel,
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 15,
             color: Colors.white.withValues(alpha: 0.6),
@@ -179,7 +215,7 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
-            widget.phone,
+            widget.identifier,
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -222,64 +258,85 @@ class _OtpVerifyPageState extends ConsumerState<OtpVerifyPage> {
           ],
         ),
         const SizedBox(height: 16),
-        GestureDetector(
-          onTap: state.isBusy
-              ? null
-              : () {
-                  ref.read(authControllerProvider.notifier).requestOtp(widget.phone);
-                },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.refresh_rounded,
-                  size: 18,
-                  color: state.isBusy
-                      ? Colors.white.withValues(alpha: 0.3)
-                      : const Color(0xFF3B82F6),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Resend Code',
-                  style: TextStyle(
-                    color: state.isBusy
-                        ? Colors.white.withValues(alpha: 0.3)
-                        : const Color(0xFF3B82F6),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
+        ResendOtpButton(
+          canResend: canResend,
+          remainingSeconds: resendSeconds,
+          isBusy: state.isBusy,
+          onResend: _resend,
         ),
       ],
     );
   }
 
+  /// Resends must preserve the original send's [shouldCreateUser] intent:
+  /// `true` only for a new-account signup, `false` for login and reset.
+  bool get _shouldCreateUser => widget.isSignupFlow;
+
+  Future<void> _resend() async {
+    final notifier = ref.read(authControllerProvider.notifier);
+    if (widget.isEmailChannel) {
+      await notifier.sendEmailOtp(
+        widget.identifier,
+        shouldCreateUser: _shouldCreateUser,
+      );
+    } else {
+      await notifier.requestOtp(
+        widget.identifier,
+        shouldCreateUser: _shouldCreateUser,
+      );
+    }
+    if (!mounted) return;
+    // Only restart the cooldown if the send didn't error out.
+    if (ref.read(authControllerProvider).errorMessage == null) {
+      startResendCountdown();
+    }
+  }
+
   Future<void> _verifyOtp(String otp) async {
     final router = GoRouter.of(context);
-    if (widget.isSignupFlow) {
-      final success = await ref
-          .read(authControllerProvider.notifier)
-          .verifyOtpForSignup(phone: widget.phone, otp: otp);
-      if (!mounted || !success) return;
-      final encoded = Uri.encodeComponent(widget.phone);
-      router.go('/login?phone=$encoded');
-      return;
-    }
-    await ref.read(authControllerProvider.notifier).verifyOtp(
-          phone: widget.phone,
+    final notifier = ref.read(authControllerProvider.notifier);
+
+    // Forgot/reset flow: verify the OTP, then force a NEW password
+    // (`updateUser(password)` via the set-password step). Works for both
+    // channels.
+    if (widget.isResetFlow) {
+      if (widget.isEmailChannel) {
+        await notifier.verifyEmailOtpForReset(
+          email: widget.identifier,
           otp: otp,
         );
+      } else {
+        await notifier.verifyOtpForReset(phone: widget.identifier, otp: otp);
+      }
+      return;
+    }
+
+    if (widget.isEmailChannel) {
+      // Email OTP signs the user in directly; the mandatory set-password step
+      // (req 6) is handled inside the controller when [requirePassword].
+      await notifier.verifyEmailOtp(
+        email: widget.identifier,
+        otp: otp,
+        requirePassword: widget.requirePassword,
+      );
+      return;
+    }
+
+    if (widget.isSignupFlow) {
+      final success = await notifier.verifyOtpForSignup(
+        phone: widget.identifier,
+        otp: otp,
+      );
+      if (!mounted || !success) return;
+      final encoded = Uri.encodeComponent(widget.identifier);
+      router.go('/login?identifier=$encoded');
+      return;
+    }
+
+    await notifier.verifyOtp(
+      phone: widget.identifier,
+      otp: otp,
+      requirePassword: widget.requirePassword,
+    );
   }
 }

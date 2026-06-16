@@ -20,12 +20,17 @@ class PremiumOtpInput extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final bool isLoading;
 
+  /// When set to a [length]-digit code (e.g. from SMS autofill), the fields are
+  /// populated and [onCompleted] fires. Change the value to re-trigger a fill.
+  final String? incomingCode;
+
   const PremiumOtpInput({
     super.key,
     this.length = 6,
     required this.onCompleted,
     this.onChanged,
     this.isLoading = false,
+    this.incomingCode,
   });
 
   @override
@@ -42,10 +47,7 @@ class _PremiumOtpInputState extends State<PremiumOtpInput>
   @override
   void initState() {
     super.initState();
-    _controllers = List.generate(
-      widget.length,
-      (_) => TextEditingController(),
-    );
+    _controllers = List.generate(widget.length, (_) => TextEditingController());
     _focusNodes = List.generate(
       widget.length,
       (_) => FocusNode()..addListener(() => setState(() {})),
@@ -57,6 +59,29 @@ class _PremiumOtpInputState extends State<PremiumOtpInput>
         duration: const Duration(milliseconds: 200),
       ),
     );
+  }
+
+  @override
+  void didUpdateWidget(covariant PremiumOtpInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final code = widget.incomingCode;
+    if (code != null &&
+        code != oldWidget.incomingCode &&
+        code.length == widget.length &&
+        RegExp(r'^\d+$').hasMatch(code)) {
+      _applyCode(code);
+    }
+  }
+
+  /// Fills all digit fields from an externally-provided code (SMS autofill).
+  void _applyCode(String code) {
+    for (var i = 0; i < widget.length; i++) {
+      _controllers[i].text = code[i];
+    }
+    for (final node in _focusNodes) {
+      node.unfocus();
+    }
+    _updateOtp();
   }
 
   @override
@@ -193,8 +218,9 @@ class _OtpDigitFieldState extends State<_OtpDigitField>
               boxShadow: widget.isFocused
                   ? [
                       BoxShadow(
-                        color: const Color(0xFF3B82F6)
-                            .withValues(alpha: 0.3 * widget.focusAnimation.value),
+                        color: const Color(
+                          0xFF3B82F6,
+                        ).withValues(alpha: 0.3 * widget.focusAnimation.value),
                         blurRadius: 16,
                       ),
                     ]
@@ -234,6 +260,9 @@ class _OtpDigitFieldState extends State<_OtpDigitField>
                           keyboardType: TextInputType.number,
                           textAlign: TextAlign.center,
                           maxLength: 1,
+                          autofillHints: widget.index == 0
+                              ? const [AutofillHints.oneTimeCode]
+                              : null,
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.95),
                             fontSize: 24,
@@ -337,13 +366,15 @@ class _StepDotState extends State<_StepDot>
       duration: const Duration(milliseconds: 300),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.8,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
-    _glowAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _glowAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     Future.delayed(widget.delay, () {
       if (mounted) _controller.forward();
@@ -396,8 +427,9 @@ class _StepDotState extends State<_StepDot>
               boxShadow: widget.isActive
                   ? [
                       BoxShadow(
-                        color: const Color(0xFF3B82F6)
-                            .withValues(alpha: 0.5 * _glowAnimation.value),
+                        color: const Color(
+                          0xFF3B82F6,
+                        ).withValues(alpha: 0.5 * _glowAnimation.value),
                         blurRadius: 8,
                         spreadRadius: -2,
                       ),

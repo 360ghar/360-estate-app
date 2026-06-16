@@ -65,6 +65,21 @@
 				<string>estate360</string>
 			</array>
 		</dict>
+		<!-- Google Sign-In: add a URL type whose scheme is the REVERSED iOS
+		     OAuth client id (e.g. com.googleusercontent.apps.XXXXX-YYYYY).
+		     Uncomment and fill in once GOOGLE_IOS_CLIENT_ID is provisioned
+		     (Phase 0). Do not remove the schemes above.
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.the360ghar.estateapp.google</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.REVERSED_IOS_CLIENT_ID</string>
+			</array>
+		</dict>
+		-->
 	</array>
 	<!-- Camera permission for property photos -->
 	<key>NSCameraUsageDescription</key>

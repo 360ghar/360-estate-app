@@ -228,10 +228,7 @@ class _CircularStepDot extends StatelessWidget {
             ? const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF3B82F6),
-                  Color(0xFF2563EB),
-                ],
+                colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
               )
             : null,
         color: isCompleted || isCurrent
@@ -255,15 +252,13 @@ class _CircularStepDot extends StatelessWidget {
       ),
       child: Center(
         child: isCompleted
-            ? const Icon(
-                Icons.check,
-                size: 16,
-                color: Colors.white,
-              )
+            ? const Icon(Icons.check, size: 16, color: Colors.white)
             : Text(
                 step.toString(),
                 style: TextStyle(
-                  color: isCurrent ? Colors.white : Colors.white.withValues(alpha: 0.5),
+                  color: isCurrent
+                      ? Colors.white
+                      : Colors.white.withValues(alpha: 0.5),
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),

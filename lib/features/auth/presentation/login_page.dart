@@ -4,20 +4,24 @@ import 'package:estate_app/core/presentation/animations/premium/premium_animatio
 import 'package:estate_app/core/presentation/widgets/glass/glass_toast.dart';
 import 'package:estate_app/core/presentation/widgets/glass/premium_glass_card.dart';
 import 'package:estate_app/core/utils/phone_utils.dart';
+import 'package:estate_app/features/auth/data/auth_repository.dart'
+    show isEmailIdentifier;
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:estate_app/features/auth/presentation/widgets/auth_ui.dart';
-import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart' show SimplePremiumBackground;
+import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart'
+    show SimplePremiumBackground;
 import 'package:estate_app/features/auth/presentation/widgets/premium_otp_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Premium login page with glassmorphism design.
+/// Premium login page with glassmorphism design. Handles both an email and a
+/// phone identifier (password branch of the unified state machine).
 class LoginPage extends ConsumerStatefulWidget {
-  const LoginPage({super.key, this.phone});
+  const LoginPage({super.key, this.identifier});
 
-  final String? phone;
+  final String? identifier;
 
   @override
   ConsumerState<LoginPage> createState() => _LoginPageState();
@@ -29,6 +33,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _prefilled = false;
+
+  /// Whether the locked identifier is an email (vs phone).
+  bool get _isEmail => isEmailIdentifier(widget.identifier?.trim() ?? '');
 
   @override
   void dispose() {
@@ -51,8 +58,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(authControllerProvider);
-    final phoneParam = widget.phone?.trim();
-    final normalizedParam = phoneParam == null ? null : normalizePhone(phoneParam);
+    final identifierParam = widget.identifier?.trim();
+    final normalizedParam = identifierParam == null || identifierParam.isEmpty
+        ? null
+        : (_isEmail
+              ? identifierParam.toLowerCase()
+              : normalizePhone(identifierParam));
     final lockPhone = normalizedParam != null && normalizedParam.isNotEmpty;
 
     if (lockPhone && !_prefilled) {
@@ -61,12 +72,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
 
     ref.listen<AuthState>(authControllerProvider, (previous, next) {
-      if (previous?.errorMessage != next.errorMessage && next.errorMessage != null) {
+      if (previous?.errorMessage != next.errorMessage &&
+          next.errorMessage != null) {
         if (!mounted) return;
-        GlassToast.showError(
-          context,
-          next.errorMessage!,
-        );
+        GlassToast.showError(context, next.errorMessage!);
       }
     });
 
@@ -78,62 +87,75 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               child: PremiumFadeTransition(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Top bar
-                      _buildTopBar(normalizedParam),
+                child: AutofillGroup(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Top bar
+                        _buildTopBar(normalizedParam),
 
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                      // Title
-                      _buildTitle(),
+                        // Title
+                        _buildTitle(),
 
-                      const SizedBox(height: 32),
+                        const SizedBox(height: 32),
 
-                      // Login form card
-                      PremiumGlassCard(
-                        padding: const EdgeInsets.all(24),
-                        borderRadius: 24,
-                        opacity: 0.15,
-                        child: Column(
-                          children: [
-                            // Phone field
-                            _PhoneField(
-                              controller: _phoneController,
-                              lockPhone: lockPhone,
-                              normalizedParam: normalizedParam,
-                              validator: _validatePhone,
-                            ),
-                            const SizedBox(height: 16),
+                        // Login form card
+                        PremiumGlassCard(
+                          padding: const EdgeInsets.all(24),
+                          borderRadius: 24,
+                          opacity: 0.15,
+                          child: Column(
+                            children: [
+                              // Identifier field (phone or email)
+                              _PhoneField(
+                                controller: _phoneController,
+                                lockPhone: lockPhone,
+                                normalizedParam: normalizedParam,
+                                isEmail: _isEmail,
+                                validator: _isEmail ? null : _validatePhone,
+                              ),
+                              const SizedBox(height: 16),
 
-                            // Password field
-                            _PasswordField(
-                              controller: _passwordController,
-                              obscure: _obscurePassword,
-                              onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
-                              validator: _validatePassword,
-                              highlightError: state.errorMessage != null,
-                            ),
-                            const SizedBox(height: 12),
+                              // Password field
+                              _PasswordField(
+                                controller: _passwordController,
+                                obscure: _obscurePassword,
+                                onToggle: () => setState(
+                                  () => _obscurePassword = !_obscurePassword,
+                                ),
+                                validator: _validatePassword,
+                                highlightError: state.errorMessage != null,
+                              ),
+                              const SizedBox(height: 12),
 
-                            // Forgot password
-                            _buildForgotPassword(state, normalizedParam, lockPhone),
-                            const SizedBox(height: 20),
+                              // Forgot password
+                              _buildForgotPassword(
+                                state,
+                                normalizedParam,
+                                lockPhone,
+                              ),
+                              const SizedBox(height: 20),
 
-                            // Sign in button
-                            _buildSignInButton(state, normalizedParam, lockPhone),
-                          ],
+                              // Sign in button
+                              _buildSignInButton(
+                                state,
+                                normalizedParam,
+                                lockPhone,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
 
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                      // Sign up link
-                      _buildSignUpLink(normalizedParam, lockPhone, state),
-                    ],
+                        // Sign up link
+                        _buildSignUpLink(normalizedParam, lockPhone, state),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -156,9 +178,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
             child: const Icon(
               Icons.arrow_back_rounded,
@@ -205,41 +225,49 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 
-  Widget _buildSignInButton(AuthState state, String? normalizedParam, bool lockPhone) {
+  Widget _buildSignInButton(
+    AuthState state,
+    String? normalizedParam,
+    bool lockPhone,
+  ) {
     return PremiumGlassButton(
       label: 'Sign In',
       onPressed: state.isBusy
           ? null
           : () {
               if (_formKey.currentState?.validate() ?? false) {
-                ref.read(authControllerProvider.notifier).signInWithPassword(
-                      phone: lockPhone
-                          ? normalizedParam!
-                          : normalizePhone(_phoneController.text),
-                      password: _passwordController.text.trim(),
-                    );
+                final notifier = ref.read(authControllerProvider.notifier);
+                final password = _passwordController.text.trim();
+                if (_isEmail && lockPhone) {
+                  notifier.signInWithEmailPassword(
+                    email: normalizedParam!,
+                    password: password,
+                  );
+                } else {
+                  notifier.signInWithPassword(
+                    phone: lockPhone
+                        ? normalizedParam!
+                        : normalizePhone(_phoneController.text),
+                    password: password,
+                  );
+                }
               }
             },
       isLoading: state.isBusy,
     );
   }
 
-  Widget _buildForgotPassword(AuthState state, String? normalizedParam, bool lockPhone) {
+  Widget _buildForgotPassword(
+    AuthState state,
+    String? normalizedParam,
+    bool lockPhone,
+  ) {
     return Align(
       alignment: Alignment.centerRight,
       child: GestureDetector(
         onTap: state.isBusy
             ? null
-            : () async {
-                final prefill = _prefillPhone(lockPhone ? normalizedParam : _phoneController.text);
-                final phone = await _promptForgotPasswordPhone(prefill: prefill);
-                if (phone == null || phone.isEmpty) return;
-                await ref.read(authControllerProvider.notifier).requestOtp(phone);
-                if (!mounted) return;
-                if (ref.read(authControllerProvider).errorMessage != null) return;
-                final encoded = Uri.encodeComponent(phone);
-                context.go('/otp?phone=$encoded');
-              },
+            : () => _onForgotPassword(normalizedParam, lockPhone),
         child: Text(
           'Forgot password?',
           style: TextStyle(
@@ -252,7 +280,45 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 
-  Widget _buildSignUpLink(String? normalizedParam, bool lockPhone, AuthState state) {
+  /// Forgot-password reset. Supports BOTH channels:
+  /// - email identifier -> send a reset email OTP for the locked email;
+  /// - phone identifier -> reuse the locked phone, or prompt for one.
+  /// Sends never create an account on reset (requestOtp/sendEmailOtp default to
+  /// shouldCreateUser: false), then routes to the OTP screen in reset mode
+  /// (which forces set-new-password).
+  Future<void> _onForgotPassword(
+    String? normalizedParam,
+    bool lockPhone,
+  ) async {
+    final notifier = ref.read(authControllerProvider.notifier);
+
+    if (_isEmail && lockPhone) {
+      final email = normalizedParam!;
+      await notifier.sendEmailOtp(email);
+      if (!mounted) return;
+      if (ref.read(authControllerProvider).errorMessage != null) return;
+      final encoded = Uri.encodeComponent(email);
+      context.go('/otp?identifier=$encoded&channel=email&flow=reset');
+      return;
+    }
+
+    final prefill = _prefillPhone(
+      lockPhone ? normalizedParam : _phoneController.text,
+    );
+    final phone = await _promptForgotPasswordPhone(prefill: prefill);
+    if (phone == null || phone.isEmpty) return;
+    await notifier.requestOtp(phone);
+    if (!mounted) return;
+    if (ref.read(authControllerProvider).errorMessage != null) return;
+    final encoded = Uri.encodeComponent(phone);
+    context.go('/otp?identifier=$encoded&channel=phone&flow=reset');
+  }
+
+  Widget _buildSignUpLink(
+    String? normalizedParam,
+    bool lockPhone,
+    AuthState state,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -267,8 +333,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           onTap: state.isBusy
               ? null
               : () {
-                  final encoded = normalizedParam == null ? null : Uri.encodeComponent(normalizedParam);
-                  final target = (lockPhone && encoded != null) ? '/signup?phone=$encoded' : '/signup';
+                  final encoded = normalizedParam == null
+                      ? null
+                      : Uri.encodeComponent(normalizedParam);
+                  final target = (lockPhone && encoded != null)
+                      ? '/signup?phone=$encoded'
+                      : '/signup';
                   context.go(target);
                 },
           child: Text(
@@ -327,9 +397,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   child: AuthCountryPrefix(),
                 ),
               ),
-              style: authInputTextStyle(dialogContext)?.copyWith(
-                letterSpacing: 1.5,
-              ),
+              style: authInputTextStyle(
+                dialogContext,
+              )?.copyWith(letterSpacing: 1.5),
               validator: (value) {
                 if (!isValidPhone(value ?? '')) {
                   return 'Enter a valid phone number.';
@@ -364,12 +434,14 @@ class _PhoneField extends StatelessWidget {
   final TextEditingController controller;
   final bool lockPhone;
   final String? normalizedParam;
+  final bool isEmail;
   final String? Function(String?)? validator;
 
   const _PhoneField({
     required this.controller,
     required this.lockPhone,
     required this.normalizedParam,
+    this.isEmail = false,
     this.validator,
   });
 
@@ -378,19 +450,27 @@ class _PhoneField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'MOBILE NUMBER',
-          style: _labelStyle(context),
-        ),
+        Text(isEmail ? 'EMAIL' : 'MOBILE NUMBER', style: _labelStyle(context)),
         const SizedBox(height: 10),
         if (lockPhone)
           _LockedPhoneDisplay(phone: normalizedParam!)
+        else if (isEmail)
+          _GlassInputField(
+            controller: controller,
+            hint: 'you@example.com',
+            prefixIcon: Icons.email_outlined,
+            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
+            autofillHints: const [AutofillHints.username, AutofillHints.email],
+            validator: validator,
+          )
         else
           _GlassInputField(
             controller: controller,
             hint: '00000 00000',
             prefixIcon: Icons.phone_outlined,
             keyboardType: TextInputType.phone,
+            autofillHints: const [AutofillHints.telephoneNumber],
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(10),
@@ -437,16 +517,16 @@ class _PasswordFieldState extends State<_PasswordField>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    _shakeAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0, end: -8), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: -8, end: 8), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 8, end: -6), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: -6, end: 4), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 4, end: 0), weight: 1),
-    ]).animate(CurvedAnimation(
-      parent: _shakeController,
-      curve: Curves.easeInOut,
-    ));
+    _shakeAnimation =
+        TweenSequence<double>([
+          TweenSequenceItem(tween: Tween(begin: 0, end: -8), weight: 1),
+          TweenSequenceItem(tween: Tween(begin: -8, end: 8), weight: 2),
+          TweenSequenceItem(tween: Tween(begin: 8, end: -6), weight: 2),
+          TweenSequenceItem(tween: Tween(begin: -6, end: 4), weight: 2),
+          TweenSequenceItem(tween: Tween(begin: 4, end: 0), weight: 1),
+        ]).animate(
+          CurvedAnimation(parent: _shakeController, curve: Curves.easeInOut),
+        );
   }
 
   @override
@@ -478,10 +558,7 @@ class _PasswordFieldState extends State<_PasswordField>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'PASSWORD',
-            style: _labelStyle(context),
-          ),
+          Text('PASSWORD', style: _labelStyle(context)),
           const SizedBox(height: 10),
           Focus(
             onFocusChange: (hasFocus) => setState(() => _isFocused = hasFocus),
@@ -496,13 +573,13 @@ class _PasswordFieldState extends State<_PasswordField>
                         ),
                       ]
                     : widget.highlightError
-                        ? [
-                            BoxShadow(
-                              color: const Color(0xFFEF4444).withValues(alpha: 0.2),
-                              blurRadius: 12,
-                            ),
-                          ]
-                        : null,
+                    ? [
+                        BoxShadow(
+                          color: const Color(0xFFEF4444).withValues(alpha: 0.2),
+                          blurRadius: 12,
+                        ),
+                      ]
+                    : null,
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
@@ -517,14 +594,15 @@ class _PasswordFieldState extends State<_PasswordField>
                         color: widget.highlightError
                             ? const Color(0xFFEF4444)
                             : _isFocused
-                                ? const Color(0xFF3B82F6)
-                                : Colors.white.withValues(alpha: 0.1),
+                            ? const Color(0xFF3B82F6)
+                            : Colors.white.withValues(alpha: 0.1),
                         width: _isFocused || widget.highlightError ? 1.5 : 1,
                       ),
                     ),
                     child: TextFormField(
                       controller: widget.controller,
                       obscureText: widget.obscure,
+                      autofillHints: const [AutofillHints.password],
                       style: _inputStyle(context),
                       cursorColor: const Color(0xFF3B82F6),
                       validator: widget.validator,
@@ -551,7 +629,10 @@ class _PasswordFieldState extends State<_PasswordField>
                           color: Color(0xFFFCA5A5),
                           fontSize: 12,
                         ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
                       ),
                     ),
                   ),
@@ -577,9 +658,7 @@ class _LockedPhoneDisplay extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
@@ -624,6 +703,7 @@ class _GlassInputField extends StatefulWidget {
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final TextInputAction? textInputAction;
+  final Iterable<String>? autofillHints;
   final String? Function(String?)? validator;
 
   const _GlassInputField({
@@ -633,6 +713,7 @@ class _GlassInputField extends StatefulWidget {
     this.keyboardType,
     this.inputFormatters,
     this.textInputAction,
+    this.autofillHints,
     this.validator,
   });
 
@@ -679,6 +760,7 @@ class _GlassInputFieldState extends State<_GlassInputField> {
                 keyboardType: widget.keyboardType,
                 inputFormatters: widget.inputFormatters,
                 textInputAction: widget.textInputAction,
+                autofillHints: widget.autofillHints,
                 style: _inputStyle(context),
                 cursorColor: const Color(0xFF3B82F6),
                 validator: widget.validator,
@@ -697,7 +779,10 @@ class _GlassInputFieldState extends State<_GlassInputField> {
                     color: Color(0xFFFCA5A5),
                     fontSize: 12,
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
                 ),
               ),
             ),
@@ -728,26 +813,27 @@ Color _iconColor(BuildContext context) => _isLightTheme(context)
     : Colors.white.withValues(alpha: 0.5);
 
 TextStyle _labelStyle(BuildContext context) => TextStyle(
-      color: _mutedTextColor(context),
-      fontSize: 13,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 1.2,
-    );
+  color: _mutedTextColor(context),
+  fontSize: 13,
+  fontWeight: FontWeight.w600,
+  letterSpacing: 1.2,
+);
 
 TextStyle _inputStyle(BuildContext context) => TextStyle(
-      color: _inputTextColor(context),
-      fontSize: 16,
-      fontWeight: FontWeight.w500,
-    );
+  color: _inputTextColor(context),
+  fontSize: 16,
+  fontWeight: FontWeight.w500,
+);
 
-TextStyle _hintStyle(BuildContext context) => TextStyle(
-      color: _hintTextColor(context),
-      fontSize: 16,
-    );
+TextStyle _hintStyle(BuildContext context) =>
+    TextStyle(color: _hintTextColor(context), fontSize: 16);
 
 class _PhoneFormatter extends TextInputFormatter {
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     final text = newValue.text.replaceAll(' ', '');
     final buffer = StringBuffer();
     for (int i = 0; i < text.length; i++) {

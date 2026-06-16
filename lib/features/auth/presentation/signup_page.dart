@@ -3,7 +3,8 @@ import 'package:estate_app/core/presentation/animations/premium/premium_animatio
 import 'package:estate_app/core/presentation/widgets/glass/premium_glass_card.dart';
 import 'package:estate_app/core/utils/phone_utils.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
-import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart' show SimplePremiumBackground;
+import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart'
+    show SimplePremiumBackground;
 import 'package:estate_app/features/auth/presentation/widgets/premium_otp_input.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -12,11 +13,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Premium signup page with glassmorphism design.
+/// Premium signup page with glassmorphism design. Reached for an unknown phone
+/// identifier; collects name/email/phone/password then verifies via SMS OTP.
 class SignupPage extends ConsumerStatefulWidget {
-  const SignupPage({super.key, this.phone});
+  const SignupPage({super.key, this.identifier});
 
-  final String? phone;
+  final String? identifier;
 
   @override
   ConsumerState<SignupPage> createState() => _SignupPageState();
@@ -48,8 +50,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(authControllerProvider);
-    final phoneParam = widget.phone?.trim();
-    final normalizedParam = phoneParam == null ? null : normalizePhone(phoneParam);
+    final identifierParam = widget.identifier?.trim();
+    final normalizedParam = identifierParam == null || identifierParam.isEmpty
+        ? null
+        : normalizePhone(identifierParam);
     final lockPhone = normalizedParam != null && normalizedParam.isNotEmpty;
 
     if (lockPhone && !_prefilled) {
@@ -58,7 +62,8 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     }
 
     ref.listen<AuthState>(authControllerProvider, (previous, next) {
-      if (previous?.errorMessage != next.errorMessage && next.errorMessage != null) {
+      if (previous?.errorMessage != next.errorMessage &&
+          next.errorMessage != null) {
         if (!mounted) return;
         _showErrorSnackBar(next.errorMessage!);
       }
@@ -72,115 +77,141 @@ class _SignupPageState extends ConsumerState<SignupPage> {
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               child: PremiumFadeTransition(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Back button and step indicator
-                      _buildTopBar(normalizedParam),
+                child: AutofillGroup(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Back button and step indicator
+                        _buildTopBar(normalizedParam),
 
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                      // Title
-                      _buildTitle(),
+                        // Title
+                        _buildTitle(),
 
-                      const SizedBox(height: 32),
+                        const SizedBox(height: 32),
 
-                      // Form card with staggered field entrance
-                      PremiumGlassCard(
-                        padding: const EdgeInsets.all(24),
-                        borderRadius: 24,
-                        opacity: 0.15,
-                        child: PremiumStaggeredList(
-                          itemCount: 7,
-                          staggerDelay: const Duration(milliseconds: 100),
-                          itemBuilder: (context, index) {
-                            switch (index) {
-                              case 0:
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 16),
-                                  child: _FullNameField(controller: _fullNameController),
-                                );
-                              case 1:
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 16),
-                                  child: _EmailField(controller: _emailController),
-                                );
-                              case 2:
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 16),
-                                  child: !lockPhone
-                                      ? _PhoneField(
-                                          controller: _phoneController,
-                                          lockPhone: lockPhone,
-                                          normalizedParam: normalizedParam,
-                                          validator: (value) {
-                                            if (!isValidPhone(value ?? '')) {
-                                              return 'Enter a valid phone number.';
-                                            }
-                                            return null;
-                                          },
-                                        )
-                                      : _LockedPhoneDisplay(phone: normalizedParam),
-                                );
-                              case 3:
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 16),
-                                  child: _PasswordField(
-                                    controller: _passwordController,
-                                    label: 'PASSWORD',
-                                    hint: 'Enter password',
-                                    obscure: _obscurePassword,
-                                    onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
-                                    validator: (value) {
-                                      final text = value?.trim() ?? '';
-                                      if (text.length < 6) {
-                                        return 'Password must be 6+ characters.';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                );
-                              case 4:
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 16),
-                                  child: _PasswordField(
-                                    controller: _confirmController,
-                                    label: 'CONFIRM PASSWORD',
-                                    hint: 'Confirm password',
-                                    obscure: _obscureConfirm,
-                                    onToggle: () => setState(() => _obscureConfirm = !_obscureConfirm),
-                                    validator: (value) {
-                                      final text = value?.trim() ?? '';
-                                      if (text.isEmpty) return 'Confirm your password.';
-                                      if (text != _passwordController.text.trim()) {
-                                        return 'Passwords do not match.';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                );
-                              case 5:
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 24),
-                                  child: _TermsCheckbox(
-                                    accepted: _termsAccepted,
-                                    onChanged: (v) => setState(() => _termsAccepted = v),
-                                  ),
-                                );
-                              default:
-                                return _buildCreateAccountButton(state.isBusy, normalizedParam, lockPhone);
-                            }
-                          },
+                        // Form card with staggered field entrance
+                        PremiumGlassCard(
+                          padding: const EdgeInsets.all(24),
+                          borderRadius: 24,
+                          opacity: 0.15,
+                          child: PremiumStaggeredList(
+                            itemCount: 7,
+                            staggerDelay: const Duration(milliseconds: 100),
+                            itemBuilder: (context, index) {
+                              switch (index) {
+                                case 0:
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: _FullNameField(
+                                      controller: _fullNameController,
+                                    ),
+                                  );
+                                case 1:
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: _EmailField(
+                                      controller: _emailController,
+                                    ),
+                                  );
+                                case 2:
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: !lockPhone
+                                        ? _PhoneField(
+                                            controller: _phoneController,
+                                            lockPhone: lockPhone,
+                                            normalizedParam: normalizedParam,
+                                            validator: (value) {
+                                              if (!isValidPhone(value ?? '')) {
+                                                return 'Enter a valid phone number.';
+                                              }
+                                              return null;
+                                            },
+                                          )
+                                        : _LockedPhoneDisplay(
+                                            phone: normalizedParam,
+                                          ),
+                                  );
+                                case 3:
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: _PasswordField(
+                                      controller: _passwordController,
+                                      label: 'PASSWORD',
+                                      hint: 'Enter password',
+                                      obscure: _obscurePassword,
+                                      onToggle: () => setState(
+                                        () => _obscurePassword =
+                                            !_obscurePassword,
+                                      ),
+                                      validator: (value) {
+                                        final text = value?.trim() ?? '';
+                                        if (text.length < 6) {
+                                          return 'Password must be 6+ characters.';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  );
+                                case 4:
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: _PasswordField(
+                                      controller: _confirmController,
+                                      label: 'CONFIRM PASSWORD',
+                                      hint: 'Confirm password',
+                                      obscure: _obscureConfirm,
+                                      onToggle: () => setState(
+                                        () =>
+                                            _obscureConfirm = !_obscureConfirm,
+                                      ),
+                                      validator: (value) {
+                                        final text = value?.trim() ?? '';
+                                        if (text.isEmpty) {
+                                          return 'Confirm your password.';
+                                        }
+                                        if (text !=
+                                            _passwordController.text.trim()) {
+                                          return 'Passwords do not match.';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  );
+                                case 5:
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 24),
+                                    child: _TermsCheckbox(
+                                      accepted: _termsAccepted,
+                                      onChanged: (v) =>
+                                          setState(() => _termsAccepted = v),
+                                    ),
+                                  );
+                                default:
+                                  return _buildCreateAccountButton(
+                                    state.isBusy,
+                                    normalizedParam,
+                                    lockPhone,
+                                  );
+                              }
+                            },
+                          ),
                         ),
-                      ),
 
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                      // Login link
-                      _buildLoginLink(normalizedParam, lockPhone, state.isBusy),
-                    ],
+                        // Login link
+                        _buildLoginLink(
+                          normalizedParam,
+                          lockPhone,
+                          state.isBusy,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -203,9 +234,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
             child: const Icon(
               Icons.arrow_back_rounded,
@@ -254,15 +283,23 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     );
   }
 
-  Widget _buildCreateAccountButton(bool isBusy, String? normalizedParam, bool lockPhone) {
+  Widget _buildCreateAccountButton(
+    bool isBusy,
+    String? normalizedParam,
+    bool lockPhone,
+  ) {
     return PremiumGlassButton(
       label: 'Create Account',
       onPressed: (isBusy || !_termsAccepted)
           ? null
           : () async {
               if (_formKey.currentState?.validate() ?? false) {
-                final phone = lockPhone ? normalizedParam! : normalizePhone(_phoneController.text);
-                final success = await ref.read(authControllerProvider.notifier).signUpWithPassword(
+                final phone = lockPhone
+                    ? normalizedParam!
+                    : normalizePhone(_phoneController.text);
+                final success = await ref
+                    .read(authControllerProvider.notifier)
+                    .signUpWithPassword(
                       phone: phone,
                       password: _passwordController.text.trim(),
                       fullName: _fullNameController.text.trim(),
@@ -270,7 +307,9 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                     );
                 if (!mounted || !success) return;
                 final encoded = Uri.encodeComponent(phone);
-                context.go('/otp?phone=$encoded&flow=signup');
+                context.go(
+                  '/otp?identifier=$encoded&channel=phone&flow=signup',
+                );
               }
             },
       isLoading: isBusy,
@@ -292,8 +331,12 @@ class _SignupPageState extends ConsumerState<SignupPage> {
           onTap: isBusy
               ? null
               : () {
-                  final encoded = normalizedParam == null ? null : Uri.encodeComponent(normalizedParam);
-                  final target = (lockPhone && encoded != null) ? '/login?phone=$encoded' : '/login';
+                  final encoded = normalizedParam == null
+                      ? null
+                      : Uri.encodeComponent(normalizedParam);
+                  final target = (lockPhone && encoded != null)
+                      ? '/login?identifier=$encoded'
+                      : '/login';
                   context.go(target);
                 },
           child: Text(
@@ -331,15 +374,13 @@ class _FullNameField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'FULL NAME (OPTIONAL)',
-          style: _labelStyle(context),
-        ),
+        Text('FULL NAME (OPTIONAL)', style: _labelStyle(context)),
         const SizedBox(height: 10),
         _GlassInputField(
           controller: controller,
           hint: 'Your full name',
           prefixIcon: Icons.person_outline,
+          autofillHints: const [AutofillHints.name],
         ),
       ],
     );
@@ -356,16 +397,14 @@ class _EmailField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'EMAIL (OPTIONAL)',
-          style: _labelStyle(context),
-        ),
+        Text('EMAIL (OPTIONAL)', style: _labelStyle(context)),
         const SizedBox(height: 10),
         _GlassInputField(
           controller: controller,
           hint: 'you@example.com',
           prefixIcon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
+          autofillHints: const [AutofillHints.email],
         ),
       ],
     );
@@ -390,16 +429,14 @@ class _PhoneField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'MOBILE NUMBER',
-          style: _labelStyle(context),
-        ),
+        Text('MOBILE NUMBER', style: _labelStyle(context)),
         const SizedBox(height: 10),
         _GlassInputField(
           controller: controller,
           hint: '00000 00000',
           prefixIcon: Icons.phone_outlined,
           keyboardType: TextInputType.phone,
+          autofillHints: const [AutofillHints.telephoneNumber],
           inputFormatters: [
             FilteringTextInputFormatter.digitsOnly,
             LengthLimitingTextInputFormatter(10),
@@ -422,19 +459,14 @@ class _LockedPhoneDisplay extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'MOBILE NUMBER',
-          style: _labelStyle(context),
-        ),
+        Text('MOBILE NUMBER', style: _labelStyle(context)),
         const SizedBox(height: 10),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.1),
-            ),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
           ),
           child: Row(
             children: [
@@ -503,10 +535,7 @@ class _PasswordFieldState extends State<_PasswordField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          widget.label,
-          style: _labelStyle(context),
-        ),
+        Text(widget.label, style: _labelStyle(context)),
         const SizedBox(height: 10),
         Focus(
           onFocusChange: (hasFocus) => setState(() => _isFocused = hasFocus),
@@ -540,6 +569,7 @@ class _PasswordFieldState extends State<_PasswordField> {
                   child: TextFormField(
                     controller: widget.controller,
                     obscureText: widget.obscure,
+                    autofillHints: const [AutofillHints.newPassword],
                     style: _inputStyle(context),
                     cursorColor: const Color(0xFF3B82F6),
                     validator: widget.validator,
@@ -554,7 +584,9 @@ class _PasswordFieldState extends State<_PasswordField> {
                       suffixIcon: GestureDetector(
                         onTap: widget.onToggle,
                         child: Icon(
-                          widget.obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                          widget.obscure
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
                           color: _iconColor(context),
                           size: 20,
                         ),
@@ -564,7 +596,10 @@ class _PasswordFieldState extends State<_PasswordField> {
                         color: Color(0xFFFCA5A5),
                         fontSize: 12,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                     ),
                   ),
                 ),
@@ -583,6 +618,7 @@ class _GlassInputField extends StatefulWidget {
   final IconData? prefixIcon;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
+  final Iterable<String>? autofillHints;
   final String? Function(String?)? validator;
 
   const _GlassInputField({
@@ -591,6 +627,7 @@ class _GlassInputField extends StatefulWidget {
     this.prefixIcon,
     this.keyboardType,
     this.inputFormatters,
+    this.autofillHints,
     this.validator,
   });
 
@@ -636,6 +673,7 @@ class _GlassInputFieldState extends State<_GlassInputField> {
                 controller: widget.controller,
                 keyboardType: widget.keyboardType,
                 inputFormatters: widget.inputFormatters,
+                autofillHints: widget.autofillHints,
                 style: _inputStyle(context),
                 cursorColor: const Color(0xFF3B82F6),
                 validator: widget.validator,
@@ -654,7 +692,10 @@ class _GlassInputFieldState extends State<_GlassInputField> {
                     color: Color(0xFFFCA5A5),
                     fontSize: 12,
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
                 ),
               ),
             ),
@@ -711,14 +752,18 @@ class _TermsCheckbox extends StatelessWidget {
                   text: 'Terms of Service',
                   style: linkStyle,
                   recognizer: TapGestureRecognizer()
-                    ..onTap = () => _launchPolicy('https://360ghar.com/policies/terms-of-service'),
+                    ..onTap = () => _launchPolicy(
+                      'https://360ghar.com/policies/terms-of-service',
+                    ),
                 ),
                 const TextSpan(text: ' and '),
                 TextSpan(
                   text: 'Privacy Policy',
                   style: linkStyle,
                   recognizer: TapGestureRecognizer()
-                    ..onTap = () => _launchPolicy('https://360ghar.com/policies/privacy-policy'),
+                    ..onTap = () => _launchPolicy(
+                      'https://360ghar.com/policies/privacy-policy',
+                    ),
                 ),
               ],
               style: TextStyle(
@@ -754,26 +799,27 @@ Color _iconColor(BuildContext context) => _isLightTheme(context)
     : Colors.white.withValues(alpha: 0.5);
 
 TextStyle _labelStyle(BuildContext context) => TextStyle(
-      color: _mutedTextColor(context),
-      fontSize: 13,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 1.2,
-    );
+  color: _mutedTextColor(context),
+  fontSize: 13,
+  fontWeight: FontWeight.w600,
+  letterSpacing: 1.2,
+);
 
 TextStyle _inputStyle(BuildContext context) => TextStyle(
-      color: _inputTextColor(context),
-      fontSize: 16,
-      fontWeight: FontWeight.w500,
-    );
+  color: _inputTextColor(context),
+  fontSize: 16,
+  fontWeight: FontWeight.w500,
+);
 
-TextStyle _hintStyle(BuildContext context) => TextStyle(
-      color: _hintTextColor(context),
-      fontSize: 16,
-    );
+TextStyle _hintStyle(BuildContext context) =>
+    TextStyle(color: _hintTextColor(context), fontSize: 16);
 
 class _PhoneFormatter extends TextInputFormatter {
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     final text = newValue.text.replaceAll(' ', '');
     final buffer = StringBuffer();
     for (int i = 0; i < text.length; i++) {

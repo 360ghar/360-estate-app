@@ -149,10 +149,7 @@ class _PremiumAuthBackgroundState extends State<PremiumAuthBackground>
           return Container(
             decoration: BoxDecoration(
               gradient: RadialGradient(
-                center: Alignment(
-                  -1 + 2 * t,
-                  -1 + 2 * (t * 0.7 % 1.0),
-                ),
+                center: Alignment(-1 + 2 * t, -1 + 2 * (t * 0.7 % 1.0)),
                 radius: 1.5,
                 colors: [
                   color1.withValues(alpha: 0.15),
@@ -268,10 +265,7 @@ class _PremiumAuthBackgroundState extends State<PremiumAuthBackground>
     return Positioned.fill(
       child: Opacity(
         opacity: 0.03,
-        child: CustomPaint(
-          painter: _NoisePainter(),
-          size: Size.infinite,
-        ),
+        child: CustomPaint(painter: _NoisePainter(), size: Size.infinite),
       ),
     );
   }
@@ -335,10 +329,7 @@ class _NoisePainter extends CustomPainter {
 class SimplePremiumBackground extends StatelessWidget {
   final Widget child;
 
-  const SimplePremiumBackground({
-    super.key,
-    required this.child,
-  });
+  const SimplePremiumBackground({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -347,11 +338,7 @@ class SimplePremiumBackground extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF0A0E27),
-            Color(0xFF1A1F3A),
-            Color(0xFF1E1B4B),
-          ],
+          colors: [Color(0xFF0A0E27), Color(0xFF1A1F3A), Color(0xFF1E1B4B)],
           stops: [0.0, 0.5, 1.0],
         ),
       ),

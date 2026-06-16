@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:ui';
 import 'package:estate_app/app/router/routes.dart';
 import 'package:estate_app/core/presentation/animations/premium/premium_animations.dart';
@@ -7,15 +8,24 @@ import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/glass/premium_glass_card.dart';
 import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/core/utils/phone_utils.dart';
+import 'package:estate_app/features/auth/data/auth_repository.dart'
+    show isEmailIdentifier;
+import 'package:estate_app/features/auth/models/auth_method.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
-import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart' show SimplePremiumBackground;
+import 'package:estate_app/features/auth/presentation/widgets/apple_sign_in_button.dart';
+import 'package:estate_app/features/auth/presentation/widgets/google_sign_in_button.dart';
+import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart'
+    show SimplePremiumBackground;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:smart_auth/smart_auth.dart';
 
-/// Premium enter phone page with glassmorphism design and smooth animations.
+/// Unified entry page: a single identifier field (email or phone) plus a
+/// native Google sign-in button. Resolves the identifier against the backend
+/// login state machine and branches to password / OTP / signup.
 class EnterPhonePage extends ConsumerStatefulWidget {
   const EnterPhonePage({super.key});
 
@@ -25,10 +35,12 @@ class EnterPhonePage extends ConsumerStatefulWidget {
 
 class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
   final _formKey = GlobalKey<FormState>();
-  final _phoneController = TextEditingController();
+  final _identifierController = TextEditingController();
+  final SmartAuth _smartAuth = SmartAuth.instance;
   late final TapGestureRecognizer _termsRecognizer;
   late final TapGestureRecognizer _privacyRecognizer;
   bool _isChecking = false;
+  bool _prefilledMasked = false;
 
   @override
   void initState() {
@@ -43,40 +55,123 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
   void dispose() {
     _termsRecognizer.dispose();
     _privacyRecognizer.dispose();
-    _phoneController.dispose();
+    _identifierController.dispose();
     super.dispose();
   }
 
-  String? _validatePhone(String? value) {
-    if (!isValidPhone(value ?? '')) return 'Enter a valid phone number.';
-    return null;
+  String? _validateIdentifier(String? value) {
+    final text = value?.trim() ?? '';
+    if (text.isEmpty) return 'Enter your email or phone number.';
+    if (isEmailIdentifier(text)) return null;
+    if (isValidPhone(text)) return null;
+    return 'Enter a valid email or phone number.';
+  }
+
+  /// Android-only phone-number hint picker (Smart Auth / Google Identity).
+  Future<void> _showPhoneHintPicker() async {
+    try {
+      final res = await _smartAuth.requestPhoneNumberHint();
+      final hint = res.data;
+      if (hint != null && hint.isNotEmpty && mounted) {
+        _identifierController.text = hint;
+      }
+    } catch (_) {
+      // Picker unavailable / dismissed — ignore.
+    }
   }
 
   Future<void> _continue() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    final phone = normalizePhone(_phoneController.text);
+    final raw = _identifierController.text.trim();
+    final isEmail = isEmailIdentifier(raw);
+    final identifier = isEmail ? raw.toLowerCase() : normalizePhone(raw);
 
     setState(() => _isChecking = true);
     try {
-      final exists =
-          await ref
-              .read(authControllerProvider.notifier)
-              .checkPhoneRegistered(phone)
-              .timeout(const Duration(seconds: 6), onTimeout: () => null);
+      final status = await ref
+          .read(authControllerProvider.notifier)
+          .checkIdentifierStatus(identifier)
+          .timeout(const Duration(seconds: 8), onTimeout: () => null);
       if (!mounted) return;
 
-      final encoded = Uri.encodeComponent(phone);
-      if (exists == false) {
-        context.go('/signup?phone=$encoded');
+      final encoded = Uri.encodeComponent(identifier);
+
+      // Verified existing account with a password -> password screen.
+      // Everything else (unverified, unknown, passwordless) -> OTP first.
+      final goToPassword =
+          status != null &&
+          status.exists &&
+          status.nextStep == IdentifierNextStep.password;
+
+      if (goToPassword) {
+        context.go('/login?identifier=$encoded');
         return;
       }
-      context.go('/login?phone=$encoded');
+
+      // OTP-first path. The account must set a password afterwards (req 6) when
+      // it has none — i.e. an existing passwordless account, or an unknown /
+      // unreachable status (treated as a brand-new account).
+      final requirePassword = status == null || !status.hasPassword;
+      final requireParam = requirePassword ? '&requirePassword=true' : '';
+
+      if (isEmail) {
+        // Email OTP-first flow. Only allow account creation when the backend
+        // positively reports the email is new; an unknown/unreachable status
+        // must NOT silently create an account.
+        final isNewEmail = status != null && !status.exists;
+        final sent = await _sendEmailOtp(
+          identifier,
+          shouldCreateUser: isNewEmail,
+        );
+        if (!mounted || !sent) return;
+        context.go('/otp?identifier=$encoded&channel=email$requireParam');
+        return;
+      }
+
+      // Phone OTP-first flow. Unknown -> signup form (collect name/password
+      // first as today); otherwise this is an existing account, so send the
+      // login OTP without creating a user.
+      if (status != null && status.exists == false) {
+        context.go('/signup?identifier=$encoded');
+        return;
+      }
+      final sent = await _sendPhoneOtp(identifier);
+      if (!mounted || !sent) return;
+      context.go('/otp?identifier=$encoded&channel=phone$requireParam');
     } catch (error) {
       if (!mounted) return;
       _showErrorSnackBar(error.toString());
     } finally {
       if (mounted) setState(() => _isChecking = false);
     }
+  }
+
+  Future<bool> _sendEmailOtp(
+    String email, {
+    bool shouldCreateUser = false,
+  }) async {
+    await ref
+        .read(authControllerProvider.notifier)
+        .sendEmailOtp(email, shouldCreateUser: shouldCreateUser);
+    final st = ref.read(authControllerProvider);
+    if (st.errorMessage != null) {
+      _showErrorSnackBar(st.errorMessage!);
+      return false;
+    }
+    return true;
+  }
+
+  // Phone OTP-first only runs for an existing account (new numbers route to
+  // /signup), so it never needs to create a user (requestOtp defaults to
+  // shouldCreateUser: false).
+  Future<bool> _sendPhoneOtp(String phone) async {
+    await ref.read(authControllerProvider.notifier).requestOtp(phone);
+    final st = ref.read(authControllerProvider);
+    if (st.errorMessage != null) {
+      _showErrorSnackBar(st.errorMessage!);
+      return false;
+    }
+    return true;
   }
 
   void _showErrorSnackBar(String message) {
@@ -95,13 +190,22 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
     final config = ref.watch(appConfigProvider);
     if (!config.isSupabaseConfigured) {
       return AppScaffold(
-        appBar: AppBar(title: const Text('Enter phone')),
+        appBar: AppBar(title: const Text('Sign in')),
         body: const AppErrorView(
           title: 'Missing Supabase configuration',
           message:
               'Add SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY to your .env file.',
         ),
       );
+    }
+
+    final controller = ref.read(authControllerProvider.notifier);
+    final lastMethod = controller.lastAuthMethod;
+    final lastMasked = controller.lastAuthIdentifierMasked;
+
+    // One-time prefill of the last-used identifier mask as a hint.
+    if (!_prefilledMasked && lastMasked != null && lastMasked.isNotEmpty) {
+      _prefilledMasked = true;
     }
 
     return SimplePremiumBackground(
@@ -113,42 +217,52 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               child: PremiumFadeTransition(
                 slideOffset: const Offset(0, 0.05),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Logo/Icon
-                      _buildLogo(),
-
-                      const SizedBox(height: 40),
-
-                      // Title
-                      _buildTitle(),
-
-                      const SizedBox(height: 48),
-
-                      // Phone input card
-                      PremiumGlassCard(
-                        padding: const EdgeInsets.all(28),
-                        borderRadius: 24,
-                        opacity: 0.15,
-                        child: PremiumStaggeredList(
-                          itemCount: 3,
-                          staggerDelay: const Duration(milliseconds: 80),
-                          itemBuilder: (context, index) {
-                            if (index == 0) return _buildPhoneInput();
-                            if (index == 1) return _buildHelperText();
-                            return _buildContinueButton();
-                          },
+                child: AutofillGroup(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildLogo(),
+                        const SizedBox(height: 40),
+                        _buildTitle(),
+                        const SizedBox(height: 32),
+                        PremiumGlassCard(
+                          padding: const EdgeInsets.all(28),
+                          borderRadius: 24,
+                          opacity: 0.15,
+                          child: Column(
+                            children: [
+                              GoogleSignInButton(
+                                enabled: !_isChecking,
+                                onResult: _onGoogleResult,
+                              ),
+                              if (_supportsApple) ...[
+                                const SizedBox(height: 12),
+                                AppleSignInButton(
+                                  enabled: !_isChecking,
+                                  onResult: _onAppleResult,
+                                ),
+                              ],
+                              const SizedBox(height: 20),
+                              _buildDivider(),
+                              const SizedBox(height: 20),
+                              _buildIdentifierInput(),
+                              if (lastMethod != null && lastMasked != null) ...[
+                                const SizedBox(height: 10),
+                                _buildLastMethodHint(lastMethod, lastMasked),
+                              ] else ...[
+                                _buildHelperText(),
+                              ],
+                              const SizedBox(height: 24),
+                              _buildContinueButton(),
+                            ],
+                          ),
                         ),
-                      ),
-
-                      const SizedBox(height: 32),
-
-                      // Terms text
-                      _buildTermsText(),
-                    ],
+                        const SizedBox(height: 24),
+                        _buildTermsText(),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -157,6 +271,28 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
         ),
       ),
     );
+  }
+
+  /// Sign in with Apple is offered on iOS only (Apple platform requirement when
+  /// Google sign-in is also offered).
+  bool get _supportsApple => !kIsWeb && Platform.isIOS;
+
+  void _onGoogleResult(GoogleSignInOutcome outcome) {
+    if (!mounted) return;
+    if (outcome == GoogleSignInOutcome.error) {
+      final msg = ref.read(authControllerProvider).errorMessage;
+      if (msg != null) _showErrorSnackBar(msg);
+    }
+    // Navigation on success is handled by the router auth redirect.
+  }
+
+  void _onAppleResult(AppleSignInOutcome outcome) {
+    if (!mounted) return;
+    if (outcome == AppleSignInOutcome.error) {
+      final msg = ref.read(authControllerProvider).errorMessage;
+      if (msg != null) _showErrorSnackBar(msg);
+    }
+    // Navigation on success is handled by the router auth redirect.
   }
 
   Widget _buildLogo() {
@@ -182,11 +318,7 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
             ),
           ],
         ),
-        child: const Icon(
-          Icons.home_rounded,
-          size: 40,
-          color: Colors.white,
-        ),
+        child: const Icon(Icons.home_rounded, size: 40, color: Colors.white),
       ),
     );
   }
@@ -212,7 +344,8 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
         ),
         const SizedBox(height: 12),
         Text(
-          'Enter your phone number to get started',
+          'Continue with Google, or your email / phone',
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w400,
@@ -223,11 +356,76 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
     );
   }
 
-  Widget _buildPhoneInput() {
-    return _AnimatedPhoneField(
-      controller: _phoneController,
+  Widget _buildDivider() {
+    return Row(
+      children: [
+        Expanded(
+          child: Divider(
+            color: Colors.white.withValues(alpha: 0.12),
+            thickness: 1,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Text(
+            'or',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 13,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Divider(
+            color: Colors.white.withValues(alpha: 0.12),
+            thickness: 1,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIdentifierInput() {
+    final supportsPhoneHint = !kIsWeb && Platform.isAndroid;
+    return _AnimatedIdentifierField(
+      controller: _identifierController,
       onFieldSubmitted: (_) => _continue(),
-      validator: _validatePhone,
+      validator: _validateIdentifier,
+      onPhoneHintTap: supportsPhoneHint ? _showPhoneHintPicker : null,
+    );
+  }
+
+  Widget _buildLastMethodHint(AuthMethod method, String masked) {
+    final label = switch (method) {
+      AuthMethod.google => 'Last time you used Google',
+      AuthMethod.apple => 'Last time you used Apple',
+      AuthMethod.emailPassword ||
+      AuthMethod.emailOtp => 'Last used email $masked',
+      AuthMethod.phonePassword ||
+      AuthMethod.phoneOtp => 'Last used phone $masked',
+    };
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Row(
+        children: [
+          Icon(
+            Icons.history_rounded,
+            size: 14,
+            color: const Color(0xFF3B82F6).withValues(alpha: 0.9),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: const Color(0xFF3B82F6).withValues(alpha: 0.9),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -235,21 +433,18 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Text(
-        'We\'ll send you a verification code',
+        "We'll send you a verification code",
         style: _helperStyle(context),
       ),
     );
   }
 
   Widget _buildContinueButton() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 24),
-      child: PremiumGlassButton(
-        label: 'Continue',
-        onPressed: _isChecking ? null : _continue,
-        isLoading: _isChecking,
-        icon: Icons.arrow_forward_rounded,
-      ),
+    return PremiumGlassButton(
+      label: 'Continue',
+      onPressed: _isChecking ? null : _continue,
+      isLoading: _isChecking,
+      icon: Icons.arrow_forward_rounded,
     );
   }
 
@@ -283,23 +478,26 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
   }
 }
 
-/// Phone input field with animated focus glow and border transition.
-class _AnimatedPhoneField extends StatefulWidget {
+/// Identifier input (email or phone) with animated focus glow and autofill.
+class _AnimatedIdentifierField extends StatefulWidget {
   final TextEditingController controller;
   final ValueChanged<String>? onFieldSubmitted;
   final String? Function(String?)? validator;
+  final VoidCallback? onPhoneHintTap;
 
-  const _AnimatedPhoneField({
+  const _AnimatedIdentifierField({
     required this.controller,
     this.onFieldSubmitted,
     this.validator,
+    this.onPhoneHintTap,
   });
 
   @override
-  State<_AnimatedPhoneField> createState() => _AnimatedPhoneFieldState();
+  State<_AnimatedIdentifierField> createState() =>
+      _AnimatedIdentifierFieldState();
 }
 
-class _AnimatedPhoneFieldState extends State<_AnimatedPhoneField>
+class _AnimatedIdentifierFieldState extends State<_AnimatedIdentifierField>
     with SingleTickerProviderStateMixin {
   late final AnimationController _focusGlowController;
   late final Animation<double> _glowAnimation;
@@ -329,9 +527,33 @@ class _AnimatedPhoneFieldState extends State<_AnimatedPhoneField>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'PHONE NUMBER',
-          style: _labelStyle(context),
+        Row(
+          children: [
+            Text('EMAIL OR PHONE', style: _labelStyle(context)),
+            const Spacer(),
+            if (widget.onPhoneHintTap != null)
+              GestureDetector(
+                onTap: widget.onPhoneHintTap,
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.contact_phone_outlined,
+                      size: 14,
+                      color: Color(0xFF3B82F6),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Use my number',
+                      style: TextStyle(
+                        color: const Color(0xFF3B82F6),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 12),
         Focus(
@@ -382,25 +604,24 @@ class _AnimatedPhoneFieldState extends State<_AnimatedPhoneField>
                   ),
                   child: TextFormField(
                     controller: widget.controller,
-                    keyboardType: TextInputType.phone,
+                    keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.done,
+                    autofillHints: const [
+                      AutofillHints.email,
+                      AutofillHints.telephoneNumber,
+                    ],
                     onFieldSubmitted: widget.onFieldSubmitted,
                     validator: widget.validator,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(10),
-                      _PhoneNumberFormatter(),
-                    ],
                     style: _inputStyle(context),
                     cursorColor: const Color(0xFF3B82F6),
                     decoration: InputDecoration(
-                      hintText: '00000 00000',
+                      hintText: 'you@example.com or 00000 00000',
                       hintStyle: _hintStyle(context),
                       prefixIcon: AnimatedSwitcher(
                         duration: const Duration(milliseconds: 200),
                         child: Icon(
-                          Icons.phone_outlined,
+                          Icons.alternate_email_rounded,
                           key: ValueKey(_isFocused),
                           color: _isFocused
                               ? const Color(0xFF3B82F6)
@@ -429,66 +650,42 @@ class _AnimatedPhoneFieldState extends State<_AnimatedPhoneField>
   }
 }
 
-/// Phone number formatter for Indian format (XXXXX XXXXX)
-class _PhoneNumberFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    final text = newValue.text.replaceAll(' ', '');
-    final buffer = StringBuffer();
-
-    for (int i = 0; i < text.length; i++) {
-      if (i == 5) buffer.write(' ');
-      buffer.write(text[i]);
-    }
-
-    final formatted = buffer.toString();
-    return TextEditingValue(
-      text: formatted,
-      selection: TextSelection.collapsed(offset: formatted.length),
-    );
-  }
-}
-
 bool _isLightTheme(BuildContext context) =>
     Theme.of(context).brightness == Brightness.light;
 
 TextStyle _labelStyle(BuildContext context) => TextStyle(
-      color: _isLightTheme(context)
-          ? const Color(0xFF64748B)
-          : Colors.white.withValues(alpha: 0.7),
-      fontSize: 13,
-      fontWeight: FontWeight.w600,
-      letterSpacing: 1.2,
-    );
+  color: _isLightTheme(context)
+      ? const Color(0xFF64748B)
+      : Colors.white.withValues(alpha: 0.7),
+  fontSize: 13,
+  fontWeight: FontWeight.w600,
+  letterSpacing: 1.2,
+);
 
 TextStyle _inputStyle(BuildContext context) => TextStyle(
-      color: _isLightTheme(context) ? const Color(0xFF0F172A) : Colors.white,
-      fontSize: 18,
-      fontWeight: FontWeight.w500,
-      letterSpacing: 1,
-    );
+  color: _isLightTheme(context) ? const Color(0xFF0F172A) : Colors.white,
+  fontSize: 17,
+  fontWeight: FontWeight.w500,
+  letterSpacing: 0.5,
+);
 
 TextStyle _hintStyle(BuildContext context) => TextStyle(
-      color: _isLightTheme(context)
-          ? const Color(0xFF94A3B8)
-          : Colors.white.withValues(alpha: 0.3),
-      fontSize: 18,
-      letterSpacing: 1,
-    );
+  color: _isLightTheme(context)
+      ? const Color(0xFF94A3B8)
+      : Colors.white.withValues(alpha: 0.3),
+  fontSize: 14,
+);
 
 Color _iconColor(BuildContext context) => _isLightTheme(context)
     ? const Color(0xFF94A3B8)
     : Colors.white.withValues(alpha: 0.5);
 
 TextStyle _helperStyle(BuildContext context) => TextStyle(
-      color: _isLightTheme(context)
-          ? const Color(0xFF64748B)
-          : Colors.white.withValues(alpha: 0.5),
-      fontSize: 13,
-    );
+  color: _isLightTheme(context)
+      ? const Color(0xFF64748B)
+      : Colors.white.withValues(alpha: 0.5),
+  fontSize: 13,
+);
 
 Color _helperEmphasisColor(BuildContext context) => _isLightTheme(context)
     ? const Color(0xFF0F172A)
