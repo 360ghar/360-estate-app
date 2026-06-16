@@ -26,10 +26,23 @@ class EnterPhonePage extends ConsumerStatefulWidget {
 class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
   final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
+  late final TapGestureRecognizer _termsRecognizer;
+  late final TapGestureRecognizer _privacyRecognizer;
   bool _isChecking = false;
 
   @override
+  void initState() {
+    super.initState();
+    _termsRecognizer = TapGestureRecognizer()
+      ..onTap = () => context.push(Routes.termsOfService);
+    _privacyRecognizer = TapGestureRecognizer()
+      ..onTap = () => context.push(Routes.privacyPolicy);
+  }
+
+  @override
   void dispose() {
+    _termsRecognizer.dispose();
+    _privacyRecognizer.dispose();
     _phoneController.dispose();
     super.dispose();
   }
@@ -252,8 +265,7 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
               color: _helperEmphasisColor(context),
               fontWeight: FontWeight.w500,
             ),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () => context.push(Routes.termsOfService),
+            recognizer: _termsRecognizer,
           ),
           const TextSpan(text: ' and '),
           TextSpan(
@@ -262,8 +274,7 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
               color: _helperEmphasisColor(context),
               fontWeight: FontWeight.w500,
             ),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () => context.push(Routes.privacyPolicy),
+            recognizer: _privacyRecognizer,
           ),
         ],
       ),

@@ -2,6 +2,7 @@ import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -30,10 +31,16 @@ class _AppShellState extends State<AppShell> {
     final scheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    // The double-back-to-exit gesture only makes sense on Android, where
+    // SystemNavigator.pop() exits the app. On iOS/web/desktop back handling is
+    // inconsistent, so we let the platform manage it normally.
+    final interceptRootBack =
+        !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
     return PopScope(
-      canPop: false,
+      canPop: !interceptRootBack,
       onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
+        if (didPop || !interceptRootBack) return;
         final now = DateTime.now();
         if (_lastBackPress != null &&
             now.difference(_lastBackPress!) < const Duration(seconds: 3)) {

@@ -413,7 +413,7 @@ abstract class AppLocalizations {
   /// No description provided for @dangerZone.
   ///
   /// In en, this message translates to:
-  /// **'DANGER ZONE'**
+  /// **'Danger Zone'**
   String get dangerZone;
 
   /// No description provided for @changePassword.
@@ -596,11 +596,29 @@ abstract class AppLocalizations {
   /// **'Email app opened. Please send the message to complete your request.'**
   String get deleteAccountEmailSent;
 
+  /// No description provided for @deleteAccountSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has been deleted successfully.'**
+  String get deleteAccountSuccess;
+
   /// No description provided for @deleteAccountManualFallback.
   ///
   /// In en, this message translates to:
   /// **'Could not open your email app. Please email info@360ghar.com with subject \"Account Deletion Request\".'**
   String get deleteAccountManualFallback;
+
+  /// No description provided for @privacyPolicyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'View our privacy practices'**
+  String get privacyPolicyDescription;
+
+  /// No description provided for @termsOfServiceDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Read our terms and conditions'**
+  String get termsOfServiceDescription;
 
   /// No description provided for @delete.
   ///

@@ -26,7 +26,9 @@ class EstateMapController {
   }
 
   Future<void> move(LatLng center, double zoom) async {
-    await _controller?.moveCamera(
+    final controller = _controller;
+    if (controller == null) return;
+    await controller.moveCamera(
       CameraUpdate.newLatLngZoom(center, zoom),
     );
   }
@@ -46,11 +48,15 @@ class EstateMapController {
   }
 
   Future<void> zoomIn() async {
-    await _controller?.animateCamera(CameraUpdate.zoomIn());
+    final controller = _controller;
+    if (controller == null) return;
+    await controller.animateCamera(CameraUpdate.zoomIn());
   }
 
   Future<void> zoomOut() async {
-    await _controller?.animateCamera(CameraUpdate.zoomOut());
+    final controller = _controller;
+    if (controller == null) return;
+    await controller.animateCamera(CameraUpdate.zoomOut());
   }
 
   Future<math.Point<num>?> toScreenLocation(LatLng latLng) async {

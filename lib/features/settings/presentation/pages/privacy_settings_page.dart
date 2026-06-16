@@ -136,7 +136,8 @@ class PrivacySettingsPage extends ConsumerWidget {
                 icon: Icons.policy_outlined,
                 iconColor: const Color(0xFF8B5CF6),
                 title: context.l10n?.privacyPolicy ?? 'Privacy Policy',
-                description: 'View our privacy practices',
+                description: context.l10n?.privacyPolicyDescription ??
+                    'View our privacy practices',
                 onTap: () => context.push(Routes.privacyPolicy),
               ),
               _tileDivider(isDark),
@@ -144,7 +145,8 @@ class PrivacySettingsPage extends ConsumerWidget {
                 icon: Icons.description_outlined,
                 iconColor: const Color(0xFF3B82F6),
                 title: context.l10n?.termsOfService ?? 'Terms of Service',
-                description: 'View our terms and conditions',
+                description: context.l10n?.termsOfServiceDescription ??
+                    'View our terms and conditions',
                 onTap: () => context.push(Routes.termsOfService),
               ),
             ],
