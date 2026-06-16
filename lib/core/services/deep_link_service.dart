@@ -101,24 +101,26 @@ class DeepLinkService {
     router.go(path);
   }
 
+  /// Canonical public domain for all 360Ghar deep links. Single source of
+  /// truth within this app; keep in sync with the backend `DEEPLINK_DOMAIN`
+  /// setting and the hosts declared in AndroidManifest / Runner.entitlements.
+  static const String deepLinkDomain = 'the360ghar.com';
+  static const String _estateBase = 'https://$deepLinkDomain/estate';
+
   /// Builds the canonical public share URL for a property.
-  static String propertyUrl(String id) =>
-      'https://the360ghar.com/estate/property/$id';
+  static String propertyUrl(String id) => '$_estateBase/property/$id';
 
   /// Builds the canonical public share URL for a task / maintenance request.
-  static String taskUrl(String id) => 'https://the360ghar.com/estate/task/$id';
+  static String taskUrl(String id) => '$_estateBase/task/$id';
 
   /// Builds the canonical public share URL for a tenant.
-  static String tenantUrl(String id) =>
-      'https://the360ghar.com/estate/tenant/$id';
+  static String tenantUrl(String id) => '$_estateBase/tenant/$id';
 
   /// Builds the canonical public share URL for a lease.
-  static String leaseUrl(String id) =>
-      'https://the360ghar.com/estate/lease/$id';
+  static String leaseUrl(String id) => '$_estateBase/lease/$id';
 
   /// Builds the canonical public share URL for a rental application.
-  static String applicationUrl(String slug) =>
-      'https://the360ghar.com/estate/apply/$slug';
+  static String applicationUrl(String slug) => '$_estateBase/apply/$slug';
 
   /// Converts an incoming URI to an internal GoRouter path.
   ///
