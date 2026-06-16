@@ -84,7 +84,7 @@ final class GooglePlacesService {
 
       if (status != 'OK') {
         if (kDebugMode && status != 'ZERO_RESULTS') {
-          debugPrint('GooglePlaces: status=$status for query=$query');
+          debugPrint('GooglePlaces: autocomplete status=$status');
         }
         return const [];
       }
@@ -100,14 +100,11 @@ final class GooglePlacesService {
               p['structured_formatting']?['secondary_text'] as String? ?? '',
         );
       }).toList();
-    } on TimeoutException {
-      debugPrint('GooglePlaces: autocomplete timeout for query=$query');
-      return const [];
     } on DioException catch (e) {
-      debugPrint('GooglePlaces: autocomplete error: ${e.message}');
+      if (kDebugMode) debugPrint('GooglePlaces: autocomplete error: ${e.message}');
       return const [];
     } catch (e) {
-      debugPrint('GooglePlaces: autocomplete error: $e');
+      if (kDebugMode) debugPrint('GooglePlaces: autocomplete error: $e');
       return const [];
     }
   }
@@ -131,9 +128,7 @@ final class GooglePlacesService {
       final status = body['status'] as String? ?? '';
 
       if (status != 'OK') {
-        debugPrint(
-          'GooglePlaces: details status=$status for placeId=$placeId',
-        );
+        if (kDebugMode) debugPrint('GooglePlaces: details status=$status');
         return null;
       }
 
@@ -144,8 +139,11 @@ final class GooglePlacesService {
           result['geometry']?['location'] as Map<String, dynamic>?;
       if (location == null) return null;
 
-      final lat = (location['lat'] as num?)?.toDouble() ?? 0.0;
-      final lng = (location['lng'] as num?)?.toDouble() ?? 0.0;
+      // Do not coerce missing coordinates to (0, 0): that "Null Island"
+      // location would silently produce wrong location filtering.
+      final lat = (location['lat'] as num?)?.toDouble();
+      final lng = (location['lng'] as num?)?.toDouble();
+      if (lat == null || lng == null) return null;
 
       String displayName;
       final components = result['address_components'] as List? ?? [];
@@ -178,14 +176,11 @@ final class GooglePlacesService {
         name: displayName,
         formattedAddress: formattedAddress,
       );
-    } on TimeoutException {
-      debugPrint('GooglePlaces: details timeout for placeId=$placeId');
-      return null;
     } on DioException catch (e) {
-      debugPrint('GooglePlaces: details error: ${e.message}');
+      if (kDebugMode) debugPrint('GooglePlaces: details error: ${e.message}');
       return null;
     } catch (e) {
-      debugPrint('GooglePlaces: details error: $e');
+      if (kDebugMode) debugPrint('GooglePlaces: details error: $e');
       return null;
     }
   }

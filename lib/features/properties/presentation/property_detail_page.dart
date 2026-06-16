@@ -354,16 +354,31 @@ class _QuickActionsRow extends StatelessWidget {
           label: 'Map',
           color: AppColors.info,
           onTap: () {
-            final markers = <PropertyMarker>[];
-            if (property.latitude != null && property.longitude != null) {
-              markers.add(PropertyMarker(
+            final hasGeo =
+                property.latitude != null && property.longitude != null;
+            if (!hasGeo) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Location is not available for this property.'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+              return;
+            }
+            final markers = <PropertyMarker>[
+              PropertyMarker(
                 id: property.id.toString(),
                 label: property.displayName,
                 latitude: property.latitude!,
                 longitude: property.longitude!,
-              ));
-            }
-            context.go('/properties/map', extra: markers);
+              ),
+            ];
+            // Pass coordinates so the map centers on the single marker instead
+            // of defaulting to the country-wide initial view.
+            context.go(
+              '/properties/map?lat=${property.latitude}&lng=${property.longitude}',
+              extra: markers,
+            );
           },
         ),
       ],

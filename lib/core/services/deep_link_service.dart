@@ -101,52 +101,49 @@ class DeepLinkService {
     router.go(path);
   }
 
+  /// Canonical public domain for all 360Ghar deep links. Single source of
+  /// truth within this app; keep in sync with the backend `DEEPLINK_DOMAIN`
+  /// setting and the hosts declared in AndroidManifest / Runner.entitlements.
+  static const String deepLinkDomain = 'the360ghar.com';
+  static const String _estateBase = 'https://$deepLinkDomain/estate';
+
   /// Builds the canonical public share URL for a property.
-  static String propertyUrl(String id) =>
-      'https://the360ghar.com/estate/property/$id';
+  static String propertyUrl(String id) => '$_estateBase/property/$id';
 
   /// Builds the canonical public share URL for a task / maintenance request.
-  static String taskUrl(String id) => 'https://the360ghar.com/estate/task/$id';
+  static String taskUrl(String id) => '$_estateBase/task/$id';
 
   /// Builds the canonical public share URL for a tenant.
-  static String tenantUrl(String id) =>
-      'https://the360ghar.com/estate/tenant/$id';
+  static String tenantUrl(String id) => '$_estateBase/tenant/$id';
 
   /// Builds the canonical public share URL for a lease.
-  static String leaseUrl(String id) =>
-      'https://the360ghar.com/estate/lease/$id';
+  static String leaseUrl(String id) => '$_estateBase/lease/$id';
 
   /// Builds the canonical public share URL for a rental application.
-  static String applicationUrl(String slug) =>
-      'https://the360ghar.com/estate/apply/$slug';
+  static String applicationUrl(String slug) => '$_estateBase/apply/$slug';
 
   /// Converts an incoming URI to an internal GoRouter path.
   ///
   /// Returns `null` when the URI does not match any known pattern.
   @visibleForTesting
   static String? mapUriToPath(Uri uri) {
-    final path = uri.path.isEmpty ? '/${uri.host}' : uri.path;
-    final segments = path
-        .split('/')
-        .where((s) => s.isNotEmpty)
-        .toList(growable: false);
-
-    // Custom-scheme fallback: estate360://property/123 -> segments: [property, 123]
+    // Custom-scheme fallback: estate360://property/123. Dart parses the entity
+    // ("property") as `uri.host` and the id ("/123") as `uri.path`, so the host
+    // must be treated as the FIRST segment or the entity is lost.
     if (uri.scheme == 'estate360') {
-      if (segments.isEmpty) return null;
-      final head = segments.first;
-      if (head == 'apply' && segments.length >= 2) {
-        return '/public/applications/${segments[1]}';
-      }
-      if (segments.length >= 2) {
-        return _mapEntity(head, segments[1]);
-      }
-      return null;
+      final segments = <String>[
+        if (uri.host.isNotEmpty) uri.host,
+        ...uri.pathSegments.where((s) => s.isNotEmpty),
+      ];
+      if (segments.length < 2) return null;
+      return _mapEntity(segments[0], segments[1]);
     }
 
-    if (segments.length < 2 || segments[0] != 'estate') return null;
+    final segments = uri.pathSegments
+        .where((s) => s.isNotEmpty)
+        .toList(growable: false);
+    if (segments.length < 3 || segments[0] != 'estate') return null;
     final entity = segments[1];
-    if (segments.length < 3) return null;
     final id = segments[2];
     return _mapEntity(entity, id);
   }

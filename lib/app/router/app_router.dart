@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:estate_app/app/app_shell.dart';
 import 'package:estate_app/core/config/constants.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/core/services/deep_link_service.dart';
 import 'package:estate_app/features/auth/presentation/add_phone_page.dart';
@@ -52,6 +53,7 @@ import 'package:estate_app/features/rental_applications/presentation/application
 import 'package:estate_app/features/rental_applications/presentation/public_application_page.dart';
 import 'package:estate_app/features/rental_applications/presentation/public_application_success_page.dart';
 import 'package:estate_app/features/settings/presentation/pages/app_settings_page.dart';
+import 'package:estate_app/features/settings/presentation/pages/delete_account_page.dart';
 import 'package:estate_app/features/settings/presentation/pages/legal_content_page.dart';
 import 'package:estate_app/features/settings/presentation/pages/notification_settings_page.dart';
 import 'package:estate_app/features/settings/presentation/pages/privacy_settings_page.dart';
@@ -61,17 +63,6 @@ import 'package:estate_app/features/tasks/presentation/tasks_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-/// Paths that originate from external deep links and must be reachable
-/// without going through the home shell. The /public/applications/* path
-/// is intentionally public; the others require authentication which is
-/// enforced by [AuthMiddleware] in the route definitions.
-bool _isEstateDeepLinkPath(String location) {
-  return location.startsWith('/properties/') ||
-      location.startsWith('/tasks/') ||
-      location.startsWith('/more/tenants/') ||
-      location.startsWith('/more/leases/');
-}
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authController = ref.read(authControllerProvider.notifier);
@@ -106,7 +97,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           isOnboarding;
       final isPublicRoute = location.startsWith('/public');
       final isApplicationsRoute = location.startsWith('/more/applications');
-      final isDeepLinkPath = _isEstateDeepLinkPath(location);
 
       if (isPublicRoute) {
         if (!flags.enablePublicApplications) {
@@ -130,12 +120,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       if (!isLoggedIn) {
-        // Allow public deep links (rental applications) through the
-        // unauthenticated state. Authenticated deep links are stored as
-        // pending paths and replayed after login.
-        if (isDeepLinkPath) {
-          return null;
-        }
+        // Protected deep links are stored as pending paths by DeepLinkService
+        // and replayed after login; here we always gate behind auth so
+        // unauthenticated users never render a protected route.
         return isAuthRoute ? null : '/enter-phone';
       }
 
@@ -521,16 +508,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                                 const PrivacySettingsPage(),
                           ),
                           GoRoute(
+                            path: 'delete-account',
+                            builder: (context, state) => const DeleteAccountPage(),
+                          ),
+                          GoRoute(
                             path: 'privacy-policy',
                             builder: (context, state) => LegalContentPage(
-                              title: 'Privacy Policy',
+                              title: context.l10n?.privacyPolicy ??
+                                  'Privacy Policy',
                               url: kPrivacyPolicyUrl,
                             ),
                           ),
                           GoRoute(
                             path: 'terms-of-service',
                             builder: (context, state) => LegalContentPage(
-                              title: 'Terms of Service',
+                              title: context.l10n?.termsOfService ??
+                                  'Terms of Service',
                               url: kTermsOfServiceUrl,
                             ),
                           ),

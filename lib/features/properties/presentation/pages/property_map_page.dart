@@ -92,6 +92,16 @@ class _PropertyMapPageState extends State<PropertyMapPage> {
           right: 40,
         ),
       );
+    } else if (widget.markers.length == 1) {
+      // A single marker won't fit-to-bounds, so center the camera on it
+      // explicitly; otherwise it stays at the far-away initial view.
+      final marker = widget.markers.first;
+      await controller.animateCamera(
+        CameraUpdate.newLatLngZoom(
+          LatLng(marker.latitude, marker.longitude),
+          15,
+        ),
+      );
     }
   }
 

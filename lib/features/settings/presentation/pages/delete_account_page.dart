@@ -82,27 +82,31 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
     FocusScope.of(context).unfocus();
     setState(() => _isSubmitting = true);
 
+    // Only the account-deletion API call should fall back to the email flow.
+    // A failure in the post-deletion logout/navigation must NOT re-trigger the
+    // email fallback, since the account has already been deleted server-side.
     try {
       final apiClient = ref.read(apiClientProvider);
-      await apiClient.delete('/users/me');
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.l10n?.deleteAccountEmailSent ??
-                'Your account has been deleted successfully.',
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      await ref.read(authControllerProvider.notifier).logout();
-      if (!mounted) return;
-      context.go('/enter-phone');
+      await apiClient.delete<void>('/users/me');
     } catch (e) {
       if (!mounted) return;
-      _fallbackEmailDeletion();
+      await _fallbackEmailDeletion();
+      return;
     }
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          context.l10n?.deleteAccountSuccess ??
+              'Your account has been deleted successfully.',
+        ),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+    await ref.read(authControllerProvider.notifier).logout();
+    if (!mounted) return;
+    context.go('/enter-phone');
   }
 
   Future<void> _fallbackEmailDeletion() async {

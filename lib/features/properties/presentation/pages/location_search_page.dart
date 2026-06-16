@@ -12,7 +12,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 
 final _placeSuggestionsProvider =
-    FutureProvider.family<List<PlaceSuggestion>, String>((ref, query) async {
+    FutureProvider.autoDispose.family<List<PlaceSuggestion>, String>((ref, query) async {
   if (query.trim().length < 2) return const [];
   final service = ref.read(googlePlacesServiceProvider);
   return service.getPlaceSuggestions(query);

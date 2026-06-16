@@ -189,7 +189,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutSection => 'ABOUT';
 
   @override
-  String get dangerZone => 'DANGER ZONE';
+  String get dangerZone => 'Danger Zone';
 
   @override
   String get changePassword => 'Change Password';
@@ -287,8 +287,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Email app opened. Please send the message to complete your request.';
 
   @override
+  String get deleteAccountSuccess =>
+      'Your account has been deleted successfully.';
+
+  @override
   String get deleteAccountManualFallback =>
       'Could not open your email app. Please email info@360ghar.com with subject \"Account Deletion Request\".';
+
+  @override
+  String get privacyPolicyDescription => 'View our privacy practices';
+
+  @override
+  String get termsOfServiceDescription => 'Read our terms and conditions';
 
   @override
   String get delete => 'Delete';
