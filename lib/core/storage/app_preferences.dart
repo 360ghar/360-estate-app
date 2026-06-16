@@ -8,7 +8,10 @@ abstract final class PrefKeys {
 
   // User & Mode
   static const lastSelectedMode = 'last_selected_mode';
-  static const userRole = 'user_role';
+
+  // Auth — remember the last successful sign-in method to pre-select it.
+  static const lastAuthMethod = 'last_auth_method';
+  static const lastAuthIdentifierMasked = 'last_auth_identifier_masked';
 
   // Profile
   static const profilePhotoUrl = 'profile_photo_url';

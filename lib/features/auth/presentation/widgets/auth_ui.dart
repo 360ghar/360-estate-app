@@ -13,58 +13,55 @@ const Color authInactive = Color(0xFFD1D5DB); // Inactive
 
 TextStyle? authTitleStyle(BuildContext context) {
   return Theme.of(context).textTheme.headlineLarge?.copyWith(
-        color: authInk,
-        fontWeight: FontWeight.w700,
-        fontSize: 28,
-        height: 1.2,
-      );
+    color: authInk,
+    fontWeight: FontWeight.w700,
+    fontSize: 28,
+    height: 1.2,
+  );
 }
 
 TextStyle? authSubtitleStyle(BuildContext context) {
-  return Theme.of(context).textTheme.bodyLarge?.copyWith(
-        color: authMuted,
-        fontSize: 15,
-        height: 1.5,
-      );
+  return Theme.of(
+    context,
+  ).textTheme.bodyLarge?.copyWith(color: authMuted, fontSize: 15, height: 1.5);
 }
 
 TextStyle? authLabelStyle(BuildContext context) {
   return Theme.of(context).textTheme.labelSmall?.copyWith(
-        color: authMuted,
-        letterSpacing: 1.5,
-        fontWeight: FontWeight.w600,
-        fontSize: 12,
-      );
+    color: authMuted,
+    letterSpacing: 1.5,
+    fontWeight: FontWeight.w600,
+    fontSize: 12,
+  );
 }
 
 TextStyle? authHintStyle(BuildContext context) {
   return Theme.of(context).textTheme.bodyLarge?.copyWith(
-        color: authMuted.withValues(alpha: 0.6),
-        fontSize: 16,
-      );
+    color: authMuted.withValues(alpha: 0.6),
+    fontSize: 16,
+  );
 }
 
 TextStyle? authInputTextStyle(BuildContext context) {
   return Theme.of(context).textTheme.bodyLarge?.copyWith(
-        color: authInk,
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
-      );
+    color: authInk,
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+  );
 }
 
 TextStyle? authFootnoteStyle(BuildContext context) {
-  return Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: authMuted,
-        fontSize: 13,
-      );
+  return Theme.of(
+    context,
+  ).textTheme.bodySmall?.copyWith(color: authMuted, fontSize: 13);
 }
 
 TextStyle? authLinkStyle(BuildContext context) {
   return Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: authAccent,
-        fontWeight: FontWeight.w600,
-        fontSize: 13,
-      );
+    color: authAccent,
+    fontWeight: FontWeight.w600,
+    fontSize: 13,
+  );
 }
 
 ButtonStyle authPrimaryButtonStyle() {
@@ -73,9 +70,7 @@ ButtonStyle authPrimaryButtonStyle() {
     foregroundColor: Colors.white,
     elevation: 0,
     shadowColor: Colors.transparent,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     padding: const EdgeInsets.symmetric(vertical: 16),
   );
 }
@@ -97,7 +92,8 @@ InputDecoration authInputDecoration(
     prefixIconConstraints: const BoxConstraints(),
     suffixIcon: suffixIcon,
     contentPadding:
-        contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding ??
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
       borderSide: const BorderSide(color: authFieldBorder),
@@ -124,10 +120,7 @@ InputDecoration authInputDecoration(
 /// Responsive auth page layout - handles keyboard appearance gracefully
 /// Content is always scrollable to prevent overflow when keyboard appears
 class AuthPageLayout extends StatelessWidget {
-  const AuthPageLayout({
-    super.key,
-    required this.child,
-  });
+  const AuthPageLayout({super.key, required this.child});
 
   final Widget child;
 
@@ -145,7 +138,8 @@ class AuthPageLayout extends StatelessWidget {
       ),
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          minHeight: MediaQuery.of(context).size.height -
+          minHeight:
+              MediaQuery.of(context).size.height -
               MediaQuery.of(context).viewInsets.bottom -
               48,
         ),
@@ -225,10 +219,7 @@ class AuthStepIndicator extends StatelessWidget {
 }
 
 class AuthSectionLabel extends StatelessWidget {
-  const AuthSectionLabel({
-    super.key,
-    required this.text,
-  });
+  const AuthSectionLabel({super.key, required this.text});
 
   final String text;
 
@@ -273,17 +264,13 @@ class AuthCountryPrefix extends StatelessWidget {
         Text(
           '+91',
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: authInk,
-                fontWeight: FontWeight.w600,
-                fontSize: 15,
-              ),
+            color: authInk,
+            fontWeight: FontWeight.w600,
+            fontSize: 15,
+          ),
         ),
         const SizedBox(width: 8),
-        Container(
-          width: 1,
-          height: 18,
-          color: authFieldBorder,
-        ),
+        Container(width: 1, height: 18, color: authFieldBorder),
       ],
     );
   }

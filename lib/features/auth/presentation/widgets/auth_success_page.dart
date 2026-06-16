@@ -97,11 +97,7 @@ class _AuthSuccessPageState extends State<AuthSuccessPage>
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF0F172A),
-              Color(0xFF1E1B4B),
-              Color(0xFF312E81),
-            ],
+            colors: [Color(0xFF0F172A), Color(0xFF1E1B4B), Color(0xFF312E81)],
           ),
         ),
         child: SafeArea(
@@ -123,13 +119,16 @@ class _AuthSuccessPageState extends State<AuthSuccessPage>
                   FadeTransition(
                     opacity: _scaleController,
                     child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, 0.3),
-                        end: Offset.zero,
-                      ).animate(CurvedAnimation(
-                        parent: _scaleController,
-                        curve: Curves.easeOut,
-                      )),
+                      position:
+                          Tween<Offset>(
+                            begin: const Offset(0, 0.3),
+                            end: Offset.zero,
+                          ).animate(
+                            CurvedAnimation(
+                              parent: _scaleController,
+                              curve: Curves.easeOut,
+                            ),
+                          ),
                       child: Text(
                         widget.title,
                         style: const TextStyle(
@@ -147,13 +146,16 @@ class _AuthSuccessPageState extends State<AuthSuccessPage>
                   FadeTransition(
                     opacity: _scaleController,
                     child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, 0.3),
-                        end: Offset.zero,
-                      ).animate(CurvedAnimation(
-                        parent: _scaleController,
-                        curve: Curves.easeOut,
-                      )),
+                      position:
+                          Tween<Offset>(
+                            begin: const Offset(0, 0.3),
+                            end: Offset.zero,
+                          ).animate(
+                            CurvedAnimation(
+                              parent: _scaleController,
+                              curve: Curves.easeOut,
+                            ),
+                          ),
                       child: Text(
                         widget.message,
                         style: TextStyle(
@@ -170,13 +172,16 @@ class _AuthSuccessPageState extends State<AuthSuccessPage>
                   FadeTransition(
                     opacity: _scaleController,
                     child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, 0.5),
-                        end: Offset.zero,
-                      ).animate(CurvedAnimation(
-                        parent: _scaleController,
-                        curve: Curves.easeOut,
-                      )),
+                      position:
+                          Tween<Offset>(
+                            begin: const Offset(0, 0.5),
+                            end: Offset.zero,
+                          ).animate(
+                            CurvedAnimation(
+                              parent: _scaleController,
+                              curve: Curves.easeOut,
+                            ),
+                          ),
                       child: _ContinueButton(
                         label: widget.continueLabel,
                         onPressed: widget.onContinue,
@@ -226,7 +231,9 @@ class _SuccessCheckmarkAnimation extends StatelessWidget {
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.success.withValues(alpha: 0.15 * scaleController.value),
+                        color: AppColors.success.withValues(
+                          alpha: 0.15 * scaleController.value,
+                        ),
                         blurRadius: 30,
                         spreadRadius: 5,
                       ),
@@ -255,19 +262,13 @@ class _CheckmarkCanvas extends StatelessWidget {
   final AnimationController controller;
   final IconData? icon;
 
-  const _CheckmarkCanvas({
-    required this.controller,
-    this.icon,
-  });
+  const _CheckmarkCanvas({required this.controller, this.icon});
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
       size: const Size(120, 120),
-      painter: _CheckmarkPainter(
-        progress: controller.value,
-        icon: icon,
-      ),
+      painter: _CheckmarkPainter(progress: controller.value, icon: icon),
     );
   }
 }
@@ -375,10 +376,7 @@ class _ContinueButton extends StatefulWidget {
   final String label;
   final VoidCallback? onPressed;
 
-  const _ContinueButton({
-    required this.label,
-    this.onPressed,
-  });
+  const _ContinueButton({required this.label, this.onPressed});
 
   @override
   State<_ContinueButton> createState() => _ContinueButtonState();
@@ -418,19 +416,14 @@ class _ContinueButtonState extends State<_ContinueButton>
       onTapCancel: () => _scaleController.reverse(),
       child: AnimatedBuilder(
         animation: _scaleAnimation,
-        builder: (context, child) => Transform.scale(
-          scale: _scaleAnimation.value,
-          child: child,
-        ),
+        builder: (context, child) =>
+            Transform.scale(scale: _scaleAnimation.value, child: child),
         child: Container(
           width: double.infinity,
           height: 52,
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [
-                Color(0xFF3B82F6),
-                Color(0xFF2563EB),
-              ],
+              colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
             ),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
@@ -489,10 +482,7 @@ class AuthSuccessWidget extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: const LinearGradient(
-              colors: [
-                Color(0xFF059669),
-                Color(0xFF10B981),
-              ],
+              colors: [Color(0xFF059669), Color(0xFF10B981)],
             ),
             boxShadow: [
               BoxShadow(
@@ -501,11 +491,7 @@ class AuthSuccessWidget extends StatelessWidget {
               ),
             ],
           ),
-          child: const Icon(
-            Icons.check,
-            size: 32,
-            color: Colors.white,
-          ),
+          child: const Icon(Icons.check, size: 32, color: Colors.white),
         ),
         const SizedBox(height: 16),
 
@@ -577,21 +563,23 @@ class _ConfettiOverlayState extends State<ConfettiOverlay>
   void _generateParticles() {
     final random = DateTime.now().millisecondsSinceEpoch;
     for (int i = 0; i < 50; i++) {
-      _particles.add(_ConfettiParticle(
-        x: (i % 5) / 4 - 0.5,
-        y: -1.0,
-        color: [
-          AppColors.successLight,
-          AppColors.accent,
-          AppColors.infoLight,
-          const Color(0xFFFBBF24),
-          const Color(0xFFF472B6),
-        ][(i + random) % 5],
-        size: 5 + (i % 3) * 2,
-        speedY: 0.3 + (i % 5) * 0.1,
-        speedX: ((i % 2) * 2 - 1) * 0.1,
-        rotation: i * 0.2,
-      ));
+      _particles.add(
+        _ConfettiParticle(
+          x: (i % 5) / 4 - 0.5,
+          y: -1.0,
+          color: [
+            AppColors.successLight,
+            AppColors.accent,
+            AppColors.infoLight,
+            const Color(0xFFFBBF24),
+            const Color(0xFFF472B6),
+          ][(i + random) % 5],
+          size: 5 + (i % 3) * 2,
+          speedY: 0.3 + (i % 5) * 0.1,
+          speedX: ((i % 2) * 2 - 1) * 0.1,
+          rotation: i * 0.2,
+        ),
+      );
     }
   }
 
@@ -658,7 +646,8 @@ class _ConfettiPainter extends CustomPainter {
 
       if (y > 1.0) continue;
 
-      final paint = Paint()..color = particle.color.withValues(alpha: 1 - progress * 0.5);
+      final paint = Paint()
+        ..color = particle.color.withValues(alpha: 1 - progress * 0.5);
 
       final screenX = size.width / 2 + x * size.width / 2;
       final screenY = size.height * y;

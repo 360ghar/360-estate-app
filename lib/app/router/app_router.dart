@@ -4,10 +4,14 @@ import 'package:estate_app/app/app_shell.dart';
 import 'package:estate_app/core/config/constants.dart';
 import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/core/services/deep_link_service.dart';
+import 'package:estate_app/features/auth/presentation/add_phone_page.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:estate_app/features/auth/presentation/enter_phone_page.dart';
 import 'package:estate_app/features/auth/presentation/login_page.dart';
 import 'package:estate_app/features/auth/presentation/otp_verify_page.dart';
+import 'package:estate_app/features/auth/presentation/set_password_page.dart';
+import 'package:estate_app/features/auth/presentation/profile_completion_page.dart';
+import 'package:estate_app/features/auth/presentation/onboarding_page.dart';
 import 'package:estate_app/features/auth/presentation/signup_page.dart';
 import 'package:estate_app/features/auth/presentation/splash_page.dart';
 import 'package:estate_app/features/collections/presentation/collections_page.dart';
@@ -80,13 +84,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final authState = ref.read(authControllerProvider);
       final isChecking = authState.status == AuthStatus.checking;
       final isLoggedIn = authState.isLoggedIn;
+      final needsPhone = authState.status == AuthStatus.needsPhone;
+      final needsPassword = authState.status == AuthStatus.needsPassword;
+      final needsProfileCompletion = authState.status == AuthStatus.needsProfileCompletion;
+      final needsOnboarding = authState.status == AuthStatus.needsOnboarding;
       final location = state.uri.path;
 
       final isSplash = location == '/splash';
-      final isAuthRoute = location == '/enter-phone' ||
+      final isAddPhone = location == '/add-phone';
+      final isSetPassword = location == '/set-password';
+      final isProfileCompletion = location == '/profile-completion';
+      final isOnboarding = location == '/onboarding';
+      final isAuthRoute =
+          location == '/enter-phone' ||
           location == '/login' ||
           location == '/otp' ||
-          location == '/signup';
+          location == '/signup' ||
+          isAddPhone ||
+          isSetPassword ||
+          isProfileCompletion ||
+          isOnboarding;
       final isPublicRoute = location.startsWith('/public');
       final isApplicationsRoute = location.startsWith('/more/applications');
       final isDeepLinkPath = _isEstateDeepLinkPath(location);
@@ -122,6 +139,29 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return isAuthRoute ? null : '/enter-phone';
       }
 
+      // Mandatory set-password step (req 6): an OTP-verified account with no
+      // password must set one before reaching the app. Non-skippable.
+      if (needsPassword) {
+        return isSetPassword ? null : '/set-password';
+      }
+
+      // Post-Google passwordless users without a phone get the skippable
+      // add-phone interstitial before reaching the app shell.
+      if (needsPhone) {
+        return isAddPhone ? null : '/add-phone';
+      }
+
+      // Profile completion gate: mandatory fields (full_name, date_of_birth)
+      // must be filled before reaching the app.
+      if (needsProfileCompletion) {
+        return isProfileCompletion ? null : '/profile-completion';
+      }
+
+      // App onboarding gate: app-specific onboarding must be completed.
+      if (needsOnboarding) {
+        return isOnboarding ? null : '/onboarding';
+      }
+
       if (!flags.enableApplicationsModule && isApplicationsRoute) {
         return '/more';
       }
@@ -142,26 +182,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: 'success',
-            builder: (context, state) =>
-                const PublicApplicationSuccessPage(),
+            builder: (context, state) => const PublicApplicationSuccessPage(),
           ),
         ],
       ),
-      GoRoute(
-        path: '/splash',
-        builder: (context, state) => const SplashPage(),
-      ),
+      GoRoute(path: '/splash', builder: (context, state) => const SplashPage()),
       GoRoute(
         path: '/properties/map',
         builder: (context, state) {
           final markers = state.extra as List<PropertyMarker>? ?? [];
-          final lat = double.tryParse(
-                state.uri.queryParameters['lat'] ?? '',
-              ) ??
+          final lat =
+              double.tryParse(state.uri.queryParameters['lat'] ?? '') ??
               20.5937;
-          final lng = double.tryParse(
-                state.uri.queryParameters['lng'] ?? '',
-              ) ??
+          final lng =
+              double.tryParse(state.uri.queryParameters['lng'] ?? '') ??
               78.9629;
           return PropertyMapPage(
             markers: markers,
@@ -177,27 +211,56 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         builder: (context, state) {
-          final phone = state.uri.queryParameters['phone'];
-          return LoginPage(phone: phone);
+          final identifier =
+              state.uri.queryParameters['identifier'] ??
+              state.uri.queryParameters['phone'];
+          return LoginPage(identifier: identifier);
         },
       ),
       GoRoute(
         path: '/signup',
         builder: (context, state) {
-          final phone = state.uri.queryParameters['phone'];
-          return SignupPage(phone: phone);
+          final identifier =
+              state.uri.queryParameters['identifier'] ??
+              state.uri.queryParameters['phone'];
+          return SignupPage(identifier: identifier);
         },
       ),
       GoRoute(
         path: '/otp',
         builder: (context, state) {
-          final phone = state.uri.queryParameters['phone'] ?? '';
+          final identifier =
+              state.uri.queryParameters['identifier'] ??
+              state.uri.queryParameters['phone'] ??
+              '';
           final flow = state.uri.queryParameters['flow'];
+          final channel = state.uri.queryParameters['channel'];
+          final requirePassword =
+              state.uri.queryParameters['requirePassword'] == 'true';
           return OtpVerifyPage(
-            phone: phone,
+            identifier: identifier,
             isSignupFlow: flow == 'signup',
+            isResetFlow: flow == 'reset',
+            isEmailChannel: channel == 'email',
+            requirePassword: requirePassword,
           );
         },
+      ),
+      GoRoute(
+        path: '/add-phone',
+        builder: (context, state) => const AddPhonePage(),
+      ),
+      GoRoute(
+        path: '/set-password',
+        builder: (context, state) => const SetPasswordPage(),
+      ),
+      GoRoute(
+        path: '/profile-completion',
+        builder: (context, state) => const ProfileCompletionPage(),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingPage(),
       ),
       GoRoute(
         path: '/location-search',
@@ -316,9 +379,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         path: 'inbox/:id',
                         builder: (context, state) {
                           final id = state.pathParameters['id']!;
-                          return ApplicationInboxDetailPage(
-                            applicationId: id,
-                          );
+                          return ApplicationInboxDetailPage(applicationId: id);
                         },
                       ),
                     ],
@@ -420,8 +481,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                       GoRoute(
                         path: 'drilldown',
                         builder: (context, state) {
-                          final args =
-                              state.extra as ReportDrilldownArgs?;
+                          final args = state.extra as ReportDrilldownArgs?;
                           if (args == null) {
                             return const ReportsPage();
                           }
@@ -452,11 +512,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         routes: [
                           GoRoute(
                             path: 'notifications',
-                            builder: (context, state) => const NotificationSettingsPage(),
+                            builder: (context, state) =>
+                                const NotificationSettingsPage(),
                           ),
                           GoRoute(
                             path: 'privacy',
-                            builder: (context, state) => const PrivacySettingsPage(),
+                            builder: (context, state) =>
+                                const PrivacySettingsPage(),
                           ),
                           GoRoute(
                             path: 'privacy-policy',
@@ -507,8 +569,8 @@ class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
     notifyOnStreamChange();
     _subscription = stream.asBroadcastStream().listen(
-          (dynamic _) => notifyListeners(),
-        );
+      (dynamic _) => notifyListeners(),
+    );
   }
 
   late final StreamSubscription<dynamic> _subscription;

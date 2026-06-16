@@ -275,7 +275,8 @@ class _OtpDigitFieldState extends State<_OtpDigitField> {
                         onChanged: widget.onChanged,
                         maxLength: 1,
                         textAlign: TextAlign.center,
-                        style: widget.textStyle ??
+                        style:
+                            widget.textStyle ??
                             const TextStyle(
                               color: Colors.white,
                               fontSize: 24,
@@ -345,10 +346,7 @@ class _GlassOtpInputCircleState extends State<GlassOtpInputCircle> {
       widget.length,
       (index) => TextEditingController(),
     );
-    _focusNodes = List.generate(
-      widget.length,
-      (index) => FocusNode(),
-    );
+    _focusNodes = List.generate(widget.length, (index) => FocusNode());
 
     // Auto-focus first field
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -437,7 +435,10 @@ class _CircleDigitField extends StatelessWidget {
 
     return ClipOval(
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: AppGlassBlur.medium, sigmaY: AppGlassBlur.medium),
+        filter: ImageFilter.blur(
+          sigmaX: AppGlassBlur.medium,
+          sigmaY: AppGlassBlur.medium,
+        ),
         child: Container(
           width: size,
           height: size,
@@ -474,9 +475,7 @@ class _CircleDigitField extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
               keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: const InputDecoration(
                 border: InputBorder.none,
                 counterText: '',

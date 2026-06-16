@@ -12,8 +12,7 @@ class SplashPage extends StatefulWidget {
   State<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage>
-    with TickerProviderStateMixin {
+class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   late final AnimationController _logoController;
   late final AnimationController _titleController;
   late final AnimationController _loaderController;
@@ -38,7 +37,10 @@ class _SplashPageState extends State<SplashPage>
       curve: AppDurations.entranceCurve,
     );
     _logoScale = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _logoController, curve: AppDurations.entranceCurve),
+      CurvedAnimation(
+        parent: _logoController,
+        curve: AppDurations.entranceCurve,
+      ),
     );
 
     // Title: slide up + fade 200-500ms
@@ -50,13 +52,13 @@ class _SplashPageState extends State<SplashPage>
       parent: _titleController,
       curve: AppDurations.entranceCurve,
     );
-    _titleSlide = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _titleController,
-      curve: AppDurations.entranceCurve,
-    ));
+    _titleSlide = Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _titleController,
+            curve: AppDurations.entranceCurve,
+          ),
+        );
 
     // Loader: fade in 400-700ms
     _loaderController = AnimationController(
