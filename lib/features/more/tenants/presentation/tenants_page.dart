@@ -106,8 +106,12 @@ class _TenantsPageState extends ConsumerState<TenantsPage> {
     final controller = ref.read(tenantsPagedProvider.notifier);
 
     // Apply client-side filters to the loaded items.
-    final filteredState =
-        state.copyWith(items: _applyFilters(state.items));
+    final filteredItems = _applyFilters(state.items);
+    final filteredState = state.copyWith(items: filteredItems);
+    // When filtered results are empty but more pages exist, show a message
+    // that encourages loading more instead of a terminal empty state.
+    final showLoadMoreHint =
+        filteredItems.isEmpty && state.hasMore && state.items.isNotEmpty;
 
     return AppScaffold(
       appBar: AppBar(title: const Text('Tenants')),
@@ -201,10 +205,15 @@ class _TenantsPageState extends ConsumerState<TenantsPage> {
           Expanded(
             child: PagedListView<Tenant>(
               state: filteredState,
-              emptyTitle: 'No tenants found',
-              emptyMessage: state.items.isEmpty
-                  ? 'Tenant directory will show up here.'
-                  : 'No tenants match your search or filter.',
+              emptyTitle: showLoadMoreHint
+                  ? 'No matches yet'
+                  : 'No tenants found',
+              emptyMessage: showLoadMoreHint
+                  ? 'No tenants match your search or filter. '
+                      'Load more to find matches.'
+                  : state.items.isEmpty
+                      ? 'Tenant directory will show up here.'
+                      : 'No tenants match your search or filter.',
               onLoadMore: controller.loadMore,
               onRefresh: controller.refresh,
               onRetry: controller.loadInitial,

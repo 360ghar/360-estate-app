@@ -112,13 +112,25 @@ class RentRepository {
     int? propertyId,
     int limit = 200,
   }) async {
-    final page = await listChargesPage(
-      cursor: null,
-      limit: limit,
-      status: status,
-      propertyId: propertyId,
-    );
-    return page.items;
+    final all = <RentCharge>[];
+    String? cursor;
+
+    while (true) {
+      final page = await listChargesPage(
+        cursor: cursor,
+        limit: limit,
+        status: status,
+        propertyId: propertyId,
+      );
+      all.addAll(page.items);
+
+      if (!page.hasMore || page.nextCursor == null || page.nextCursor == cursor) {
+        break;
+      }
+      cursor = page.nextCursor;
+    }
+
+    return all;
   }
 
   Future<void> generateCharges() async {

@@ -15,6 +15,7 @@ final class AuthInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     final token = await _tokenProvider.getAccessToken();
+    options.extra['auth_header_attached'] = token != null && token.isNotEmpty;
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
       final payload = _decodeJwtPayload(token);
@@ -31,8 +32,12 @@ final class AuthInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     final statusCode = err.response?.statusCode;
-    if (statusCode == 401 ||
-        (statusCode == 403 && _isExpiredTokenResponse(err.response?.data))) {
+    final hadAuthHeader =
+        err.requestOptions.extra['auth_header_attached'] == true;
+    if (hadAuthHeader &&
+        (statusCode == 401 ||
+            (statusCode == 403 &&
+                _isExpiredTokenResponse(err.response?.data)))) {
       await _tokenProvider.clearSession();
     }
     handler.next(err);

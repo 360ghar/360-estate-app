@@ -57,7 +57,7 @@ class PagedListState<T> {
     bool? isLoading,
     bool? isRefreshing,
     bool? isLoadingMore,
-    Failure? error,
+    Object? error = _unset,
     Object? loadMoreError = _unset,
   }) {
     return PagedListState<T>(
@@ -70,7 +70,7 @@ class PagedListState<T> {
       isLoading: isLoading ?? this.isLoading,
       isRefreshing: isRefreshing ?? this.isRefreshing,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      error: error,
+      error: identical(error, _unset) ? this.error : error as Failure?,
       loadMoreError: identical(loadMoreError, _unset)
           ? this.loadMoreError
           : loadMoreError,
@@ -153,7 +153,8 @@ class PagedListController<T> extends StateNotifier<PagedListState<T>> {
     if (!state.hasMore ||
         state.nextCursor == null ||
         state.isLoadingMore ||
-        state.isLoading) {
+        state.isLoading ||
+        state.isRefreshing) {
       return;
     }
     state = state.copyWith(isLoadingMore: true, loadMoreError: null);

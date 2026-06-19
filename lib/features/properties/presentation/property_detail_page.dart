@@ -653,8 +653,16 @@ class _LeaseTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final propertyId = property.id;
+    if (propertyId == null) {
+      return const AppEmptyView(
+        title: 'No active lease',
+        message: 'Unable to identify this property.',
+        icon: Icons.assignment_outlined,
+      );
+    }
     final leasesAsync = ref.watch(
-      leasesListProvider(LeaseListFilter(propertyId: property.id?.toString())),
+      leasesListProvider(LeaseListFilter(propertyId: propertyId.toString())),
     );
 
     return leasesAsync.when(
@@ -682,7 +690,9 @@ class _LeaseTab extends ConsumerWidget {
       error: (error, _) => AppErrorView(
         title: 'Unable to load leases',
         message: error.toString(),
-        onRetry: () => ref.invalidate(leasesListProvider),
+        onRetry: () => ref.invalidate(
+          leasesListProvider(LeaseListFilter(propertyId: property.id?.toString())),
+        ),
       ),
     );
   }
@@ -861,7 +871,8 @@ class _DocumentsTab extends ConsumerWidget {
         if (documents.isEmpty) {
           return AppEmptyView(
             title: 'No documents',
-            message: 'Documents for this property will appear here.',
+            message: 'No documents uploaded yet. '
+                'Documents added elsewhere will also appear here.',
             icon: Icons.folder_outlined,
             action: FilledButton.icon(
               onPressed: () => context.go('/more/documents'),
@@ -919,9 +930,17 @@ class _InspectionsTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final propertyId = property.id;
+    if (propertyId == null) {
+      return const AppEmptyView(
+        title: 'No inspections',
+        message: 'Unable to identify this property.',
+        icon: Icons.fact_check_outlined,
+      );
+    }
     final inspectionsAsync = ref.watch(
       inspectionsListProvider(
-        InspectionListFilter(propertyId: property.id?.toString()),
+        InspectionListFilter(propertyId: propertyId.toString()),
       ),
     );
 
@@ -951,7 +970,11 @@ class _InspectionsTab extends ConsumerWidget {
       error: (error, _) => AppErrorView(
         title: 'Unable to load inspections',
         message: error.toString(),
-        onRetry: () => ref.invalidate(inspectionsListProvider),
+        onRetry: () => ref.invalidate(
+          inspectionsListProvider(
+            InspectionListFilter(propertyId: property.id?.toString()),
+          ),
+        ),
       ),
     );
   }

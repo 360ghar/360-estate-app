@@ -36,7 +36,13 @@
   }
 
   final rawItems = map['items'];
-  final items = rawItems is List ? rawItems : <dynamic>[];
+  final items = rawItems is List
+      ? rawItems
+      : (map['data'] is List
+          ? map['data'] as List
+          : (map['results'] is List
+              ? map['results'] as List
+              : <dynamic>[]));
 
   final rawCursor = map['next_cursor'] ?? map['nextCursor'];
   final nextCursor =
@@ -61,8 +67,12 @@ Map<String, dynamic> unwrapMap(Object? payload) {
 List<dynamic> unwrapList(Object? payload) {
   if (payload is List) return payload;
   if (payload is Map<String, dynamic>) {
-    final data = payload['items'] ?? payload['data'] ?? payload['results'];
+    final items = payload['items'];
+    if (items is List) return items;
+    final data = payload['data'];
     if (data is List) return data;
+    final results = payload['results'];
+    if (results is List) return results;
   }
   return <dynamic>[];
 }

@@ -109,6 +109,8 @@ class _TasksPageState extends ConsumerState<TasksPage> {
                       hasMore: state.hasMore,
                       onLoadMore: controller.loadMore,
                       isLoadingMore: state.isLoadingMore,
+                      loadMoreError: state.loadMoreError,
+                      onLoadMoreRetry: controller.retryLoadMore,
                     ),
                   )
                 : PagedListView<MaintenanceRequest>(
@@ -385,12 +387,16 @@ class _TaskPipelineView extends StatelessWidget {
   final bool hasMore;
   final VoidCallback? onLoadMore;
   final bool isLoadingMore;
+  final Object? loadMoreError;
+  final VoidCallback? onLoadMoreRetry;
 
   const _TaskPipelineView({
     required this.tasks,
     this.hasMore = false,
     this.onLoadMore,
     this.isLoadingMore = false,
+    this.loadMoreError,
+    this.onLoadMoreRetry,
   });
 
   @override
@@ -428,7 +434,18 @@ class _TaskPipelineView extends StatelessWidget {
               ),
             ],
           ),
-          if (hasMore)
+          if (loadMoreError != null)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.lg),
+              child: Center(
+                child: TextButton.icon(
+                  onPressed: onLoadMoreRetry,
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Retry load more'),
+                ),
+              ),
+            )
+          else if (hasMore)
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.lg),
               child: Center(

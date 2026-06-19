@@ -75,14 +75,14 @@ class _InspectionTemplatesPageState
     );
   }
 
-  void _showCreateDialog() {
+  Future<void> _showCreateDialog() async {
     final nameController = TextEditingController();
     final descController = TextEditingController();
     final itemsController = TextEditingController();
-
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
+    try {
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
         title: const Text('New Template'),
         content: SingleChildScrollView(
           child: Column(
@@ -147,6 +147,11 @@ class _InspectionTemplatesPageState
         ],
       ),
     );
+    } finally {
+      nameController.dispose();
+      descController.dispose();
+      itemsController.dispose();
+    }
   }
 }
 

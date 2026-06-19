@@ -10,12 +10,14 @@ class TenantsRepository {
   final ApiClient _client;
   final CacheStore _cache;
   static const _cacheTtl = Duration(minutes: 5);
+  static const _nullCursorSentinel = '__NULL_CURSOR__';
 
   Future<Page<Tenant>> listPage({
     required String? cursor,
     required int limit,
   }) async {
-    final cacheKey = 'tenants:cursor=${cursor ?? 'first'}:limit=$limit';
+    final cacheKey =
+        'tenants:cursor=${cursor ?? _nullCursorSentinel}:limit=$limit';
     final cached = _cache
         .get<({List<Tenant> items, String? nextCursor, bool hasMore})>(
             cacheKey);

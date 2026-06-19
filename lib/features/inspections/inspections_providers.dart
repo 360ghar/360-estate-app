@@ -48,6 +48,7 @@ class InspectionTemplatesNotifier
   }
 
   final AppPreferences _prefs;
+  Future<void> _writeQueue = Future.value();
 
   void _load() {
     final raw = _prefs.getString(_templatesPrefKey);
@@ -61,22 +62,33 @@ class InspectionTemplatesNotifier
     );
   }
 
-  Future<void> addTemplate(InspectionTemplate template) async {
-    state = [...state, template];
-    await _persist();
+  Future<void> addTemplate(InspectionTemplate template) {
+    return _enqueueMutation(() {
+      state = [...state, template];
+    });
   }
 
-  Future<void> updateTemplate(InspectionTemplate template) async {
-    state = [
-      for (final t in state)
-        if (t.id == template.id) template else t,
-    ];
-    await _persist();
+  Future<void> updateTemplate(InspectionTemplate template) {
+    return _enqueueMutation(() {
+      state = [
+        for (final t in state)
+          if (t.id == template.id) template else t,
+      ];
+    });
   }
 
-  Future<void> deleteTemplate(String id) async {
-    state = state.where((t) => t.id != id).toList();
-    await _persist();
+  Future<void> deleteTemplate(String id) {
+    return _enqueueMutation(() {
+      state = state.where((t) => t.id != id).toList();
+    });
+  }
+
+  Future<void> _enqueueMutation(void Function() mutate) {
+    _writeQueue = _writeQueue.then((_) async {
+      mutate();
+      await _persist();
+    });
+    return _writeQueue;
   }
 }
 
@@ -116,7 +128,7 @@ final defaultInspectionTemplates = <InspectionTemplate>[
     items: [
       'All keys returned',
       'Walls and paint damage',
-      'Applices clean and working',
+      'Appliances clean and working',
       'Carpets cleaned',
       'Bathroom condition',
       'Kitchen condition',

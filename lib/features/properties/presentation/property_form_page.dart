@@ -156,6 +156,7 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
     final propertyId = _currentPropertyIdForUpload();
     if (propertyId == null) {
       setState(() {
+        _hasUnsavedChanges = true;
         for (final image in selectedImages) {
           final file = File(image.path);
           _data.images.add(file.uri.toString());
@@ -219,6 +220,7 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
     final propertyId = _currentPropertyIdForUpload();
     if (propertyId == null) {
       setState(() {
+        _hasUnsavedChanges = true;
         for (final image in selectedImages) {
           final file = File(image.path);
           _data.floorPlans.add(file.uri.toString());
@@ -445,6 +447,7 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
           context.go('/properties');
           // Show success message after navigation (using a post-frame callback)
           WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
             final action = isCreating ? 'created' : 'updated';
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

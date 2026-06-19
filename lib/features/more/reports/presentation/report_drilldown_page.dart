@@ -235,12 +235,24 @@ class ReportDrilldownPage extends StatelessWidget {
   }
 
   /// Escapes a string for CSV output (wraps in quotes if it contains commas,
-  /// quotes, or newlines).
+  /// quotes, or newlines). Prefixes risky leading characters to prevent
+  /// formula injection when opened in spreadsheet applications.
   String _csvEscape(String value) {
-    if (value.contains(',') || value.contains('"') || value.contains('\n')) {
-      return '"${value.replaceAll('"', '""')}"';
+    var sanitized = value;
+    if (sanitized.isNotEmpty &&
+        (sanitized.startsWith('=') ||
+            sanitized.startsWith('+') ||
+            sanitized.startsWith('-') ||
+            sanitized.startsWith('@'))) {
+      sanitized = "'$sanitized";
     }
-    return value;
+    if (sanitized.contains(',') ||
+        sanitized.contains('"') ||
+        sanitized.contains('\n') ||
+        sanitized.contains('\r')) {
+      return '"${sanitized.replaceAll('"', '""')}"';
+    }
+    return sanitized;
   }
 }
 

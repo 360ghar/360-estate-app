@@ -34,7 +34,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
   @override
   void initState() {
     super.initState();
-    _platformController.text = Platform.isIOS ? 'ios' : 'android';
+    _platformController.text = _platform;
   }
 
   @override
@@ -44,7 +44,12 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     super.dispose();
   }
 
-  String get _platform => Platform.isIOS ? 'ios' : 'android';
+  String get _platform {
+    if (Platform.isIOS) return 'ios';
+    if (Platform.isAndroid) return 'android';
+    if (Platform.isWindows) return 'windows';
+    return 'unknown';
+  }
 
   Future<void> _registerDeviceAuto() async {
     setState(() => _isRegistering = true);
@@ -156,7 +161,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                           ),
                         )
                       : const Icon(Icons.notifications_active, size: 20),
-                  label: Text('Enable Push Notifications ($_platform)'),
+                  label: Text('Setup Push Notifications ($_platform)'),
                 ),
               ),
               // Developer-facing manual token entry (debug mode only)

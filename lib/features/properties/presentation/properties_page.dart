@@ -107,7 +107,12 @@ class _PropertiesPageState extends ConsumerState<PropertiesPage> {
     final controller = ref.read(propertiesPagedProvider.notifier);
 
     // Apply the selected filter chip to the loaded items.
-    final filteredState = state.copyWith(items: _applyFilter(state.items));
+    final filteredItems = _applyFilter(state.items);
+    final filteredState = state.copyWith(items: filteredItems);
+    // When filtered results are empty but more pages exist, show a message
+    // that encourages loading more instead of a terminal empty state.
+    final showLoadMoreHint =
+        filteredItems.isEmpty && state.hasMore && state.items.isNotEmpty;
 
     return AppScaffold(
       appBar: _buildAppBar(context),
@@ -178,8 +183,13 @@ class _PropertiesPageState extends ConsumerState<PropertiesPage> {
                   )
                 : PagedListView<Property>(
                     state: filteredState,
-                    emptyTitle: 'No properties yet',
-                    emptyMessage: 'Create your first property to get started.',
+                    emptyTitle: showLoadMoreHint
+                        ? 'No matches yet'
+                        : 'No properties yet',
+                    emptyMessage: showLoadMoreHint
+                        ? 'No properties match the current filter. '
+                            'Load more to find matches.'
+                        : 'Create your first property to get started.',
                     onLoadMore: controller.loadMore,
                     onRefresh: controller.refresh,
                     onRetry: controller.loadInitial,
