@@ -5,7 +5,7 @@ import 'package:estate_app/features/documents/domain/entities/document.dart';
 
 abstract interface class DocumentsRepository {
   Future<Page<Document>> getDocuments({
-    required int page,
+    required String? cursor,
     required int limit,
     int? propertyId,
     int? leaseId,

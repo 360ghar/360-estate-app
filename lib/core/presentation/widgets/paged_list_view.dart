@@ -20,6 +20,9 @@ class PagedListView<T> extends StatelessWidget {
     this.padding = const EdgeInsets.all(AppSpacing.lg),
     this.separatorSpacing = AppSpacing.md,
     this.enableStagger = true,
+    this.onLoadMoreRetry,
+    this.loadMoreErrorMessage =
+        'Couldn\u0027t load more. Tap retry to try again.',
   });
 
   final PagedListState<T> state;
@@ -35,7 +38,15 @@ class PagedListView<T> extends StatelessWidget {
   /// Enable staggered entrance animation for list items
   final bool enableStagger;
 
+  /// Optional retry callback invoked when the user taps the inline
+  /// load-more retry button. When null, the retry button is not shown.
+  final VoidCallback? onLoadMoreRetry;
+
+  /// Message displayed in the inline load-more error banner.
+  final String loadMoreErrorMessage;
+
   bool _onScroll(ScrollNotification notification) {
+    if (state.isLoadingMore) return false;
     if (notification.metrics.pixels >=
         notification.metrics.maxScrollExtent - 200) {
       onLoadMore();
@@ -63,16 +74,26 @@ class PagedListView<T> extends StatelessWidget {
       return AppEmptyView(title: emptyTitle, message: emptyMessage);
     }
 
+    final showLoadMoreError =
+        state.loadMoreError != null && !state.isLoadingMore;
+
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: NotificationListener<ScrollNotification>(
         onNotification: _onScroll,
         child: ListView.separated(
           padding: padding,
-          itemCount: state.items.length + (state.isLoadingMore ? 1 : 0),
+          itemCount: state.items.length +
+              (state.isLoadingMore || showLoadMoreError ? 1 : 0),
           separatorBuilder: (_, _) => SizedBox(height: separatorSpacing),
           itemBuilder: (context, index) {
             if (index >= state.items.length) {
+              if (showLoadMoreError) {
+                return _LoadMoreErrorRow(
+                  message: loadMoreErrorMessage,
+                  onRetry: onLoadMoreRetry,
+                );
+              }
               return const Padding(
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
                 child: Center(
@@ -95,6 +116,49 @@ class PagedListView<T> extends StatelessWidget {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _LoadMoreErrorRow extends StatelessWidget {
+  const _LoadMoreErrorRow({required this.message, this.onRetry});
+
+  final String message;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.cloud_off_outlined,
+            size: 18,
+            color: scheme.error,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Flexible(
+            child: Text(
+              message,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: scheme.error,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          if (onRetry != null) ...[
+            const SizedBox(width: AppSpacing.sm),
+            TextButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh, size: 16),
+              label: const Text('Retry'),
+            ),
+          ],
+        ],
       ),
     );
   }

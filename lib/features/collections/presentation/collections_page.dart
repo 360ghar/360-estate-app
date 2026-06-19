@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Professional B2B Collections page with:
 /// - Gradient summary cards for Due/Overdue/Paid totals
@@ -52,6 +53,20 @@ class _CollectionsPageState extends ConsumerState<CollectionsPage> {
           children: [
             // Summary Cards with gradient backgrounds
             const _CollectionsSummaryCards(),
+            // Footnote documenting that totals reflect only the first loaded page.
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.xs,
+              ),
+              child: Text(
+                'Totals reflect the first page of charges only. Scroll the list below to load more.',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.textTertiary,
+                      fontStyle: FontStyle.italic,
+                    ),
+              ),
+            ),
             const Divider(height: 1),
 
             // Tab Content
@@ -152,7 +167,12 @@ class _CollectionsSummaryCards extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Watch all charges to calculate totals
+    // Watch all charges to calculate totals.
+    // NOTE: Each paged provider only fetches the first page (default 20 items),
+    // so these totals are partial sums of the currently loaded page, not grand
+    // totals. The backend returns a `total` count but not a total amount, so a
+    // true grand total would require fetching every charge. This limitation is
+    // accepted for now; the summary reflects the first page only.
     final dueAsync = ref.watch<PagedListState<RentCharge>>(rentChargesPagedProvider('pending'));
     final overdueAsync = ref.watch<PagedListState<RentCharge>>(rentChargesPagedProvider('overdue'));
     final paidAsync = ref.watch<PagedListState<RentCharge>>(rentChargesPagedProvider('paid'));
@@ -296,6 +316,7 @@ class _ChargesList extends ConsumerWidget {
       onLoadMore: controller.loadMore,
       onRefresh: controller.refresh,
       onRetry: controller.loadInitial,
+      onLoadMoreRetry: controller.retryLoadMore,
       itemBuilder: (context, charge) => _ChargeTile(
         charge: charge,
         status: status,
@@ -520,9 +541,41 @@ class _ChargeTile extends StatelessWidget {
   }
 
   void _sendReminder(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Payment reminder sent.')),
-    );
+    final amountStr = NumberFormat.currency(
+      symbol: '\u20B9',
+      decimalDigits: 0,
+    ).format(charge.displayAmount);
+    final dueStr = charge.dueDate != null
+        ? DateFormat('d MMM yyyy').format(charge.dueDate!)
+        : 'soon';
+    final message = 'Hi ${charge.displayTenant}, this is a friendly reminder '
+        'that your rent of $amountStr for ${charge.displayProperty} '
+        'is due on $dueStr. Please make the payment at your earliest '
+        'convenience. Thank you!';
+    final encoded = Uri.encodeComponent(message);
+    _launchReminder(context, encoded);
+  }
+
+  Future<void> _launchReminder(BuildContext context, String encodedMessage) async {
+    // Try WhatsApp first (opens contact picker so the user selects the tenant).
+    final whatsappUri = Uri.parse('https://wa.me/?text=$encodedMessage');
+    if (await canLaunchUrl(whatsappUri)) {
+      await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
+      return;
+    }
+    // Fallback to SMS (also opens the SMS app with the message pre-filled).
+    final smsUri = Uri.parse('sms:?body=$encodedMessage');
+    if (await canLaunchUrl(smsUri)) {
+      await launchUrl(smsUri);
+      return;
+    }
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No messaging app available to send the reminder.'),
+        ),
+      );
+    }
   }
 }
 

@@ -29,10 +29,20 @@ class NotificationsRepository {
     );
   }
 
-  Future<List<NotificationItem>> listForUser(String userId) async {
-    final response = await _client.get<dynamic>('/notifications/users/$userId/');
-    final data = unwrapList(response.data);
-    return data
+  Future<List<NotificationItem>> listForUser(
+    String userId, {
+    int limit = 50,
+    String? cursor,
+  }) async {
+    final response = await _client.get<dynamic>(
+      '/notifications/users/$userId/',
+      queryParameters: {
+        'limit': limit,
+        if (cursor != null) 'cursor': cursor,
+      },
+    );
+    final page = unwrapPage(response.data);
+    return page.items
         .whereType<Map<String, dynamic>>()
         .map(NotificationItem.fromJson)
         .toList();

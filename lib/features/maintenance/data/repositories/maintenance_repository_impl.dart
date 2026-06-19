@@ -11,7 +11,7 @@ final class MaintenanceRepositoryImpl implements MaintenanceRepository {
 
   @override
   Future<Page<MaintenanceRequest>> getRequests({
-    required int page,
+    required String? cursor,
     required int limit,
     int? propertyId,
     String? status,
@@ -22,7 +22,7 @@ final class MaintenanceRepositoryImpl implements MaintenanceRepository {
     final apiPriority = priority == null ? null : _mapUrgency(priority);
     final apiCategory = category == null ? null : _mapCategory(category);
     final dtoPage = await _remoteDataSource.getRequests(
-      page: page,
+      cursor: cursor,
       limit: limit,
       propertyId: propertyId,
       status: apiStatus,
@@ -32,9 +32,9 @@ final class MaintenanceRepositoryImpl implements MaintenanceRepository {
 
     return Page<MaintenanceRequest>(
       items: dtoPage.items.map((dto) => dto.toEntity()).toList(),
-      page: dtoPage.page,
       limit: dtoPage.limit,
       hasMore: dtoPage.hasMore,
+      nextCursor: dtoPage.nextCursor,
     );
   }
 

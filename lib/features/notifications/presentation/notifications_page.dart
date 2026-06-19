@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
@@ -11,6 +13,7 @@ import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:estate_app/features/notifications/data/notifications_repository.dart';
 import 'package:estate_app/features/notifications/models/notification_item.dart';
 import 'package:estate_app/features/notifications/notifications_providers.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -26,6 +29,13 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
   final _tokenController = TextEditingController();
   final _platformController = TextEditingController();
   bool _isRegistering = false;
+  bool _showManualEntry = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _platformController.text = Platform.isIOS ? 'ios' : 'android';
+  }
 
   @override
   void dispose() {
@@ -34,7 +44,31 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     super.dispose();
   }
 
-  Future<void> _registerDevice() async {
+  String get _platform => Platform.isIOS ? 'ios' : 'android';
+
+  Future<void> _registerDeviceAuto() async {
+    setState(() => _isRegistering = true);
+    try {
+      // FCM/push integration is not yet configured. Once firebase_messaging
+      // is added, the token will be obtained automatically here. For now we
+      // inform the user that push is pending setup.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Push notifications will be available once FCM is configured. '
+              'Use manual entry in debug mode to register a device token.',
+            ),
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isRegistering = false);
+    }
+  }
+
+  Future<void> _registerDeviceManual() async {
     final token = _tokenController.text.trim();
     if (token.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -48,7 +82,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
       await ref.read(notificationsRepositoryProvider).registerDevice(
             DeviceRegistrationRequest(
               token: token,
-              platform: _platformController.text.trim(),
+              platform: _platformController.text.trim().isEmpty
+                  ? _platform
+                  : _platformController.text.trim(),
             ),
           );
       if (mounted) {
@@ -93,8 +129,8 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
         children: [
           // Device registration section
           AppSectionCard(
-            title: 'Device Registration',
-            icon: Icons.devices_outlined,
+            title: 'Push Notifications',
+            icon: Icons.notifications_active_outlined,
             iconColor: AppColors.info,
             children: [
               Text(
@@ -105,28 +141,11 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-              TextFormField(
-                controller: _tokenController,
-                decoration: const InputDecoration(
-                  labelText: 'Device token',
-                  prefixIcon: Icon(Icons.vpn_key_outlined),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              TextFormField(
-                controller: _platformController,
-                decoration: const InputDecoration(
-                  labelText: 'Platform (optional)',
-                  hintText: 'ios or android',
-                  prefixIcon: Icon(Icons.phone_android_outlined),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
               SizedBox(
                 width: double.infinity,
                 height: 48,
                 child: FilledButton.icon(
-                  onPressed: _isRegistering ? null : _registerDevice,
+                  onPressed: _isRegistering ? null : _registerDeviceAuto,
                   icon: _isRegistering
                       ? const SizedBox(
                           width: 18,
@@ -136,10 +155,58 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                             color: Colors.white,
                           ),
                         )
-                      : const Icon(Icons.app_registration, size: 20),
-                  label: const Text('Register Device'),
+                      : const Icon(Icons.notifications_active, size: 20),
+                  label: Text('Enable Push Notifications ($_platform)'),
                 ),
               ),
+              // Developer-facing manual token entry (debug mode only)
+              if (kDebugMode) ...[
+                const SizedBox(height: AppSpacing.md),
+                TextButton.icon(
+                  onPressed: () {
+                    setState(() => _showManualEntry = !_showManualEntry);
+                  },
+                  icon: Icon(
+                    _showManualEntry
+                        ? Icons.expand_less
+                        : Icons.expand_more,
+                  ),
+                  label: Text(
+                    _showManualEntry
+                        ? 'Hide manual entry'
+                        : 'Manual token entry (debug)',
+                  ),
+                ),
+                if (_showManualEntry) ...[
+                  TextFormField(
+                    controller: _tokenController,
+                    decoration: const InputDecoration(
+                      labelText: 'Device token',
+                      prefixIcon: Icon(Icons.vpn_key_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  TextFormField(
+                    controller: _platformController,
+                    decoration: const InputDecoration(
+                      labelText: 'Platform',
+                      hintText: 'ios or android',
+                      prefixIcon: Icon(Icons.phone_android_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton.icon(
+                      onPressed:
+                          _isRegistering ? null : _registerDeviceManual,
+                      icon: const Icon(Icons.app_registration, size: 20),
+                      label: const Text('Register (Manual)'),
+                    ),
+                  ),
+                ],
+              ],
             ],
           ),
 

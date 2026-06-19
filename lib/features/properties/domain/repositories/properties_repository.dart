@@ -2,9 +2,9 @@ import 'package:estate_app/core/pagination/page.dart';
 import 'package:estate_app/features/properties/models/property.dart';
 
 abstract interface class PropertiesRepository {
-  /// List properties with pagination
+  /// List properties with cursor pagination
   Future<Page<Property>> listPage({
-    required int page,
+    required String? cursor,
     required int limit,
   });
 

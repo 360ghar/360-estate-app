@@ -374,13 +374,19 @@ class _FullNameField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('FULL NAME (OPTIONAL)', style: _labelStyle(context)),
+        Text('FULL NAME', style: _labelStyle(context)),
         const SizedBox(height: 10),
         _GlassInputField(
           controller: controller,
           hint: 'Your full name',
           prefixIcon: Icons.person_outline,
           autofillHints: const [AutofillHints.name],
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'Please enter your full name.';
+            }
+            return null;
+          },
         ),
       ],
     );
@@ -397,7 +403,7 @@ class _EmailField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('EMAIL (OPTIONAL)', style: _labelStyle(context)),
+        Text('EMAIL', style: _labelStyle(context)),
         const SizedBox(height: 10),
         _GlassInputField(
           controller: controller,
@@ -405,6 +411,16 @@ class _EmailField extends StatelessWidget {
           prefixIcon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
           autofillHints: const [AutofillHints.email],
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'Please enter your email.';
+            }
+            final emailRegex = RegExp(r'^[\w.+-]+@[\w-]+\.[\w.-]+$');
+            if (!emailRegex.hasMatch(value.trim())) {
+              return 'Enter a valid email address.';
+            }
+            return null;
+          },
         ),
       ],
     );

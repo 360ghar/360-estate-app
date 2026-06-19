@@ -28,9 +28,9 @@ final propertiesPagedProvider =
   (ref) {
     final repository = ref.watch(propertiesRepositoryProvider);
     return PagedListController<Property>(
-      fetchPage: ({required page, required limit}) {
+      fetchPage: ({required cursor, required limit}) {
         return repository.listPage(
-          page: page,
+          cursor: cursor,
           limit: limit,
         );
       },

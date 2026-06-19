@@ -73,13 +73,41 @@ class _PropertiesPageState extends ConsumerState<PropertiesPage> {
     setState(() {
       _selectedFilter = filter;
     });
-    // TODO: Apply filter to provider
+  }
+
+  /// Filters the loaded property items client-side based on the selected
+  /// filter chip. The backend does not currently support status/type query
+  /// parameters for properties, so filtering is applied to the loaded page.
+  List<Property> _applyFilter(List<Property> items) {
+    switch (_selectedFilter) {
+      case PropertyFilter.all:
+        return items;
+      case PropertyFilter.active:
+        return items.where((p) => p.isActive).toList();
+      case PropertyFilter.occupied:
+        return items.where((p) => p.isOccupied).toList();
+      case PropertyFilter.vacant:
+        return items.where((p) => !p.isOccupied).toList();
+      case PropertyFilter.pg:
+        return items
+            .where((p) => p.type?.toLowerCase().contains('pg') ?? false)
+            .toList();
+      case PropertyFilter.flat:
+        return items
+            .where((p) =>
+                p.type?.toLowerCase() == 'flat' ||
+                p.type?.toLowerCase() == 'apartment')
+            .toList();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(propertiesPagedProvider);
     final controller = ref.read(propertiesPagedProvider.notifier);
+
+    // Apply the selected filter chip to the loaded items.
+    final filteredState = state.copyWith(items: _applyFilter(state.items));
 
     return AppScaffold(
       appBar: _buildAppBar(context),
@@ -143,18 +171,19 @@ class _PropertiesPageState extends ConsumerState<PropertiesPage> {
           Expanded(
             child: _isGridView
                 ? _PropertyGridView(
-                    state: state,
+                    state: filteredState,
                     onLoadMore: controller.loadMore,
                     onRefresh: controller.refresh,
                     onRetry: controller.loadInitial,
                   )
                 : PagedListView<Property>(
-                    state: state,
+                    state: filteredState,
                     emptyTitle: 'No properties yet',
                     emptyMessage: 'Create your first property to get started.',
                     onLoadMore: controller.loadMore,
                     onRefresh: controller.refresh,
                     onRetry: controller.loadInitial,
+                    onLoadMoreRetry: controller.retryLoadMore,
                     padding: const EdgeInsets.fromLTRB(
                       AppSpacing.lg,
                       AppSpacing.sm,

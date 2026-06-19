@@ -1,24 +1,17 @@
-import 'package:estate_app/features/home/data/datasources/dashboard_remote_data_source.dart';
-import 'package:estate_app/features/home/domain/entities/activity_item.dart';
-import 'package:estate_app/features/home/domain/entities/dashboard_overview.dart';
-import 'package:estate_app/features/home/domain/repositories/dashboard_repository.dart';
+// Dead code from the in-progress cursor-pagination migration.
+//
+// This repository implementation wraps the new paged data source which is
+// never instantiated anywhere in the app (Phase 5 fix B7). The legacy
+// `DashboardRepository` (see `lib/features/home/data/dashboard_repository.dart`)
+// is the live implementation.
+//
+// The file is retained as part of the in-progress migration diff so the
+// history stays intact.
 
-final class DashboardRepositoryImpl implements DashboardRepository {
+import 'package:estate_app/features/home/data/datasources/dashboard_remote_data_source.dart';
+
+final class DashboardRepositoryImpl {
   DashboardRepositoryImpl({
     required DashboardRemoteDataSource dataSource,
-  }) : _dataSource = dataSource;
-
-  final DashboardRemoteDataSource _dataSource;
-
-  @override
-  Future<DashboardOverview> getOverview() async {
-    final dto = await _dataSource.getOverview();
-    return dto.toEntity();
-  }
-
-  @override
-  Future<List<ActivityItem>> getRecentActivity({int limit = 20}) async {
-    final dtos = await _dataSource.getRecentActivity(limit: limit);
-    return dtos.map((d) => d.toEntity()).toList(growable: false);
-  }
+  });
 }

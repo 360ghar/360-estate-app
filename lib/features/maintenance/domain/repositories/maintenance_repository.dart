@@ -3,7 +3,7 @@ import 'package:estate_app/features/maintenance/domain/entities/maintenance_requ
 
 abstract interface class MaintenanceRepository {
   Future<Page<MaintenanceRequest>> getRequests({
-    required int page,
+    required String? cursor,
     required int limit,
     int? propertyId,
     String? status,

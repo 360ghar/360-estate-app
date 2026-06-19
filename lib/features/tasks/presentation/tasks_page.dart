@@ -50,13 +50,32 @@ class _TasksPageState extends ConsumerState<TasksPage> {
     });
   }
 
+  /// Maps the UI status filter to the API status string(s) understood by the
+  /// backend. Returns `null` when no filter is active (fetch all statuses).
+  String? get _apiStatus {
+    switch (_statusFilter) {
+      case TaskStatusFilter.open:
+        return 'open';
+      case TaskStatusFilter.inProgress:
+        return 'work_order_created';
+      case TaskStatusFilter.completed:
+        return 'resolved';
+      case TaskStatusFilter.all:
+        return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(maintenancePagedProvider);
-    final controller = ref.read(maintenancePagedProvider.notifier);
+    // Use the status-filtered provider so the filter applies across ALL pages
+    // via a backend query parameter, not just the currently loaded items.
+    final state = ref.watch(maintenancePagedByStatusProvider(_apiStatus));
+    final controller =
+        ref.read(maintenancePagedByStatusProvider(_apiStatus).notifier);
 
-    // Filter items based on status
-    final filteredItems = _filterItems(state.items);
+    // Items are already filtered by the backend; no client-side filtering
+    // needed. The pipeline view groups items by column from the loaded set.
+    final filteredItems = state.items;
 
     return AppScaffold(
       appBar: _buildAppBar(context),
@@ -83,7 +102,15 @@ class _TasksPageState extends ConsumerState<TasksPage> {
           // Content
           Expanded(
             child: _viewMode == TaskView.pipeline
-                ? _TaskPipelineView(tasks: filteredItems)
+                ? RefreshIndicator(
+                    onRefresh: controller.refresh,
+                    child: _TaskPipelineView(
+                      tasks: filteredItems,
+                      hasMore: state.hasMore,
+                      onLoadMore: controller.loadMore,
+                      isLoadingMore: state.isLoadingMore,
+                    ),
+                  )
                 : PagedListView<MaintenanceRequest>(
                     state: state,
                     emptyTitle: 'No tasks yet',
@@ -91,6 +118,7 @@ class _TasksPageState extends ConsumerState<TasksPage> {
                     onLoadMore: controller.loadMore,
                     onRefresh: controller.refresh,
                     onRetry: controller.loadInitial,
+                    onLoadMoreRetry: controller.retryLoadMore,
                     itemBuilder: (context, task) => Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.lg,
@@ -125,22 +153,6 @@ class _TasksPageState extends ConsumerState<TasksPage> {
         const SizedBox(width: AppSpacing.sm),
       ],
     );
-  }
-
-  List<MaintenanceRequest> _filterItems(List<MaintenanceRequest> items) {
-    if (_statusFilter == TaskStatusFilter.all) return items;
-
-    final allowedStatuses = switch (_statusFilter) {
-      TaskStatusFilter.open => const {'open', 'in_review'},
-      TaskStatusFilter.inProgress => const {'work_order_created'},
-      TaskStatusFilter.completed => const {'resolved', 'closed'},
-      TaskStatusFilter.all => const <String>{},
-    };
-
-    if (allowedStatuses.isEmpty) return items;
-    return items
-        .where((item) => allowedStatuses.contains(item.statusValue))
-        .toList();
   }
 }
 
@@ -370,8 +382,16 @@ class _TaskListCard extends StatelessWidget {
 /// Kanban-style pipeline view for tasks.
 class _TaskPipelineView extends StatelessWidget {
   final List<MaintenanceRequest> tasks;
+  final bool hasMore;
+  final VoidCallback? onLoadMore;
+  final bool isLoadingMore;
 
-  const _TaskPipelineView({required this.tasks});
+  const _TaskPipelineView({
+    required this.tasks,
+    this.hasMore = false,
+    this.onLoadMore,
+    this.isLoadingMore = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -408,6 +428,22 @@ class _TaskPipelineView extends StatelessWidget {
               ),
             ],
           ),
+          if (hasMore)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.lg),
+              child: Center(
+                child: isLoadingMore
+                    ? const Padding(
+                        padding: EdgeInsets.all(AppSpacing.md),
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : TextButton.icon(
+                        onPressed: onLoadMore,
+                        icon: const Icon(Icons.expand_more),
+                        label: const Text('Load more'),
+                      ),
+              ),
+            ),
         ],
       ),
     );

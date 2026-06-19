@@ -10,6 +10,7 @@ import 'package:estate_app/features/more/reports/data/reports_repository.dart';
 import 'package:estate_app/features/more/reports/models/report_row.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ReportDrilldownArgs {
   const ReportDrilldownArgs({required this.result, required this.row});
@@ -40,15 +41,9 @@ class ReportDrilldownPage extends StatelessWidget {
         title: const Text('Report drilldown'),
         actions: [
           IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Export will be available in a future update.'),
-                ),
-              );
-            },
+            onPressed: () => _exportCsv(context, args.result),
             icon: const Icon(Icons.ios_share_rounded),
-            tooltip: 'Export',
+            tooltip: 'Export CSV',
           ),
         ],
       ),
@@ -219,6 +214,33 @@ class ReportDrilldownPage extends StatelessWidget {
       0,
       (total, row) => total + (row.amount ?? 0),
     );
+  }
+
+  /// Exports the report result as a CSV string and shares it via the system
+  /// share sheet.
+  void _exportCsv(BuildContext context, ReportResult result) {
+    final buffer = StringBuffer();
+    buffer.writeln('Label,Amount,Value');
+    for (final row in result.rows) {
+      final label = _csvEscape(row.label ?? '');
+      final amount = row.amount?.toStringAsFixed(2) ?? '';
+      final value = _csvEscape(row.value ?? '');
+      buffer.writeln('$label,$amount,$value');
+    }
+    final csv = buffer.toString();
+    final reportName = result.type.name;
+    final dateStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    Share.share(csv, subject: '$reportName report ($dateStr)');
+  }
+
+  /// Escapes a string for CSV output (wraps in quotes if it contains commas,
+  /// quotes, or newlines).
+  String _csvEscape(String value) {
+    if (value.contains(',') || value.contains('"') || value.contains('\n')) {
+      return '"${value.replaceAll('"', '""')}"';
+    }
+    return value;
   }
 }
 

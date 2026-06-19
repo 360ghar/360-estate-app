@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/storage/auth_token_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
@@ -18,8 +19,16 @@ final class RefreshingAuthTokenProvider implements AuthTokenProvider {
     supabase.SupabaseClient client;
     try {
       client = supabase.Supabase.instance.client;
-    } catch (_) {
-      await _storage.clear();
+    } catch (error, stackTrace) {
+      // Supabase is not initialized yet (transient startup race). Do NOT
+      // clear the stored session - returning null here without clearing lets
+      // the next call succeed once Supabase is ready. Surface the gap so
+      // cold-start races are visible in logs (B14).
+      AppLogger.w(
+        'AuthTokenProvider: Supabase not yet initialized; returning null token',
+        error: error,
+        stackTrace: stackTrace,
+      );
       return null;
     }
 
@@ -33,8 +42,20 @@ final class RefreshingAuthTokenProvider implements AuthTokenProvider {
       try {
         final refresh = await client.auth.refreshSession();
         session = refresh.session ?? client.auth.currentSession;
-      } catch (_) {
+      } on supabase.AuthException {
+        // Confirmed auth failure (e.g. refresh token expired or revoked).
+        // The session is truly invalid; clear storage so the user is logged out.
         await _storage.clear();
+        return null;
+      } catch (error, stackTrace) {
+        // Transient error (network timeout, connectivity, etc.). Do NOT clear
+        // the stored session; return null so the caller can retry later
+        // without being silently logged out. Log so the failure is visible.
+        AppLogger.w(
+          'AuthTokenProvider: session refresh failed transiently; returning null token',
+          error: error,
+          stackTrace: stackTrace,
+        );
         return null;
       }
     }

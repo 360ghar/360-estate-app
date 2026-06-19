@@ -22,11 +22,26 @@ final maintenanceRepositoryProvider = Provider<MaintenanceRepositoryImpl>((ref) 
 final maintenanceListProvider = FutureProvider<List<MaintenanceRequest>>((ref) async {
   ref.watch(authControllerProvider.select((state) => state.user?.id));
   final result = await ref.watch(maintenanceRepositoryProvider).getRequests(
-        page: 1,
+        cursor: null,
         limit: 100,
       );
   return result.items;
 });
+
+/// Provider for maintenance requests scoped to a specific property.
+/// Used by the property detail page's Maintenance tab.
+final maintenanceListForPropertyProvider =
+    FutureProvider.family<List<MaintenanceRequest>, int>(
+  (ref, propertyId) async {
+    ref.watch(authControllerProvider.select((state) => state.user?.id));
+    final result = await ref.watch(maintenanceRepositoryProvider).getRequests(
+          cursor: null,
+          limit: 100,
+          propertyId: propertyId,
+        );
+    return result.items;
+  },
+);
 
 final maintenancePagedProvider = StateNotifierProvider<
     PagedListController<MaintenanceRequest>,
@@ -35,10 +50,32 @@ final maintenancePagedProvider = StateNotifierProvider<
     ref.watch(authControllerProvider.select((state) => state.user?.id));
     final repository = ref.watch(maintenanceRepositoryProvider);
     return PagedListController<MaintenanceRequest>(
-      fetchPage: ({required page, required limit}) {
+      fetchPage: ({required cursor, required limit}) {
         return repository.getRequests(
-          page: page,
+          cursor: cursor,
           limit: limit,
+        );
+      },
+    );
+  },
+);
+
+/// Paged provider for maintenance requests filtered by status. When a status
+/// filter is active, the backend is queried with that status so the filter
+/// applies across ALL pages, not just the currently loaded items.
+final maintenancePagedByStatusProvider = StateNotifierProvider.family<
+    PagedListController<MaintenanceRequest>,
+    PagedListState<MaintenanceRequest>,
+    String?>(
+  (ref, status) {
+    ref.watch(authControllerProvider.select((state) => state.user?.id));
+    final repository = ref.watch(maintenanceRepositoryProvider);
+    return PagedListController<MaintenanceRequest>(
+      fetchPage: ({required cursor, required limit}) {
+        return repository.getRequests(
+          cursor: cursor,
+          limit: limit,
+          status: status,
         );
       },
     );

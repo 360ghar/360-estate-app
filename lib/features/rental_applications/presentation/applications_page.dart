@@ -63,6 +63,7 @@ class _FormsTab extends ConsumerWidget {
       onLoadMore: controller.loadMore,
       onRefresh: controller.refresh,
       onRetry: controller.loadInitial,
+      onLoadMoreRetry: controller.retryLoadMore,
       itemBuilder: (context, form) => _FormTile(form: form),
     );
   }
@@ -278,6 +279,7 @@ class _InboxTab extends ConsumerWidget {
       onLoadMore: controller.loadMore,
       onRefresh: controller.refresh,
       onRetry: controller.loadInitial,
+      onLoadMoreRetry: controller.retryLoadMore,
       itemBuilder: (context, submission) =>
           _SubmissionTile(submission: submission),
     );

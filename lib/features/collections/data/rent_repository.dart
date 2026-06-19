@@ -45,47 +45,39 @@ class RentRepository {
   static const _cacheTtl = Duration(minutes: 3);
 
   Future<Page<RentCharge>> listChargesPage({
-    required int page,
+    required String? cursor,
     required int limit,
     String? status,
+    int? propertyId,
   }) async {
-    final cacheKey = 'rent_charges:status=$status:page=$page:limit=$limit';
-    final cached = _cache.get<List<RentCharge>>(cacheKey);
+    final cacheKey =
+        'rent_charges:status=$status:property=$propertyId:cursor=${cursor ?? 'first'}:limit=$limit';
+    final cached = _cache
+        .get<({List<RentCharge> items, String? nextCursor, bool hasMore})>(
+            cacheKey);
     if (cached != null) {
       return Page(
-        items: cached,
-        page: page,
+        items: cached.items,
         limit: limit,
-        hasMore: cached.length >= limit,
+        hasMore: cached.hasMore,
+        nextCursor: cached.nextCursor,
       );
     }
 
     try {
-      final offset = (page - 1) * limit;
       final response = await _client.get<dynamic>(
         '/pm/rent/charges',
         queryParameters: {
           if (status != null) 'status': status,
+          if (propertyId != null) 'property_id': propertyId,
+          if (cursor != null) 'cursor': cursor,
           'limit': limit,
-          'offset': offset,
         },
       );
-      final payload = response.data;
-      List<Map<String, dynamic>> rawItems = [];
-      int? total;
-      if (payload is Map<String, dynamic>) {
-        final itemsPayload =
-            payload['items'] ?? payload['data'] ?? payload['results'];
-        if (itemsPayload is List) {
-          rawItems = itemsPayload.whereType<Map<String, dynamic>>().toList();
-        }
-        total = payload['total'] as int?;
-      }
-      if (rawItems.isEmpty) {
-        rawItems = unwrapList(
-          payload,
-        ).whereType<Map<String, dynamic>>().toList();
-      }
+      final page = unwrapPage(response.data);
+      final rawItems = page.items
+          .whereType<Map<String, dynamic>>()
+          .toList();
 
       final seenIds = <int?>{};
       final charges = rawItems
@@ -94,20 +86,21 @@ class RentRepository {
           .where((charge) => seenIds.add(charge.id))
           .toList();
 
-      _cache.set(cacheKey, charges, ttl: _cacheTtl);
+      _cache.set(
+        cacheKey,
+        (items: charges, nextCursor: page.nextCursor, hasMore: page.hasMore),
+        ttl: _cacheTtl,
+      );
       return Page(
         items: charges,
-        page: page,
         limit: limit,
-        hasMore: total != null
-            ? offset + rawItems.length < total
-            : rawItems.length >= limit,
+        hasMore: page.hasMore,
+        nextCursor: page.nextCursor,
       );
     } on NotFoundFailure {
       // No charges exist yet - return empty page instead of error
       return Page(
         items: const <RentCharge>[],
-        page: page,
         limit: limit,
         hasMore: false,
       );
@@ -116,9 +109,15 @@ class RentRepository {
 
   Future<List<RentCharge>> listCharges({
     String? status,
+    int? propertyId,
     int limit = 200,
   }) async {
-    final page = await listChargesPage(page: 1, limit: limit, status: status);
+    final page = await listChargesPage(
+      cursor: null,
+      limit: limit,
+      status: status,
+      propertyId: propertyId,
+    );
     return page.items;
   }
 

@@ -3,7 +3,7 @@ import 'package:estate_app/features/tenants/domain/entities/tenant.dart';
 
 abstract interface class TenantsRepository {
   Future<Page<Tenant>> getTenants({
-    required int page,
+    required String? cursor,
     required int limit,
     required String query,
   });

@@ -21,9 +21,9 @@ final rentChargesPagedProvider = StateNotifierProvider.family<
     PagedListState<RentCharge>,
     String?>(
   (ref, status) => PagedListController<RentCharge>(
-    fetchPage: ({required page, required limit}) {
+    fetchPage: ({required cursor, required limit}) {
       return ref.read(rentRepositoryProvider).listChargesPage(
-            page: page,
+            cursor: cursor,
             limit: limit,
             status: status,
           );
@@ -34,3 +34,13 @@ final rentChargesPagedProvider = StateNotifierProvider.family<
 final rentPaymentsProvider = FutureProvider<List<RentPayment>>(
   (ref) => ref.read(rentRepositoryProvider).listPayments(),
 );
+
+/// Property-scoped variant of [rentChargesProvider]. Used by the
+/// property-detail Rent tab so the backend does the filtering instead of
+/// relying on a (fragile) client-side name match (B16).
+final rentChargesForPropertyProvider =
+    FutureProvider.family<List<RentCharge>, int>((ref, propertyId) {
+  return ref
+      .read(rentRepositoryProvider)
+      .listCharges(propertyId: propertyId);
+});

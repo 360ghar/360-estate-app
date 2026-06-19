@@ -44,8 +44,14 @@ class ExpensesRepository {
 
   final ApiClient _client;
 
-  Future<List<Expense>> list() async {
-    final response = await _client.get<dynamic>('/pm/expenses/');
+  Future<List<Expense>> list({int? propertyId, int limit = 200}) async {
+    final response = await _client.get<dynamic>(
+      '/pm/expenses/',
+      queryParameters: {
+        if (propertyId != null) 'property_id': propertyId,
+        'limit': limit,
+      },
+    );
     final data = unwrapList(response.data);
     return data
         .whereType<Map<String, dynamic>>()

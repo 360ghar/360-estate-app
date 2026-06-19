@@ -9,6 +9,7 @@ import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/app_status_badge.dart';
 import 'package:estate_app/features/inspections/inspections_providers.dart';
 import 'package:estate_app/features/inspections/models/inspection.dart';
+import 'package:estate_app/features/inspections/presentation/inspection_templates_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,7 +30,22 @@ class InspectionsPage extends ConsumerWidget {
     );
 
     return AppScaffold(
-      appBar: AppBar(title: const Text('Inspections')),
+      appBar: AppBar(
+        title: const Text('Inspections'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.fact_check_outlined),
+            tooltip: 'Templates',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const InspectionTemplatesPage(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       padding: EdgeInsets.zero,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.go('/more/inspections/new'),

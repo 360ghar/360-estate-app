@@ -834,16 +834,47 @@ class _PhoneFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    final text = newValue.text.replaceAll(' ', '');
+    final newDigits = newValue.text.replaceAll(' ', '');
     final buffer = StringBuffer();
-    for (int i = 0; i < text.length; i++) {
+    for (int i = 0; i < newDigits.length; i++) {
       if (i == 5) buffer.write(' ');
-      buffer.write(text[i]);
+      buffer.write(newDigits[i]);
     }
     final formatted = buffer.toString();
+
+    // Compute the cursor position in the formatted string. The raw selection
+    // offset is relative to newValue.text (which may contain a space from
+    // prior formatting). We first count how many digits appear before the
+    // cursor, then map that digit count back to the formatted output.
+    final selection = _computeSelection(newValue, formatted);
+
     return TextEditingValue(
       text: formatted,
-      selection: TextSelection.collapsed(offset: formatted.length),
+      selection: selection,
+    );
+  }
+
+  /// Maps the cursor from [newValue.text] space to [formatted] space so the
+  /// cursor stays in the correct position for mid-string edits.
+  TextSelection _computeSelection(
+    TextEditingValue newValue,
+    String formatted,
+  ) {
+    final selection = newValue.selection;
+    if (!selection.isValid) {
+      return TextSelection.collapsed(offset: formatted.length);
+    }
+
+    final rawOffset = selection.baseOffset.clamp(0, newValue.text.length);
+    // Count digits (non-space chars) before the cursor in the raw input.
+    final textBeforeCursor = newValue.text.substring(0, rawOffset);
+    final digitCount = textBeforeCursor.replaceAll(' ', '').length;
+
+    // A space is inserted after the 5th digit in the formatted output.
+    final formattedOffset = digitCount + (digitCount >= 5 ? 1 : 0);
+
+    return TextSelection.collapsed(
+      offset: formattedOffset.clamp(0, formatted.length),
     );
   }
 }
