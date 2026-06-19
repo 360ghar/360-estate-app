@@ -13,9 +13,9 @@ final applicationFormsPagedProvider = StateNotifierProvider<
     PagedListController<ApplicationForm>,
     PagedListState<ApplicationForm>>(
   (ref) => PagedListController<ApplicationForm>(
-    fetchPage: ({required page, required limit}) {
+    fetchPage: ({required cursor, required limit}) {
       return ref.read(applicationsRepositoryProvider).listFormsPage(
-            page: page,
+            cursor: cursor,
             limit: limit,
           );
     },
@@ -26,9 +26,9 @@ final applicationInboxPagedProvider = StateNotifierProvider<
     PagedListController<ApplicationSubmission>,
     PagedListState<ApplicationSubmission>>(
   (ref) => PagedListController<ApplicationSubmission>(
-    fetchPage: ({required page, required limit}) {
+    fetchPage: ({required cursor, required limit}) {
       return ref.read(applicationsRepositoryProvider).listApplicationsPage(
-            page: page,
+            cursor: cursor,
             limit: limit,
           );
     },

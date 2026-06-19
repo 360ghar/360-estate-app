@@ -14,17 +14,68 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-class LeasesPage extends ConsumerWidget {
+class LeasesPage extends ConsumerStatefulWidget {
   const LeasesPage({super.key, this.propertyId, this.tenantId});
 
   final String? propertyId;
   final String? tenantId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LeasesPage> createState() => _LeasesPageState();
+}
+
+enum _LeaseStatusFilter { all, active, expired, upcoming }
+
+class _LeasesPageState extends ConsumerState<LeasesPage> {
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
+  _LeaseStatusFilter _statusFilter = _LeaseStatusFilter.all;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  List<Lease> _applyFilters(List<Lease> leases) {
+    var filtered = leases;
+
+    // Status filter
+    if (_statusFilter != _LeaseStatusFilter.all) {
+      filtered = filtered.where((lease) {
+        final status = lease.status?.toLowerCase() ?? '';
+        switch (_statusFilter) {
+          case _LeaseStatusFilter.active:
+            return status == 'active';
+          case _LeaseStatusFilter.expired:
+            return status == 'expired' || status == 'terminated';
+          case _LeaseStatusFilter.upcoming:
+            return status == 'pending' || status == 'draft';
+          case _LeaseStatusFilter.all:
+            return true;
+        }
+      }).toList();
+    }
+
+    // Search filter (by tenant name or property name)
+    if (_searchQuery.isNotEmpty) {
+      final query = _searchQuery.toLowerCase();
+      filtered = filtered.where((lease) {
+        final tenantName = lease.tenantName?.toLowerCase() ?? '';
+        final propertyName = lease.propertyName?.toLowerCase() ?? '';
+        return tenantName.contains(query) ||
+            propertyName.contains(query);
+      }).toList();
+    }
+
+    return filtered;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final leasesAsync = ref.watch(
       leasesListProvider(
-        LeaseListFilter(propertyId: propertyId, tenantId: tenantId),
+        LeaseListFilter(propertyId: widget.propertyId, tenantId: widget.tenantId),
       ),
     );
 
@@ -36,32 +87,137 @@ class LeasesPage extends ConsumerWidget {
         icon: const Icon(Icons.post_add_outlined),
         label: const Text('New lease'),
       ),
-      body: leasesAsync.when(
-        data: (leases) {
-          if (leases.isEmpty) {
-            return const AppEmptyView(
-              title: 'No leases yet',
-              message: 'Create your first lease to begin tracking.',
-            );
-          }
-          return ListView.separated(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            itemCount: leases.length,
-            separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
-            itemBuilder: (context, index) {
-              return _LeaseTile(lease: leases[index]);
-            },
-          );
-        },
-        loading: () => const AppLoadingShimmer(),
-        error: (error, _) => AppErrorView(
-          title: 'Unable to load leases',
-          message: error.toString(),
-          onRetry: () => ref.invalidate(leasesListProvider),
-          retryLabel: 'Try again',
-        ),
+      body: Column(
+        children: [
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search by tenant or property...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _searchQuery = '');
+                        },
+                      )
+                    : null,
+                border: OutlineInputBorder(
+                  borderRadius: AppRadii.md,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+              ),
+              onChanged: (value) {
+                setState(() => _searchQuery = value);
+              },
+            ),
+          ),
+          // Status filter chips
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.xs,
+            ),
+            child: Row(
+              children: _LeaseStatusFilter.values.map((filter) {
+                final isSelected = filter == _statusFilter;
+                final scheme = Theme.of(context).colorScheme;
+                return Padding(
+                  padding: const EdgeInsets.only(right: AppSpacing.sm),
+                  child: FilterChip(
+                    label: Text(_filterLabel(filter)),
+                    selected: isSelected,
+                    onSelected: (_) {
+                      setState(() => _statusFilter = filter);
+                    },
+                    selectedColor: scheme.primary.withValues(alpha: 0.12),
+                    checkmarkColor: scheme.primary,
+                    labelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: isSelected
+                              ? scheme.primary
+                              : AppColors.textSecondary,
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w500,
+                        ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: AppRadii.md,
+                      side: BorderSide(
+                        color: isSelected
+                            ? scheme.primary
+                            : scheme.outlineVariant,
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    visualDensity:
+                        const VisualDensity(horizontal: -2, vertical: -2),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const Divider(height: 1),
+          // Lease list
+          Expanded(
+            child: leasesAsync.when(
+              data: (leases) {
+                final filtered = _applyFilters(leases);
+                if (filtered.isEmpty) {
+                  return AppEmptyView(
+                    title: 'No leases found',
+                    message: leases.isEmpty
+                        ? 'Create your first lease to begin tracking.'
+                        : 'No leases match your search or filter.',
+                  );
+                }
+                return ListView.separated(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  itemCount: filtered.length,
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: AppSpacing.md),
+                  itemBuilder: (context, index) {
+                    return _LeaseTile(lease: filtered[index]);
+                  },
+                );
+              },
+              loading: () => const AppLoadingShimmer(),
+              error: (error, _) => AppErrorView(
+                title: 'Unable to load leases',
+                message: error.toString(),
+                onRetry: () => ref.invalidate(leasesListProvider),
+                retryLabel: 'Try again',
+              ),
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  String _filterLabel(_LeaseStatusFilter filter) {
+    switch (filter) {
+      case _LeaseStatusFilter.all:
+        return 'All';
+      case _LeaseStatusFilter.active:
+        return 'Active';
+      case _LeaseStatusFilter.expired:
+        return 'Expired';
+      case _LeaseStatusFilter.upcoming:
+        return 'Upcoming';
+    }
   }
 }
 

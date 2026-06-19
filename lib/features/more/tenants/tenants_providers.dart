@@ -18,9 +18,9 @@ final tenantsListProvider = FutureProvider<List<Tenant>>((ref) {
 final tenantsPagedProvider =
     StateNotifierProvider<PagedListController<Tenant>, PagedListState<Tenant>>(
   (ref) => PagedListController<Tenant>(
-    fetchPage: ({required page, required limit}) {
+    fetchPage: ({required cursor, required limit}) {
       return ref.read(tenantsRepositoryProvider).listPage(
-            page: page,
+            cursor: cursor,
             limit: limit,
           );
     },

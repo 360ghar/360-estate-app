@@ -4,7 +4,7 @@ import 'package:estate_app/features/applications/domain/entities/application.dar
 abstract interface class ApplicationsRepository {
   // Application Forms
   Future<Page<ApplicationForm>> getApplicationForms({
-    required int page,
+    required String? cursor,
     required int limit,
     int? propertyId,
     bool? isActive,
@@ -29,7 +29,7 @@ abstract interface class ApplicationsRepository {
 
   // Applications (Submissions)
   Future<Page<Application>> getApplications({
-    required int page,
+    required String? cursor,
     required int limit,
     int? propertyId,
     int? formId,

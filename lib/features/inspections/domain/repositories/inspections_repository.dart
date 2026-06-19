@@ -3,7 +3,7 @@ import 'package:estate_app/features/inspections/domain/entities/inspection.dart'
 
 abstract interface class InspectionsRepository {
   Future<Page<Inspection>> getInspections({
-    required int page,
+    required String? cursor,
     required int limit,
     int? propertyId,
     InspectionType? inspectionType,

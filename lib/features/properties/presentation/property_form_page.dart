@@ -44,6 +44,7 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
   bool _initialized = false;
   bool _isSaving = false;
   bool _isUploading = false;
+  bool _hasUnsavedChanges = false;
   int? _createdPropertyId;
   final List<File> _imageFiles = [];
   final List<File> _floorPlanFiles = [];
@@ -105,6 +106,7 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
 
   void _onDataChanged(PropertyWizardStepData newData) {
     setState(() {
+      _hasUnsavedChanges = true;
       _data = _data.copyWith(
         name: newData.name,
         type: newData.type,
@@ -154,6 +156,7 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
     final propertyId = _currentPropertyIdForUpload();
     if (propertyId == null) {
       setState(() {
+        _hasUnsavedChanges = true;
         for (final image in selectedImages) {
           final file = File(image.path);
           _data.images.add(file.uri.toString());
@@ -217,6 +220,7 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
     final propertyId = _currentPropertyIdForUpload();
     if (propertyId == null) {
       setState(() {
+        _hasUnsavedChanges = true;
         for (final image in selectedImages) {
           final file = File(image.path);
           _data.floorPlans.add(file.uri.toString());
@@ -262,6 +266,7 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
 
   void _removeImage(int index) {
     setState(() {
+      _hasUnsavedChanges = true;
       final removed = _data.images[index];
       _data.images.removeAt(index);
       if (_isLocalFileUrl(removed)) {
@@ -272,6 +277,7 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
 
   void _removeFloorPlan(int index) {
     setState(() {
+      _hasUnsavedChanges = true;
       final removed = _data.floorPlans[index];
       _data.floorPlans.removeAt(index);
       if (_isLocalFileUrl(removed)) {
@@ -343,6 +349,7 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
         final uploadService = ref.read(fileUploadServiceProvider);
 
         final uploadedImages = <String>[...remoteImages];
+        final succeededImageFiles = <File>[];
         for (final file in _imageFiles) {
           try {
             final result = await uploadService.uploadFile(
@@ -353,6 +360,7 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
             );
             if (result.url != null) {
               uploadedImages.add(result.url!);
+              succeededImageFiles.add(file);
             } else {
               failedUploads++;
             }
@@ -362,6 +370,7 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
         }
 
         final uploadedFloorPlans = <String>[...remoteFloorPlans];
+        final succeededFloorPlanFiles = <File>[];
         for (final file in _floorPlanFiles) {
           try {
             final result = await uploadService.uploadFile(
@@ -372,6 +381,7 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
             );
             if (result.url != null) {
               uploadedFloorPlans.add(result.url!);
+              succeededFloorPlanFiles.add(file);
             } else {
               failedUploads++;
             }
@@ -396,8 +406,15 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
           }
         }
 
-        _imageFiles.clear();
-        _floorPlanFiles.clear();
+        // Only remove successfully-uploaded files. Keep failed files so the
+        // user can retry them; otherwise the local image references are lost
+        // with no way to recover.
+        for (final file in succeededImageFiles) {
+          _imageFiles.remove(file);
+        }
+        for (final file in succeededFloorPlanFiles) {
+          _floorPlanFiles.remove(file);
+        }
       }
 
       ref.invalidate(propertiesListProvider);
@@ -406,21 +423,41 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
       }
       ref.invalidate(propertiesPagedProvider);
 
-      if (mounted) {
-        // Navigate first, then show success message on the next screen
-        context.go('/properties');
-        // Show success message after navigation (using a post-frame callback)
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          final action = isCreating ? 'created' : 'updated';
-          final suffix = failedUploads > 0 ? ' (some images failed to upload)' : '';
+      if (failedUploads > 0) {
+        // Some uploads failed. Do NOT navigate away - keep the user on the
+        // form so they can retry uploading the remaining local files. The
+        // property itself was saved successfully.
+        _hasUnsavedChanges = true;
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Property $action successfully$suffix'),
-              backgroundColor: failedUploads > 0 ? Colors.orange : Colors.green,
-              duration: const Duration(seconds: 3),
+              content: Text(
+                'Property saved, but $failedUploads file(s) failed to '
+                'upload. Tap Save again to retry.',
+              ),
+              backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 5),
             ),
           );
-        });
+        }
+      } else {
+        _hasUnsavedChanges = false;
+        if (mounted) {
+          // Navigate first, then show success message on the next screen
+          context.go('/properties');
+          // Show success message after navigation (using a post-frame callback)
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            final action = isCreating ? 'created' : 'updated';
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Property $action successfully'),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          });
+        }
       }
     } catch (error) {
       if (!mounted) return;
@@ -507,48 +544,85 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
       floorPlans: _data.floorPlans,
     );
 
-    return AppScaffold(
-      appBar: AppBar(
-        title: Text(isEdit ? 'Edit Property' : 'New Property'),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(72),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
-            ),
-            child: _EnhancedWizardIndicator(
-              steps: _wizardSteps,
-              currentStep: _currentStep,
-            ),
-          ),
-        ),
-      ),
-      body: Column(
-        children: [
-          // Step content wrapped in AppSectionCard
-          Expanded(
-            child: AnimatedSwitcher(
-              duration: AppDurations.medium,
-              switchInCurve: AppDurations.entranceCurve,
-              switchOutCurve: AppDurations.exitCurve,
-              child: SingleChildScrollView(
-                key: ValueKey(_currentStep),
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: AppSectionCard(
-                  title: _stepTitles[_currentStep],
-                  icon: _stepIcons[_currentStep],
-                  child: _buildStepContent(stepData),
-                ),
+    return PopScope(
+      canPop: !_hasUnsavedChanges,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final shouldDiscard = await _showDiscardDialog();
+        if (shouldDiscard && mounted) {
+          _hasUnsavedChanges = false;
+          context.go('/properties');
+        }
+      },
+      child: AppScaffold(
+        appBar: AppBar(
+          title: Text(isEdit ? 'Edit Property' : 'New Property'),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(72),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
+              ),
+              child: _EnhancedWizardIndicator(
+                steps: _wizardSteps,
+                currentStep: _currentStep,
               ),
             ),
           ),
+        ),
+        body: Column(
+          children: [
+            // Step content wrapped in AppSectionCard
+            Expanded(
+              child: AnimatedSwitcher(
+                duration: AppDurations.medium,
+                switchInCurve: AppDurations.entranceCurve,
+                switchOutCurve: AppDurations.exitCurve,
+                child: SingleChildScrollView(
+                  key: ValueKey(_currentStep),
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: AppSectionCard(
+                    title: _stepTitles[_currentStep],
+                    icon: _stepIcons[_currentStep],
+                    child: _buildStepContent(stepData),
+                  ),
+                ),
+              ),
+            ),
 
-          // Navigation buttons
-          _buildNavigationButtons(context),
+            // Navigation buttons
+            _buildNavigationButtons(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<bool> _showDiscardDialog() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Discard changes?'),
+        content: const Text(
+          'You have unsaved changes. Are you sure you want to leave?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Stay'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Discard'),
+          ),
         ],
       ),
     );
+    return result ?? false;
   }
 
   Widget _buildStepContent(PropertyWizardStepData stepData) {

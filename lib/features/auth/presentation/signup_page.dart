@@ -374,13 +374,19 @@ class _FullNameField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('FULL NAME (OPTIONAL)', style: _labelStyle(context)),
+        Text('FULL NAME', style: _labelStyle(context)),
         const SizedBox(height: 10),
         _GlassInputField(
           controller: controller,
           hint: 'Your full name',
           prefixIcon: Icons.person_outline,
           autofillHints: const [AutofillHints.name],
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'Please enter your full name.';
+            }
+            return null;
+          },
         ),
       ],
     );
@@ -397,7 +403,7 @@ class _EmailField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('EMAIL (OPTIONAL)', style: _labelStyle(context)),
+        Text('EMAIL', style: _labelStyle(context)),
         const SizedBox(height: 10),
         _GlassInputField(
           controller: controller,
@@ -405,6 +411,16 @@ class _EmailField extends StatelessWidget {
           prefixIcon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
           autofillHints: const [AutofillHints.email],
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'Please enter your email.';
+            }
+            final emailRegex = RegExp(r'^[\w.+-]+@[\w-]+\.[\w.-]+$');
+            if (!emailRegex.hasMatch(value.trim())) {
+              return 'Enter a valid email address.';
+            }
+            return null;
+          },
         ),
       ],
     );
@@ -820,16 +836,39 @@ class _PhoneFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    final text = newValue.text.replaceAll(' ', '');
+    final newDigits = newValue.text.replaceAll(' ', '');
     final buffer = StringBuffer();
-    for (int i = 0; i < text.length; i++) {
+    for (int i = 0; i < newDigits.length; i++) {
       if (i == 5) buffer.write(' ');
-      buffer.write(text[i]);
+      buffer.write(newDigits[i]);
     }
     final formatted = buffer.toString();
+
+    final selection = _computeSelection(newValue, formatted);
+
     return TextEditingValue(
       text: formatted,
-      selection: TextSelection.collapsed(offset: formatted.length),
+      selection: selection,
+    );
+  }
+
+  TextSelection _computeSelection(
+    TextEditingValue newValue,
+    String formatted,
+  ) {
+    final selection = newValue.selection;
+    if (!selection.isValid) {
+      return TextSelection.collapsed(offset: formatted.length);
+    }
+
+    final rawOffset = selection.baseOffset.clamp(0, newValue.text.length);
+    final textBeforeCursor = newValue.text.substring(0, rawOffset);
+    final digitCount = textBeforeCursor.replaceAll(' ', '').length;
+
+    final formattedOffset = digitCount + (digitCount > 5 ? 1 : 0);
+
+    return TextSelection.collapsed(
+      offset: formattedOffset.clamp(0, formatted.length),
     );
   }
 }

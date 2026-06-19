@@ -1,5 +1,6 @@
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/core/network/response_parser.dart';
+import 'package:estate_app/core/pagination/page.dart';
 import 'package:estate_app/features/notifications/models/notification_item.dart';
 
 class DeviceRegistrationRequest {
@@ -29,12 +30,28 @@ class NotificationsRepository {
     );
   }
 
-  Future<List<NotificationItem>> listForUser(String userId) async {
-    final response = await _client.get<dynamic>('/notifications/users/$userId/');
-    final data = unwrapList(response.data);
-    return data
+  Future<Page<NotificationItem>> listForUser(
+    String userId, {
+    int limit = 50,
+    String? cursor,
+  }) async {
+    final response = await _client.get<dynamic>(
+      '/notifications/users/$userId/',
+      queryParameters: {
+        'limit': limit,
+        if (cursor != null) 'cursor': cursor,
+      },
+    );
+    final page = unwrapPage(response.data);
+    final items = page.items
         .whereType<Map<String, dynamic>>()
         .map(NotificationItem.fromJson)
         .toList();
+    return Page(
+      items: items,
+      limit: limit,
+      hasMore: page.hasMore,
+      nextCursor: page.nextCursor,
+    );
   }
 }

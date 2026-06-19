@@ -9,5 +9,8 @@ final notificationsRepositoryProvider = Provider<NotificationsRepository>(
 
 final notificationsListProvider =
     FutureProvider.family<List<NotificationItem>, String>(
-  (ref, userId) => ref.read(notificationsRepositoryProvider).listForUser(userId),
+  (ref, userId) async {
+    final page = await ref.read(notificationsRepositoryProvider).listForUser(userId);
+    return page.items;
+  },
 );

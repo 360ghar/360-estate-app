@@ -5,7 +5,7 @@ import 'package:estate_app/features/maintenance/data/models/maintenance_request_
 
 abstract interface class MaintenanceRemoteDataSource {
   Future<Page<MaintenanceRequestDto>> getRequests({
-    required int page,
+    required String? cursor,
     required int limit,
     int? propertyId,
     String? status,
@@ -31,17 +31,16 @@ final class ApiMaintenanceRemoteDataSource
 
   @override
   Future<Page<MaintenanceRequestDto>> getRequests({
-    required int page,
+    required String? cursor,
     required int limit,
     int? propertyId,
     String? status,
     String? priority,
     String? category,
   }) async {
-    final offset = (page - 1) * limit;
     final queryParams = <String, dynamic>{
       'limit': limit,
-      'offset': offset,
+      if (cursor != null) 'cursor': cursor,
       if (propertyId != null) 'property_id': propertyId,
       if (status != null) 'request_status': status,
       if (priority != null) 'priority': priority,
@@ -53,28 +52,17 @@ final class ApiMaintenanceRemoteDataSource
       queryParameters: queryParams,
     );
 
-    final data = response.data;
-    final rawItems = unwrapList(data);
-    final items = rawItems
+    final page = unwrapPage(response.data);
+    final items = page.items
         .whereType<Map<String, dynamic>>()
         .map(MaintenanceRequestDto.fromJson)
         .toList();
 
-    int? total;
-    if (data is Map<String, dynamic>) {
-      final totalValue = data['total'] ?? data['count'];
-      if (totalValue is int) {
-        total = totalValue;
-      }
-    }
-    final hasMore =
-        total != null ? offset + items.length < total : items.length >= limit;
-
     return Page<MaintenanceRequestDto>(
       items: items,
-      page: page,
       limit: limit,
-      hasMore: hasMore,
+      hasMore: page.hasMore,
+      nextCursor: page.nextCursor,
     );
   }
 

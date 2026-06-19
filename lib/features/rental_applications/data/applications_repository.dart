@@ -95,27 +95,26 @@ class ApplicationsRepository {
   final ApiClient _client;
 
   Future<Page<ApplicationForm>> listFormsPage({
-    required int page,
+    required String? cursor,
     required int limit,
   }) async {
     final response = await _client.get<dynamic>(
       '/pm/applications/forms',
       queryParameters: {
-        'page': page,
+        if (cursor != null) 'cursor': cursor,
         'limit': limit,
-        'offset': (page - 1) * limit,
       },
     );
-    final data = unwrapList(response.data);
-    final items = data
+    final page = unwrapPage(response.data);
+    final items = page.items
         .whereType<Map<String, dynamic>>()
         .map(ApplicationForm.fromJson)
         .toList();
     return Page(
       items: items,
-      page: page,
       limit: limit,
-      hasMore: items.length >= limit,
+      hasMore: page.hasMore,
+      nextCursor: page.nextCursor,
     );
   }
 
@@ -137,7 +136,7 @@ class ApplicationsRepository {
   }
 
   Future<Page<ApplicationSubmission>> listApplicationsPage({
-    required int page,
+    required String? cursor,
     required int limit,
     String? status,
   }) async {
@@ -145,21 +144,20 @@ class ApplicationsRepository {
       '/pm/applications/',
       queryParameters: {
         if (status != null) 'status': status,
-        'page': page,
+        if (cursor != null) 'cursor': cursor,
         'limit': limit,
-        'offset': (page - 1) * limit,
       },
     );
-    final data = unwrapList(response.data);
-    final items = data
+    final page = unwrapPage(response.data);
+    final items = page.items
         .whereType<Map<String, dynamic>>()
         .map(ApplicationSubmission.fromJson)
         .toList();
     return Page(
       items: items,
-      page: page,
       limit: limit,
-      hasMore: items.length >= limit,
+      hasMore: page.hasMore,
+      nextCursor: page.nextCursor,
     );
   }
 

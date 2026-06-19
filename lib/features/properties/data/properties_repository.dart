@@ -19,47 +19,55 @@ class PropertiesRepositoryImpl implements PropertiesRepository {
 
   @override
   Future<Page<Property>> listPage({
-    required int page,
+    required String? cursor,
     required int limit,
   }) async {
-    final cacheKey = 'properties:$_cacheScope:page=$page:limit=$limit';
-    final cached = _cache.get<List<Property>>(cacheKey);
+    final cursorPart = cursor == null ? 'cursor=<null>' : 'cursor=$cursor';
+    final cacheKey =
+        'properties:$_cacheScope:$cursorPart:limit=$limit';
+    final cached = _cache
+        .get<({List<Property> items, String? nextCursor, bool hasMore})>(
+            cacheKey);
     if (cached != null) {
       return Page(
-        items: cached,
-        page: page,
+        items: cached.items,
         limit: limit,
-        hasMore: cached.length >= limit,
+        hasMore: cached.hasMore,
+        nextCursor: cached.nextCursor,
       );
     }
 
     final response = await _client.get<dynamic>(
       '/pm/properties/',
       queryParameters: {
-        'page': page,
+        if (cursor != null) 'cursor': cursor,
         'limit': limit,
-        'offset': (page - 1) * limit,
       },
     );
     final baseUrl = _client.dio.options.baseUrl;
-    final items = unwrapList(response.data)
+    final page = unwrapPage(response.data);
+    final items = page.items
         .whereType<Map<String, dynamic>>()
         .map((item) => _normalizePropertyJson(item, baseUrl: baseUrl))
         .map(Property.fromJson)
         .toList();
-    _cache.set(cacheKey, items, ttl: _cacheTtl);
+    _cache.set(
+      cacheKey,
+      (items: items, nextCursor: page.nextCursor, hasMore: page.hasMore),
+      ttl: _cacheTtl,
+    );
     return Page(
       items: items,
-      page: page,
       limit: limit,
-      hasMore: items.length >= limit,
+      hasMore: page.hasMore,
+      nextCursor: page.nextCursor,
     );
   }
 
   /// List all properties (up to limit)
   @override
   Future<List<Property>> list({int limit = 200}) async {
-    final page = await listPage(page: 1, limit: limit);
+    final page = await listPage(cursor: null, limit: limit);
     return page.items;
   }
 

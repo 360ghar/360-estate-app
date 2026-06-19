@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:estate_app/core/config/app_config.dart';
 import 'package:estate_app/core/errors/failure.dart';
+import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/core/storage/app_preferences.dart';
 import 'package:estate_app/core/storage/auth_token_storage.dart';
@@ -723,11 +724,22 @@ class AuthController extends StateNotifier<AuthState> {
       try {
         final gateState = await _repository.getAuthGateState(app: 'estate');
         final stage = gateState['stage'] as String? ?? 'active';
-        // Loop prevention: if the backend still returns profile_completion
-        // after a successful update (backend bug or data not saved), break
-        // the loop by setting status to authenticated.
+        // If the backend still returns profile_completion after a successful
+        // update, the profile data was not actually saved (backend bug or data
+        // not persisted). Keep the user on the profile-completion screen so
+        // they can retry instead of masking the problem by forcing
+        // authenticated and leaving them in an incomplete state.
         if (stage == 'profile_completion') {
-          state = AuthState(status: AuthStatus.authenticated, user: user, phone: state.phone);
+          AppLogger.w(
+            'Gate still reports profile_completion after a successful '
+            'profile update; staying on needsProfileCompletion so the user '
+            'can retry.',
+          );
+          state = AuthState(
+            status: AuthStatus.needsProfileCompletion,
+            user: user,
+            phone: state.phone,
+          );
         } else {
           final gateStatus = _mapGateStageToAuthStatus(stage);
           state = AuthState(status: gateStatus, user: user, phone: state.phone);

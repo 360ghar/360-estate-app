@@ -34,43 +34,49 @@ class MaintenanceRepository {
   static const _cacheTtl = Duration(minutes: 3);
 
   Future<Page<MaintenanceRequest>> listPage({
-    required int page,
+    required String? cursor,
     required int limit,
   }) async {
-    final cacheKey = 'maintenance:page=$page:limit=$limit';
-    final cached = _cache.get<List<MaintenanceRequest>>(cacheKey);
+    final cacheKey = 'maintenance:cursor=${cursor ?? 'first'}:limit=$limit';
+    final cached = _cache.get<
+        ({List<MaintenanceRequest> items, String? nextCursor, bool hasMore})>(
+        cacheKey);
     if (cached != null) {
       return Page(
-        items: cached,
-        page: page,
+        items: cached.items,
         limit: limit,
-        hasMore: cached.length >= limit,
+        hasMore: cached.hasMore,
+        nextCursor: cached.nextCursor,
       );
     }
 
     final response = await _client.get<dynamic>(
       '/pm/maintenance/requests',
       queryParameters: {
-        'page': page,
+        if (cursor != null) 'cursor': cursor,
         'limit': limit,
-        'offset': (page - 1) * limit,
       },
     );
-    final data = unwrapList(response.data)
+    final page = unwrapPage(response.data);
+    final data = page.items
         .whereType<Map<String, dynamic>>()
         .map(MaintenanceRequest.fromJson)
         .toList();
-    _cache.set(cacheKey, data, ttl: _cacheTtl);
+    _cache.set(
+      cacheKey,
+      (items: data, nextCursor: page.nextCursor, hasMore: page.hasMore),
+      ttl: _cacheTtl,
+    );
     return Page(
       items: data,
-      page: page,
       limit: limit,
-      hasMore: data.length >= limit,
+      hasMore: page.hasMore,
+      nextCursor: page.nextCursor,
     );
   }
 
   Future<List<MaintenanceRequest>> list({int limit = 200}) async {
-    final page = await listPage(page: 1, limit: limit);
+    final page = await listPage(cursor: null, limit: limit);
     return page.items;
   }
 

@@ -691,11 +691,12 @@ class AuthRepository {
       if (user.email == null) {
         throw const UnknownFailure('No email associated with this account');
       }
+      final email = user.email!;
 
       // Verify current password by attempting to sign in
       try {
         await _supabase.auth.signInWithPassword(
-          email: user.email!,
+          email: email,
           password: currentPassword,
         );
       } on AuthException catch (e) {

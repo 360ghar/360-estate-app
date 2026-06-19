@@ -1,8 +1,7 @@
 import 'dart:async';
 
-import 'package:estate_app/core/providers.dart';
+import 'package:estate_app/features/auth/data/auth_repository.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
-import 'package:estate_app/features/auth/models/user_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';

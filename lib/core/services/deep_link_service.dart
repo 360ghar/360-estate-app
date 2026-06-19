@@ -97,8 +97,10 @@ class DeepLinkService {
       _pendingPath = path;
       return;
     }
-    _pendingPath = path;
+    // Navigate immediately and clear the pending path so the same deep link
+    // is not replayed twice (once by router.go and again by the pending queue).
     router.go(path);
+    _pendingPath = null;
   }
 
   /// Canonical public domain for all 360Ghar deep links. Single source of

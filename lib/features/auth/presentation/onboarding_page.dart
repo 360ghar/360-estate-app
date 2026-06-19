@@ -1,4 +1,3 @@
-import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

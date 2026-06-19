@@ -85,14 +85,6 @@ class _MorePageState extends ConsumerState<MorePage> {
                 title: 'Change Password',
                 subtitle: 'Update your password',
                 onTap: () => context.push('/more/profile/change-password'),
-              ),
-              _MenuTile(
-                icon: Icons.security_outlined,
-                iconColor: const Color(0xFF8B5CF6),
-                title: 'Two-Factor Authentication',
-                subtitle: 'Not enabled',
-                trailing: const _StatusChip(value: 'Off', color: Color(0xFF64748B)),
-                onTap: () => _showComingSoon(context),
                 isLast: true,
               ),
             ],
@@ -347,16 +339,6 @@ class _MorePageState extends ConsumerState<MorePage> {
 
           const SizedBox(height: AppSpacing.xl * 2),
         ],
-      ),
-    );
-  }
-
-  void _showComingSoon(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Coming soon!'),
-        behavior: SnackBarBehavior.floating,
-        duration: Duration(seconds: 1),
       ),
     );
   }
@@ -1006,40 +988,6 @@ class _MenuTile extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-}
-
-// Status Chip
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({
-    required this.value,
-    required this.color,
-  });
-
-  final String value;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: AppRadii.pill,
-      ),
-      child: Text(
-        value,
-        style: theme.textTheme.labelSmall?.copyWith(
-          color: color,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
     );
   }
 }

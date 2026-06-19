@@ -6,7 +6,7 @@ import 'package:estate_app/features/finance/domain/entities/rent_payment.dart';
 abstract interface class FinanceRepository {
   // Rent Charges
   Future<Page<RentCharge>> getRentCharges({
-    required int page,
+    required String? cursor,
     required int limit,
     int? propertyId,
     int? leaseId,
@@ -17,7 +17,7 @@ abstract interface class FinanceRepository {
 
   // Rent Payments
   Future<Page<RentPayment>> getRentPayments({
-    required int page,
+    required String? cursor,
     required int limit,
     int? leaseId,
     int? rentChargeId,
@@ -35,7 +35,7 @@ abstract interface class FinanceRepository {
 
   // Expenses
   Future<Page<Expense>> getExpenses({
-    required int page,
+    required String? cursor,
     required int limit,
     int? propertyId,
     String? category,
