@@ -1,3 +1,4 @@
+import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/core/storage/app_preferences.dart';
 import 'package:estate_app/features/inspections/data/inspections_repository.dart';
@@ -87,6 +88,14 @@ class InspectionTemplatesNotifier
     _writeQueue = _writeQueue.then((_) async {
       mutate();
       await _persist();
+    }).catchError((Object error, StackTrace stackTrace) {
+      // Recover from prior queue errors so subsequent mutations are not
+      // permanently blocked by a single persist failure.
+      AppLogger.w(
+        'InspectionTemplatesNotifier: persist failed',
+        error: error,
+        stackTrace: stackTrace,
+      );
     });
     return _writeQueue;
   }

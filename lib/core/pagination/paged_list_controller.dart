@@ -70,7 +70,9 @@ class PagedListState<T> {
       isLoading: isLoading ?? this.isLoading,
       isRefreshing: isRefreshing ?? this.isRefreshing,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-      error: identical(error, _unset) ? this.error : error as Failure?,
+      error: identical(error, _unset)
+          ? this.error
+          : (error is Failure? ? error : null),
       loadMoreError: identical(loadMoreError, _unset)
           ? this.loadMoreError
           : loadMoreError,
