@@ -836,16 +836,39 @@ class _PhoneFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    final text = newValue.text.replaceAll(' ', '');
+    final newDigits = newValue.text.replaceAll(' ', '');
     final buffer = StringBuffer();
-    for (int i = 0; i < text.length; i++) {
+    for (int i = 0; i < newDigits.length; i++) {
       if (i == 5) buffer.write(' ');
-      buffer.write(text[i]);
+      buffer.write(newDigits[i]);
     }
     final formatted = buffer.toString();
+
+    final selection = _computeSelection(newValue, formatted);
+
     return TextEditingValue(
       text: formatted,
-      selection: TextSelection.collapsed(offset: formatted.length),
+      selection: selection,
+    );
+  }
+
+  TextSelection _computeSelection(
+    TextEditingValue newValue,
+    String formatted,
+  ) {
+    final selection = newValue.selection;
+    if (!selection.isValid) {
+      return TextSelection.collapsed(offset: formatted.length);
+    }
+
+    final rawOffset = selection.baseOffset.clamp(0, newValue.text.length);
+    final textBeforeCursor = newValue.text.substring(0, rawOffset);
+    final digitCount = textBeforeCursor.replaceAll(' ', '').length;
+
+    final formattedOffset = digitCount + (digitCount > 5 ? 1 : 0);
+
+    return TextSelection.collapsed(
+      offset: formattedOffset.clamp(0, formatted.length),
     );
   }
 }

@@ -22,8 +22,9 @@ class PropertiesRepositoryImpl implements PropertiesRepository {
     required String? cursor,
     required int limit,
   }) async {
+    final cursorPart = cursor == null ? 'cursor=<null>' : 'cursor=$cursor';
     final cacheKey =
-        'properties:$_cacheScope:cursor=${cursor ?? 'first'}:limit=$limit';
+        'properties:$_cacheScope:$cursorPart:limit=$limit';
     final cached = _cache
         .get<({List<Property> items, String? nextCursor, bool hasMore})>(
             cacheKey);

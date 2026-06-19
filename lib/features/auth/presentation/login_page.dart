@@ -871,7 +871,7 @@ class _PhoneFormatter extends TextInputFormatter {
     final digitCount = textBeforeCursor.replaceAll(' ', '').length;
 
     // A space is inserted after the 5th digit in the formatted output.
-    final formattedOffset = digitCount + (digitCount >= 5 ? 1 : 0);
+    final formattedOffset = digitCount + (digitCount > 5 ? 1 : 0);
 
     return TextSelection.collapsed(
       offset: formattedOffset.clamp(0, formatted.length),

@@ -559,14 +559,12 @@ class _ChargeTile extends StatelessWidget {
   Future<void> _launchReminder(BuildContext context, String encodedMessage) async {
     // Try WhatsApp first (opens contact picker so the user selects the tenant).
     final whatsappUri = Uri.parse('https://wa.me/?text=$encodedMessage');
-    if (await canLaunchUrl(whatsappUri)) {
-      await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
+    if (await launchUrl(whatsappUri, mode: LaunchMode.externalApplication)) {
       return;
     }
     // Fallback to SMS (also opens the SMS app with the message pre-filled).
     final smsUri = Uri.parse('sms:?body=$encodedMessage');
-    if (await canLaunchUrl(smsUri)) {
-      await launchUrl(smsUri);
+    if (await launchUrl(smsUri)) {
       return;
     }
     if (context.mounted) {

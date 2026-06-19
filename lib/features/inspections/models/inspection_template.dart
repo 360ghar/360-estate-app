@@ -11,14 +11,17 @@ class InspectionTemplate {
     this.description,
   });
 
+  static int _counter = 0;
+
   /// Creates a new template with a unique ID.
   factory InspectionTemplate.create({
     required String name,
     required List<String> items,
     String? description,
   }) {
+    _counter++;
     return InspectionTemplate(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: '${DateTime.now().millisecondsSinceEpoch}_$_counter',
       name: name,
       items: items,
       description: description,
@@ -52,10 +55,16 @@ class InspectionTemplate {
     if (raw == null || raw.isEmpty) return [];
     try {
       final list = jsonDecode(raw) as List;
-      return list
-          .whereType<Map<String, dynamic>>()
-          .map(InspectionTemplate.fromJson)
-          .toList();
+      final result = <InspectionTemplate>[];
+      for (final entry in list) {
+        if (entry is! Map<String, dynamic>) continue;
+        try {
+          result.add(InspectionTemplate.fromJson(entry));
+        } catch (_) {
+          // Skip invalid entries instead of losing the entire list.
+        }
+      }
+      return result;
     } catch (_) {
       return [];
     }
