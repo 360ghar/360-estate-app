@@ -51,8 +51,8 @@ class ExpensesRepository {
         if (propertyId != null) 'property_id': propertyId,
       },
     );
-    final data = unwrapList(response.data);
-    return data
+    final page = unwrapPage(response.data);
+    return page.items
         .whereType<Map<String, dynamic>>()
         .map(Expense.fromJson)
         .toList();

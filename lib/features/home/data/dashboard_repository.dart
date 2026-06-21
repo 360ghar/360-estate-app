@@ -26,8 +26,8 @@ class DashboardRepository {
         _cache.get<List<DashboardActivityItem>>('dashboard:activity');
     if (cached != null) return cached;
     final response = await _client.get<dynamic>('/pm/dashboard/activity');
-    final data = unwrapList(response.data);
-    final items = data
+    final page = unwrapPage(response.data);
+    final items = page.items
         .whereType<Map<String, dynamic>>()
         .map(DashboardActivityItem.fromJson)
         .toList();

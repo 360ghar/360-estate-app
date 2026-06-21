@@ -25,8 +25,8 @@ class LeasesRepositoryImpl implements LeasesRepository {
         if (status != null) 'status': status,
       },
     );
-    final data = unwrapList(response.data);
-    return data
+    final page = unwrapPage(response.data);
+    return page.items
         .whereType<Map<String, dynamic>>()
         .map(Lease.fromJson)
         .toList();

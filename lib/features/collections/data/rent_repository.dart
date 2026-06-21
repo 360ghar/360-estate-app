@@ -96,6 +96,7 @@ class RentRepository {
         limit: limit,
         hasMore: page.hasMore,
         nextCursor: page.nextCursor,
+        total: page.total,
       );
     } on NotFoundFailure {
       // No charges exist yet - return empty page instead of error
@@ -145,8 +146,8 @@ class RentRepository {
 
   Future<List<RentPayment>> listPayments() async {
     final response = await _client.get<dynamic>('/pm/rent/payments');
-    final data = unwrapList(response.data);
-    return data
+    final page = unwrapPage(response.data);
+    return page.items
         .whereType<Map<String, dynamic>>()
         .map(RentPayment.fromJson)
         .toList();

@@ -12,8 +12,8 @@ class DocumentsRepository {
 
   Future<List<DocumentItem>> list() async {
     final response = await _client.get<dynamic>('/pm/documents/');
-    final data = unwrapList(response.data);
-    return data
+    final page = unwrapPage(response.data);
+    return page.items
         .whereType<Map<String, dynamic>>()
         .map(DocumentItem.fromJson)
         .toList();

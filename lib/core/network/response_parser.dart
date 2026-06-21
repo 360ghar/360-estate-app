@@ -4,11 +4,11 @@
 /// the top level as well as the legacy-wrapped form `{data: {...}}`. When the
 /// payload is a bare list it is returned with no next cursor and `hasMore`
 /// derived from the presence of a cursor.
-({List<dynamic> items, String? nextCursor, bool hasMore}) unwrapPage(
+({List<dynamic> items, String? nextCursor, bool hasMore, int? total}) unwrapPage(
   Object? payload,
 ) {
   if (payload is List) {
-    return (items: payload, nextCursor: null, hasMore: false);
+    return (items: payload, nextCursor: null, hasMore: false, total: null);
   }
 
   Map<String, dynamic> map;
@@ -32,7 +32,7 @@
       map = casted;
     }
   } else {
-    return (items: <dynamic>[], nextCursor: null, hasMore: false);
+    return (items: <dynamic>[], nextCursor: null, hasMore: false, total: null);
   }
 
   final rawItems = map['items'];
@@ -52,7 +52,10 @@
   final hasMore =
       rawHasMore is bool ? rawHasMore : (nextCursor != null);
 
-  return (items: items, nextCursor: nextCursor, hasMore: hasMore);
+  final rawTotal = map['total'];
+  final total = rawTotal is int ? rawTotal : null;
+
+  return (items: items, nextCursor: nextCursor, hasMore: hasMore, total: total);
 }
 
 Map<String, dynamic> unwrapMap(Object? payload) {
