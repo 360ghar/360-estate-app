@@ -1,4 +1,23 @@
-enum PropertyType { apartment, house, villa, commercial, land, other }
+enum PropertyType {
+  apartment,
+  builderFloor,
+  commercial,
+  condo,
+  flatmate,
+  house,
+  land,
+  loft,
+  office,
+  other,
+  penthouse,
+  pg,
+  plot,
+  room,
+  shop,
+  studio,
+  villa,
+  warehouse,
+}
 
 enum PropertyCategory { residential, commercial }
 

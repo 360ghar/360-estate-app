@@ -8,9 +8,22 @@ import 'package:flutter/material.dart';
 /// Property types supported by the backend.
 const propertyTypes = [
   'apartment',
-  'house',
   'builder_floor',
+  'commercial',
+  'condo',
+  'flatmate',
+  'house',
+  'land',
+  'loft',
+  'office',
+  'penthouse',
+  'pg',
+  'plot',
   'room',
+  'shop',
+  'studio',
+  'villa',
+  'warehouse',
 ];
 
 String _propertyTypeLabel(String value) {
@@ -21,8 +34,34 @@ String _propertyTypeLabel(String value) {
       return 'Apartment';
     case 'house':
       return 'House';
+    case 'villa':
+      return 'Villa';
+    case 'studio':
+      return 'Studio';
+    case 'pg':
+      return 'PG';
+    case 'penthouse':
+      return 'Penthouse';
     case 'room':
       return 'Room';
+    case 'plot':
+      return 'Plot';
+    case 'loft':
+      return 'Loft';
+    case 'condo':
+      return 'Condo';
+    case 'flatmate':
+      return 'Flatmate';
+    case 'commercial':
+      return 'Commercial';
+    case 'office':
+      return 'Office';
+    case 'shop':
+      return 'Shop';
+    case 'warehouse':
+      return 'Warehouse';
+    case 'land':
+      return 'Land';
     default:
       return value;
   }

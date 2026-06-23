@@ -57,7 +57,7 @@ final class AppConfig {
     required this.environment,
     required this.apiBaseUrl,
     required this.supabaseUrl,
-    required this.supabaseAnonKey,
+    required this.supabasePublishableKey,
     required this.enableCrashReporting,
     required this.enableDebugLogs,
     required this.featureFlags,
@@ -69,7 +69,7 @@ final class AppConfig {
   final AppEnvironment environment;
   final String apiBaseUrl;
   final String supabaseUrl;
-  final String supabaseAnonKey;
+  final String supabasePublishableKey;
   final bool enableCrashReporting;
   final bool enableDebugLogs;
   final FeatureFlags featureFlags;
@@ -86,7 +86,8 @@ final class AppConfig {
   bool get isProd => environment == AppEnvironment.prod;
 
   bool get isSupabaseConfigured =>
-      supabaseUrl.trim().isNotEmpty && supabaseAnonKey.trim().isNotEmpty;
+      supabaseUrl.trim().isNotEmpty &&
+      supabasePublishableKey.trim().isNotEmpty;
 
   /// Google Sign-In can only be attempted when at least the web client id is
   /// configured (required as the Android `serverClientId` and for Supabase to
@@ -127,14 +128,10 @@ final class AppConfig {
     const supabasePublishableKeyDefine = String.fromEnvironment(
       'SUPABASE_PUBLISHABLE_KEY',
     );
-    const supabaseAnonKeyDefine = String.fromEnvironment('SUPABASE_ANON_KEY');
-    final supabaseAnonKey = supabasePublishableKeyDefine.trim().isNotEmpty
+    final supabasePublishableKey =
+        supabasePublishableKeyDefine.trim().isNotEmpty
         ? supabasePublishableKeyDefine
-        : (supabaseAnonKeyDefine.trim().isNotEmpty
-              ? supabaseAnonKeyDefine
-              : (dotenv.env['SUPABASE_PUBLISHABLE_KEY'] ??
-                    dotenv.env['SUPABASE_ANON_KEY'] ??
-                    ''));
+        : (dotenv.env['SUPABASE_PUBLISHABLE_KEY'] ?? '');
 
     const enableCrashReportingDefine = String.fromEnvironment(
       'ENABLE_CRASH_REPORTING',
@@ -184,7 +181,8 @@ final class AppConfig {
     if (apiBaseUrl.trim().isEmpty) {
       throw StateError('Missing API_BASE_URL configuration.');
     }
-    if (supabaseUrl.trim().isEmpty || supabaseAnonKey.trim().isEmpty) {
+    if (supabaseUrl.trim().isEmpty ||
+        supabasePublishableKey.trim().isEmpty) {
       throw StateError(
         'Missing SUPABASE_URL or SUPABASE_PUBLISHABLE_KEY configuration.',
       );
@@ -194,7 +192,7 @@ final class AppConfig {
       environment: environment,
       apiBaseUrl: apiBaseUrl,
       supabaseUrl: supabaseUrl,
-      supabaseAnonKey: supabaseAnonKey,
+      supabasePublishableKey: supabasePublishableKey,
       enableCrashReporting: enableCrashReporting,
       enableDebugLogs: enableDebugLogs,
       featureFlags: featureFlags,

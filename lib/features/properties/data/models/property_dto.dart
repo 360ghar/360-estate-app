@@ -196,10 +196,22 @@ final class PropertyDto {
   static PropertyType _parsePropertyType(String value) {
     return switch (value.toLowerCase()) {
       'apartment' => PropertyType.apartment,
-      'house' => PropertyType.house,
-      'villa' => PropertyType.villa,
+      'builder_floor' => PropertyType.builderFloor,
       'commercial' => PropertyType.commercial,
+      'condo' => PropertyType.condo,
+      'flatmate' => PropertyType.flatmate,
+      'house' => PropertyType.house,
       'land' => PropertyType.land,
+      'loft' => PropertyType.loft,
+      'office' => PropertyType.office,
+      'penthouse' => PropertyType.penthouse,
+      'pg' => PropertyType.pg,
+      'plot' => PropertyType.plot,
+      'room' => PropertyType.room,
+      'shop' => PropertyType.shop,
+      'studio' => PropertyType.studio,
+      'villa' => PropertyType.villa,
+      'warehouse' => PropertyType.warehouse,
       _ => PropertyType.other,
     };
   }

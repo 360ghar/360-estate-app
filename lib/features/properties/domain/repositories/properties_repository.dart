@@ -211,33 +211,40 @@ class PropertyPayload {
 String? _normalizePropertyType(String raw) {
   final value = raw.trim().toLowerCase();
   if (value.isEmpty) return null;
+  // Alias mappings for common variations
   switch (value) {
-    case 'builder_floor':
     case 'builder floor':
     case 'floor':
-    case 'commercial':
-    case 'office':
-    case 'shop':
-    case 'warehouse':
-    case 'land':
       return 'builder_floor';
-    case 'pg':
-    case '1rk':
-    case 'room':
-      return 'room';
+    case 'flat':
     case '1bhk':
     case '2bhk':
     case '3bhk':
     case '4bhk':
-    case 'flat':
+      return 'apartment';
+    case '1rk':
+      return 'room';
+    // Direct pass-through for known backend types
     case 'apartment':
-      return 'apartment';
-    case 'villa':
-      return 'house';
+    case 'builder_floor':
+    case 'commercial':
+    case 'condo':
+    case 'flatmate':
     case 'house':
-      return 'house';
+    case 'land':
+    case 'loft':
+    case 'office':
+    case 'penthouse':
+    case 'pg':
+    case 'plot':
+    case 'room':
+    case 'shop':
+    case 'studio':
+    case 'villa':
+    case 'warehouse':
+      return value;
     default:
-      return 'apartment';
+      return null;
   }
 }
 
