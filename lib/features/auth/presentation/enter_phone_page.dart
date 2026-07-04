@@ -5,6 +5,7 @@ import 'package:estate_app/app/router/routes.dart';
 import 'package:estate_app/core/presentation/animations/premium/premium_animations.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/widgets/glass/glass_toast.dart';
 import 'package:estate_app/core/presentation/widgets/glass/premium_glass_card.dart';
 import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/core/utils/phone_utils.dart';
@@ -91,7 +92,14 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
       final status = await ref
           .read(authControllerProvider.notifier)
           .checkIdentifierStatus(identifier)
-          .timeout(const Duration(seconds: 8), onTimeout: () => null);
+          .timeout(
+            const Duration(seconds: 8),
+            onTimeout: () {
+              throw TimeoutException(
+                'Unable to verify your account. Please try again.',
+              );
+            },
+          );
       if (!mounted) return;
 
       final encoded = Uri.encodeComponent(identifier);
@@ -99,7 +107,6 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
       // Verified existing account with a password -> password screen.
       // Everything else (unverified, unknown, passwordless) -> OTP first.
       final goToPassword =
-          status != null &&
           status.exists &&
           status.nextStep == IdentifierNextStep.password;
 
@@ -109,16 +116,22 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
       }
 
       // OTP-first path. The account must set a password afterwards (req 6) when
-      // it has none — i.e. an existing passwordless account, or an unknown /
-      // unreachable status (treated as a brand-new account).
-      final requirePassword = status == null || !status.hasPassword;
+      // it has no password — i.e. an existing passwordless account or a brand
+      // new account (backend unreachable now throws and is caught below).
+      final requirePassword = !status.hasPassword;
       final requireParam = requirePassword ? '&requirePassword=true' : '';
+
+      if (status.exists && !status.verified) {
+        GlassToast.showInfo(
+          context,
+          "Your account isn't verified yet. We've sent a code — enter it below or resend.",
+        );
+      }
 
       if (isEmail) {
         // Email OTP-first flow. Only allow account creation when the backend
-        // positively reports the email is new; an unknown/unreachable status
-        // must NOT silently create an account.
-        final isNewEmail = status != null && !status.exists;
+        // positively reports the email is new.
+        final isNewEmail = !status.exists;
         final sent = await _sendEmailOtp(
           identifier,
           shouldCreateUser: isNewEmail,
@@ -131,7 +144,7 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
       // Phone OTP-first flow. Unknown -> signup form (collect name/password
       // first as today); otherwise this is an existing account, so send the
       // login OTP without creating a user.
-      if (status != null && status.exists == false) {
+      if (status.exists == false) {
         context.go('/signup?identifier=$encoded');
         return;
       }

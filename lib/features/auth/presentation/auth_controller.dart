@@ -221,9 +221,10 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   /// Resolves an identifier (email or phone) against the backend login state
-  /// machine. Returns null when the backend can't be reached; callers should
-  /// then fall back to a safe default (treat as a new account -> OTP signup).
-  Future<IdentifierStatus?> checkIdentifierStatus(String identifier) async {
+  /// machine. Throws on backend/transport failure so callers can surface the
+  /// error instead of silently degrading to a signup/OTP flow (which previously
+  /// risked duplicate-account creation and hid the "can't reach server" state).
+  Future<IdentifierStatus> checkIdentifierStatus(String identifier) async {
     state = state.copyWith(isBusy: true);
     try {
       if (!_config.isSupabaseConfigured) {
@@ -237,7 +238,7 @@ class AuthController extends StateNotifier<AuthState> {
         isBusy: false,
         errorMessage: _messageForError(error),
       );
-      return null;
+      rethrow;
     }
   }
 

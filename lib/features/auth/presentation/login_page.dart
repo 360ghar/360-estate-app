@@ -291,14 +291,31 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     bool lockPhone,
   ) async {
     final notifier = ref.read(authControllerProvider.notifier);
+    const noAccountMessage =
+        'No account found with this email or phone. Check the address or sign up.';
 
     if (_isEmail && lockPhone) {
       final email = normalizedParam!;
-      await notifier.sendEmailOtp(email);
-      if (!mounted) return;
-      if (ref.read(authControllerProvider).errorMessage != null) return;
-      final encoded = Uri.encodeComponent(email);
-      context.go('/otp?identifier=$encoded&channel=email&flow=reset');
+      try {
+        final status = await notifier.checkIdentifierStatus(email);
+        if (!mounted) return;
+        if (!status.exists) {
+          GlassToast.showError(context, noAccountMessage);
+          return;
+        }
+        await notifier.sendEmailOtp(email);
+        if (!mounted) return;
+        if (ref.read(authControllerProvider).errorMessage != null) return;
+        final encoded = Uri.encodeComponent(email);
+        context.go('/otp?identifier=$encoded&channel=email&flow=reset');
+      } catch (_) {
+        if (!mounted) return;
+        final err = ref.read(authControllerProvider).errorMessage;
+        GlassToast.showError(
+          context,
+          err ?? 'Unable to verify your account. Please try again.',
+        );
+      }
       return;
     }
 
@@ -307,11 +324,27 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
     final phone = await _promptForgotPasswordPhone(prefill: prefill);
     if (phone == null || phone.isEmpty) return;
-    await notifier.requestOtp(phone);
-    if (!mounted) return;
-    if (ref.read(authControllerProvider).errorMessage != null) return;
-    final encoded = Uri.encodeComponent(phone);
-    context.go('/otp?identifier=$encoded&channel=phone&flow=reset');
+    final normalizedPhone = normalizePhone(phone);
+    try {
+      final status = await notifier.checkIdentifierStatus(normalizedPhone);
+      if (!mounted) return;
+      if (!status.exists) {
+        GlassToast.showError(context, noAccountMessage);
+        return;
+      }
+      await notifier.requestOtp(normalizedPhone);
+      if (!mounted) return;
+      if (ref.read(authControllerProvider).errorMessage != null) return;
+      final encoded = Uri.encodeComponent(normalizedPhone);
+      context.go('/otp?identifier=$encoded&channel=phone&flow=reset');
+    } catch (_) {
+      if (!mounted) return;
+      final err = ref.read(authControllerProvider).errorMessage;
+      GlassToast.showError(
+        context,
+        err ?? 'Unable to verify your account. Please try again.',
+      );
+    }
   }
 
   Widget _buildSignUpLink(

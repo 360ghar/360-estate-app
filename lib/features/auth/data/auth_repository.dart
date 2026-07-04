@@ -101,14 +101,16 @@ class AuthRepository {
   /// Resolves an identifier (email or phone) against the backend login state
   /// machine: `POST /api/v1/auth/identifier-status`.
   ///
-  /// Returns null when the backend can't be reached so callers can fall back
-  /// to a safe default (treat as new account -> OTP-first signup).
-  Future<IdentifierStatus?> checkIdentifierStatus(String identifier) async {
+  /// Throws [UnknownFailure] when the backend can't be reached so callers can
+  /// surface the error instead of silently degrading to a signup/OTP flow.
+  Future<IdentifierStatus> checkIdentifierStatus(String identifier) async {
     final isEmail = isEmailIdentifier(identifier);
     final normalized = isEmail
         ? identifier.trim().toLowerCase()
         : normalizePhone(identifier);
-    if (normalized.isEmpty) return null;
+    if (normalized.isEmpty) {
+      throw UnknownFailure('Invalid identifier.');
+    }
     try {
       final response = await _client.post<dynamic>(
         '/api/v1/auth/identifier-status',
@@ -131,9 +133,12 @@ class AuthRepository {
             : IdentifierNextStep.otp,
       );
     } on Failure {
-      return null;
-    } catch (_) {
-      return null;
+      rethrow;
+    } catch (e) {
+      throw UnknownFailure(
+        'Unable to verify your account. Please try again.',
+        cause: e,
+      );
     }
   }
 
