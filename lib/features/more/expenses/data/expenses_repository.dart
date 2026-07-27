@@ -46,7 +46,7 @@ class ExpensesRepository {
 
   Future<List<Expense>> list({int? propertyId}) async {
     final response = await _client.get<dynamic>(
-      '/pm/expenses/',
+      '/pm/expenses',
       queryParameters: {
         if (propertyId != null) 'property_id': propertyId,
       },
@@ -60,7 +60,7 @@ class ExpensesRepository {
 
   Future<Expense> create(ExpensePayload payload) async {
     final response = await _client.post<dynamic>(
-      '/pm/expenses/',
+      '/pm/expenses',
       data: payload.toJson(),
     );
     final data = unwrapMap(response.data);

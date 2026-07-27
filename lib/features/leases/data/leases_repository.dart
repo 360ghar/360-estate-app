@@ -18,7 +18,7 @@ class LeasesRepositoryImpl implements LeasesRepository {
     String? status,
   }) async {
     final response = await _client.get<dynamic>(
-      '/pm/leases/',
+      '/pm/leases',
       queryParameters: {
         if (propertyId != null) 'property_id': propertyId,
         if (tenantId != null) 'tenant_id': tenantId,
@@ -42,7 +42,7 @@ class LeasesRepositoryImpl implements LeasesRepository {
   @override
   Future<Lease> create(LeaseCreateRequest request) async {
     final response = await _client.post<dynamic>(
-      '/pm/leases/',
+      '/pm/leases',
       data: request.toJson(),
     );
     final data = unwrapMap(response.data);

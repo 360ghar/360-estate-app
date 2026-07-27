@@ -31,7 +31,7 @@ class TenantsRepository {
     }
 
     final response = await _client.get<dynamic>(
-      '/pm/tenants/',
+      '/pm/tenants',
       queryParameters: {
         if (cursor != null) 'cursor': cursor,
         'limit': limit,

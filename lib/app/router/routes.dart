@@ -10,6 +10,10 @@ abstract final class Routes {
   static const signup = '/signup';
   static const otp = '/otp';
 
+  // Public legal routes used before authentication (for sign-up consent).
+  static const publicPrivacyPolicy = '/legal/privacy-policy';
+  static const publicTermsOfService = '/legal/terms-of-service';
+
   // Main tab routes
   static const home = '/home';
   static const properties = '/properties';
@@ -17,7 +21,7 @@ abstract final class Routes {
   static const tasks = '/tasks';
   static const more = '/more';
 
-// Properties sub-routes
+  // Properties sub-routes
   static const propertiesCreate = '/properties/create';
   static const locationSearch = '/location-search';
   static String propertyDetail(String id) => '/properties/$id';

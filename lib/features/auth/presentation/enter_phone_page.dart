@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:ui';
+
 import 'package:estate_app/app/router/routes.dart';
+import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/core/presentation/animations/premium/premium_animations.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
@@ -47,9 +49,9 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
   void initState() {
     super.initState();
     _termsRecognizer = TapGestureRecognizer()
-      ..onTap = () => context.push(Routes.termsOfService);
+      ..onTap = () => context.push(Routes.publicTermsOfService);
     _privacyRecognizer = TapGestureRecognizer()
-      ..onTap = () => context.push(Routes.privacyPolicy);
+      ..onTap = () => context.push(Routes.publicPrivacyPolicy);
   }
 
   @override
@@ -107,8 +109,7 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
       // Verified existing account with a password -> password screen.
       // Everything else (unverified, unknown, passwordless) -> OTP first.
       final goToPassword =
-          status.exists &&
-          status.nextStep == IdentifierNextStep.password;
+          status.exists && status.nextStep == IdentifierNextStep.password;
 
       if (goToPassword) {
         context.go('/login?identifier=$encoded');
@@ -153,7 +154,16 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
       context.go('/otp?identifier=$encoded&channel=phone$requireParam');
     } catch (error) {
       if (!mounted) return;
-      _showErrorSnackBar(error.toString());
+      // Prefer Failure.message / controller-mapped text — never surface
+      // `ValidationFailure(message: ...)` via error.toString().
+      final fromState = ref.read(authControllerProvider).errorMessage;
+      if (fromState != null && fromState.isNotEmpty) {
+        _showErrorSnackBar(fromState);
+      } else if (error is Failure) {
+        _showErrorSnackBar(error.message);
+      } else {
+        _showErrorSnackBar('Something went wrong. Please try again.');
+      }
     } finally {
       if (mounted) setState(() => _isChecking = false);
     }

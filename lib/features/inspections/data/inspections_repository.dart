@@ -43,7 +43,7 @@ class InspectionsRepository {
     String? status,
   }) async {
     final response = await _client.get<dynamic>(
-      '/pm/inspections/',
+      '/pm/inspections',
       queryParameters: {
         if (propertyId != null) 'property_id': propertyId,
         if (tenantId != null) 'tenant_id': tenantId,
@@ -65,7 +65,7 @@ class InspectionsRepository {
 
   Future<Inspection> create(InspectionCreateRequest request) async {
     final response = await _client.post<dynamic>(
-      '/pm/inspections/',
+      '/pm/inspections',
       data: request.toJson(),
     );
     final data = unwrapMap(response.data);

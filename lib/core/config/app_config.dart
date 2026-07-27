@@ -116,7 +116,7 @@ final class AppConfig {
     final environment = _parseEnv(envRaw);
 
     const apiBaseUrlDefine = String.fromEnvironment('API_BASE_URL');
-    final apiBaseUrl = apiBaseUrlDefine.trim().isNotEmpty
+    final apiBaseUrlRaw = apiBaseUrlDefine.trim().isNotEmpty
         ? apiBaseUrlDefine
         : (dotenv.env['API_BASE_URL'] ?? '');
 
@@ -178,9 +178,12 @@ final class AppConfig {
 
     final featureFlags = FeatureFlags.fromEnvironment(environment);
 
-    if (apiBaseUrl.trim().isEmpty) {
+    if (apiBaseUrlRaw.trim().isEmpty) {
       throw StateError('Missing API_BASE_URL configuration.');
     }
+    // Base URL must include /api/v1 exactly once; call sites use bare paths
+    // like /auth/... and /pm/....
+    final apiBaseUrl = normalizeApiBaseUrl(apiBaseUrlRaw);
     if (supabaseUrl.trim().isEmpty ||
         supabasePublishableKey.trim().isEmpty) {
       throw StateError(
@@ -200,5 +203,29 @@ final class AppConfig {
       googleWebClientId: googleWebClientId,
       googleIosClientId: googleIosClientId,
     );
+  }
+
+  /// Ensures [baseUrl] ends with a single `/api/v1` suffix.
+  ///
+  /// Accepts hosts with or without the version prefix and strips trailing
+  /// slashes / duplicate `/api/v1` segments so misconfigured `.env` values
+  /// (e.g. `https://api.360ghar.com` or `.../api/v1/api/v1`) still work.
+  static String normalizeApiBaseUrl(String baseUrl) {
+    var normalized = baseUrl.trim();
+    if (normalized.isEmpty) return normalized;
+
+    while (normalized.endsWith('/')) {
+      normalized = normalized.substring(0, normalized.length - 1);
+    }
+
+    const prefix = '/api/v1';
+    while (normalized.endsWith(prefix)) {
+      normalized = normalized.substring(0, normalized.length - prefix.length);
+      while (normalized.endsWith('/')) {
+        normalized = normalized.substring(0, normalized.length - 1);
+      }
+    }
+
+    return '$normalized$prefix';
   }
 }

@@ -11,7 +11,7 @@ class DocumentsRepository {
   final ApiClient _client;
 
   Future<List<DocumentItem>> list() async {
-    final response = await _client.get<dynamic>('/pm/documents/');
+    final response = await _client.get<dynamic>('/pm/documents');
     final page = unwrapPage(response.data);
     return page.items
         .whereType<Map<String, dynamic>>()

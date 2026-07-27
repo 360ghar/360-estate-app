@@ -141,7 +141,7 @@ class ApplicationsRepository {
     String? status,
   }) async {
     final response = await _client.get<dynamic>(
-      '/pm/applications/',
+      '/pm/applications',
       queryParameters: {
         if (status != null) 'status': status,
         if (cursor != null) 'cursor': cursor,

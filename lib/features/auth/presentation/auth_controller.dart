@@ -10,6 +10,7 @@ import 'package:estate_app/core/storage/auth_token_storage.dart';
 import 'package:estate_app/features/auth/data/apple_sign_in_service.dart';
 import 'package:estate_app/features/auth/data/auth_repository.dart';
 import 'package:estate_app/features/auth/data/google_sign_in_service.dart';
+import 'package:estate_app/features/auth/data/supabase_auth_error_mapper.dart';
 import 'package:estate_app/features/auth/models/auth_method.dart';
 import 'package:estate_app/features/auth/models/user_profile.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -877,6 +878,19 @@ class AuthController extends StateNotifier<AuthState> {
 
   String _messageForError(Object error) {
     if (error is Failure) return error.message;
+    // AuthException may surface when repository paths don't wrap it, or when
+    // a cause is rethrown. Map to product copy instead of a generic fallback.
+    if (error is supabase.AuthException) {
+      return mapSupabaseAuthError(error);
+    }
+    final raw = error.toString().toLowerCase();
+    if (raw.contains('socket') ||
+        raw.contains('network') ||
+        raw.contains('failed host lookup') ||
+        raw.contains('connection refused') ||
+        raw.contains('connection reset')) {
+      return 'Network error. Check your connection and try again.';
+    }
     return 'Something went wrong. Please try again.';
   }
 

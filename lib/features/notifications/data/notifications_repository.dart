@@ -36,7 +36,7 @@ class NotificationsRepository {
     String? cursor,
   }) async {
     final response = await _client.get<dynamic>(
-      '/notifications/users/$userId/',
+      '/notifications/users/$userId',
       queryParameters: {
         'limit': limit,
         if (cursor != null) 'cursor': cursor,

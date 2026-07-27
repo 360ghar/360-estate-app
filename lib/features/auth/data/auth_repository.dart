@@ -8,6 +8,7 @@ import 'package:estate_app/core/storage/auth_token_storage.dart';
 import 'package:estate_app/core/utils/phone_utils.dart';
 import 'package:estate_app/features/auth/data/apple_sign_in_service.dart';
 import 'package:estate_app/features/auth/data/google_sign_in_service.dart';
+import 'package:estate_app/features/auth/data/supabase_auth_error_mapper.dart';
 import 'package:estate_app/features/auth/models/auth_method.dart';
 import 'package:estate_app/features/auth/models/user_profile.dart';
 import 'package:mime/mime.dart';
@@ -52,7 +53,8 @@ class UserProfileUpdate {
       payload['phone'] = phone!.trim();
     }
     if (avatarUrl != null && avatarUrl!.trim().isNotEmpty) {
-      payload['avatar_url'] = avatarUrl!.trim();
+      // Backend UserUpdate field is profile_image_url (not avatar_url).
+      payload['profile_image_url'] = avatarUrl!.trim();
     }
     if (dateOfBirth != null) {
       payload['date_of_birth'] = dateOfBirth!.toIso8601String();
@@ -99,7 +101,7 @@ class AuthRepository {
   }
 
   /// Resolves an identifier (email or phone) against the backend login state
-  /// machine: `POST /api/v1/auth/identifier-status`.
+  /// machine: `POST /api/v1/auth/identifier-status` (bare path; base includes `/api/v1`).
   ///
   /// Throws [UnknownFailure] when the backend can't be reached so callers can
   /// surface the error instead of silently degrading to a signup/OTP flow.
@@ -113,7 +115,7 @@ class AuthRepository {
     }
     try {
       final response = await _client.post<dynamic>(
-        '/api/v1/auth/identifier-status',
+        '/auth/identifier-status',
         data: {'identifier': normalized},
       );
       final data = unwrapMap(response.data);
@@ -147,7 +149,7 @@ class AuthRepository {
   Future<void> recordLastMethod(AuthMethod method) async {
     try {
       await _client.post<dynamic>(
-        '/api/v1/auth/last-method',
+        '/auth/last-method',
         data: {'method': method.wireName},
       );
     } catch (_) {
@@ -159,7 +161,7 @@ class AuthRepository {
   /// Returns a map with `stage`, `next_action`, and `missing_fields`.
   Future<Map<String, dynamic>> getAuthGateState({String app = 'estate'}) async {
     final response = await _client.get<dynamic>(
-      '/api/v1/users/me/auth-state',
+      '/users/me/auth-state',
       queryParameters: {'app': app},
     );
     return Map<String, dynamic>.from(response.data as Map);
@@ -171,7 +173,7 @@ class AuthRepository {
   Future<void> completeOnboarding({String app = 'estate'}) async {
     try {
       await _client.post<dynamic>(
-        '/api/v1/users/me/onboarding',
+        '/users/me/onboarding',
         queryParameters: {'app': app},
       );
     } catch (_) {
@@ -263,7 +265,7 @@ class AuthRepository {
     } on Failure {
       rethrow;
     } on AuthException catch (e) {
-      throw ValidationFailure(e.message.trim(), cause: e);
+      throw failureFromAuthException(e);
     } catch (e) {
       throw UnknownFailure('Google sign-in failed', cause: e);
     }
@@ -317,7 +319,7 @@ class AuthRepository {
     } on Failure {
       rethrow;
     } on AuthException catch (e) {
-      throw ValidationFailure(e.message.trim(), cause: e);
+      throw failureFromAuthException(e);
     } catch (e) {
       throw UnknownFailure('Apple sign-in failed', cause: e);
     }
@@ -344,7 +346,7 @@ class AuthRepository {
       final user = response.user ?? session.user;
       return _fetchProfileWithFallback(user);
     } on AuthException catch (e) {
-      throw ValidationFailure(e.message.trim(), cause: e);
+      throw failureFromAuthException(e);
     } catch (e) {
       throw UnknownFailure('Authentication failed', cause: e);
     }
@@ -384,7 +386,7 @@ class AuthRepository {
       }
       return _fetchProfileWithFallback(user);
     } on AuthException catch (e) {
-      throw ValidationFailure(e.message.trim(), cause: e);
+      throw failureFromAuthException(e);
     } catch (e) {
       throw UnknownFailure('Sign up failed', cause: e);
     }
@@ -403,10 +405,16 @@ class AuthRepository {
     if (!_isSupabaseReady) {
       throw const UnknownFailure('Supabase is not configured for OTP login.');
     }
-    await _supabase.auth.signInWithOtp(
-      phone: normalizedPhone,
-      shouldCreateUser: shouldCreateUser,
-    );
+    try {
+      await _supabase.auth.signInWithOtp(
+        phone: normalizedPhone,
+        shouldCreateUser: shouldCreateUser,
+      );
+    } on AuthException catch (e) {
+      throw failureFromAuthException(e);
+    } catch (e) {
+      throw UnknownFailure('Failed to send OTP', cause: e);
+    }
   }
 
   Future<UserProfile> verifyOtp({
@@ -420,18 +428,25 @@ class AuthRepository {
     if (!_isSupabaseReady) {
       throw const UnknownFailure('Supabase is not configured for OTP login.');
     }
-    final response = await _supabase.auth.verifyOTP(
-      phone: normalizedPhone,
-      token: otp,
-      type: OtpType.sms,
-    );
-    final session = response.session ?? _supabase.auth.currentSession;
-    if (session == null) {
-      throw const UnknownFailure('Login succeeded but session is missing');
+    try {
+      final response = await _supabase.auth.verifyOTP(
+        phone: normalizedPhone,
+        token: otp,
+        type: OtpType.sms,
+      );
+      final session = response.session ?? _supabase.auth.currentSession;
+      if (session == null) {
+        throw const UnknownFailure('Login succeeded but session is missing');
+      }
+      await _tokenStorage.save(session.accessToken);
+      final user = response.user ?? session.user;
+      return _fetchProfileWithFallback(user);
+    } on AuthException catch (e) {
+      throw failureFromAuthException(e, context: AuthErrorContext.otp);
+    } catch (e) {
+      if (e is Failure) rethrow;
+      throw UnknownFailure('OTP verification failed', cause: e);
     }
-    await _tokenStorage.save(session.accessToken);
-    final user = response.user ?? session.user;
-    return _fetchProfileWithFallback(user);
   }
 
   /// Sends a 6-digit email OTP (Supabase `OtpType.email`).
@@ -457,7 +472,7 @@ class AuthRepository {
         emailRedirectTo: googleOAuthRedirectUrl,
       );
     } on AuthException catch (e) {
-      throw ValidationFailure(e.message.trim(), cause: e);
+      throw failureFromAuthException(e);
     }
   }
 
@@ -487,7 +502,7 @@ class AuthRepository {
       final user = response.user ?? session.user;
       return _fetchProfileWithFallback(user);
     } on AuthException catch (e) {
-      throw ValidationFailure(e.message.trim(), cause: e);
+      throw failureFromAuthException(e, context: AuthErrorContext.otp);
     }
   }
 
@@ -513,7 +528,7 @@ class AuthRepository {
       final user = response.user ?? session.user;
       return _fetchProfileWithFallback(user);
     } on AuthException catch (e) {
-      throw ValidationFailure(e.message.trim(), cause: e);
+      throw failureFromAuthException(e);
     } catch (e) {
       throw UnknownFailure('Authentication failed', cause: e);
     }
@@ -537,7 +552,7 @@ class AuthRepository {
     try {
       await _supabase.auth.updateUser(UserAttributes(password: newPassword));
     } on AuthException catch (e) {
-      throw ValidationFailure(e.message.trim(), cause: e);
+      throw failureFromAuthException(e);
     } catch (e) {
       throw UnknownFailure('Failed to set password', cause: e);
     }
@@ -559,7 +574,7 @@ class AuthRepository {
     try {
       await _supabase.auth.updateUser(UserAttributes(phone: normalizedPhone));
     } on AuthException catch (e) {
-      throw ValidationFailure(e.message.trim(), cause: e);
+      throw failureFromAuthException(e);
     } catch (e) {
       throw UnknownFailure('Failed to start phone verification', cause: e);
     }
@@ -591,14 +606,14 @@ class AuthRepository {
       final user = response.user ?? session?.user;
       return _fetchProfileWithFallback(user);
     } on AuthException catch (e) {
-      throw ValidationFailure(e.message.trim(), cause: e);
+      throw failureFromAuthException(e, context: AuthErrorContext.otp);
     } catch (e) {
       throw UnknownFailure('Failed to verify phone', cause: e);
     }
   }
 
   Future<UserProfile> fetchProfile() async {
-    final response = await _client.get<dynamic>('/users/profile/');
+    final response = await _client.get<dynamic>('/users/profile');
     final data = unwrapMap(response.data);
     return UserProfile.fromJson(data);
   }
@@ -618,7 +633,7 @@ class AuthRepository {
 
   Future<UserProfile> updateProfile(UserProfileUpdate update) async {
     final response = await _client.put<dynamic>(
-      '/users/profile/',
+      '/users/profile',
       data: update.toJson(),
     );
     final data = unwrapMap(response.data);
@@ -664,7 +679,7 @@ class AuthRepository {
       });
 
       final response = await _client.upload<dynamic>(
-        '/api/v1/upload',
+        '/upload',
         data: formData,
       );
 
@@ -714,8 +729,10 @@ class AuthRepository {
 
       // Update password
       await _supabase.auth.updateUser(UserAttributes(password: newPassword));
+    } on Failure {
+      rethrow;
     } on AuthException catch (e) {
-      throw ValidationFailure(e.message.trim(), cause: e);
+      throw failureFromAuthException(e);
     } catch (e) {
       throw UnknownFailure('Failed to change password', cause: e);
     }
@@ -725,8 +742,8 @@ class AuthRepository {
   Future<UserProfile> updateProfilePhoto(String photoUrl) async {
     try {
       final response = await _client.put<dynamic>(
-        '/users/profile/',
-        data: {'avatar_url': photoUrl},
+        '/users/profile',
+        data: {'profile_image_url': photoUrl},
       );
       final data = unwrapMap(response.data);
       return UserProfile.fromJson(data);

@@ -38,7 +38,7 @@ class PropertiesRepositoryImpl implements PropertiesRepository {
     }
 
     final response = await _client.get<dynamic>(
-      '/pm/properties/',
+      '/pm/properties',
       queryParameters: {
         if (cursor != null) 'cursor': cursor,
         'limit': limit,
@@ -84,7 +84,7 @@ class PropertiesRepositoryImpl implements PropertiesRepository {
   @override
   Future<Property> create(PropertyPayload payload) async {
     final response = await _client.post<dynamic>(
-      '/pm/properties/',
+      '/pm/properties',
       data: payload.toJson(),
     );
     final data = _normalizePropertyJson(

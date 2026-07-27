@@ -77,7 +77,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isLoggedIn = authState.isLoggedIn;
       final needsPhone = authState.status == AuthStatus.needsPhone;
       final needsPassword = authState.status == AuthStatus.needsPassword;
-      final needsProfileCompletion = authState.status == AuthStatus.needsProfileCompletion;
+      final needsProfileCompletion =
+          authState.status == AuthStatus.needsProfileCompletion;
       final needsOnboarding = authState.status == AuthStatus.needsOnboarding;
       final location = state.uri.path;
 
@@ -95,7 +96,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           isSetPassword ||
           isProfileCompletion ||
           isOnboarding;
-      final isPublicRoute = location.startsWith('/public');
+      final isPublicRoute =
+          location.startsWith('/public') || location.startsWith('/legal/');
       final isApplicationsRoute = location.startsWith('/more/applications');
 
       if (isPublicRoute) {
@@ -160,6 +162,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      GoRoute(
+        path: Routes.publicPrivacyPolicy,
+        builder: (context, state) => LegalContentPage(
+          title: context.l10n?.privacyPolicy ?? 'Privacy Policy',
+          url: kPrivacyPolicyUrl,
+        ),
+      ),
+      GoRoute(
+        path: Routes.publicTermsOfService,
+        builder: (context, state) => LegalContentPage(
+          title: context.l10n?.termsOfService ?? 'Terms of Service',
+          url: kTermsOfServiceUrl,
+        ),
+      ),
       GoRoute(
         path: '/public/applications/:slug',
         builder: (context, state) {
@@ -509,12 +525,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                           ),
                           GoRoute(
                             path: 'delete-account',
-                            builder: (context, state) => const DeleteAccountPage(),
+                            builder: (context, state) =>
+                                const DeleteAccountPage(),
                           ),
                           GoRoute(
                             path: 'privacy-policy',
                             builder: (context, state) => LegalContentPage(
-                              title: context.l10n?.privacyPolicy ??
+                              title:
+                                  context.l10n?.privacyPolicy ??
                                   'Privacy Policy',
                               url: kPrivacyPolicyUrl,
                             ),
@@ -522,7 +540,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                           GoRoute(
                             path: 'terms-of-service',
                             builder: (context, state) => LegalContentPage(
-                              title: context.l10n?.termsOfService ??
+                              title:
+                                  context.l10n?.termsOfService ??
                                   'Terms of Service',
                               url: kTermsOfServiceUrl,
                             ),

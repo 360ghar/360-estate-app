@@ -48,7 +48,7 @@ class FileUploadService {
     });
 
     final path =
-        target == UploadTarget.documents ? '/pm/documents/upload' : '/upload/';
+        target == UploadTarget.documents ? '/pm/documents/upload' : '/upload';
     final response = await _client.upload<Map<String, dynamic>>(
       path,
       data: formData,

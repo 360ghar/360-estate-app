@@ -14,11 +14,21 @@ class UserProfile with _$UserProfile {
     String? phone,
     String? email,
     String? role,
+    // Client field name is avatarUrl; backend wire name is profile_image_url
+    // (avatar_url accepted as legacy alias via fromJson normalization below).
     @JsonKey(name: 'avatar_url') String? avatarUrl,
   }) = _UserProfile;
 
-  factory UserProfile.fromJson(Map<String, dynamic> json) =>
-      _$UserProfileFromJson(json);
+  factory UserProfile.fromJson(Map<String, dynamic> json) {
+    final map = Map<String, dynamic>.from(json);
+    // Backend UserSchema uses profile_image_url + full_name only.
+    map['avatar_url'] ??= map['profile_image_url'];
+    map['full_name'] ??= map['name'];
+    // Prefer explicit first/last; otherwise leave null (displayName uses full_name).
+    map['first_name'] ??= map['firstName'];
+    map['last_name'] ??= map['lastName'];
+    return _$UserProfileFromJson(map);
+  }
 }
 
 extension UserProfileX on UserProfile {
