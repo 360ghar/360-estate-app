@@ -668,7 +668,7 @@ class AuthRepository {
         throw const ValidationFailure('Image size must be less than 5MB');
       }
 
-      final fileName = imageFile.path.split('/').last;
+      final fileName = imageFile.path.split(Platform.pathSeparator).last;
       final formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(
           imageFile.path,
@@ -678,10 +678,7 @@ class AuthRepository {
         'visibility': 'public',
       });
 
-      final response = await _client.upload<dynamic>(
-        '/upload',
-        data: formData,
-      );
+      final response = await _client.upload<dynamic>('/upload', data: formData);
 
       final data = response.data;
       final imageUrl = data['public_url'] as String?;

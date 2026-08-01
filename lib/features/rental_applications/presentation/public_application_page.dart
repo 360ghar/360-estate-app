@@ -1,6 +1,7 @@
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:estate_app/core/presentation/errors/user_facing_message.dart';
 import 'package:estate_app/core/presentation/widgets/app_empty_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loading_shimmer.dart';
@@ -24,8 +25,7 @@ class PublicApplicationPage extends ConsumerStatefulWidget {
       _PublicApplicationPageState();
 }
 
-class _PublicApplicationPageState
-    extends ConsumerState<PublicApplicationPage> {
+class _PublicApplicationPageState extends ConsumerState<PublicApplicationPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -64,9 +64,9 @@ class _PublicApplicationPageState
 
     final missing = _validateRequiredFields(form.fields ?? const []);
     if (missing != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill "$missing".')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Please fill "$missing".')));
       return;
     }
 
@@ -100,9 +100,9 @@ class _PublicApplicationPageState
       }
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(userFacingMessage(error))));
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -151,7 +151,7 @@ class _PublicApplicationPageState
         loading: () => const AppLoadingShimmer(itemCount: 3),
         error: (error, _) => AppErrorView(
           title: 'Unable to load form',
-          message: error.toString(),
+          message: userFacingMessage(error),
           onRetry: () =>
               ref.invalidate(publicApplicationFormProvider(widget.slug)),
           retryLabel: 'Try again',
@@ -240,10 +240,9 @@ class _PublicApplicationPageState
                   labelText: 'Full name',
                   prefixIcon: Icon(Icons.person_outline),
                 ),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty
-                        ? 'Enter your name.'
-                        : null,
+                validator: (value) => value == null || value.trim().isEmpty
+                    ? 'Enter your name.'
+                    : null,
               ),
               const SizedBox(height: AppSpacing.lg),
               TextFormField(
@@ -253,10 +252,9 @@ class _PublicApplicationPageState
                   prefixIcon: Icon(Icons.email_outlined),
                 ),
                 keyboardType: TextInputType.emailAddress,
-                validator: (value) =>
-                    value == null || value.trim().isEmpty
-                        ? 'Enter your email.'
-                        : null,
+                validator: (value) => value == null || value.trim().isEmpty
+                    ? 'Enter your email.'
+                    : null,
               ),
               const SizedBox(height: AppSpacing.lg),
               TextFormField(
@@ -266,10 +264,9 @@ class _PublicApplicationPageState
                   prefixIcon: Icon(Icons.phone_outlined),
                 ),
                 keyboardType: TextInputType.phone,
-                validator: (value) =>
-                    value == null || value.trim().isEmpty
-                        ? 'Enter your phone number.'
-                        : null,
+                validator: (value) => value == null || value.trim().isEmpty
+                    ? 'Enter your phone number.'
+                    : null,
               ),
             ],
           ),
@@ -341,9 +338,9 @@ class _PublicApplicationPageState
             const SizedBox(width: AppSpacing.sm),
             Text(
               'No extra fields required for this application.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
             ),
           ],
         ),

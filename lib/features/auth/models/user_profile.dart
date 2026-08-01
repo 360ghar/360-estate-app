@@ -5,6 +5,9 @@ part 'user_profile.freezed.dart';
 part 'user_profile.g.dart';
 
 @freezed
+// createToJson: false — UserProfile is only ever deserialized from the
+// backend; nothing serializes it (auth_session.user is includeToJson: false).
+@JsonSerializable(createToJson: false)
 class UserProfile with _$UserProfile {
   const factory UserProfile({
     @JsonKey(fromJson: parseInt) int? id,

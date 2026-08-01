@@ -21,7 +21,10 @@ AuthSession _$AuthSessionFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$AuthSession {
-  String get token => throw _privateConstructorUsedError;
+  String get token =>
+      throw _privateConstructorUsedError; // Deserialize-only: the app never serializes AuthSession back to the
+  // backend, so no UserProfile.toJson is required by codegen.
+  @JsonKey(includeToJson: false)
   UserProfile? get user => throw _privateConstructorUsedError;
 
   /// Serializes this AuthSession to a JSON map.
@@ -41,7 +44,7 @@ abstract class $AuthSessionCopyWith<$Res> {
     $Res Function(AuthSession) then,
   ) = _$AuthSessionCopyWithImpl<$Res, AuthSession>;
   @useResult
-  $Res call({String token, UserProfile? user});
+  $Res call({String token, @JsonKey(includeToJson: false) UserProfile? user});
 
   $UserProfileCopyWith<$Res>? get user;
 }
@@ -100,7 +103,7 @@ abstract class _$$AuthSessionImplCopyWith<$Res>
   ) = __$$AuthSessionImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String token, UserProfile? user});
+  $Res call({String token, @JsonKey(includeToJson: false) UserProfile? user});
 
   @override
   $UserProfileCopyWith<$Res>? get user;
@@ -138,14 +141,20 @@ class __$$AuthSessionImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$AuthSessionImpl implements _AuthSession {
-  const _$AuthSessionImpl({required this.token, this.user});
+  const _$AuthSessionImpl({
+    required this.token,
+    @JsonKey(includeToJson: false) this.user,
+  });
 
   factory _$AuthSessionImpl.fromJson(Map<String, dynamic> json) =>
       _$$AuthSessionImplFromJson(json);
 
   @override
   final String token;
+  // Deserialize-only: the app never serializes AuthSession back to the
+  // backend, so no UserProfile.toJson is required by codegen.
   @override
+  @JsonKey(includeToJson: false)
   final UserProfile? user;
 
   @override
@@ -183,15 +192,17 @@ class _$AuthSessionImpl implements _AuthSession {
 abstract class _AuthSession implements AuthSession {
   const factory _AuthSession({
     required final String token,
-    final UserProfile? user,
+    @JsonKey(includeToJson: false) final UserProfile? user,
   }) = _$AuthSessionImpl;
 
   factory _AuthSession.fromJson(Map<String, dynamic> json) =
       _$AuthSessionImpl.fromJson;
 
   @override
-  String get token;
+  String get token; // Deserialize-only: the app never serializes AuthSession back to the
+  // backend, so no UserProfile.toJson is required by codegen.
   @override
+  @JsonKey(includeToJson: false)
   UserProfile? get user;
 
   /// Create a copy of AuthSession

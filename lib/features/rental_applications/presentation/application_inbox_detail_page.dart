@@ -1,6 +1,7 @@
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:estate_app/core/presentation/errors/user_facing_message.dart';
 import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loading_shimmer.dart';
@@ -51,9 +52,7 @@ class _ApplicationInboxDetailPageState
                 borderRadius: AppRadii.sm,
               ),
               child: Icon(
-                isApproval
-                    ? Icons.check_circle_outline
-                    : Icons.cancel_outlined,
+                isApproval ? Icons.check_circle_outline : Icons.cancel_outlined,
                 color: isApproval ? AppColors.success : AppColors.danger,
                 size: 20,
               ),
@@ -69,9 +68,9 @@ class _ApplicationInboxDetailPageState
               isApproval
                   ? 'Are you sure you want to approve this application?'
                   : 'Are you sure you want to reject this application?',
-              style: Theme.of(dialogContext).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(
+                dialogContext,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
             ),
             const SizedBox(height: AppSpacing.lg),
             TextField(
@@ -93,8 +92,9 @@ class _ApplicationInboxDetailPageState
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor:
-                  isApproval ? AppColors.success : AppColors.danger,
+              backgroundColor: isApproval
+                  ? AppColors.success
+                  : AppColors.danger,
             ),
             child: Text(isApproval ? 'Approve' : 'Reject'),
           ),
@@ -115,15 +115,15 @@ class _ApplicationInboxDetailPageState
       ref.invalidate(applicationInboxPagedProvider);
       ref.invalidate(applicationDetailProvider(widget.applicationId));
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Application $decision.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Application $decision.')));
       }
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(userFacingMessage(error))));
     } finally {
       if (mounted) setState(() => _isProcessing = false);
     }
@@ -131,8 +131,9 @@ class _ApplicationInboxDetailPageState
 
   @override
   Widget build(BuildContext context) {
-    final applicationAsync =
-        ref.watch(applicationDetailProvider(widget.applicationId));
+    final applicationAsync = ref.watch(
+      applicationDetailProvider(widget.applicationId),
+    );
 
     return AppScaffold(
       appBar: AppBar(title: const Text('Application details')),
@@ -148,7 +149,7 @@ class _ApplicationInboxDetailPageState
         loading: () => const AppLoadingShimmer(itemCount: 3),
         error: (error, _) => AppErrorView(
           title: 'Unable to load application',
-          message: error.toString(),
+          message: userFacingMessage(error),
           onRetry: () =>
               ref.invalidate(applicationDetailProvider(widget.applicationId)),
           retryLabel: 'Try again',
@@ -224,8 +225,9 @@ class _ApplicationDetail extends StatelessWidget {
                     width: 52,
                     height: 52,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primary
-                          .withValues(alpha: isDark ? 0.2 : 0.1),
+                      color: theme.colorScheme.primary.withValues(
+                        alpha: isDark ? 0.2 : 0.1,
+                      ),
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
@@ -336,45 +338,45 @@ class _ApplicationDetail extends StatelessWidget {
                   .asMap()
                   .entries
                   .map((entry) {
-                final item = entry.value;
-                final isLast =
-                    entry.key ==
-                    submission.customFieldResponses!.length - 1;
-                return Padding(
-                  padding: EdgeInsets.only(
-                    bottom: isLast ? 0 : AppSpacing.sm,
-                  ),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppColors.darkSurfaceSecondary
-                          : AppColors.surfaceSecondary,
-                      borderRadius: AppRadii.md,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.key,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.textTertiary,
-                            fontWeight: FontWeight.w500,
-                          ),
+                    final item = entry.value;
+                    final isLast =
+                        entry.key ==
+                        submission.customFieldResponses!.length - 1;
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: isLast ? 0 : AppSpacing.sm,
+                      ),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? AppColors.darkSurfaceSecondary
+                              : AppColors.surfaceSecondary,
+                          borderRadius: AppRadii.md,
                         ),
-                        const SizedBox(height: AppSpacing.xxs),
-                        Text(
-                          item.value?.toString() ?? '-',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.key,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: AppColors.textTertiary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.xxs),
+                            Text(
+                              item.value?.toString() ?? '-',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                );
-              }),
+                      ),
+                    );
+                  }),
             if (submission.notes != null && submission.notes!.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.md),
               Container(
@@ -397,10 +399,7 @@ class _ApplicationDetail extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xxs),
-                    Text(
-                      submission.notes!,
-                      style: theme.textTheme.bodyMedium,
-                    ),
+                    Text(submission.notes!, style: theme.textTheme.bodyMedium),
                   ],
                 ),
               ),
@@ -506,11 +505,7 @@ class _ContactRow extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(
-          icon,
-          size: 16,
-          color: AppColors.textTertiary,
-        ),
+        Icon(icon, size: 16, color: AppColors.textTertiary),
         const SizedBox(width: AppSpacing.sm),
         SizedBox(
           width: 72,

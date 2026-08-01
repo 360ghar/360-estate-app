@@ -1,6 +1,7 @@
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:estate_app/core/presentation/errors/user_facing_message.dart';
 import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loading_shimmer.dart';
@@ -32,7 +33,7 @@ class ApplicationFormDetailPage extends ConsumerWidget {
         loading: () => const AppLoadingShimmer(itemCount: 3),
         error: (error, _) => AppErrorView(
           title: 'Unable to load form',
-          message: error.toString(),
+          message: userFacingMessage(error),
           onRetry: () => ref.invalidate(applicationFormDetailProvider(formId)),
           retryLabel: 'Try again',
         ),
@@ -161,7 +162,9 @@ class _FormDetail extends StatelessWidget {
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
-                      color: AppColors.info.withValues(alpha: isDark ? 0.2 : 0.1),
+                      color: AppColors.info.withValues(
+                        alpha: isDark ? 0.2 : 0.1,
+                      ),
                       borderRadius: AppRadii.sm,
                     ),
                     child: const Icon(
@@ -214,11 +217,11 @@ class _FormDetail extends StatelessWidget {
                           ? null
                           : () async {
                               await Clipboard.setData(
-                                  ClipboardData(text: link));
+                                ClipboardData(text: link),
+                              );
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('Link copied.')),
+                                  const SnackBar(content: Text('Link copied.')),
                                 );
                               }
                             },
@@ -229,8 +232,7 @@ class _FormDetail extends StatelessWidget {
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed:
-                          link.isEmpty ? null : () => context.go(link),
+                      onPressed: link.isEmpty ? null : () => context.go(link),
                       icon: const Icon(Icons.open_in_new_rounded, size: 16),
                       label: const Text('Open form'),
                     ),
@@ -293,8 +295,9 @@ class _FormDetail extends StatelessWidget {
                           width: 32,
                           height: 32,
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.primary
-                                .withValues(alpha: isDark ? 0.15 : 0.08),
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: isDark ? 0.15 : 0.08,
+                            ),
                             borderRadius: AppRadii.sm,
                           ),
                           child: Icon(

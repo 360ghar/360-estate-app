@@ -64,7 +64,6 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
               'Push notifications will be available once FCM is configured. '
               'Use manual entry in debug mode to register a device token.',
             ),
-            duration: Duration(seconds: 4),
           ),
         );
       }
@@ -76,15 +75,17 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
   Future<void> _registerDeviceManual() async {
     final token = _tokenController.text.trim();
     if (token.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter a device token.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Enter a device token.')));
       return;
     }
 
     setState(() => _isRegistering = true);
     try {
-      await ref.read(notificationsRepositoryProvider).registerDevice(
+      await ref
+          .read(notificationsRepositoryProvider)
+          .registerDevice(
             DeviceRegistrationRequest(
               token: token,
               platform: _platformController.text.trim().isEmpty
@@ -93,15 +94,15 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
             ),
           );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Device registered.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Device registered.')));
       }
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
     } finally {
       if (mounted) setState(() => _isRegistering = false);
     }
@@ -172,9 +173,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                     setState(() => _showManualEntry = !_showManualEntry);
                   },
                   icon: Icon(
-                    _showManualEntry
-                        ? Icons.expand_less
-                        : Icons.expand_more,
+                    _showManualEntry ? Icons.expand_less : Icons.expand_more,
                   ),
                   label: Text(
                     _showManualEntry
@@ -204,8 +203,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                     width: double.infinity,
                     height: 48,
                     child: OutlinedButton.icon(
-                      onPressed:
-                          _isRegistering ? null : _registerDeviceManual,
+                      onPressed: _isRegistering ? null : _registerDeviceManual,
                       icon: const Icon(Icons.app_registration, size: 20),
                       label: const Text('Register (Manual)'),
                     ),
@@ -251,11 +249,12 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
               }
               return Column(
                 children: items
-                    .map((item) => Padding(
-                          padding:
-                              const EdgeInsets.only(bottom: AppSpacing.sm),
-                          child: _NotificationTile(item: item),
-                        ))
+                    .map(
+                      (item) => Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: _NotificationTile(item: item),
+                      ),
+                    )
                     .toList(),
               );
             },
@@ -263,8 +262,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
             error: (error, _) => AppErrorView(
               title: 'Unable to load notifications',
               message: error.toString(),
-              onRetry: () =>
-                  ref.invalidate(notificationsListProvider(userId)),
+              onRetry: () => ref.invalidate(notificationsListProvider(userId)),
               retryLabel: 'Try again',
             ),
           ),
@@ -403,11 +401,7 @@ class _NotificationTile extends StatelessWidget {
               color: iconColor.withValues(alpha: 0.10),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              _iconForType(item.type),
-              size: 20,
-              color: iconColor,
-            ),
+            child: Icon(_iconForType(item.type), size: 20, color: iconColor),
           ),
           const SizedBox(width: AppSpacing.md),
           // Content
@@ -421,8 +415,9 @@ class _NotificationTile extends StatelessWidget {
                       child: Text(
                         item.title ?? 'Notification',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight:
-                              isUnread ? FontWeight.w600 : FontWeight.w500,
+                          fontWeight: isUnread
+                              ? FontWeight.w600
+                              : FontWeight.w500,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -432,8 +427,7 @@ class _NotificationTile extends StatelessWidget {
                       Container(
                         width: 8,
                         height: 8,
-                        margin:
-                            const EdgeInsets.only(left: AppSpacing.sm),
+                        margin: const EdgeInsets.only(left: AppSpacing.sm),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.primary,
                           shape: BoxShape.circle,
@@ -458,8 +452,9 @@ class _NotificationTile extends StatelessWidget {
                   Text(
                     date,
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant
-                          .withValues(alpha: 0.7),
+                      color: theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.7,
+                      ),
                     ),
                   ),
                 ],

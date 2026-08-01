@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
@@ -5,6 +7,8 @@ import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
+import 'package:estate_app/core/providers.dart';
+import 'package:estate_app/core/storage/app_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,7 +25,9 @@ class NotificationSettingsPage extends ConsumerWidget {
 
     return AppScaffold(
       appBar: AppBar(
-        title: Text(context.l10n?.notificationPreferences ?? 'Notification Preferences'),
+        title: Text(
+          context.l10n?.notificationPreferences ?? 'Notification Preferences',
+        ),
       ),
       scrollable: true,
       body: Column(
@@ -59,13 +65,15 @@ class NotificationSettingsPage extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        context.l10n?.enablePushNotifications ?? 'Push Notifications',
+                        context.l10n?.enablePushNotifications ??
+                            'Push Notifications',
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       Text(
-                        context.l10n?.pushNotificationsDesc ?? 'Receive notifications on your device',
+                        context.l10n?.pushNotificationsDesc ??
+                            'Receive notifications on your device',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -76,7 +84,9 @@ class NotificationSettingsPage extends ConsumerWidget {
                 Switch(
                   value: masterEnabled,
                   onChanged: (value) {
-                    ref.read(notificationPreferencesProvider.notifier).setPreference('notificationsEnabled', value);
+                    ref
+                        .read(notificationPreferencesProvider.notifier)
+                        .setPreference('notificationsEnabled', value);
                   },
                 ),
               ],
@@ -96,11 +106,15 @@ class NotificationSettingsPage extends ConsumerWidget {
                 icon: Icons.payments_outlined,
                 iconColor: const Color(0xFF10B981),
                 title: context.l10n?.rentReminders ?? 'Rent Due Reminders',
-                description: context.l10n?.rentRemindersDesc ?? 'Get reminded before rent is due',
+                description:
+                    context.l10n?.rentRemindersDesc ??
+                    'Get reminded before rent is due',
                 value: prefs['rentRemindersEnabled'] ?? true,
                 enabled: masterEnabled,
                 onChanged: (value) {
-                  ref.read(notificationPreferencesProvider.notifier).setPreference('rentRemindersEnabled', value);
+                  ref
+                      .read(notificationPreferencesProvider.notifier)
+                      .setPreference('rentRemindersEnabled', value);
                 },
               ),
               _tileDivider(isDark),
@@ -108,11 +122,15 @@ class NotificationSettingsPage extends ConsumerWidget {
                 icon: Icons.account_balance_wallet_outlined,
                 iconColor: const Color(0xFF059669),
                 title: context.l10n?.paymentAlerts ?? 'Payment Received Alerts',
-                description: context.l10n?.paymentAlertsDesc ?? 'Know when payments are received',
+                description:
+                    context.l10n?.paymentAlertsDesc ??
+                    'Know when payments are received',
                 value: prefs['paymentAlertsEnabled'] ?? true,
                 enabled: masterEnabled,
                 onChanged: (value) {
-                  ref.read(notificationPreferencesProvider.notifier).setPreference('paymentAlertsEnabled', value);
+                  ref
+                      .read(notificationPreferencesProvider.notifier)
+                      .setPreference('paymentAlertsEnabled', value);
                 },
               ),
               _tileDivider(isDark),
@@ -120,11 +138,15 @@ class NotificationSettingsPage extends ConsumerWidget {
                 icon: Icons.description_outlined,
                 iconColor: const Color(0xFFF59E0B),
                 title: context.l10n?.leaseExpiryAlerts ?? 'Lease Expiry Alerts',
-                description: context.l10n?.leaseExpiryAlertsDesc ?? 'Get notified before leases expire',
+                description:
+                    context.l10n?.leaseExpiryAlertsDesc ??
+                    'Get notified before leases expire',
                 value: prefs['leaseExpiryAlertsEnabled'] ?? true,
                 enabled: masterEnabled,
                 onChanged: (value) {
-                  ref.read(notificationPreferencesProvider.notifier).setPreference('leaseExpiryAlertsEnabled', value);
+                  ref
+                      .read(notificationPreferencesProvider.notifier)
+                      .setPreference('leaseExpiryAlertsEnabled', value);
                 },
               ),
               _tileDivider(isDark),
@@ -132,23 +154,32 @@ class NotificationSettingsPage extends ConsumerWidget {
                 icon: Icons.build_outlined,
                 iconColor: const Color(0xFF8B5CF6),
                 title: context.l10n?.maintenanceAlerts ?? 'Maintenance Updates',
-                description: context.l10n?.maintenanceAlertsDesc ?? 'Updates on maintenance requests',
+                description:
+                    context.l10n?.maintenanceAlertsDesc ??
+                    'Updates on maintenance requests',
                 value: prefs['maintenanceAlertsEnabled'] ?? true,
                 enabled: masterEnabled,
                 onChanged: (value) {
-                  ref.read(notificationPreferencesProvider.notifier).setPreference('maintenanceAlertsEnabled', value);
+                  ref
+                      .read(notificationPreferencesProvider.notifier)
+                      .setPreference('maintenanceAlertsEnabled', value);
                 },
               ),
               _tileDivider(isDark),
               _NotificationToggleTile(
                 icon: Icons.fact_check_outlined,
                 iconColor: const Color(0xFF0EA5E9),
-                title: context.l10n?.inspectionReminders ?? 'Inspection Reminders',
-                description: context.l10n?.inspectionRemindersDesc ?? 'Reminders for upcoming inspections',
+                title:
+                    context.l10n?.inspectionReminders ?? 'Inspection Reminders',
+                description:
+                    context.l10n?.inspectionRemindersDesc ??
+                    'Reminders for upcoming inspections',
                 value: prefs['inspectionRemindersEnabled'] ?? true,
                 enabled: masterEnabled,
                 onChanged: (value) {
-                  ref.read(notificationPreferencesProvider.notifier).setPreference('inspectionRemindersEnabled', value);
+                  ref
+                      .read(notificationPreferencesProvider.notifier)
+                      .setPreference('inspectionRemindersEnabled', value);
                 },
               ),
             ],
@@ -167,11 +198,15 @@ class NotificationSettingsPage extends ConsumerWidget {
                 icon: Icons.campaign_outlined,
                 iconColor: const Color(0xFF64748B),
                 title: context.l10n?.marketingEmails ?? 'Marketing Emails',
-                description: context.l10n?.marketingEmailsDesc ?? 'Receive updates and promotional content',
+                description:
+                    context.l10n?.marketingEmailsDesc ??
+                    'Receive updates and promotional content',
                 value: prefs['marketingEmailsEnabled'] ?? false,
                 enabled: true,
                 onChanged: (value) {
-                  ref.read(notificationPreferencesProvider.notifier).setPreference('marketingEmailsEnabled', value);
+                  ref
+                      .read(notificationPreferencesProvider.notifier)
+                      .setPreference('marketingEmailsEnabled', value);
                 },
               ),
             ],
@@ -258,10 +293,7 @@ class _NotificationToggleTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            Switch(
-              value: value,
-              onChanged: enabled ? onChanged : null,
-            ),
+            Switch(value: value, onChanged: enabled ? onChanged : null),
           ],
         ),
       ),
@@ -269,13 +301,20 @@ class _NotificationToggleTile extends StatelessWidget {
   }
 }
 
-// Simple notification preferences provider
-final notificationPreferencesProvider = StateNotifierProvider<NotificationPreferencesNotifier, Map<String, bool>>((ref) {
-  return NotificationPreferencesNotifier();
-});
+// Notification preferences provider — persisted through AppPreferences so
+// toggles survive app restarts (they previously lived only in memory).
+final notificationPreferencesProvider =
+    StateNotifierProvider<NotificationPreferencesNotifier, Map<String, bool>>(
+      (ref) =>
+          NotificationPreferencesNotifier(ref.read(appPreferencesProvider)),
+    );
 
 class NotificationPreferencesNotifier extends StateNotifier<Map<String, bool>> {
-  NotificationPreferencesNotifier() : super({
+  NotificationPreferencesNotifier(this._prefs) : super(_loadInitial(_prefs));
+
+  final AppPreferences _prefs;
+
+  static const Map<String, bool> _defaults = {
     'notificationsEnabled': true,
     'rentRemindersEnabled': true,
     'paymentAlertsEnabled': true,
@@ -283,10 +322,33 @@ class NotificationPreferencesNotifier extends StateNotifier<Map<String, bool>> {
     'maintenanceAlertsEnabled': true,
     'inspectionRemindersEnabled': true,
     'marketingEmailsEnabled': false,
-  });
+  };
+
+  /// Maps the UI-facing preference key to its persisted [PrefKeys] entry.
+  static const Map<String, String> _prefKeys = {
+    'notificationsEnabled': PrefKeys.notificationsEnabled,
+    'rentRemindersEnabled': PrefKeys.rentRemindersEnabled,
+    'paymentAlertsEnabled': PrefKeys.paymentAlertsEnabled,
+    'leaseExpiryAlertsEnabled': PrefKeys.leaseExpiryAlertsEnabled,
+    'maintenanceAlertsEnabled': PrefKeys.maintenanceAlertsEnabled,
+    'inspectionRemindersEnabled': PrefKeys.inspectionRemindersEnabled,
+    'marketingEmailsEnabled': PrefKeys.marketingEmailsEnabled,
+  };
+
+  static Map<String, bool> _loadInitial(AppPreferences prefs) {
+    return _defaults.map(
+      (key, fallback) =>
+          MapEntry(key, prefs.getBool(_prefKeys[key]!) ?? fallback),
+    );
+  }
 
   void setPreference(String key, bool value) {
     state = {...state, key: value};
-    // TODO: Save to storage
+    final prefKey = _prefKeys[key];
+    if (prefKey != null) {
+      // Fire-and-forget: SharedPreferences writes are queued internally; a
+      // failed write is non-fatal for a settings toggle.
+      unawaited(_prefs.setBool(prefKey, value));
+    }
   }
 }

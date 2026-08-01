@@ -39,8 +39,8 @@ These directories contain clean-arch data/domain files but no `presentation` lay
 
 | Feature | File | What is missing |
 |---------|------|-----------------|
-| **Notification preferences** | `lib/features/settings/presentation/pages/notification_settings_page.dart` | `NotificationPreferencesNotifier.setPreference` only updates in-memory state. The comment is `// TODO: Save to storage`. |
-| **Privacy settings** | `lib/features/settings/presentation/pages/privacy_settings_page.dart` | Crash reporting toggle has `// TODO: Implement crash reporting toggle`. `_updatePrivacy` has `// TODO: Save to storage via privacy preferences provider`. Download and clear-history actions only show snackbars. |
+| **Notification preferences** | `lib/features/settings/presentation/pages/notification_settings_page.dart` | ~~In-memory only~~ — now persisted via `AppPreferences` (see `PrefKeys`); toggles survive restarts. |
+| **Privacy settings** | `lib/features/settings/presentation/pages/privacy_settings_page.dart` | Profile visibility / analytics / crash-reporting choices now persist via `PrivacyPreferencesNotifier`; the crash toggle is honored at next launch by `bootstrap.dart`. Download and clear-history actions still only show snackbars (no backend endpoint). |
 
 ## Core infrastructure stubs
 

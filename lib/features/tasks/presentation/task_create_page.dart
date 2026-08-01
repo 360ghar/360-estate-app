@@ -80,12 +80,16 @@ class _TaskCreatePageState extends ConsumerState<TaskCreatePage> {
       // Debug: Log what we're sending
       debugPrint('Creating task with:');
       debugPrint('  title: "$title" (length: ${title.length})');
-      debugPrint('  description: "$description" (length: ${description.length})');
+      debugPrint(
+        '  description: "$description" (length: ${description.length})',
+      );
       debugPrint('  propertyId: $propertyId');
       debugPrint('  category: ${_category.name}');
       debugPrint('  priority: ${_priority.name}');
 
-      await ref.read(maintenanceRepositoryProvider).createRequest(
+      await ref
+          .read(maintenanceRepositoryProvider)
+          .createRequest(
             propertyId: propertyId,
             category: _category.name,
             priority: _priority.name,
@@ -94,8 +98,11 @@ class _TaskCreatePageState extends ConsumerState<TaskCreatePage> {
             scheduledDate: _dueDate,
           );
 
-      // Invalidate providers to refresh the list
+      // Invalidate providers to refresh the list. The status-filtered family
+      // must be invalidated too, otherwise a filter tab shows stale items
+      // after a create (the family state is cached per status).
       ref.invalidate(maintenancePagedProvider);
+      ref.invalidate(maintenancePagedByStatusProvider);
       ref.invalidate(maintenanceListProvider);
 
       if (mounted) {
@@ -128,10 +135,7 @@ class _TaskCreatePageState extends ConsumerState<TaskCreatePage> {
           SnackBar(
             content: Text(errorMessage, maxLines: 5),
             duration: const Duration(seconds: 6),
-            action: SnackBarAction(
-              label: 'Dismiss',
-              onPressed: () {},
-            ),
+            action: SnackBarAction(label: 'Dismiss', onPressed: () {}),
           ),
         );
       }
@@ -160,9 +164,7 @@ class _TaskCreatePageState extends ConsumerState<TaskCreatePage> {
     final propertiesAsync = ref.watch(propertiesListProvider);
 
     return AppScaffold(
-      appBar: AppBar(
-        title: const Text('New Task'),
-      ),
+      appBar: AppBar(title: const Text('New Task')),
       scrollable: true,
       body: Form(
         key: _formKey,
@@ -240,7 +242,11 @@ class _TaskCreatePageState extends ConsumerState<TaskCreatePage> {
                       label: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(cat.icon, size: 16, color: isSelected ? Colors.white : cat.color),
+                          Icon(
+                            cat.icon,
+                            size: 16,
+                            color: isSelected ? Colors.white : cat.color,
+                          ),
                           const SizedBox(width: 4),
                           Text(cat.displayName),
                         ],
@@ -323,9 +329,9 @@ class _TaskCreatePageState extends ConsumerState<TaskCreatePage> {
                 Text(
                   'Priority',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Wrap(
@@ -348,8 +354,7 @@ class _TaskCreatePageState extends ConsumerState<TaskCreatePage> {
                         ],
                       ),
                       selected: isSelected,
-                      onSelected: (_) =>
-                          setState(() => _priority = priority),
+                      onSelected: (_) => setState(() => _priority = priority),
                       selectedColor: chipColor,
                       checkmarkColor: Colors.white,
                       labelStyle: TextStyle(
@@ -387,7 +392,8 @@ class _TaskCreatePageState extends ConsumerState<TaskCreatePage> {
                             _dueDate == null
                                 ? 'Set due date (optional)'
                                 : 'Due: ${_formatDate(_dueDate!)}',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
                                   color: _dueDate != null
                                       ? Theme.of(context).colorScheme.primary
                                       : AppColors.textSecondary,
@@ -425,9 +431,7 @@ class _TaskCreatePageState extends ConsumerState<TaskCreatePage> {
                     : const Icon(Icons.check_circle_outline),
                 label: Text(_isSubmitting ? 'Creating...' : 'Create Task'),
                 style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.md,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                 ),
               ),
             ),
@@ -439,8 +443,18 @@ class _TaskCreatePageState extends ConsumerState<TaskCreatePage> {
 
   String _formatDate(DateTime date) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
@@ -456,25 +470,19 @@ class _PropertyEmptyState extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.danger.withValues(alpha: 0.1),
-        border: Border.all(
-          color: AppColors.danger.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: AppColors.danger.withValues(alpha: 0.3)),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.error_outline,
-            color: AppColors.danger,
-            size: 20,
-          ),
+          Icon(Icons.error_outline, color: AppColors.danger, size: 20),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               'No properties available. Please add a property first before creating tasks.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.danger,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.danger),
             ),
           ),
         ],
@@ -485,10 +493,7 @@ class _PropertyEmptyState extends StatelessWidget {
 
 /// Error state for properties.
 class _PropertyErrorState extends StatelessWidget {
-  const _PropertyErrorState({
-    required this.message,
-    required this.onRetry,
-  });
+  const _PropertyErrorState({required this.message, required this.onRetry});
 
   final String message;
   final VoidCallback onRetry;

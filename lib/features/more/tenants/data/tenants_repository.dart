@@ -10,17 +10,17 @@ class TenantsRepository {
   final ApiClient _client;
   final CacheStore _cache;
   static const _cacheTtl = Duration(minutes: 5);
-  static const _nullCursorSentinel = '__NULL_CURSOR__';
 
   Future<Page<Tenant>> listPage({
     required String? cursor,
     required int limit,
   }) async {
     final cacheKey =
-        'tenants:cursor=${cursor ?? _nullCursorSentinel}:limit=$limit';
+        'tenants:cursor=${cursor ?? Page.nullCursorCacheKey}:limit=$limit';
     final cached = _cache
         .get<({List<Tenant> items, String? nextCursor, bool hasMore})>(
-            cacheKey);
+          cacheKey,
+        );
     if (cached != null) {
       return Page(
         items: cached.items,
@@ -32,21 +32,18 @@ class TenantsRepository {
 
     final response = await _client.get<dynamic>(
       '/pm/tenants',
-      queryParameters: {
-        if (cursor != null) 'cursor': cursor,
-        'limit': limit,
-      },
+      queryParameters: {if (cursor != null) 'cursor': cursor, 'limit': limit},
     );
     final page = unwrapPage(response.data);
     final data = page.items
         .whereType<Map<String, dynamic>>()
         .map(Tenant.fromJson)
         .toList();
-    _cache.set(
-      cacheKey,
-      (items: data, nextCursor: page.nextCursor, hasMore: page.hasMore),
-      ttl: _cacheTtl,
-    );
+    _cache.set(cacheKey, (
+      items: data,
+      nextCursor: page.nextCursor,
+      hasMore: page.hasMore,
+    ), ttl: _cacheTtl);
     return Page(
       items: data,
       limit: limit,

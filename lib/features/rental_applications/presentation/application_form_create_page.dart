@@ -1,6 +1,7 @@
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:estate_app/core/presentation/errors/user_facing_message.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
 import 'package:estate_app/features/rental_applications/applications_providers.dart';
@@ -94,9 +95,9 @@ class _ApplicationFormCreatePageState
       }
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(userFacingMessage(error))));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -147,10 +148,9 @@ class _ApplicationFormCreatePageState
                     labelText: 'Property ID',
                     prefixIcon: Icon(Icons.apartment_outlined),
                   ),
-                  validator: (value) =>
-                      value == null || value.trim().isEmpty
-                          ? 'Enter a property ID.'
-                          : null,
+                  validator: (value) => value == null || value.trim().isEmpty
+                      ? 'Enter a property ID.'
+                      : null,
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 TextFormField(
@@ -216,8 +216,7 @@ class _ApplicationFormCreatePageState
                       ),
                       Switch(
                         value: _isActive,
-                        onChanged: (value) =>
-                            setState(() => _isActive = value),
+                        onChanged: (value) => setState(() => _isActive = value),
                       ),
                     ],
                   ),
@@ -380,9 +379,7 @@ class _ApplicationFormCreatePageState
                     final field = _fields[index];
                     return Padding(
                       padding: EdgeInsets.only(
-                        bottom: index < _fields.length - 1
-                            ? AppSpacing.sm
-                            : 0,
+                        bottom: index < _fields.length - 1 ? AppSpacing.sm : 0,
                       ),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
@@ -407,8 +404,9 @@ class _ApplicationFormCreatePageState
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.primary
-                                    .withValues(alpha: isDark ? 0.15 : 0.08),
+                                color: theme.colorScheme.primary.withValues(
+                                  alpha: isDark ? 0.15 : 0.08,
+                                ),
                                 borderRadius: AppRadii.sm,
                               ),
                               child: Icon(
@@ -433,10 +431,10 @@ class _ApplicationFormCreatePageState
                                     children: [
                                       Text(
                                         field.fieldType ?? 'text',
-                                        style:
-                                            theme.textTheme.bodySmall?.copyWith(
-                                          color: AppColors.textTertiary,
-                                        ),
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: AppColors.textTertiary,
+                                            ),
                                       ),
                                       if (field.isRequired == true) ...[
                                         const SizedBox(width: AppSpacing.sm),
@@ -446,17 +444,18 @@ class _ApplicationFormCreatePageState
                                             vertical: 2,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: AppColors.warning
-                                                .withValues(alpha: 0.1),
+                                            color: AppColors.warning.withValues(
+                                              alpha: 0.1,
+                                            ),
                                             borderRadius: AppRadii.pill,
                                           ),
                                           child: Text(
                                             'Required',
                                             style: theme.textTheme.labelSmall
                                                 ?.copyWith(
-                                              color: AppColors.warning,
-                                              fontSize: 10,
-                                            ),
+                                                  color: AppColors.warning,
+                                                  fontSize: 10,
+                                                ),
                                           ),
                                         ),
                                       ],
@@ -544,10 +543,12 @@ class _FieldTypeChip extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: isSelected
-                ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.2 : 0.08)
+                ? theme.colorScheme.primary.withValues(
+                    alpha: isDark ? 0.2 : 0.08,
+                  )
                 : (isDark
-                    ? AppColors.darkSurfaceVariant
-                    : AppColors.surfaceSecondary),
+                      ? AppColors.darkSurfaceVariant
+                      : AppColors.surfaceSecondary),
             borderRadius: AppRadii.pill,
             border: Border.all(
               color: isSelected

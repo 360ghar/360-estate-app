@@ -9,10 +9,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// from an explicitly-passed `null` cursor.
 const _unset = Object();
 
-typedef PageFetcher<T> = Future<Page<T>> Function({
-  required String? cursor,
-  required int limit,
-});
+typedef PageFetcher<T> =
+    Future<Page<T>> Function({required String? cursor, required int limit});
 
 class PagedListState<T> {
   const PagedListState({
@@ -81,11 +79,9 @@ class PagedListState<T> {
 }
 
 class PagedListController<T> extends StateNotifier<PagedListState<T>> {
-  PagedListController({
-    required PageFetcher<T> fetchPage,
-    int pageSize = 20,
-  })  : _fetchPage = fetchPage,
-        super(PagedListState<T>(limit: pageSize)) {
+  PagedListController({required PageFetcher<T> fetchPage, int pageSize = 20})
+    : _fetchPage = fetchPage,
+      super(PagedListState<T>(limit: pageSize)) {
     unawaited(loadInitial());
   }
 
@@ -111,12 +107,12 @@ class PagedListController<T> extends StateNotifier<PagedListState<T>> {
         error: null,
         loadMoreError: null,
       );
-    } catch (error) {
+    } catch (error, stackTrace) {
       // Mark pagination as exhausted so the UI does not keep firing
       // loadMore() against a broken endpoint (see B12).
       state = state.copyWith(
         isLoading: false,
-        error: _mapFailure(error),
+        error: _mapFailure(error, stackTrace),
         hasMore: false,
         nextCursor: null,
       );
@@ -140,11 +136,11 @@ class PagedListController<T> extends StateNotifier<PagedListState<T>> {
         error: null,
         loadMoreError: null,
       );
-    } catch (error) {
+    } catch (error, stackTrace) {
       // Same recovery rule as loadInitial (see B12).
       state = state.copyWith(
         isRefreshing: false,
-        error: _mapFailure(error),
+        error: _mapFailure(error, stackTrace),
         hasMore: false,
         nextCursor: null,
       );
@@ -161,8 +157,10 @@ class PagedListController<T> extends StateNotifier<PagedListState<T>> {
     }
     state = state.copyWith(isLoadingMore: true, loadMoreError: null);
     try {
-      final page =
-          await _fetchPage(cursor: state.nextCursor, limit: state.limit);
+      final page = await _fetchPage(
+        cursor: state.nextCursor,
+        limit: state.limit,
+      );
       state = state.copyWith(
         items: [...state.items, ...page.items],
         nextCursor: page.nextCursor,
@@ -196,7 +194,18 @@ class PagedListController<T> extends StateNotifier<PagedListState<T>> {
   }
 }
 
-Failure? _mapFailure(Object error) {
+Failure? _mapFailure(Object error, StackTrace stackTrace) {
   if (error is Failure) return error;
-  return null;
+  // Non-Failure errors (parsing TypeErrors, programmer bugs) used to be
+  // silently dropped: the UI showed an empty list with no error. Surface
+  // them as a visible failure so bugs are not invisible to users.
+  AppLogger.e(
+    'PagedListController: unhandled error during page load',
+    error: error,
+    stackTrace: stackTrace,
+  );
+  return UnknownFailure(
+    'Something went wrong. Please try again.',
+    cause: error,
+  );
 }

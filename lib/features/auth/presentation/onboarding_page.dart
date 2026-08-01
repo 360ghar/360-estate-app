@@ -14,7 +14,7 @@ class OnboardingPage extends ConsumerWidget {
 
   Future<void> _completeAndContinue(WidgetRef ref, BuildContext context) async {
     try {
-      await ref.read(authRepositoryProvider).completeOnboarding(app: 'estate');
+      await ref.read(authRepositoryProvider).completeOnboarding();
     } catch (_) {
       // Non-critical; ignore.
     }
@@ -30,7 +30,11 @@ class OnboardingPage extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.check_circle_outline, size: 64, color: Colors.green),
+            const Icon(
+              Icons.check_circle_outline,
+              size: 64,
+              color: Colors.green,
+            ),
             const SizedBox(height: 24),
             Text(
               'Welcome to Estate App',

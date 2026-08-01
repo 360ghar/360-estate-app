@@ -22,12 +22,14 @@ class PropertiesRepositoryImpl implements PropertiesRepository {
     required String? cursor,
     required int limit,
   }) async {
-    final cursorPart = cursor == null ? 'cursor=<null>' : 'cursor=$cursor';
-    final cacheKey =
-        'properties:$_cacheScope:$cursorPart:limit=$limit';
+    final cursorPart = cursor == null
+        ? Page.nullCursorCacheKey
+        : 'cursor=$cursor';
+    final cacheKey = 'properties:$_cacheScope:$cursorPart:limit=$limit';
     final cached = _cache
         .get<({List<Property> items, String? nextCursor, bool hasMore})>(
-            cacheKey);
+          cacheKey,
+        );
     if (cached != null) {
       return Page(
         items: cached.items,
@@ -39,10 +41,7 @@ class PropertiesRepositoryImpl implements PropertiesRepository {
 
     final response = await _client.get<dynamic>(
       '/pm/properties',
-      queryParameters: {
-        if (cursor != null) 'cursor': cursor,
-        'limit': limit,
-      },
+      queryParameters: {if (cursor != null) 'cursor': cursor, 'limit': limit},
     );
     final baseUrl = _client.dio.options.baseUrl;
     final page = unwrapPage(response.data);
@@ -51,11 +50,11 @@ class PropertiesRepositoryImpl implements PropertiesRepository {
         .map((item) => _normalizePropertyJson(item, baseUrl: baseUrl))
         .map(Property.fromJson)
         .toList();
-    _cache.set(
-      cacheKey,
-      (items: items, nextCursor: page.nextCursor, hasMore: page.hasMore),
-      ttl: _cacheTtl,
-    );
+    _cache.set(cacheKey, (
+      items: items,
+      nextCursor: page.nextCursor,
+      hasMore: page.hasMore,
+    ), ttl: _cacheTtl);
     return Page(
       items: items,
       limit: limit,
@@ -122,7 +121,8 @@ Map<String, dynamic> _normalizePropertyJson(
 }) {
   final normalized = Map<String, dynamic>.from(json);
 
-  final rawName = normalized['name'] ??
+  final rawName =
+      normalized['name'] ??
       normalized['property_name'] ??
       normalized['title'] ??
       normalized['property_title'];
@@ -149,7 +149,8 @@ Map<String, dynamic> _normalizePropertyJson(
       return;
     }
     if (value is Map<String, dynamic>) {
-      final url = value['url'] ??
+      final url =
+          value['url'] ??
           value['image_url'] ??
           value['image'] ??
           value['imageUrl'] ??

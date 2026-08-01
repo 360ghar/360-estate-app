@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:estate_app/core/config/app_config.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('AppConfig.normalizeApiBaseUrl', () {
@@ -19,9 +19,7 @@ void main() {
 
     test('collapses double /api/v1 prefix', () {
       expect(
-        AppConfig.normalizeApiBaseUrl(
-          'https://api.360ghar.com/api/v1/api/v1',
-        ),
+        AppConfig.normalizeApiBaseUrl('https://api.360ghar.com/api/v1/api/v1'),
         'https://api.360ghar.com/api/v1',
       );
     });

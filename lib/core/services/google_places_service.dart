@@ -36,22 +36,25 @@ class PlaceDetails {
 
 final googlePlacesServiceProvider = Provider<GooglePlacesService>((ref) {
   final config = ref.read(appConfigProvider);
-  return GooglePlacesService(apiKey: config.googlePlacesApiKey);
+  final service = GooglePlacesService(apiKey: config.googlePlacesApiKey);
+  ref.onDispose(service.dispose);
+  return service;
 });
 
 final class GooglePlacesService {
   GooglePlacesService({required this.apiKey});
 
   final String apiKey;
-  final _dio = Dio(BaseOptions(
-    connectTimeout: const Duration(seconds: 10),
-    receiveTimeout: const Duration(seconds: 10),
-  ));
+  final _dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
+    ),
+  );
 
   Timer? _debounceTimer;
 
-  static const _baseUrl =
-      'https://maps.googleapis.com/maps/api/place';
+  static const _baseUrl = 'https://maps.googleapis.com/maps/api/place';
 
   Future<List<PlaceSuggestion>> getPlaceSuggestions(
     String query, {
@@ -94,17 +97,20 @@ final class GooglePlacesService {
         return PlaceSuggestion(
           placeId: p['place_id'] as String? ?? '',
           description: p['description'] as String? ?? '',
-          mainText:
-              p['structured_formatting']?['main_text'] as String? ?? '',
+          mainText: p['structured_formatting']?['main_text'] as String? ?? '',
           secondaryText:
               p['structured_formatting']?['secondary_text'] as String? ?? '',
         );
       }).toList();
     } on DioException catch (e) {
-      if (kDebugMode) debugPrint('GooglePlaces: autocomplete error: ${e.message}');
+      if (kDebugMode) {
+        debugPrint('GooglePlaces: autocomplete error: ${e.message}');
+      }
       return const [];
     } catch (e) {
-      if (kDebugMode) debugPrint('GooglePlaces: autocomplete error: $e');
+      if (kDebugMode) {
+        debugPrint('GooglePlaces: autocomplete error: $e');
+      }
       return const [];
     }
   }
@@ -135,8 +141,7 @@ final class GooglePlacesService {
       final result = body['result'] as Map<String, dynamic>?;
       if (result == null) return null;
 
-      final location =
-          result['geometry']?['location'] as Map<String, dynamic>?;
+      final location = result['geometry']?['location'] as Map<String, dynamic>?;
       if (location == null) return null;
 
       // Do not coerce missing coordinates to (0, 0): that "Null Island"
@@ -167,8 +172,7 @@ final class GooglePlacesService {
         displayName = locality;
       }
 
-      final formattedAddress =
-          result['formatted_address'] as String?;
+      final formattedAddress = result['formatted_address'] as String?;
 
       return PlaceDetails(
         lat: lat,
@@ -177,10 +181,14 @@ final class GooglePlacesService {
         formattedAddress: formattedAddress,
       );
     } on DioException catch (e) {
-      if (kDebugMode) debugPrint('GooglePlaces: details error: ${e.message}');
+      if (kDebugMode) {
+        debugPrint('GooglePlaces: details error: ${e.message}');
+      }
       return null;
     } catch (e) {
-      if (kDebugMode) debugPrint('GooglePlaces: details error: $e');
+      if (kDebugMode) {
+        debugPrint('GooglePlaces: details error: $e');
+      }
       return null;
     }
   }
@@ -192,5 +200,12 @@ final class GooglePlacesService {
 
   void cancelDebounce() {
     _debounceTimer?.cancel();
+  }
+
+  /// Releases the debounce timer. Idempotent; safe to call from a provider's
+  /// `onDispose` hook.
+  void dispose() {
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
   }
 }

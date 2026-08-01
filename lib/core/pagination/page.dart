@@ -7,6 +7,11 @@ final class Page<T> {
     this.total,
   });
 
+  /// Cache-key sentinel used when there is no cursor yet (first page).
+  /// Repositories previously used three different conventions
+  /// (`'cursor=<null>'`, `'__NULL_CURSOR__'`, `'first'`) for the same thing.
+  static const String nullCursorCacheKey = '__NULL_CURSOR__';
+
   final List<T> items;
   final int limit;
   final bool hasMore;

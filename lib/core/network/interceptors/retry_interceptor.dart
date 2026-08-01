@@ -58,33 +58,46 @@ final class RetryInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    final options = err.requestOptions;
-    final cancelled = options.cancelToken?.isCancelled ?? false;
-    if (cancelled || !_isIdempotent(options) || !_isRetryableException(err)) {
-      handler.next(err);
-      return;
-    }
-
-    final attempt = (options.extra[RequestIdKeys.attempt] as int?) ?? 0;
-    if (attempt >= _maxRetries) {
-      handler.next(err);
-      return;
-    }
-
-    options.extra[RequestIdKeys.attempt] = attempt + 1;
-
-    final delay = _backoff(attempt);
-    await Future<void>.delayed(delay);
-
     try {
-      final response = await _dio.fetch<dynamic>(options);
-      handler.resolve(response);
-    } catch (e) {
-      if (e is DioException) {
-        handler.next(e);
-      } else {
-        handler.next(DioException(requestOptions: options, error: e));
+      final options = err.requestOptions;
+      final cancelled = options.cancelToken?.isCancelled ?? false;
+      if (cancelled || !_isIdempotent(options) || !_isRetryableException(err)) {
+        handler.next(err);
+        return;
       }
+
+      final attempt = (options.extra[RequestIdKeys.attempt] as int?) ?? 0;
+      if (attempt >= _maxRetries) {
+        handler.next(err);
+        return;
+      }
+
+      options.extra[RequestIdKeys.attempt] = attempt + 1;
+
+      final delay = _backoff(attempt);
+      await Future<void>.delayed(delay);
+
+      // The request may have been cancelled while we were backing off; do
+      // not re-send it in that case.
+      if (options.cancelToken?.isCancelled ?? false) {
+        handler.next(err);
+        return;
+      }
+
+      try {
+        final response = await _dio.fetch<dynamic>(options);
+        handler.resolve(response);
+      } catch (e) {
+        if (e is DioException) {
+          handler.next(e);
+        } else {
+          handler.next(DioException(requestOptions: options, error: e));
+        }
+      }
+    } catch (e) {
+      // Never strand a request in an async-void handler: on any unexpected
+      // error in the retry machinery itself, pass the original error through.
+      handler.next(err);
     }
   }
 }

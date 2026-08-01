@@ -1,6 +1,5 @@
-import 'dart:convert';
-
 import 'package:estate_app/core/logger/app_logger.dart';
+import 'package:estate_app/core/network/jwt.dart';
 import 'package:estate_app/core/storage/auth_token_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
@@ -14,101 +13,123 @@ final class RefreshingAuthTokenProvider implements AuthTokenProvider {
 
   final AuthTokenStorage _storage;
 
+  /// In-memory copy of the current access token.
+  ///
+  /// The secure storage is only written when the token actually changes
+  /// (fresh load or refresh) — previously every `getAccessToken()` call wrote
+  /// to the Keystore/Keychain, adding tens of ms of platform-channel latency
+  /// to every HTTP request.
+  String? _cachedToken;
+
+  /// Single in-flight refresh; concurrent callers share the same future so
+  /// parallel requests cannot race two `refreshSession()` calls (Supabase
+  /// rotates/revokes the refresh token on use, so a double refresh can
+  /// invalidate the session).
+  Future<String?>? _refreshInFlight;
+
   @override
   Future<String?> getAccessToken() async {
+    final cached = _cachedToken;
+    // Fast path: a cached token that is still within its validity window.
+    // No Supabase round-trip, no secure-storage write.
+    if (cached != null && cached.isNotEmpty && !Jwt.isExpired(cached)) {
+      return cached;
+    }
+    return _loadFreshToken(cached);
+  }
+
+  Future<String?> _loadFreshToken(String? cached) async {
     supabase.SupabaseClient client;
     try {
       client = supabase.Supabase.instance.client;
     } catch (error, stackTrace) {
       // Supabase is not initialized yet (transient startup race). Do NOT
-      // clear the stored session - returning null here without clearing lets
-      // the next call succeed once Supabase is ready. Surface the gap so
-      // cold-start races are visible in logs (B14).
+      // clear the stored session - returning a cached token (when present)
+      // lets the request proceed and the next call succeed once Supabase is
+      // ready. Surface the gap so cold-start races are visible in logs (B14).
       AppLogger.w(
-        'AuthTokenProvider: Supabase not yet initialized; returning null token',
+        'AuthTokenProvider: Supabase not yet initialized; returning cached token',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return cached;
+    }
+
+    final session = client.auth.currentSession;
+    if (session == null) {
+      await _clearToken();
+      return null;
+    }
+
+    final token = session.accessToken;
+    if (session.isExpired || Jwt.isExpired(token)) {
+      return _refreshSession(cached);
+    }
+
+    if (token.isNotEmpty) {
+      _cachedToken = token;
+      await _storage.save(token);
+      return token;
+    }
+
+    await _clearToken();
+    return null;
+  }
+
+  Future<String?> _refreshSession(String? cached) {
+    final inFlight = _refreshInFlight;
+    if (inFlight != null) return inFlight;
+    final future = _doRefresh(cached);
+    _refreshInFlight = future;
+    return future.whenComplete(() => _refreshInFlight = null);
+  }
+
+  Future<String?> _doRefresh(String? cached) async {
+    try {
+      final refresh = await supabase.Supabase.instance.client.auth
+          .refreshSession();
+      final session =
+          refresh.session ??
+          supabase.Supabase.instance.client.auth.currentSession;
+      final token = session?.accessToken;
+      if (token != null && token.isNotEmpty) {
+        _cachedToken = token;
+        await _storage.save(token);
+        return token;
+      }
+      await _clearToken();
+      return null;
+    } on supabase.AuthException {
+      // Confirmed auth failure (e.g. refresh token expired or revoked).
+      // The session is truly invalid; clear storage so the user is logged out.
+      await _clearToken();
+      return null;
+    } catch (error, stackTrace) {
+      // Transient error (network timeout, connectivity, etc.). Do NOT clear
+      // the stored session; return null so the caller can retry later
+      // without being silently logged out. Log so the failure is visible.
+      AppLogger.w(
+        'AuthTokenProvider: session refresh failed transiently; returning null token',
         error: error,
         stackTrace: stackTrace,
       );
       return null;
     }
+  }
 
-    var session = client.auth.currentSession;
-    if (session == null) {
-      await _storage.clear();
-      return null;
-    }
-
-    if (session.isExpired || _isJwtExpired(session.accessToken)) {
-      try {
-        final refresh = await client.auth.refreshSession();
-        session = refresh.session ?? client.auth.currentSession;
-      } on supabase.AuthException {
-        // Confirmed auth failure (e.g. refresh token expired or revoked).
-        // The session is truly invalid; clear storage so the user is logged out.
-        await _storage.clear();
-        return null;
-      } catch (error, stackTrace) {
-        // Transient error (network timeout, connectivity, etc.). Do NOT clear
-        // the stored session; return null so the caller can retry later
-        // without being silently logged out. Log so the failure is visible.
-        AppLogger.w(
-          'AuthTokenProvider: session refresh failed transiently; returning null token',
-          error: error,
-          stackTrace: stackTrace,
-        );
-        return null;
-      }
-    }
-
-    final token = session?.accessToken;
-    if (token != null && token.isNotEmpty) {
-      await _storage.save(token);
-      return token;
-    }
-
+  Future<void> _clearToken() async {
+    _cachedToken = null;
     await _storage.clear();
-    return null;
   }
 
   @override
   Future<void> clearSession() async {
+    _cachedToken = null;
     await _storage.clear();
     try {
       await supabase.Supabase.instance.client.auth.signOut();
     } catch (_) {
       // Ignore sign-out failures from the auth SDK.
     }
-  }
-}
-
-bool _isJwtExpired(String token, {Duration skew = const Duration(seconds: 10)}) {
-  final payload = _decodeJwtPayload(token);
-  if (payload == null) return false;
-  final exp = payload['exp'];
-  int? expValue;
-  if (exp is num) {
-    expValue = exp.toInt();
-  } else if (exp is String) {
-    expValue = int.tryParse(exp);
-  }
-  if (expValue == null) return false;
-  final expiry = DateTime.fromMillisecondsSinceEpoch(expValue * 1000);
-  return DateTime.now().add(skew).isAfter(expiry);
-}
-
-Map<String, dynamic>? _decodeJwtPayload(String token) {
-  final parts = token.split('.');
-  if (parts.length < 2) return null;
-  try {
-    final payload = base64Url.normalize(parts[1]);
-    final decoded = utf8.decode(base64Url.decode(payload));
-    final data = jsonDecode(decoded);
-    if (data is Map<String, dynamic>) return data;
-    if (data is Map) {
-      return data.map((key, value) => MapEntry(key.toString(), value));
-    }
-    return null;
-  } catch (_) {
-    return null;
   }
 }

@@ -29,6 +29,7 @@ abstract final class PrefKeys {
 
   // Privacy
   static const analyticsEnabled = 'analytics_enabled';
+  static const crashReportingEnabled = 'crash_reporting_enabled';
   static const profileVisibility = 'profile_visibility';
   static const phoneVisibility = 'phone_visibility';
   static const emailVisibility = 'email_visibility';

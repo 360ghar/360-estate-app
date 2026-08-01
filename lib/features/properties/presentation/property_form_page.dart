@@ -54,11 +54,31 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
 
   /// Wizard step definitions.
   static const List<WizardStep> _wizardSteps = [
-    WizardStep(label: 'Basic', subtitle: 'Details', icon: Icons.info_outline_rounded),
-    WizardStep(label: 'Location', subtitle: 'Address', icon: Icons.location_on_outlined),
-    WizardStep(label: 'Specs', subtitle: 'Amenities', icon: Icons.list_alt_outlined),
-    WizardStep(label: 'Financial', subtitle: 'Legal', icon: Icons.account_balance_outlined),
-    WizardStep(label: 'Media', subtitle: 'Photos', icon: Icons.photo_library_outlined),
+    WizardStep(
+      label: 'Basic',
+      subtitle: 'Details',
+      icon: Icons.info_outline_rounded,
+    ),
+    WizardStep(
+      label: 'Location',
+      subtitle: 'Address',
+      icon: Icons.location_on_outlined,
+    ),
+    WizardStep(
+      label: 'Specs',
+      subtitle: 'Amenities',
+      icon: Icons.list_alt_outlined,
+    ),
+    WizardStep(
+      label: 'Financial',
+      subtitle: 'Legal',
+      icon: Icons.account_balance_outlined,
+    ),
+    WizardStep(
+      label: 'Media',
+      subtitle: 'Photos',
+      icon: Icons.photo_library_outlined,
+    ),
   ];
 
   /// Step titles for the section card headers.
@@ -90,7 +110,9 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
 
     final isEdit = widget.propertyId != null;
     if (isEdit) {
-      final propertyAsync = ref.read(propertyDetailProvider(widget.propertyId!));
+      final propertyAsync = ref.read(
+        propertyDetailProvider(widget.propertyId!),
+      );
       propertyAsync.whenData((property) {
         if (!_initialized) {
           setState(() {
@@ -253,7 +275,9 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to upload floor plans: ${_formatError(error)}'),
+            content: Text(
+              'Failed to upload floor plans: ${_formatError(error)}',
+            ),
           ),
         );
       }
@@ -289,9 +313,9 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
   void _nextStep() {
     final error = _data.validateStep(_currentStep + 1);
     if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error)));
       return;
     }
 
@@ -309,9 +333,9 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
   Future<void> _submit() async {
     final error = _data.validateStep(_currentStep + 1);
     if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error)));
       return;
     }
 
@@ -397,7 +421,9 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
               propertyId.toString(),
               PropertyPayload(
                 images: uploadedImages.isEmpty ? null : uploadedImages,
-                floorPlans: uploadedFloorPlans.isEmpty ? null : uploadedFloorPlans,
+                floorPlans: uploadedFloorPlans.isEmpty
+                    ? null
+                    : uploadedFloorPlans,
               ),
             );
           } catch (e) {
@@ -549,9 +575,10 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
       onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
         final shouldDiscard = await _showDiscardDialog();
-        if (shouldDiscard && mounted) {
+        if (!mounted) return;
+        if (shouldDiscard) {
           _hasUnsavedChanges = false;
-          context.go('/properties');
+          this.context.go('/properties');
         }
       },
       child: AppScaffold(
@@ -613,9 +640,7 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
             child: const Text('Stay'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Discard'),
           ),
@@ -628,25 +653,13 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
   Widget _buildStepContent(PropertyWizardStepData stepData) {
     switch (_currentStep) {
       case 0:
-        return PropertyWizardStep1(
-          data: stepData,
-          onChanged: _onDataChanged,
-        );
+        return PropertyWizardStep1(data: stepData, onChanged: _onDataChanged);
       case 1:
-        return PropertyWizardStep2(
-          data: stepData,
-          onChanged: _onDataChanged,
-        );
+        return PropertyWizardStep2(data: stepData, onChanged: _onDataChanged);
       case 2:
-        return PropertyWizardStep3(
-          data: stepData,
-          onChanged: _onDataChanged,
-        );
+        return PropertyWizardStep3(data: stepData, onChanged: _onDataChanged);
       case 3:
-        return PropertyWizardStep4(
-          data: stepData,
-          onChanged: _onDataChanged,
-        );
+        return PropertyWizardStep4(data: stepData, onChanged: _onDataChanged);
       case 4:
         return PropertyWizardStep5(
           data: stepData,
@@ -673,10 +686,7 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
         color: scheme.surface,
         boxShadow: AppShadows.sectionDivider,
         border: Border(
-          top: BorderSide(
-            color: scheme.outlineVariant,
-            width: 0.5,
-          ),
+          top: BorderSide(color: scheme.outlineVariant, width: 0.5),
         ),
       ),
       child: SafeArea(
@@ -708,14 +718,22 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
                 Expanded(
                   flex: 2,
                   child: FilledButton(
-                    onPressed: _isSaving ? null : (isLastStep ? _submit : _nextStep),
+                    onPressed: _isSaving
+                        ? null
+                        : (isLastStep ? _submit : _nextStep),
                     child: _isSaving
                         ? const SizedBox(
                             width: 18,
                             height: 18,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : Text(isLastStep ? (widget.propertyId != null ? 'Save Changes' : 'Create Property') : 'Next'),
+                        : Text(
+                            isLastStep
+                                ? (widget.propertyId != null
+                                      ? 'Save Changes'
+                                      : 'Create Property')
+                                : 'Next',
+                          ),
                   ),
                 ),
               ],
@@ -754,7 +772,9 @@ class _EnhancedWizardIndicator extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: i <= currentStep
                       ? scheme.primary
-                      : (isDark ? AppColors.darkSurfaceVariant : AppColors.borderLight),
+                      : (isDark
+                            ? AppColors.darkSurfaceVariant
+                            : AppColors.borderLight),
                   borderRadius: AppRadii.pill,
                 ),
               ),
@@ -784,7 +804,9 @@ class _EnhancedWizardIndicator extends StatelessWidget {
       bgColor = scheme.primary;
       fgColor = Colors.white;
     } else {
-      bgColor = isDark ? AppColors.darkSurfaceVariant : AppColors.surfaceSecondary;
+      bgColor = isDark
+          ? AppColors.darkSurfaceVariant
+          : AppColors.surfaceSecondary;
       fgColor = isDark ? AppColors.darkTextSecondary : AppColors.textTertiary;
     }
 

@@ -15,10 +15,6 @@ final _privateConstructorUsedError = UnsupportedError(
   'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
 );
 
-UserProfile _$UserProfileFromJson(Map<String, dynamic> json) {
-  return _UserProfile.fromJson(json);
-}
-
 /// @nodoc
 mixin _$UserProfile {
   @JsonKey(fromJson: parseInt)
@@ -31,12 +27,11 @@ mixin _$UserProfile {
   String? get lastName => throw _privateConstructorUsedError;
   String? get phone => throw _privateConstructorUsedError;
   String? get email => throw _privateConstructorUsedError;
-  String? get role => throw _privateConstructorUsedError;
+  String? get role =>
+      throw _privateConstructorUsedError; // Client field name is avatarUrl; backend wire name is profile_image_url
+  // (avatar_url accepted as legacy alias via fromJson normalization below).
   @JsonKey(name: 'avatar_url')
   String? get avatarUrl => throw _privateConstructorUsedError;
-
-  /// Serializes this UserProfile to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
   /// Create a copy of UserProfile
   /// with the given fields replaced by the non-null parameter values.
@@ -212,7 +207,7 @@ class __$$UserProfileImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-@JsonSerializable()
+
 class _$UserProfileImpl implements _UserProfile {
   const _$UserProfileImpl({
     @JsonKey(fromJson: parseInt) this.id,
@@ -224,9 +219,6 @@ class _$UserProfileImpl implements _UserProfile {
     this.role,
     @JsonKey(name: 'avatar_url') this.avatarUrl,
   });
-
-  factory _$UserProfileImpl.fromJson(Map<String, dynamic> json) =>
-      _$$UserProfileImplFromJson(json);
 
   @override
   @JsonKey(fromJson: parseInt)
@@ -246,6 +238,8 @@ class _$UserProfileImpl implements _UserProfile {
   final String? email;
   @override
   final String? role;
+  // Client field name is avatarUrl; backend wire name is profile_image_url
+  // (avatar_url accepted as legacy alias via fromJson normalization below).
   @override
   @JsonKey(name: 'avatar_url')
   final String? avatarUrl;
@@ -274,7 +268,6 @@ class _$UserProfileImpl implements _UserProfile {
                 other.avatarUrl == avatarUrl));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
     runtimeType,
@@ -295,11 +288,6 @@ class _$UserProfileImpl implements _UserProfile {
   @pragma('vm:prefer-inline')
   _$$UserProfileImplCopyWith<_$UserProfileImpl> get copyWith =>
       __$$UserProfileImplCopyWithImpl<_$UserProfileImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$UserProfileImplToJson(this);
-  }
 }
 
 abstract class _UserProfile implements UserProfile {
@@ -313,9 +301,6 @@ abstract class _UserProfile implements UserProfile {
     final String? role,
     @JsonKey(name: 'avatar_url') final String? avatarUrl,
   }) = _$UserProfileImpl;
-
-  factory _UserProfile.fromJson(Map<String, dynamic> json) =
-      _$UserProfileImpl.fromJson;
 
   @override
   @JsonKey(fromJson: parseInt)
@@ -334,7 +319,8 @@ abstract class _UserProfile implements UserProfile {
   @override
   String? get email;
   @override
-  String? get role;
+  String? get role; // Client field name is avatarUrl; backend wire name is profile_image_url
+  // (avatar_url accepted as legacy alias via fromJson normalization below).
   @override
   @JsonKey(name: 'avatar_url')
   String? get avatarUrl;

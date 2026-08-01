@@ -1,18 +1,18 @@
 import 'dart:async';
 
 import 'package:estate_app/app/app_shell.dart';
+import 'package:estate_app/app/router/routes.dart';
 import 'package:estate_app/core/config/constants.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/providers.dart';
-import 'package:estate_app/core/services/deep_link_service.dart';
 import 'package:estate_app/features/auth/presentation/add_phone_page.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:estate_app/features/auth/presentation/enter_phone_page.dart';
 import 'package:estate_app/features/auth/presentation/login_page.dart';
-import 'package:estate_app/features/auth/presentation/otp_verify_page.dart';
-import 'package:estate_app/features/auth/presentation/set_password_page.dart';
-import 'package:estate_app/features/auth/presentation/profile_completion_page.dart';
 import 'package:estate_app/features/auth/presentation/onboarding_page.dart';
+import 'package:estate_app/features/auth/presentation/otp_verify_page.dart';
+import 'package:estate_app/features/auth/presentation/profile_completion_page.dart';
+import 'package:estate_app/features/auth/presentation/set_password_page.dart';
 import 'package:estate_app/features/auth/presentation/signup_page.dart';
 import 'package:estate_app/features/auth/presentation/splash_page.dart';
 import 'package:estate_app/features/collections/presentation/collections_page.dart';
@@ -115,7 +115,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Replay any pending deep link captured during cold start once the
       // user is authenticated and the splash has been processed.
       if (isLoggedIn && !isSplash && !isAuthRoute) {
-        final pending = DeepLinkService.consumePendingPath();
+        final pending = ref.read(deepLinkServiceProvider).consumePendingPath();
         if (pending != null && pending != location) {
           return pending;
         }
@@ -193,7 +193,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/properties/map',
         builder: (context, state) {
-          final markers = state.extra as List<PropertyMarker>? ?? [];
+          final extra = state.extra;
+          final markers = extra is List<PropertyMarker>
+              ? extra
+              : const <PropertyMarker>[];
           final lat =
               double.tryParse(state.uri.queryParameters['lat'] ?? '') ??
               20.5937;

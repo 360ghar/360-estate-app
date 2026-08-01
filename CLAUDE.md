@@ -172,7 +172,7 @@ Each feature is feature-first (presentation + `*_providers.dart`); some are clea
 - **`API_BASE_URL` already includes `/api/v1`** (`.env.example`). Most call sites use bare paths (`/users/profile/`), but a few in `auth_repository.dart` and `uploadProfilePhoto` use `/api/v1/...` prefixes — those double-prefix to `/api/v1/api/v1/...`. Match the bare-path convention when adding endpoints.
 - **`tasks` ≠ `maintenance`**, and **`rental_applications` ≠ `applications`** (see Features). Don't wire UI to the `applications` clean-arch layer.
 - **Feature flags default to `true`** — set `ENABLE_APPLICATIONS_MODULE=false` / `ENABLE_PUBLIC_APPLICATIONS=false` in `.env` to hide those flows.
-- **Crash reporting is a stub** — `ConsoleCrashReporter` only logs; `ENABLE_CRASH_REPORTING=true` sends nothing external.
+- **Crash reporting is a stub** — `ConsoleCrashReporter` only logs; `ENABLE_CRASH_REPORTING=true` (or the persisted Privacy-settings toggle) sends nothing external.
 - **Token is the Supabase JWT** (key `'auth_token'`), not a backend-issued opaque token. Never add a custom refresh endpoint.
 - **`UserProfile.role` exists but is unused for gating** — see the Roles note at the top.
 

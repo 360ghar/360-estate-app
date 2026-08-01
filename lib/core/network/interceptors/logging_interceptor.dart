@@ -44,7 +44,7 @@ final class LoggingInterceptor extends Interceptor {
       final options = err.requestOptions;
       final requestId = options.extra[RequestIdKeys.requestId] ?? 'n/a';
       final code = err.response?.statusCode;
-      final data = err.response?.data;
+      final data = _sanitizeBody(err.response?.data);
       final tokenMeta = _formatTokenMeta(options.extra);
       AppLogger.w(
         'HTTP ERROR [${code ?? '-'}] ${options.method} ${options.uri.path} (rid=$requestId)$tokenMeta - Response: $data',
@@ -54,6 +54,53 @@ final class LoggingInterceptor extends Interceptor {
     }
     handler.next(err);
   }
+}
+
+/// Redacts sensitive values and truncates over-long bodies so debug logs
+/// never contain PII (phones, emails, tokens, addresses) or megabytes of
+/// response payloads.
+Object? _sanitizeBody(Object? data) {
+  const sensitiveKeys = {
+    'phone',
+    'phone_number',
+    'mobile',
+    'email',
+    'email_address',
+    'token',
+    'access_token',
+    'refresh_token',
+    'id_token',
+    'password',
+    'authorization',
+    'pan',
+    'aadhaar',
+    'upi',
+    'bank_account',
+    'ifsc',
+  };
+  const maxBodyChars = 1024;
+
+  Object? sanitize(Object? value) {
+    if (value is Map) {
+      return value.map((key, value) {
+        final k = key.toString().toLowerCase();
+        final v = sanitize(value);
+        return MapEntry(key, sensitiveKeys.contains(k) ? '***REDACTED***' : v);
+      });
+    }
+    if (value is List) return value.map(sanitize).toList();
+    return value;
+  }
+
+  final sanitized = sanitize(data);
+  // Truncate the text representation for both string and structured bodies;
+  // a multi-megabyte Map/List would otherwise be dumped in full by the
+  // interpolation below.
+  final text = sanitized is String ? sanitized : sanitized.toString();
+  if (text.length > maxBodyChars) {
+    return '${text.substring(0, maxBodyChars)}…(truncated ${text.length - maxBodyChars} chars)';
+  }
+  return sanitized;
 }
 
 String _formatTokenMeta(Map<String, dynamic> extras) {

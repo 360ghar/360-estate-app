@@ -52,7 +52,8 @@ class AuthState {
       status == AuthStatus.needsOnboarding;
   bool get needsPhone => status == AuthStatus.needsPhone;
   bool get needsPassword => status == AuthStatus.needsPassword;
-  bool get needsProfileCompletion => status == AuthStatus.needsProfileCompletion;
+  bool get needsProfileCompletion =>
+      status == AuthStatus.needsProfileCompletion;
   bool get needsOnboarding => status == AuthStatus.needsOnboarding;
 
   AuthState copyWith({
@@ -184,8 +185,19 @@ class AuthController extends StateNotifier<AuthState> {
           await _setAuthenticated(user, phone: session.user.phone);
           return;
         }
-      } catch (_) {
+      } on UnauthorizedFailure {
+        // The stored session is confirmed invalid — force a clean logout.
         await _tokenStorage.clear();
+      } catch (error, stackTrace) {
+        // Transient failure (network hiccup, backend 5xx) while restoring a
+        // VALID session: keep the token so the user is not silently logged
+        // out by a temporary outage. Fall through to the storage-based path
+        // below, which retries the profile fetch.
+        AppLogger.w(
+          'AuthController: failed to restore session from Supabase; retrying from storage',
+          error: error,
+          stackTrace: stackTrace,
+        );
       }
     }
 
@@ -198,8 +210,19 @@ class AuthController extends StateNotifier<AuthState> {
     try {
       final user = await _repository.fetchProfile();
       await _setAuthenticated(user);
-    } catch (_) {
+    } on UnauthorizedFailure {
+      // Token rejected by the backend — the session is truly gone.
       await _tokenStorage.clear();
+      state = const AuthState(status: AuthStatus.unauthenticated);
+    } catch (error, stackTrace) {
+      // Transient restore failure (no network, backend unavailable): keep the
+      // token and show the unauthenticated gate; the router's next refresh
+      // will re-run this initialization once connectivity returns.
+      AppLogger.w(
+        'AuthController: profile restore failed transiently; keeping token',
+        error: error,
+        stackTrace: stackTrace,
+      );
       state = const AuthState(status: AuthStatus.unauthenticated);
     }
   }
@@ -724,7 +747,7 @@ class AuthController extends StateNotifier<AuthState> {
 
       // Re-evaluate the gate after profile update to determine the next stage.
       try {
-        final gateState = await _repository.getAuthGateState(app: 'estate');
+        final gateState = await _repository.getAuthGateState();
         final stage = gateState['stage'] as String? ?? 'active';
         // If the backend still returns profile_completion after a successful
         // update, the profile data was not actually saved (backend bug or data
@@ -748,7 +771,11 @@ class AuthController extends StateNotifier<AuthState> {
         }
       } catch (_) {
         // If gate fails, default to authenticated.
-        state = AuthState(status: AuthStatus.authenticated, user: user, phone: state.phone);
+        state = AuthState(
+          status: AuthStatus.authenticated,
+          user: user,
+          phone: state.phone,
+        );
       }
     } catch (error) {
       state = state.copyWith(
@@ -801,7 +828,7 @@ class AuthController extends StateNotifier<AuthState> {
     // at.  We call GET /users/me/auth-state?app=estate and map the
     // response stage to the AuthStatus enum.
     try {
-      final gateState = await _repository.getAuthGateState(app: 'estate');
+      final gateState = await _repository.getAuthGateState();
       final stage = gateState['stage'] as String? ?? 'active';
       final gateStatus = _mapGateStageToAuthStatus(stage);
       state = AuthState(

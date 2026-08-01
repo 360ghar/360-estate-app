@@ -8,8 +8,11 @@ enum LogLevel { trace, debug, info, warn, error }
 final class AppLogger {
   AppLogger._(this._minLevel);
 
-  static late AppLogger _instance;
-  static AppLogger get instance => _instance;
+  static AppLogger? _instance;
+
+  /// Lazily-created default so log calls before [init] (e.g. in widget tests)
+  /// never throw a LateInitializationError.
+  static AppLogger get instance => _instance ??= AppLogger._(LogLevel.info);
 
   final LogLevel _minLevel;
 

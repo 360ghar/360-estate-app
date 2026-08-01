@@ -46,8 +46,9 @@ class _MaintenanceDetailPageState extends ConsumerState<MaintenanceDetailPage> {
     _status = request.status;
     _priority = request.priority;
     final notes = request.notes;
-    _notesController.text =
-        notes != null && notes.trim().isNotEmpty ? notes : request.description;
+    _notesController.text = notes != null && notes.trim().isNotEmpty
+        ? notes
+        : request.description;
     _initialized = true;
   }
 
@@ -59,27 +60,25 @@ class _MaintenanceDetailPageState extends ConsumerState<MaintenanceDetailPage> {
         throw Exception('Invalid request ID');
       }
 
-      await ref.read(maintenanceRepositoryProvider).updateRequest(
-            id,
-            {
-              'status': _status.apiValue,
-              'priority': _priority.name,
-              if (_notesController.text.trim().isNotEmpty)
-                'notes': _notesController.text.trim(),
-            },
-          );
+      await ref.read(maintenanceRepositoryProvider).updateRequest(id, {
+        'status': _status.apiValue,
+        'priority': _priority.name,
+        if (_notesController.text.trim().isNotEmpty)
+          'notes': _notesController.text.trim(),
+      });
       ref.invalidate(maintenanceListProvider);
       ref.invalidate(maintenancePagedProvider);
+      ref.invalidate(maintenancePagedByStatusProvider);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Request updated.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Request updated.')));
       }
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
     } finally {
       if (mounted) {
         setState(() => _isSaving = false);
@@ -148,7 +147,8 @@ class _MaintenanceDetailPageState extends ConsumerState<MaintenanceDetailPage> {
 
     MaintenanceRequest request;
     try {
-      request = initial ??
+      request =
+          initial ??
           state.items.firstWhere(
             (item) => item.id.toString() == widget.requestId,
           );
@@ -172,18 +172,12 @@ class _MaintenanceDetailPageState extends ConsumerState<MaintenanceDetailPage> {
         // Title and property
         Text(
           request.title,
-          style: textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: AppSpacing.xs),
         Row(
           children: [
-            Icon(
-              Icons.home_outlined,
-              size: 16,
-              color: AppColors.textSecondary,
-            ),
+            Icon(Icons.home_outlined, size: 16, color: AppColors.textSecondary),
             const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: Text(
@@ -212,7 +206,11 @@ class _MaintenanceDetailPageState extends ConsumerState<MaintenanceDetailPage> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(request.category.icon, size: 16, color: request.category.color),
+                  Icon(
+                    request.category.icon,
+                    size: 16,
+                    color: request.category.color,
+                  ),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
                     request.category.displayName,
@@ -264,10 +262,7 @@ class _MaintenanceDetailPageState extends ConsumerState<MaintenanceDetailPage> {
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
-              Text(
-                request.description,
-                style: textTheme.bodyMedium,
-              ),
+              Text(request.description, style: textTheme.bodyMedium),
             ],
           ],
         ),
@@ -336,8 +331,7 @@ class _MaintenanceDetailPageState extends ConsumerState<MaintenanceDetailPage> {
                     ],
                   ),
                   selected: isSelected,
-                  onSelected: (_) =>
-                      setState(() => _priority = priority),
+                  onSelected: (_) => setState(() => _priority = priority),
                   selectedColor: chipColor,
                   checkmarkColor: Colors.white,
                   labelStyle: TextStyle(
@@ -449,7 +443,11 @@ class _StatusStepper extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.cancel_outlined, color: AppColors.danger, size: 20),
+                  Icon(
+                    Icons.cancel_outlined,
+                    color: AppColors.danger,
+                    size: 20,
+                  ),
                   const SizedBox(width: AppSpacing.sm),
                   Text(
                     'Cancelled',
@@ -471,8 +469,8 @@ class _StatusStepper extends StatelessWidget {
                         color: i <= currentIndex
                             ? AppColors.primary
                             : (isDark
-                                ? AppColors.darkCardBorder
-                                : AppColors.border),
+                                  ? AppColors.darkCardBorder
+                                  : AppColors.border),
                       ),
                     ),
                   _StepCircle(
@@ -529,16 +527,13 @@ class _StepCircle extends StatelessWidget {
         Container(
           width: 28,
           height: 28,
-          decoration: BoxDecoration(
-            color: circleColor,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: circleColor, shape: BoxShape.circle),
           child: Icon(
             isCompleted
                 ? Icons.check
                 : isCurrent
-                    ? Icons.circle
-                    : Icons.circle_outlined,
+                ? Icons.circle
+                : Icons.circle_outlined,
             size: isCompleted ? 16 : 10,
             color: iconColor,
           ),
@@ -548,7 +543,9 @@ class _StepCircle extends StatelessWidget {
           label,
           style: textTheme.labelSmall?.copyWith(
             color: textColor,
-            fontWeight: isCurrent || isCompleted ? FontWeight.w600 : FontWeight.w400,
+            fontWeight: isCurrent || isCompleted
+                ? FontWeight.w600
+                : FontWeight.w400,
           ),
           textAlign: TextAlign.center,
         ),
@@ -570,9 +567,9 @@ class _DetailRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
         ),
         child,
       ],

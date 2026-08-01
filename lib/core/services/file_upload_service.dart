@@ -1,10 +1,16 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/core/network/response_parser.dart';
 
 enum UploadTarget { general, documents }
+
+/// Maximum accepted upload size. The avatar path enforces 5MB
+/// (`AuthRepository.uploadProfilePhoto`); document uploads are capped here so
+/// a single oversized file cannot exhaust memory/timeouts on the wire.
+const int kMaxUploadBytes = 25 * 1024 * 1024; // 25 MB
 
 class UploadResult {
   const UploadResult({this.url, this.data});
@@ -26,13 +32,21 @@ class FileUploadService {
     int? propertyId,
     int? leaseId,
     ProgressCallback? onSendProgress,
+    int maxBytes = kMaxUploadBytes,
   }) async {
+    final length = await file.length();
+    if (length > maxBytes) {
+      throw ValidationFailure(
+        'File is too large. Maximum size is ${(maxBytes / (1024 * 1024)).toStringAsFixed(0)}MB.',
+      );
+    }
     final fileName = file.path.split(Platform.pathSeparator).last;
     final trimmedTitle = title?.trim();
     final trimmedType = type?.trim();
     final formData = FormData.fromMap({
       'file': await MultipartFile.fromFile(file.path, filename: fileName),
-      if (trimmedTitle != null && trimmedTitle.isNotEmpty) 'title': trimmedTitle,
+      if (trimmedTitle != null && trimmedTitle.isNotEmpty)
+        'title': trimmedTitle,
       if (trimmedType != null &&
           trimmedType.isNotEmpty &&
           target == UploadTarget.documents)
@@ -47,8 +61,9 @@ class FileUploadService {
         'lease_id': leaseId.toString(),
     });
 
-    final path =
-        target == UploadTarget.documents ? '/pm/documents/upload' : '/upload';
+    final path = target == UploadTarget.documents
+        ? '/pm/documents/upload'
+        : '/upload';
     final response = await _client.upload<Map<String, dynamic>>(
       path,
       data: formData,

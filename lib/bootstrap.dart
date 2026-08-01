@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:estate_app/app/app.dart';
 import 'package:estate_app/core/config/app_config.dart';
@@ -24,7 +24,9 @@ Future<void> bootstrap() async {
       final config = AppConfig.fromEnvironment();
       AppLogger.init(config);
       if (!envLoaded) {
-        AppLogger.w('No .env asset found; falling back to --dart-define values');
+        AppLogger.w(
+          'No .env asset found; falling back to --dart-define values',
+        );
       }
 
       if (!config.isSupabaseConfigured) {
@@ -40,7 +42,12 @@ Future<void> bootstrap() async {
       final preferences = await AppPreferences.create();
       final secureStore = SecureKvStore();
 
-      crashReporter = config.enableCrashReporting
+      // Crash reporting can be enabled via env (`ENABLE_CRASH_REPORTING`) or
+      // toggled by the user in Privacy settings (persisted preference).
+      final crashReportingEnabled =
+          config.enableCrashReporting ||
+          preferences.getBool(PrefKeys.crashReportingEnabled) == true;
+      crashReporter = crashReportingEnabled
           ? ConsoleCrashReporter()
           : NoopCrashReporter();
       await crashReporter!.init();

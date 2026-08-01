@@ -22,15 +22,19 @@ import 'package:go_router/go_router.dart';
 /// redirect once the user lands on the home shell.
 class DeepLinkService {
   DeepLinkService({AppLinks? appLinks, GoRouter? router})
-      : _appLinks = appLinks ?? AppLinks(),
-        _router = router;
+    : _appLinks = appLinks ?? AppLinks(),
+      _router = router;
 
   final AppLinks _appLinks;
   GoRouter? _router;
   StreamSubscription<Uri>? _sub;
 
-  static String? _pendingPath;
-  static String? consumePendingPath() {
+  /// Deep link captured before the router was bound (cold start while the
+  /// user is still on the splash screen). Instance state: a static here leaked
+  /// across service instances and test cases.
+  String? _pendingPath;
+
+  String? consumePendingPath() {
     final path = _pendingPath;
     _pendingPath = null;
     return path;
@@ -85,7 +89,9 @@ class DeepLinkService {
     AppLogger.i('Deep link received: ${uri.scheme}://${uri.host}${uri.path}');
     final path = mapUriToPath(uri);
     if (path == null) {
-      AppLogger.w('No deep link mapping for ${uri.scheme}://${uri.host}${uri.path}');
+      AppLogger.w(
+        'No deep link mapping for ${uri.scheme}://${uri.host}${uri.path}',
+      );
       return;
     }
     _routeToPath(path);
