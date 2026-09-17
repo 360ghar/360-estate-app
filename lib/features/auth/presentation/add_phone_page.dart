@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 import 'dart:ui';
 import 'package:estate_app/core/presentation/animations/premium/premium_animations.dart';
 import 'package:estate_app/core/presentation/widgets/glass/glass_toast.dart';
@@ -10,7 +9,7 @@ import 'package:estate_app/features/auth/presentation/widgets/premium_auth_backg
     show SimplePremiumBackground;
 import 'package:estate_app/features/auth/presentation/widgets/premium_otp_input.dart';
 import 'package:estate_app/features/auth/presentation/widgets/resend_otp_timer.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,7 +53,8 @@ class _AddPhonePageState extends ConsumerState<AddPhonePage>
     });
   }
 
-  bool get _supportsPhoneHint => !kIsWeb && Platform.isAndroid;
+  bool get _supportsPhoneHint =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
 
   Future<void> _showPhoneHintPicker() async {
     try {

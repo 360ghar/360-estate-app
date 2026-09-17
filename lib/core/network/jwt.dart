@@ -53,6 +53,23 @@ abstract final class Jwt {
   }
 
   /// Formats the `exp` claim as a UTC ISO-8601 string, or `null`.
+  ///
+  /// Takes an already-decoded payload so per-request callers (e.g. the auth
+  /// interceptor) decode the JWT once instead of twice.
+  static String? formatExpFromPayload(Map<String, dynamic> payload) {
+    final exp = payload['exp'];
+    final expValue = exp is num
+        ? exp.toInt()
+        : exp is String
+        ? int.tryParse(exp)
+        : null;
+    if (expValue == null) return null;
+    return DateTime.fromMillisecondsSinceEpoch(
+      expValue * 1000,
+    ).toUtc().toIso8601String();
+  }
+
+  /// Formats the `exp` claim as a UTC ISO-8601 string, or `null`.
   static String? formatExp(String token) {
     final expValue = expSeconds(token);
     if (expValue == null) return null;

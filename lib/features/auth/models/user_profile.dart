@@ -47,4 +47,13 @@ extension UserProfileX on UserProfile {
 
     return phone ?? email ?? 'User';
   }
+
+  /// True when mandatory profile fields are present.
+  /// Used for the in-app completion prompt (not a router gate).
+  /// Checks the raw name fields: displayName always falls back to
+  /// phone/email/'User', so it can never report an incomplete profile.
+  bool get isProfileComplete =>
+      (fullName?.trim().isNotEmpty ?? false) ||
+      ((firstName?.trim().isNotEmpty ?? false) ||
+          (lastName?.trim().isNotEmpty ?? false));
 }

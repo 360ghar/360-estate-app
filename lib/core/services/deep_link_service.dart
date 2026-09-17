@@ -157,6 +157,8 @@ class DeepLinkService {
   }
 
   static String? _mapEntity(String entity, String id) {
+    // Cap id length to bound router path / cache growth from hostile links.
+    if (id.isEmpty || id.length > 128) return null;
     switch (entity) {
       case 'apply':
         return '/public/applications/$id';

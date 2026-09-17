@@ -1,3 +1,4 @@
+import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_durations.dart';
 import 'package:estate_app/core/presentation/design_system/app_gradients.dart';
@@ -14,6 +15,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+/// Returns true when a delete-account API failure should offer the mailto
+/// fallback. Offline ([NetworkFailure]) stays on the page with a snackbar;
+/// anything else (401/404/server/unknown) offers the email path.
+bool shouldFallbackToEmailOnDelete(Object error) =>
+    error is! NetworkFailure;
 
 class DeleteAccountPage extends ConsumerStatefulWidget {
   const DeleteAccountPage({super.key});
@@ -88,6 +95,18 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
     try {
       final apiClient = ref.read(apiClientProvider);
       await apiClient.delete<void>('/users/me');
+    } on NetworkFailure {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'You appear to be offline. Check your connection and try again.',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      setState(() => _isSubmitting = false);
+      return;
     } catch (e) {
       if (!mounted) return;
       await _fallbackEmailDeletion();

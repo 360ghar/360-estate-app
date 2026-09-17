@@ -55,3 +55,23 @@ app.*.map.json
 android/key.properties
 *.keystore
 *.jks
+
+# Flutter-standard hardening
+.env.*
+!.env.example
+coverage/lcov.info
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/ServiceDefinitions.json
+android/.gradle/
+android/local.properties
+.mason/
+.fvm/fvm_config.json
+*.xcuserdata
+*.xcworkspace/xcuserdata/
+DerivedData/
+.vscode/*
+!.vscode/extensions.json

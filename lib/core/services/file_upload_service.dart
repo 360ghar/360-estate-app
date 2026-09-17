@@ -1,9 +1,12 @@
 import 'dart:io';
 
+import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
 import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/core/network/api_client.dart';
+import 'package:estate_app/core/network/api_paths.dart';
 import 'package:estate_app/core/network/response_parser.dart';
+import 'package:flutter/foundation.dart';
 
 enum UploadTarget { general, documents }
 
@@ -11,6 +14,9 @@ enum UploadTarget { general, documents }
 /// (`AuthRepository.uploadProfilePhoto`); document uploads are capped here so
 /// a single oversized file cannot exhaust memory/timeouts on the wire.
 const int kMaxUploadBytes = 25 * 1024 * 1024; // 25 MB
+
+/// Maximum accepted avatar/profile-photo size (5 MB).
+const int kMaxAvatarBytes = 5 * 1024 * 1024; // 5 MB
 
 class UploadResult {
   const UploadResult({this.url, this.data});
@@ -24,8 +30,73 @@ class FileUploadService {
 
   final ApiClient _client;
 
+  /// Shared basename helper: last path segment. Web-safe on purpose — split
+  /// on both `/` and `\` instead of `Platform.pathSeparator` so web builds
+  /// (no dart:io Platform) resolve the same basename.
+  static String fileNameOf(String path) {
+    return path.split(RegExp(r'[/\\]')).last;
+  }
+
+  /// Shared image validation used by avatar + document upload paths.
+  ///
+  /// Pass [isAvatar] true for profile photos (5 MB cap with the legacy
+  /// avatar error strings); default enforces the 25 MB document cap.
+  /// The `application/octet-stream` passthrough preserves the legacy
+  /// `AuthRepository.uploadProfilePhoto` behavior for unknown mime types.
+  static void validateImage({
+    required int length,
+    String? mimeType,
+    bool isAvatar = false,
+  }) {
+    if (mimeType == null ||
+        (!mimeType.startsWith('image/') &&
+            mimeType != 'application/octet-stream')) {
+      throw const ValidationFailure(
+        'Invalid file type. Please select an image.',
+      );
+    }
+    final maxBytes = isAvatar ? kMaxAvatarBytes : kMaxUploadBytes;
+    if (length > maxBytes) {
+      if (isAvatar) {
+        throw const ValidationFailure('Image size must be less than 5MB');
+      }
+      throw ValidationFailure(
+        'File is too large. Maximum size is ${(maxBytes / (1024 * 1024)).toStringAsFixed(0)}MB.',
+      );
+    }
+  }
+
+  /// Legacy File-based entry point. Kept for existing document callers
+  /// (e.g. property_form_page) that still hold a `dart:io` File. Delegates
+  /// to [uploadXFile] so there is a single upload implementation.
   Future<UploadResult> uploadFile({
     required File file,
+    UploadTarget target = UploadTarget.documents,
+    String? title,
+    String? type,
+    int? propertyId,
+    int? leaseId,
+    ProgressCallback? onSendProgress,
+    int maxBytes = kMaxUploadBytes,
+  }) async {
+    return uploadXFile(
+      file: XFile(file.path),
+      target: target,
+      title: title,
+      type: type,
+      propertyId: propertyId,
+      leaseId: leaseId,
+      onSendProgress: onSendProgress,
+      maxBytes: maxBytes,
+    );
+  }
+
+  /// Web-safe upload entry point. Accepts the `XFile` returned directly by
+  /// `image_picker` (no `dart:io` File conversion), so avatar + document
+  /// picks work on web. Uses `readAsBytes` + `MultipartFile.fromBytes`
+  /// instead of `MultipartFile.fromFile(path)` (which needs dart:io).
+  Future<UploadResult> uploadXFile({
+    required XFile file,
     UploadTarget target = UploadTarget.documents,
     String? title,
     String? type,
@@ -40,11 +111,26 @@ class FileUploadService {
         'File is too large. Maximum size is ${(maxBytes / (1024 * 1024)).toStringAsFixed(0)}MB.',
       );
     }
-    final fileName = file.path.split(Platform.pathSeparator).last;
+    final fileName = file.name.isNotEmpty
+        ? file.name
+        : FileUploadService.fileNameOf(file.path);
+    // Stream from disk on IO platforms so a 25MB file is not held twice in
+    // RAM (readAsBytes + fromBytes). Web has no filesystem path, so it keeps
+    // the byte-based upload.
+    final MultipartFile multipartFile;
+    if (!kIsWeb && file.path.isNotEmpty) {
+      multipartFile = await MultipartFile.fromFile(
+        file.path,
+        filename: fileName,
+      );
+    } else {
+      final bytes = await file.readAsBytes();
+      multipartFile = MultipartFile.fromBytes(bytes, filename: fileName);
+    }
     final trimmedTitle = title?.trim();
     final trimmedType = type?.trim();
     final formData = FormData.fromMap({
-      'file': await MultipartFile.fromFile(file.path, filename: fileName),
+      'file': multipartFile,
       if (trimmedTitle != null && trimmedTitle.isNotEmpty)
         'title': trimmedTitle,
       if (trimmedType != null &&
@@ -62,8 +148,8 @@ class FileUploadService {
     });
 
     final path = target == UploadTarget.documents
-        ? '/pm/documents/upload'
-        : '/upload';
+        ? ApiPaths.documentsUpload
+        : ApiPaths.generalUpload;
     final response = await _client.upload<Map<String, dynamic>>(
       path,
       data: formData,

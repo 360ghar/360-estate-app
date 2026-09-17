@@ -94,6 +94,24 @@ final class AppConfig {
   /// validate the ID token). The iOS client id is additionally required on iOS.
   bool get isGoogleSignInConfigured => googleWebClientId.trim().isNotEmpty;
 
+  static String _redactSecret(String value) {
+    final v = value.trim();
+    if (v.isEmpty) return '(empty)';
+    if (v.length <= 4) return '***';
+    return '${v.substring(0, 4)}***';
+  }
+
+  @override
+  String toString() =>
+      'AppConfig(environment: $environment, apiBaseUrl: $apiBaseUrl, '
+      'supabaseUrl: $supabaseUrl, '
+      'supabasePublishableKey: ${_redactSecret(supabasePublishableKey)}, '
+      'googlePlacesApiKey: ${_redactSecret(googlePlacesApiKey)}, '
+      'googleWebClientId: ${_redactSecret(googleWebClientId)}, '
+      'googleIosClientId: ${_redactSecret(googleIosClientId)}, '
+      'enableCrashReporting: $enableCrashReporting, '
+      'enableDebugLogs: $enableDebugLogs)';
+
   static AppEnvironment _parseEnv(String value) {
     switch (value.trim().toLowerCase()) {
       case 'prod':

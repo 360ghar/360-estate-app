@@ -10,7 +10,7 @@ import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
 import 'package:estate_app/core/presentation/widgets/wizard_progress_indicator.dart';
 import 'package:estate_app/core/providers.dart';
-import 'package:estate_app/features/documents/domain/entities/document.dart';
+import 'package:estate_app/features/more/documents/models/document_type.dart';
 import 'package:estate_app/features/properties/domain/repositories/properties_repository.dart';
 import 'package:estate_app/features/properties/presentation/property_wizard_data.dart';
 import 'package:estate_app/features/properties/presentation/property_wizard_steps.dart';

@@ -11,6 +11,11 @@ class TenantsRepository {
   final CacheStore _cache;
   static const _cacheTtl = Duration(minutes: 5);
 
+  /// Tenant list pages are cached in-memory (process-scoped).
+  ///
+  /// Cross-user isolation comes from the logout hook in AuthController,
+  /// which invalidates the `tenants:` prefix on logout and token expiry,
+  /// not from per-user cache keys.
   Future<Page<Tenant>> listPage({
     required String? cursor,
     required int limit,

@@ -4,6 +4,12 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:estate_app/core/network/interceptors/request_id_interceptor.dart';
 
+/// Retry policy: idempotent requests (GET/HEAD/OPTIONS) only, max 2 retries
+/// with exponential backoff (350ms base + jitter) on 408/429/5xx plus
+/// connection timeouts/errors. Never retries 4xx (except 408/429), cancels,
+/// or non-idempotent verbs. Offline detection is deferred to ApiClient,
+/// which only pays the NetworkInfo platform-channel cost for
+/// connectionError/unknown failures.
 final class RetryInterceptor extends Interceptor {
   RetryInterceptor({
     required Dio dio,

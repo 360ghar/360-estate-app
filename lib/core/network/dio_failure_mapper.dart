@@ -27,11 +27,17 @@ final class DioFailureMapper {
         exception.requestOptions.extra[RequestIdKeys.requestId] as String?;
 
     if (statusCode == 401) {
-      return UnauthorizedFailure('Unauthorized', cause: exception);
+      return UnauthorizedFailure(
+        _tryExtractMessage(exception.response?.data) ?? 'Unauthorized',
+        cause: exception,
+      );
     }
 
     if (statusCode == 404) {
-      return NotFoundFailure('Not found', cause: exception);
+      return NotFoundFailure(
+        _tryExtractMessage(exception.response?.data) ?? 'Not found',
+        cause: exception,
+      );
     }
 
     if (statusCode == 400 || statusCode == 422) {

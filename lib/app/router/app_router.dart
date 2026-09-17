@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:estate_app/app/app_shell.dart';
+import 'package:estate_app/app/router/guards.dart';
 import 'package:estate_app/app/router/routes.dart';
 import 'package:estate_app/core/config/constants.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
@@ -73,93 +74,38 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     refreshListenable: GoRouterRefreshStream(authController.stream),
     redirect: (context, state) {
       final authState = ref.read(authControllerProvider);
-      final isChecking = authState.status == AuthStatus.checking;
-      final isLoggedIn = authState.isLoggedIn;
-      final needsPhone = authState.status == AuthStatus.needsPhone;
-      final needsPassword = authState.status == AuthStatus.needsPassword;
-      final needsProfileCompletion =
-          authState.status == AuthStatus.needsProfileCompletion;
-      final needsOnboarding = authState.status == AuthStatus.needsOnboarding;
       final location = state.uri.path;
-
+      // Only consume the pending deep link when it can actually replay.
+      // consumePendingPath is destructive: consuming on an auth route
+      // would drop the link before login completes.
       final isSplash = location == '/splash';
-      final isAddPhone = location == '/add-phone';
-      final isSetPassword = location == '/set-password';
-      final isProfileCompletion = location == '/profile-completion';
-      final isOnboarding = location == '/onboarding';
       final isAuthRoute =
           location == '/enter-phone' ||
           location == '/login' ||
           location == '/otp' ||
           location == '/signup' ||
-          isAddPhone ||
-          isSetPassword ||
-          isProfileCompletion ||
-          isOnboarding;
+          location == '/add-phone' ||
+          location == '/set-password' ||
+          location == '/profile-completion' ||
+          location == '/onboarding';
       final isPublicRoute =
           location.startsWith('/public') || location.startsWith('/legal/');
-      final isApplicationsRoute = location.startsWith('/more/applications');
-
-      if (isPublicRoute) {
-        if (!flags.enablePublicApplications) {
-          if (!isLoggedIn) return '/enter-phone';
-          return '/home';
-        }
-        return null;
+      String? pending;
+      if (authState.isLoggedIn &&
+          !isSplash &&
+          !isAuthRoute &&
+          !isPublicRoute) {
+        pending = ref.read(deepLinkServiceProvider).consumePendingPath();
+        if (pending == location) pending = null;
       }
-
-      if (isChecking) {
-        return isSplash ? null : '/splash';
-      }
-
-      // Replay any pending deep link captured during cold start once the
-      // user is authenticated and the splash has been processed.
-      if (isLoggedIn && !isSplash && !isAuthRoute) {
-        final pending = ref.read(deepLinkServiceProvider).consumePendingPath();
-        if (pending != null && pending != location) {
-          return pending;
-        }
-      }
-
-      if (!isLoggedIn) {
-        // Protected deep links are stored as pending paths by DeepLinkService
-        // and replayed after login; here we always gate behind auth so
-        // unauthenticated users never render a protected route.
-        return isAuthRoute ? null : '/enter-phone';
-      }
-
-      // Mandatory set-password step (req 6): an OTP-verified account with no
-      // password must set one before reaching the app. Non-skippable.
-      if (needsPassword) {
-        return isSetPassword ? null : '/set-password';
-      }
-
-      // Post-Google passwordless users without a phone get the skippable
-      // add-phone interstitial before reaching the app shell.
-      if (needsPhone) {
-        return isAddPhone ? null : '/add-phone';
-      }
-
-      // Profile completion gate: mandatory fields (full_name, date_of_birth)
-      // must be filled before reaching the app.
-      if (needsProfileCompletion) {
-        return isProfileCompletion ? null : '/profile-completion';
-      }
-
-      // App onboarding gate: app-specific onboarding must be completed.
-      if (needsOnboarding) {
-        return isOnboarding ? null : '/onboarding';
-      }
-
-      if (!flags.enableApplicationsModule && isApplicationsRoute) {
-        return '/more';
-      }
-
-      if (isLoggedIn && (isAuthRoute || isSplash)) {
-        return '/home';
-      }
-
-      return null;
+      return resolveRedirect(
+        location: location,
+        isChecking: authState.status == AuthStatus.checking,
+        isLoggedIn: authState.isLoggedIn,
+        enablePublicApplications: flags.enablePublicApplications,
+        enableApplicationsModule: flags.enableApplicationsModule,
+        pendingPath: pending,
+      );
     },
     routes: [
       GoRoute(
@@ -582,15 +528,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 /// Used to make GoRouter aware of authentication state changes.
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
-    notifyOnStreamChange();
-    _subscription = stream.asBroadcastStream().listen(
-      (dynamic _) => notifyListeners(),
-    );
+    _subscription = stream.listen((dynamic _) => notifyListeners());
   }
 
   late final StreamSubscription<dynamic> _subscription;
-
-  void notifyOnStreamChange() => notifyListeners();
 
   @override
   void dispose() {

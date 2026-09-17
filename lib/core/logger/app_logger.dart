@@ -23,16 +23,54 @@ final class AppLogger {
     _instance = AppLogger._(minLevel);
   }
 
-  static void t(String message, {Object? error, StackTrace? stackTrace}) =>
-      instance._log(LogLevel.trace, message, error, stackTrace);
-  static void d(String message, {Object? error, StackTrace? stackTrace}) =>
-      instance._log(LogLevel.debug, message, error, stackTrace);
-  static void i(String message, {Object? error, StackTrace? stackTrace}) =>
-      instance._log(LogLevel.info, message, error, stackTrace);
-  static void w(String message, {Object? error, StackTrace? stackTrace}) =>
-      instance._log(LogLevel.warn, message, error, stackTrace);
-  static void e(String message, {Object? error, StackTrace? stackTrace}) =>
-      instance._log(LogLevel.error, message, error, stackTrace);
+  static void t(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    String? requestId,
+  }) => _logAt(LogLevel.trace, message, error: error, stackTrace: stackTrace, requestId: requestId);
+  static void d(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    String? requestId,
+  }) => _logAt(LogLevel.debug, message, error: error, stackTrace: stackTrace, requestId: requestId);
+  static void i(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    String? requestId,
+  }) => _logAt(LogLevel.info, message, error: error, stackTrace: stackTrace, requestId: requestId);
+  static void w(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    String? requestId,
+  }) => _logAt(LogLevel.warn, message, error: error, stackTrace: stackTrace, requestId: requestId);
+  static void e(
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    String? requestId,
+  }) => _logAt(LogLevel.error, message, error: error, stackTrace: stackTrace, requestId: requestId);
+
+  static void _logAt(
+    LogLevel level,
+    String message, {
+    Object? error,
+    StackTrace? stackTrace,
+    String? requestId,
+  }) => instance._log(
+    level,
+    _withRequestId(message, requestId),
+    error,
+    stackTrace,
+  );
+
+  static String _withRequestId(String message, String? requestId) {
+    if (requestId == null || requestId.isEmpty) return message;
+    return 'rid=$requestId $message';
+  }
 
   void _log(
     LogLevel level,

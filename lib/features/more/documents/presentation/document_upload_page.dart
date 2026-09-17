@@ -8,6 +8,7 @@ import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
 import 'package:estate_app/features/more/documents/documents_providers.dart';
+import 'package:estate_app/features/more/documents/models/document_type.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,6 +23,19 @@ const _documentCategories = [
   'Insurance',
   'Other',
 ];
+
+/// Maps the sheet's display labels to canonical backend values.
+/// 'Tax' has no backend counterpart and falls back to `other`,
+/// matching `DocumentType.fromString` for unknown strings.
+const _documentCategoryValues = {
+  'Agreement': DocumentType.leaseAgreement,
+  'Receipt': DocumentType.receipt,
+  'Invoice': DocumentType.invoice,
+  'ID Proof': DocumentType.idProof,
+  'Tax': DocumentType.other,
+  'Insurance': DocumentType.insurancePolicy,
+  'Other': DocumentType.other,
+};
 
 class DocumentUploadPage extends ConsumerStatefulWidget {
   const DocumentUploadPage({super.key});
@@ -120,7 +134,9 @@ class _DocumentUploadPageState extends ConsumerState<DocumentUploadPage> {
       await ref.read(documentsRepositoryProvider).upload(
             file: _file!,
             title: _titleController.text.trim(),
-            type: _selectedType,
+            type:
+                _documentCategoryValues[_selectedType]?.apiValue ??
+                DocumentType.other.apiValue,
           );
       ref.invalidate(documentsListProvider);
       if (mounted) {

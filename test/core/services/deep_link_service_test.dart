@@ -108,6 +108,22 @@ void main() {
         isNull,
       );
     });
+
+    test('returns null for oversize ids (>128 chars)', () {
+      final longId = List.filled(129, 'a').join();
+      expect(
+        DeepLinkService.mapUriToPath(
+          Uri.parse('https://the360ghar.com/estate/property/$longId'),
+        ),
+        isNull,
+      );
+      expect(
+        DeepLinkService.mapUriToPath(
+          Uri.parse('estate360://property/$longId'),
+        ),
+        isNull,
+      );
+    });
   });
 
   group('DeepLinkService share URL builders', () {

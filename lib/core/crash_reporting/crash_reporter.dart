@@ -71,9 +71,14 @@ final class CrashReporterGuard {
   final CrashReporter _reporter;
 
   void install() {
+    if (_reporter is NoopCrashReporter) return;
     FlutterError.onError = (details) {
       FlutterError.presentError(details);
       unawaited(_reporter.recordFlutterError(details));
+    };
+    PlatformDispatcher.instance.onError = (error, stack) {
+      unawaited(_reporter.recordError(error, stack, fatal: true));
+      return true;
     };
   }
 }
