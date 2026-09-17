@@ -119,9 +119,11 @@ final class GooglePlacesService {
       if (kDebugMode) {
         debugPrint('GooglePlaces: autocomplete error: ${e.message}');
       }
-      // Connectivity problems must surface so the caller can show an
-      // offline hint; ZERO_RESULTS and other API statuses return [].
-      final failure = const DioFailureMapper().map(e, isOffline: true);
+      // ZERO_RESULTS and other API statuses return [].
+      // No connectivity check here: a timeout on a slow-but-online network
+      // must not surface as "no internet". Offline detection stays in
+      // ApiClient, which consults NetworkInfo before labeling a failure.
+      final failure = const DioFailureMapper().map(e, isOffline: false);
       if (failure is NetworkFailure) throw failure;
       return const [];
     } catch (e) {
@@ -209,7 +211,10 @@ final class GooglePlacesService {
       if (kDebugMode) {
         debugPrint('GooglePlaces: details error: ${e.message}');
       }
-      final failure = const DioFailureMapper().map(e, isOffline: true);
+      // No connectivity check here: a timeout on a slow-but-online network
+      // must not surface as "no internet". Offline detection stays in
+      // ApiClient, which consults NetworkInfo before labeling a failure.
+      final failure = const DioFailureMapper().map(e, isOffline: false);
       if (failure is NetworkFailure) throw failure;
       return null;
     } catch (e) {

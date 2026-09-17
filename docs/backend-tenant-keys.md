@@ -17,7 +17,7 @@ Endpoints: `GET /pm/tenants`, `GET /pm/tenants/:id`
 }
 ```
 
-## 8 unported fields (legacy `TenantDto` parses, canonical drops)
+## 8 unported fields (historically parsed by the legacy `TenantDto`, now removed; canonical drops)
 
 1. `user_id` (String?)
 2. `emergency_contact` (String?)
@@ -33,5 +33,5 @@ Endpoints: `GET /pm/tenants`, `GET /pm/tenants/:id`
 For `GET /pm/tenants` and `GET /pm/tenants/:id`: which of the
 8 keys above are actually returned? For each returned key, confirm
 type and nullability (e.g. `emergency_phone: string | null`).
-If a key is never returned, confirm it is dead so we remove it
-from `TenantDto` instead of carrying forward-compat parsing.
+If a key is never returned, confirm it is dead so we close this
+request without porting it into the canonical model.

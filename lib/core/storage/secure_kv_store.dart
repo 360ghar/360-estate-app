@@ -7,7 +7,11 @@ final class SecureKvStore {
           const FlutterSecureStorage(
             aOptions: AndroidOptions(encryptedSharedPreferences: true),
             iOptions: IOSOptions(
-              accessibility: KeychainAccessibility.first_unlock,
+              // Token is only read by the foreground auth interceptor; no
+              // background access needs the weaker first_unlock level.
+              // ignore: avoid_redundant_argument_values -- `unlocked` is the
+              // default; stated explicitly so first_unlock is not reintroduced.
+              accessibility: KeychainAccessibility.unlocked,
             ),
           );
 

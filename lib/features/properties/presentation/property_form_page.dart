@@ -194,9 +194,8 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
       final uploadService = ref.read(fileUploadServiceProvider);
 
       for (final image in selectedImages) {
-        final file = File(image.path);
-        final result = await uploadService.uploadFile(
-          file: file,
+        final result = await uploadService.uploadXFile(
+          file: image,
           type: DocumentType.other.apiValue,
           title: _data.name ?? 'Property image',
           propertyId: propertyId,
@@ -258,9 +257,8 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
       final uploadService = ref.read(fileUploadServiceProvider);
 
       for (final image in selectedImages) {
-        final file = File(image.path);
-        final result = await uploadService.uploadFile(
-          file: file,
+        final result = await uploadService.uploadXFile(
+          file: image,
           type: DocumentType.other.apiValue,
           title: _data.name ?? 'Floor plan',
           propertyId: propertyId,
@@ -376,8 +374,8 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
         final succeededImageFiles = <File>[];
         for (final file in _imageFiles) {
           try {
-            final result = await uploadService.uploadFile(
-              file: file,
+            final result = await uploadService.uploadXFile(
+              file: XFile(file.path),
               type: DocumentType.other.apiValue,
               title: _data.name ?? 'Property image',
               propertyId: propertyId,
@@ -397,8 +395,8 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
         final succeededFloorPlanFiles = <File>[];
         for (final file in _floorPlanFiles) {
           try {
-            final result = await uploadService.uploadFile(
-              file: file,
+            final result = await uploadService.uploadXFile(
+              file: XFile(file.path),
               type: DocumentType.other.apiValue,
               title: _data.name ?? 'Floor plan',
               propertyId: propertyId,

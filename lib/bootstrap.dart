@@ -22,7 +22,16 @@ Future<void> bootstrap() async {
 
       final envLoaded = await EnvLoader.load();
 
-      final config = AppConfig.fromEnvironment();
+      // fromEnvironment throws StateError on missing values (fresh checkout
+      // with an empty .env). Mount the config-error UI instead of dying
+      // before first frame in the zoned error handler.
+      late final AppConfig config;
+      try {
+        config = AppConfig.fromEnvironment();
+      } on StateError catch (e) {
+        runApp(ConfigErrorPage(message: e.message));
+        return;
+      }
       AppLogger.init(config);
       if (!envLoaded) {
         AppLogger.w(

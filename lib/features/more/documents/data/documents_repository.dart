@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:cross_file/cross_file.dart';
 import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/core/network/response_parser.dart';
@@ -21,16 +20,17 @@ class DocumentsRepository {
   }
 
   /// Uploads via the shared [FileUploadService] so there is a single upload
-  /// implementation. The service sends `document_type`, which the backend
-  /// requires (`POST /pm/documents/upload` takes it as a required Form
-  /// field).
+  /// implementation. Takes the picker's `XFile` directly (bytes-backed on
+  /// web, path-backed on IO) so no `dart:io` File is needed. The service
+  /// sends `document_type`, which the backend requires
+  /// (`POST /pm/documents/upload` takes it as a required Form field).
   Future<DocumentItem> upload({
-    required File file,
+    required XFile file,
     String? title,
     String? type,
   }) async {
     final uploads = FileUploadService(_client);
-    final result = await uploads.uploadFile(
+    final result = await uploads.uploadXFile(
       file: file,
       title: title,
       type: type,

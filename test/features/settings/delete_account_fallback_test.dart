@@ -13,6 +13,15 @@ void main() {
       );
     });
 
+    test('online NetworkFailure (timeout) -> offer mailto fallback', () {
+      expect(
+        shouldFallbackToEmailOnDelete(
+          const NetworkFailure('timeout'),
+        ),
+        isTrue,
+      );
+    });
+
     test('401 Unauthorized -> offer mailto fallback', () {
       expect(
         shouldFallbackToEmailOnDelete(const UnauthorizedFailure('401')),

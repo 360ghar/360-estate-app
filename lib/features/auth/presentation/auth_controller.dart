@@ -21,6 +21,11 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 enum AuthStatus {
   checking,
   unauthenticated,
+
+  /// Signed in but the mandatory set-password step (req 6) is pending.
+  /// Router gate: only `/set-password` is reachable until it completes.
+  needsPassword,
+
   authenticated,
 }
 
@@ -40,7 +45,12 @@ class AuthState {
   final bool isBusy;
 
   bool get isAuthenticated => status == AuthStatus.authenticated;
-  bool get isLoggedIn => status == AuthStatus.authenticated;
+
+  /// Has a live session. Includes [AuthStatus.needsPassword]: the account is
+  /// signed in but must complete the mandatory set-password step first.
+  bool get isLoggedIn =>
+      status == AuthStatus.authenticated ||
+      status == AuthStatus.needsPassword;
   // Progressive prompts (in-app, not router gates). Derived from profile.
   bool get needsPhone =>
       isAuthenticated &&
@@ -118,15 +128,16 @@ final authControllerProvider = StateNotifierProvider<AuthController, AuthState>(
 );
 
 /// Map the backend auth-gate stage string to the local [AuthStatus] enum.
-/// 3-state model: only `identifier_verification` keeps the user out.
-/// All other stages (password_setup, profile_completion, app_onboarding,
-/// active) enter the app; missing profile/phone surface as in-app prompts.
-/// Top-level for testability; [AuthController] delegates to this.
+/// `identifier_verification` keeps the user out and `password_setup` routes
+/// to the mandatory set-password step. profile_completion / app_onboarding
+/// enter the app (in-app prompts, not router gates). Top-level for
+/// testability; [AuthController] delegates to this.
 AuthStatus mapGateStageToAuthStatus(String stage) {
   switch (stage) {
     case 'identifier_verification':
       return AuthStatus.unauthenticated;
     case 'password_setup':
+      return AuthStatus.needsPassword;
     case 'profile_completion':
     case 'app_onboarding':
     case 'active':
@@ -184,6 +195,11 @@ class AuthController extends StateNotifier<AuthState> {
   /// [authControllerProvider] to clear the `tenants:` cache prefix; defaults
   /// to null so unit tests can construct the controller without a ref.
   final FutureOr<void> Function()? onLogoutClear;
+
+  /// Last non-empty token seen. A *different* non-empty token means account
+  /// replacement (B signed in over A): per-user caches must be dropped before
+  /// the new session serves stale data from the old account.
+  String? _lastToken;
   late final StreamSubscription<String?> _subscription;
   StreamSubscription<supabase.AuthState>? _supabaseSubscription;
 
@@ -634,7 +650,7 @@ class AuthController extends StateNotifier<AuthState> {
     _pendingPasswordMethod = method;
     _setPasswordIsReset = isReset;
     state = AuthState(
-      status: AuthStatus.authenticated,
+      status: AuthStatus.needsPassword,
       user: user,
       phone: phone ?? state.phone,
     );
@@ -685,7 +701,8 @@ class AuthController extends StateNotifier<AuthState> {
   /// resulting `*_password` method, then enters the app. Returns false on
   /// failure so the screen can keep the user on the step.
   Future<bool> completeSetPassword(String newPassword) async {
-    if (state.user == null) {
+    // Only valid from the mandatory set-password step (req 6).
+    if (state.status != AuthStatus.needsPassword || state.user == null) {
       return false;
     }
     state = state.copyWith(isBusy: true);
@@ -698,8 +715,9 @@ class AuthController extends StateNotifier<AuthState> {
       await _setAuthenticated(state.user!, phone: state.phone, method: method);
       return true;
     } catch (error) {
+      // Stay on the set-password step so the user can retry.
       state = state.copyWith(
-        status: AuthStatus.authenticated,
+        status: AuthStatus.needsPassword,
         errorMessage: _messageForError(error),
         isBusy: false,
       );
@@ -818,19 +836,32 @@ class AuthController extends StateNotifier<AuthState> {
 
   Future<void> _handleTokenChange(String? token) async {
     if (token == null || token.isEmpty) {
+      _lastToken = null;
       try {
         await onLogoutClear?.call();
       } catch (_) {
         // Cache-clear failure must never block expiry logout.
       }
-      if (state.status == AuthStatus.authenticated) {
+      if (state.status == AuthStatus.authenticated ||
+          state.status == AuthStatus.needsPassword) {
         state = const AuthState(status: AuthStatus.unauthenticated);
       }
       if (_config.isSupabaseConfigured &&
           supabase.Supabase.instance.client.auth.currentSession != null) {
         unawaited(supabase.Supabase.instance.client.auth.signOut());
       }
+      return;
     }
+    // Non-empty replacement token for a different account: invalidate the
+    // per-user cache before the new session can read the old account's data.
+    if (_lastToken != null && _lastToken != token) {
+      try {
+        await onLogoutClear?.call();
+      } catch (_) {
+        // Cache-clear failure must never block sign-in.
+      }
+    }
+    _lastToken = token;
   }
 
   Future<void> _setAuthenticated(

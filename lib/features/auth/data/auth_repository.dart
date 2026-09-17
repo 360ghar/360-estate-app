@@ -687,6 +687,10 @@ class AuthRepository {
         throw const UnknownFailure('Upload succeeded but no URL returned.');
       }
       return imageUrl;
+    } on Failure {
+      // ValidationFailure from validateImage (file type / 5MB cap) keeps
+      // its message; only transport errors become UnknownFailure below.
+      rethrow;
     } on DioException catch (e) {
       final detail = e.response?.data?['detail'] ?? e.message;
       throw UnknownFailure('Failed to upload photo: $detail', cause: e);

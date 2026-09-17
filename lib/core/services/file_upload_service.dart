@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
 import 'package:estate_app/core/errors/failure.dart';
@@ -66,35 +64,11 @@ class FileUploadService {
     }
   }
 
-  /// Legacy File-based entry point. Kept for existing document callers
-  /// (e.g. property_form_page) that still hold a `dart:io` File. Delegates
-  /// to [uploadXFile] so there is a single upload implementation.
-  Future<UploadResult> uploadFile({
-    required File file,
-    UploadTarget target = UploadTarget.documents,
-    String? title,
-    String? type,
-    int? propertyId,
-    int? leaseId,
-    ProgressCallback? onSendProgress,
-    int maxBytes = kMaxUploadBytes,
-  }) async {
-    return uploadXFile(
-      file: XFile(file.path),
-      target: target,
-      title: title,
-      type: type,
-      propertyId: propertyId,
-      leaseId: leaseId,
-      onSendProgress: onSendProgress,
-      maxBytes: maxBytes,
-    );
-  }
-
-  /// Web-safe upload entry point. Accepts the `XFile` returned directly by
-  /// `image_picker` (no `dart:io` File conversion), so avatar + document
-  /// picks work on web. Uses `readAsBytes` + `MultipartFile.fromBytes`
-  /// instead of `MultipartFile.fromFile(path)` (which needs dart:io).
+  /// Upload entry point. Accepts the `XFile` returned directly by
+  /// `image_picker` / `file_picker` (bytes-backed on web, path-backed on
+  /// IO) — no `dart:io` File anywhere in this library, so web compiles.
+  /// Streams from disk on IO (`MultipartFile.fromFile`) and uploads bytes
+  /// on web (`MultipartFile.fromBytes`).
   Future<UploadResult> uploadXFile({
     required XFile file,
     UploadTarget target = UploadTarget.documents,

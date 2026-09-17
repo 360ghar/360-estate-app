@@ -75,9 +75,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final authState = ref.read(authControllerProvider);
       final location = state.uri.path;
+      final isChecking = authState.status == AuthStatus.checking;
       // Only consume the pending deep link when it can actually replay.
-      // consumePendingPath is destructive: consuming on an auth route
-      // would drop the link before login completes.
+      // consumePendingPath is destructive: consuming while auth state is
+      // still resolving, on an auth route, or during the mandatory
+      // set-password step would drop the link before it can be served.
       final isSplash = location == '/splash';
       final isAuthRoute =
           location == '/enter-phone' ||
@@ -92,6 +94,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           location.startsWith('/public') || location.startsWith('/legal/');
       String? pending;
       if (authState.isLoggedIn &&
+          authState.status != AuthStatus.needsPassword &&
           !isSplash &&
           !isAuthRoute &&
           !isPublicRoute) {
@@ -100,8 +103,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
       return resolveRedirect(
         location: location,
-        isChecking: authState.status == AuthStatus.checking,
+        isChecking: isChecking,
         isLoggedIn: authState.isLoggedIn,
+        needsPassword: authState.status == AuthStatus.needsPassword,
         enablePublicApplications: flags.enablePublicApplications,
         enableApplicationsModule: flags.enableApplicationsModule,
         pendingPath: pending,

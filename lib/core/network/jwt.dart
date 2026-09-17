@@ -28,15 +28,23 @@ abstract final class Jwt {
     }
   }
 
+  /// The `exp` claim of an already-decoded payload as epoch seconds, or
+  /// `null` when absent or malformed (numeric and string encodings are
+  /// tolerated). Shared by [expSeconds] and [formatExpFromPayload] so the
+  /// two readers cannot drift apart.
+  static int? expSecondsFromPayload(Map<String, dynamic> payload) {
+    final exp = payload['exp'];
+    if (exp is num) return exp.toInt();
+    if (exp is String) return int.tryParse(exp);
+    return null;
+  }
+
   /// The `exp` claim as an epoch-seconds value, or `null` when absent or
   /// malformed (both numeric and string encodings are tolerated).
   static int? expSeconds(String token) {
     final payload = decodePayload(token);
     if (payload == null) return null;
-    final exp = payload['exp'];
-    if (exp is num) return exp.toInt();
-    if (exp is String) return int.tryParse(exp);
-    return null;
+    return expSecondsFromPayload(payload);
   }
 
   /// True when the token's `exp` claim is within [skew] of now (or already
@@ -57,12 +65,7 @@ abstract final class Jwt {
   /// Takes an already-decoded payload so per-request callers (e.g. the auth
   /// interceptor) decode the JWT once instead of twice.
   static String? formatExpFromPayload(Map<String, dynamic> payload) {
-    final exp = payload['exp'];
-    final expValue = exp is num
-        ? exp.toInt()
-        : exp is String
-        ? int.tryParse(exp)
-        : null;
+    final expValue = expSecondsFromPayload(payload);
     if (expValue == null) return null;
     return DateTime.fromMillisecondsSinceEpoch(
       expValue * 1000,

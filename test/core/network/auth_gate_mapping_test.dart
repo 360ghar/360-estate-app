@@ -10,10 +10,10 @@ void main() {
       );
     });
 
-    test('password_setup -> authenticated (in-app prompt, not gate)', () {
+    test('password_setup -> needsPassword (mandatory set-password gate)', () {
       expect(
         mapGateStageToAuthStatus('password_setup'),
-        AuthStatus.authenticated,
+        AuthStatus.needsPassword,
       );
     });
 

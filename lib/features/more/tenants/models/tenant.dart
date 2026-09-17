@@ -6,11 +6,10 @@ part 'tenant.g.dart';
 
 /// Canonical Tenant model (UI-backed).
 ///
-/// This freezed model under `more/tenants` is the owner used by the tenants
-/// pages and record-payment flow. The parallel `tenants/domain/entities`
-/// Tenant + `tenants/data/models` TenantDto are legacy clean-arch and are
-/// deprecated pending the risky model merge — do NOT add new fields here
-/// without checking the legacy pair.
+/// This freezed model under `more/tenants` is the single Tenant used by the
+/// tenants pages and record-payment flow. The parallel legacy clean-arch
+/// Tenant/TenantDto pair was deleted; confirm unexpected backend keys
+/// against `docs/backend-tenant-keys.md` before adding fields here.
 @freezed
 class Tenant with _$Tenant {
   const factory Tenant({
@@ -47,9 +46,4 @@ extension TenantX on Tenant {
     final first = parts[0];
     return first.substring(0, first.length >= 2 ? 2 : 1).toUpperCase();
   }
-
-  /// Preferred contact value (phone first, then email), if any.
-  ///
-  /// Ported from the legacy Tenant entity.
-  String? get contactInfo => phone ?? email;
 }
