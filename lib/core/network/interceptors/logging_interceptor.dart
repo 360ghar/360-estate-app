@@ -104,13 +104,9 @@ Object? _sanitizeBody(Object? data) {
 }
 
 String _formatTokenMeta(Map<String, dynamic> extras) {
-  final tail = extras['auth_token_tail']?.toString();
   final exp = extras['auth_token_exp']?.toString();
   final iss = extras['auth_token_iss']?.toString();
   final parts = <String>[];
-  if (tail != null && tail.isNotEmpty) {
-    parts.add('tail=$tail');
-  }
   if (exp != null && exp.isNotEmpty) {
     parts.add('exp=$exp');
   }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 import 'dart:ui';
 
 import 'package:estate_app/app/router/routes.dart';
@@ -19,7 +18,7 @@ import 'package:estate_app/features/auth/presentation/widgets/apple_sign_in_butt
 import 'package:estate_app/features/auth/presentation/widgets/google_sign_in_button.dart';
 import 'package:estate_app/features/auth/presentation/widgets/premium_auth_background.dart'
     show SimplePremiumBackground;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -298,7 +297,8 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
 
   /// Sign in with Apple is offered on iOS only (Apple platform requirement when
   /// Google sign-in is also offered).
-  bool get _supportsApple => !kIsWeb && Platform.isIOS;
+  bool get _supportsApple =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
 
   void _onGoogleResult(GoogleSignInOutcome outcome) {
     if (!mounted) return;
@@ -409,7 +409,8 @@ class _EnterPhonePageState extends ConsumerState<EnterPhonePage> {
   }
 
   Widget _buildIdentifierInput() {
-    final supportsPhoneHint = !kIsWeb && Platform.isAndroid;
+    final supportsPhoneHint =
+        !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
     return _AnimatedIdentifierField(
       controller: _identifierController,
       onFieldSubmitted: (_) => _continue(),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:estate_app/core/config/app_config.dart';
 import 'package:estate_app/core/crash_reporting/crash_reporter.dart';
 import 'package:estate_app/core/network/api_client.dart';
@@ -32,7 +34,11 @@ final networkInfoProvider = Provider<NetworkInfo>((ref) => NetworkInfoImpl());
 final cacheStoreProvider = Provider<CacheStore>((ref) => CacheStore());
 
 final authTokenStorageProvider = Provider<AuthTokenStorage>((ref) {
-  return AuthTokenStorage(ref.read(secureStoreProvider));
+  final storage = AuthTokenStorage(ref.read(secureStoreProvider));
+  ref.onDispose(() {
+    unawaited(storage.dispose());
+  });
+  return storage;
 });
 
 final authTokenProvider = Provider<AuthTokenProvider>((ref) {

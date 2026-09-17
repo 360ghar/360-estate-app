@@ -44,14 +44,6 @@ class _TenantDetail extends StatelessWidget {
 
   final Tenant tenant;
 
-  String _getInitials(String name) {
-    final parts = name.trim().split(RegExp(r'\s+'));
-    if (parts.length >= 2) {
-      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    }
-    return name.isNotEmpty ? name[0].toUpperCase() : '?';
-  }
-
   AppStatusType _statusType(String status) {
     switch (status.toLowerCase()) {
       case 'active':
@@ -107,7 +99,7 @@ class _TenantDetail extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    _getInitials(tenant.displayName),
+                    tenant.initials.isEmpty ? '?' : tenant.initials,
                     style: textTheme.titleLarge?.copyWith(
                       color: scheme.primary,
                       fontWeight: FontWeight.w700,

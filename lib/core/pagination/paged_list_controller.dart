@@ -108,15 +108,22 @@ class PagedListController<T> extends StateNotifier<PagedListState<T>> {
         loadMoreError: null,
       );
     } catch (error, stackTrace) {
-      // Mark pagination as exhausted so the UI does not keep firing
-      // loadMore() against a broken endpoint (see B12).
+      // Keep hasMore=true when nothing loaded so the retry button can
+      // re-fire loadInitial (a dead-end hasMore=false strands the UI).
       state = state.copyWith(
         isLoading: false,
         error: _mapFailure(error, stackTrace),
-        hasMore: false,
-        nextCursor: null,
+        hasMore: state.items.isEmpty ? true : state.hasMore,
+        nextCursor: state.items.isEmpty ? null : state.nextCursor,
       );
     }
+  }
+
+  /// Retry entry-point for full-screen error states: re-runs [loadInitial]
+  /// only when a previous initial/refresh load failed.
+  Future<void> retryInitial() async {
+    if (state.error == null) return;
+    await loadInitial();
   }
 
   Future<void> refresh() async {
@@ -137,12 +144,14 @@ class PagedListController<T> extends StateNotifier<PagedListState<T>> {
         loadMoreError: null,
       );
     } catch (error, stackTrace) {
-      // Same recovery rule as loadInitial (see B12).
+      // Same recovery rule as loadInitial: keep hasMore=true when nothing
+      // is loaded so retry stays possible; preserve cursor when items
+      // exist so loadMore keeps working.
       state = state.copyWith(
         isRefreshing: false,
         error: _mapFailure(error, stackTrace),
-        hasMore: false,
-        nextCursor: null,
+        hasMore: state.items.isEmpty ? true : state.hasMore,
+        nextCursor: state.items.isEmpty ? null : state.nextCursor,
       );
     }
   }

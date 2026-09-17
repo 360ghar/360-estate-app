@@ -22,10 +22,7 @@ final class AuthInterceptor extends Interceptor {
         final payload = Jwt.decodePayload(token);
         if (payload != null) {
           options.extra['auth_token_iss'] = payload['iss']?.toString();
-          options.extra['auth_token_exp'] = Jwt.formatExp(token);
-          options.extra['auth_token_tail'] = token.length <= 8
-              ? token
-              : token.substring(token.length - 8);
+          options.extra['auth_token_exp'] = Jwt.formatExpFromPayload(payload);
         }
       }
       handler.next(options);

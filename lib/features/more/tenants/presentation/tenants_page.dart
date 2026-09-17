@@ -333,7 +333,8 @@ class _TenantTile extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final status = tenant.status ?? 'Active';
-    final initials = _getInitials(tenant.displayName);
+    final rawInitials = tenant.initials;
+    final initials = rawInitials.isEmpty ? '?' : rawInitials;
 
     return GestureDetector(
       onLongPress: onLongPress,
@@ -417,11 +418,4 @@ class _TenantTile extends StatelessWidget {
     );
   }
 
-  String _getInitials(String name) {
-    final parts = name.trim().split(RegExp(r'\s+'));
-    if (parts.length >= 2) {
-      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    }
-    return name.isNotEmpty ? name[0].toUpperCase() : '?';
-  }
 }

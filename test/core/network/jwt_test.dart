@@ -66,6 +66,19 @@ void main() {
       expect(Jwt.formatExp(noExpToken), isNull);
     });
 
+    test('formatExpFromPayload formats numeric and string exp as UTC ISO', () {
+      const expected = '2023-11-14T22:13:20.000Z';
+      expect(Jwt.formatExpFromPayload(const {'exp': 1700000000}), expected);
+      expect(Jwt.formatExpFromPayload(const {'exp': '1700000000'}), expected);
+    });
+
+    test('formatExpFromPayload returns null for missing/malformed exp', () {
+      expect(Jwt.formatExpFromPayload(const {}), isNull);
+      expect(Jwt.formatExpFromPayload(const {'exp': 'not-a-number'}), isNull);
+      expect(Jwt.formatExpFromPayload(const {'exp': true}), isNull);
+      expect(Jwt.formatExpFromPayload(const {'exp': null}), isNull);
+    });
+
     test('decodePayload handles non-String-typed Map values', () {
       // If the JWT body is decoded as a `Map<dynamic, dynamic>` (e.g. from
       // a non-standard Dart JSON decoder), it should still be handled.

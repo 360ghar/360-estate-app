@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
@@ -30,7 +30,12 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
 
-  File? _selectedImage;
+  XFile? _selectedImage;
+
+  /// Cached preview bytes for [_selectedImage]. Read once on pick:
+  /// passing `readAsBytes()` inline would create a new future per build,
+  /// re-reading the file and flickering the preview on every setState.
+  Future<Uint8List>? _avatarBytes;
   String? _avatarUrl;
   final bool _isUploading = false;
   bool _isSaving = false;
@@ -73,7 +78,10 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
 
     if (pickedFile != null) {
       setState(() {
-        _selectedImage = File(pickedFile.path);
+        // image_picker already returns XFile — keep it, no File conversion
+        // (File breaks web builds).
+        _selectedImage = pickedFile;
+        _avatarBytes = pickedFile.readAsBytes();
       });
     }
   }
@@ -144,6 +152,7 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
                     Navigator.pop(context);
                     setState(() {
                       _selectedImage = null;
+                      _avatarBytes = null;
                       _avatarUrl = null;
                     });
                   },
@@ -387,10 +396,18 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
 
   Widget _buildAvatarContent() {
     if (_selectedImage != null) {
+      // Web-safe preview: render XFile bytes instead of Image.file
+      // (dart:io File is unavailable on web).
+      final selected = _selectedImage!;
       return ClipOval(
-        child: Image.file(
-          _selectedImage!,
-          fit: BoxFit.cover,
+        child: FutureBuilder<Uint8List>(
+          future: _avatarBytes ?? selected.readAsBytes(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return Image.memory(snapshot.data!, fit: BoxFit.cover);
+            }
+            return _buildFallbackAvatar();
+          },
         ),
       );
     }

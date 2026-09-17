@@ -1,8 +1,8 @@
-import 'dart:io';
-
-import 'package:dio/dio.dart';
+import 'package:cross_file/cross_file.dart';
+import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/core/network/response_parser.dart';
+import 'package:estate_app/core/services/file_upload_service.dart';
 import 'package:estate_app/features/more/documents/models/document_item.dart';
 
 class DocumentsRepository {
@@ -19,23 +19,26 @@ class DocumentsRepository {
         .toList();
   }
 
+  /// Uploads via the shared [FileUploadService] so there is a single upload
+  /// implementation. Takes the picker's `XFile` directly (bytes-backed on
+  /// web, path-backed on IO) so no `dart:io` File is needed. The service
+  /// sends `document_type`, which the backend requires
+  /// (`POST /pm/documents/upload` takes it as a required Form field).
   Future<DocumentItem> upload({
-    required File file,
+    required XFile file,
     String? title,
     String? type,
   }) async {
-    final fileName = file.path.split(Platform.pathSeparator).last;
-    final formData = FormData.fromMap({
-      'file': await MultipartFile.fromFile(file.path, filename: fileName),
-      if (title != null && title.trim().isNotEmpty) 'title': title.trim(),
-      if (type != null && type.trim().isNotEmpty) 'type': type.trim(),
-    });
-
-    final response = await _client.upload<dynamic>(
-      '/pm/documents/upload',
-      data: formData,
+    final uploads = FileUploadService(_client);
+    final result = await uploads.uploadXFile(
+      file: file,
+      title: title,
+      type: type,
     );
-    final data = unwrapMap(response.data);
+    final data = result.data;
+    if (data == null) {
+      throw const UnknownFailure('Upload succeeded but no data returned.');
+    }
     return DocumentItem.fromJson(data);
   }
 

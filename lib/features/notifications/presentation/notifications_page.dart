@@ -1,5 +1,3 @@
-import 'dart:io' show Platform;
-
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
@@ -13,7 +11,8 @@ import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:estate_app/features/notifications/data/notifications_repository.dart';
 import 'package:estate_app/features/notifications/models/notification_item.dart';
 import 'package:estate_app/features/notifications/notifications_providers.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/foundation.dart'
+    show defaultTargetPlatform, kDebugMode, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -45,9 +44,13 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
   }
 
   String get _platform {
-    if (Platform.isIOS) return 'ios';
-    if (Platform.isAndroid) return 'android';
-    if (Platform.isWindows) return 'windows';
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) return 'ios';
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      return 'android';
+    }
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
+      return 'windows';
+    }
     return 'unknown';
   }
 

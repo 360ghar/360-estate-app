@@ -185,7 +185,7 @@ class _QuickActionsRow extends StatelessWidget {
             icon: Icons.build_outlined,
             label: 'New\nTask',
             iconColor: AppColors.warning,
-            onTap: () => context.go('/tasks'),
+            onTap: () => context.go('/tasks/create'),
           ),
         ),
       ],
@@ -419,17 +419,18 @@ class _KpiGrid extends StatelessWidget {
 
 /// Collection summary showing total rent collected.
 class _CollectionSummary extends StatelessWidget {
+  static final _currencyFormatter = NumberFormat.currency(
+    symbol: '₹',
+    decimalDigits: 0,
+  );
+
   final double collected;
 
   const _CollectionSummary({required this.collected});
 
   @override
   Widget build(BuildContext context) {
-    final formatter = NumberFormat.currency(
-      symbol: '₹',
-      decimalDigits: 0,
-    );
-    final collectedStr = formatter.format(collected);
+    final collectedStr = _currencyFormatter.format(collected);
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -574,16 +575,17 @@ class _RecentActivitySection extends StatelessWidget {
 
 /// Enhanced activity tile with semantic icons and better visual hierarchy.
 class _ActivityTile extends StatelessWidget {
+  static final _timeFormatter = DateFormat('dd MMM, hh:mm a');
+
   const _ActivityTile({required this.item});
 
   final DashboardActivityItem item;
 
   @override
   Widget build(BuildContext context) {
-    final formatter = DateFormat('dd MMM, hh:mm a');
     final time = item.createdAt == null
         ? null
-        : formatter.format(item.createdAt!);
+        : _timeFormatter.format(item.createdAt!);
 
     final (icon, color, type) = _getActivityIconAndColor(context, item.type);
     final title = item.title?.trim().isNotEmpty ?? false

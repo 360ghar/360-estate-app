@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 
+import 'package:cross_file/cross_file.dart';
 import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
@@ -8,7 +8,9 @@ import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
 import 'package:estate_app/features/more/documents/documents_providers.dart';
+import 'package:estate_app/features/more/documents/models/document_type.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,6 +25,19 @@ const _documentCategories = [
   'Other',
 ];
 
+/// Maps the sheet's display labels to canonical backend values.
+/// 'Tax' has no backend counterpart and falls back to `other`,
+/// matching `DocumentType.fromString` for unknown strings.
+const _documentCategoryValues = {
+  'Agreement': DocumentType.leaseAgreement,
+  'Receipt': DocumentType.receipt,
+  'Invoice': DocumentType.invoice,
+  'ID Proof': DocumentType.idProof,
+  'Tax': DocumentType.other,
+  'Insurance': DocumentType.insurancePolicy,
+  'Other': DocumentType.other,
+};
+
 class DocumentUploadPage extends ConsumerStatefulWidget {
   const DocumentUploadPage({super.key});
 
@@ -34,7 +49,7 @@ class DocumentUploadPage extends ConsumerStatefulWidget {
 class _DocumentUploadPageState extends ConsumerState<DocumentUploadPage> {
   final _titleController = TextEditingController();
   String _selectedType = _documentCategories.last;
-  File? _file;
+  XFile? _file;
   String? _fileName;
   int? _fileSize;
   bool _isUploading = false;
@@ -47,13 +62,22 @@ class _DocumentUploadPageState extends ConsumerState<DocumentUploadPage> {
   }
 
   Future<void> _pickFile() async {
-    final result = await FilePicker.platform.pickFiles();
+    // withData on web: browser picks have no filesystem path, so retain the
+    // bytes via XFile.fromData instead of discarding the selection.
+    final result = await FilePicker.platform.pickFiles(withData: kIsWeb);
     if (result == null || result.files.isEmpty) return;
     final platformFile = result.files.single;
     final path = platformFile.path;
-    if (path == null) return;
+    final XFile? picked;
+    if (path != null && path.isNotEmpty) {
+      picked = XFile(path);
+    } else if (platformFile.bytes != null) {
+      picked = XFile.fromData(platformFile.bytes!, name: platformFile.name);
+    } else {
+      return;
+    }
     setState(() {
-      _file = File(path);
+      _file = picked;
       _fileName = platformFile.name;
       _fileSize = platformFile.size;
     });
@@ -120,7 +144,9 @@ class _DocumentUploadPageState extends ConsumerState<DocumentUploadPage> {
       await ref.read(documentsRepositoryProvider).upload(
             file: _file!,
             title: _titleController.text.trim(),
-            type: _selectedType,
+            type:
+                _documentCategoryValues[_selectedType]?.apiValue ??
+                DocumentType.other.apiValue,
           );
       ref.invalidate(documentsListProvider);
       if (mounted) {

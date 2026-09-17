@@ -156,11 +156,26 @@ final class ApiClient {
     );
   }
 
+  /// Retry policy (see RetryInterceptor): idempotent GET/HEAD/OPTIONS
+  /// only, max 2 retries with exponential backoff on 408/429/500/502/503/504
+  /// plus timeouts/connection errors.
+  ///
+  /// NetworkInfo.isConnected costs a platform-channel round-trip, so it
+  /// is only consulted when the error could actually mean offline
+  /// (timeouts, connectionError, unknown). An HTTP response (e.g. 4xx)
+  /// already proves connectivity — no check needed.
   Future<Response<T>> _guard<T>(Future<Response<T>> Function() request) async {
     try {
       return await request();
     } on DioException catch (e) {
-      final isOffline = !(await _networkInfo.isConnected);
+      final needsConnectivityCheck =
+          e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.unknown;
+      final isOffline =
+          needsConnectivityCheck && !(await _networkInfo.isConnected);
       throw _failureMapper.map(e, isOffline: isOffline);
     } catch (e) {
       throw UnknownFailure('Unexpected error', cause: e);

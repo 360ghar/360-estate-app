@@ -1,9 +1,10 @@
-import 'dart:io';
-
+import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
 import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/core/network/api_client.dart';
+import 'package:estate_app/core/network/api_paths.dart';
 import 'package:estate_app/core/network/response_parser.dart';
+import 'package:estate_app/core/services/file_upload_service.dart';
 import 'package:estate_app/core/storage/auth_token_storage.dart';
 import 'package:estate_app/core/utils/phone_utils.dart';
 import 'package:estate_app/features/auth/data/apple_sign_in_service.dart';
@@ -647,38 +648,38 @@ class AuthRepository {
 
   /// Upload profile photo via backend API (Cloudinary).
   /// Returns the public URL of the uploaded image.
-  Future<String> uploadProfilePhoto(File imageFile) async {
+  /// Web-safe: takes the `XFile` returned directly by `image_picker` —
+  /// no `dart:io` File. Validation strings + 5MB avatar cap are unchanged
+  /// (via `FileUploadService.validateImage` with `isAvatar: true`).
+  Future<String> uploadProfilePhoto(XFile imageFile) async {
     try {
       final user = _supabase.auth.currentUser;
       if (user == null) {
         throw const UnauthorizedFailure('User not authenticated');
       }
 
-      final mimeType = lookupMimeType(imageFile.path);
-      if (mimeType == null ||
-          (!mimeType.startsWith('image/') &&
-              mimeType != 'application/octet-stream')) {
-        throw const ValidationFailure(
-          'Invalid file type. Please select an image.',
-        );
-      }
-
+      final mimeType = imageFile.mimeType ?? lookupMimeType(imageFile.path);
       final fileSize = await imageFile.length();
-      if (fileSize > 5 * 1024 * 1024) {
-        throw const ValidationFailure('Image size must be less than 5MB');
-      }
+      FileUploadService.validateImage(
+        length: fileSize,
+        mimeType: mimeType,
+        isAvatar: true,
+      );
 
-      final fileName = imageFile.path.split(Platform.pathSeparator).last;
+      final fileName = imageFile.name.isNotEmpty
+          ? imageFile.name
+          : FileUploadService.fileNameOf(imageFile.path);
+      final bytes = await imageFile.readAsBytes();
       final formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(
-          imageFile.path,
-          filename: fileName,
-        ),
+        'file': MultipartFile.fromBytes(bytes, filename: fileName),
         'folder': 'avatars',
         'visibility': 'public',
       });
 
-      final response = await _client.upload<dynamic>('/upload', data: formData);
+      final response = await _client.upload<dynamic>(
+        ApiPaths.generalUpload,
+        data: formData,
+      );
 
       final data = response.data;
       final imageUrl = data['public_url'] as String?;
@@ -686,6 +687,10 @@ class AuthRepository {
         throw const UnknownFailure('Upload succeeded but no URL returned.');
       }
       return imageUrl;
+    } on Failure {
+      // ValidationFailure from validateImage (file type / 5MB cap) keeps
+      // its message; only transport errors become UnknownFailure below.
+      rethrow;
     } on DioException catch (e) {
       final detail = e.response?.data?['detail'] ?? e.message;
       throw UnknownFailure('Failed to upload photo: $detail', cause: e);
