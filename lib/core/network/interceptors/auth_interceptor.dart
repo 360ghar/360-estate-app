@@ -47,47 +47,19 @@ final class AuthInterceptor extends Interceptor {
         err.requestOptions.extra['auth_header_attached'] == true;
     if (hadAuthHeader &&
         (statusCode == 401 ||
-            (statusCode == 403 &&
-                _isExpiredTokenResponse(err.response?.data)))) {
+            (statusCode == 403 && _isInactiveAccount(err.response?.data)))) {
       await _tokenProvider.clearSession();
     }
     handler.next(err);
   }
 }
 
-/// Detects a 403 that means "the presented token has expired" as opposed to a
-/// genuine authorization failure.
-///
-/// Heuristic is deliberately narrow (matched against the whole message, not
-/// substrings that collide with unrelated words like "expenses" or "expert"):
-/// the token must be explicitly named, and the message must state it is
-/// expired/invalid.
-bool _isExpiredTokenResponse(Object? data) {
-  if (data == null) return false;
-  String? message;
-  if (data is Map) {
-    final detail = data['detail'];
-    if (detail is String) {
-      message = detail;
-    } else if (detail is Map) {
-      message = detail['message']?.toString();
-    }
-    message ??= data['message']?.toString();
-  } else if (data is String) {
-    message = data;
-  }
-  if (message == null) return false;
-  final lower = message.toLowerCase();
-  final mentionsToken =
-      lower.contains('token') ||
-      lower.contains('jwt') ||
-      lower.contains('bearer');
-  if (!mentionsToken) return false;
-  final isStale =
-      lower.contains('expired') ||
-      lower.contains('has expired') ||
-      lower.contains('expiration') ||
-      lower.contains('invalid') ||
-      lower.contains('not valid');
-  return isStale;
+/// A 401 means the token is missing, invalid or expired. A 403 is a plain
+/// access failure, except for the error code `USER_INACTIVE`: the account was
+/// deactivated, so the session ends. The code is read from the error envelope
+/// `{"error": {"code": ...}}` and nowhere else.
+bool _isInactiveAccount(Object? data) {
+  if (data is! Map) return false;
+  final error = data['error'];
+  return error is Map && error['code'] == 'USER_INACTIVE';
 }

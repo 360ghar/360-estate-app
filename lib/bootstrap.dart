@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:estate_app/app/app.dart';
 import 'package:estate_app/app/config_error_page.dart';
+import 'package:estate_app/core/api/wire_log.dart';
 import 'package:estate_app/core/config/app_config.dart';
 import 'package:estate_app/core/config/env_loader.dart';
 import 'package:estate_app/core/crash_reporting/crash_reporter.dart';
@@ -33,6 +34,7 @@ Future<void> bootstrap() async {
         return;
       }
       AppLogger.init(config);
+      wireLogSink = AppLogger.w;
       if (!envLoaded) {
         AppLogger.w(
           'No .env asset found; falling back to --dart-define values',

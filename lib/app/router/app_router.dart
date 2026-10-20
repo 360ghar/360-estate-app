@@ -21,6 +21,7 @@ import 'package:estate_app/features/collections/presentation/record_payment_page
 import 'package:estate_app/features/home/presentation/home_page.dart';
 import 'package:estate_app/features/inspections/presentation/inspection_detail_page.dart';
 import 'package:estate_app/features/inspections/presentation/inspection_form_page.dart';
+import 'package:estate_app/features/inspections/presentation/inspection_templates_page.dart';
 import 'package:estate_app/features/inspections/presentation/inspections_page.dart';
 import 'package:estate_app/features/leases/presentation/lease_detail_page.dart';
 import 'package:estate_app/features/leases/presentation/lease_form_page.dart';
@@ -115,14 +116,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.publicPrivacyPolicy,
         builder: (context, state) => LegalContentPage(
-          title: context.l10n?.privacyPolicy ?? 'Privacy Policy',
+          title: context.l10n.legalPrivacyPolicy,
           url: kPrivacyPolicyUrl,
         ),
       ),
       GoRoute(
         path: Routes.publicTermsOfService,
         builder: (context, state) => LegalContentPage(
-          title: context.l10n?.termsOfService ?? 'Terms of Service',
+          title: context.l10n.legalTerms,
           url: kTermsOfServiceUrl,
         ),
       ),
@@ -356,12 +357,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'leases',
                     builder: (context, state) {
-                      final propertyId =
-                          state.uri.queryParameters['propertyId'];
-                      final tenantId = state.uri.queryParameters['tenantId'];
+                      final query = state.uri.queryParameters;
                       return LeasesPage(
-                        propertyId: propertyId,
-                        tenantId: tenantId,
+                        propertyId: int.tryParse(query['propertyId'] ?? ''),
+                        tenantUserId: int.tryParse(query['tenantUserId'] ?? ''),
                       );
                     },
                     routes: [
@@ -381,18 +380,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'inspections',
                     builder: (context, state) {
-                      final propertyId =
-                          state.uri.queryParameters['propertyId'];
-                      final tenantId = state.uri.queryParameters['tenantId'];
+                      final query = state.uri.queryParameters;
                       return InspectionsPage(
-                        propertyId: propertyId,
-                        tenantId: tenantId,
+                        propertyId: int.tryParse(query['propertyId'] ?? ''),
+                        leaseId: int.tryParse(query['leaseId'] ?? ''),
                       );
                     },
                     routes: [
                       GoRoute(
                         path: 'new',
                         builder: (context, state) => const InspectionFormPage(),
+                      ),
+                      // Before ':id', so 'templates' is not read as an id.
+                      GoRoute(
+                        path: 'templates',
+                        builder: (context, state) =>
+                            const InspectionTemplatesPage(),
                       ),
                       GoRoute(
                         path: ':id',
@@ -484,18 +487,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                           GoRoute(
                             path: 'privacy-policy',
                             builder: (context, state) => LegalContentPage(
-                              title:
-                                  context.l10n?.privacyPolicy ??
-                                  'Privacy Policy',
+                              title: context.l10n.legalPrivacyPolicy,
                               url: kPrivacyPolicyUrl,
                             ),
                           ),
                           GoRoute(
                             path: 'terms-of-service',
                             builder: (context, state) => LegalContentPage(
-                              title:
-                                  context.l10n?.termsOfService ??
-                                  'Terms of Service',
+                              title: context.l10n.legalTerms,
                               url: kTermsOfServiceUrl,
                             ),
                           ),

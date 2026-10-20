@@ -2,8 +2,7 @@ import 'dart:math' as math;
 
 import 'package:maplibre_gl/maplibre_gl.dart';
 
-const String kLibertyStyle =
-    'https://tiles.openfreemap.org/styles/liberty';
+const String kLibertyStyle = 'https://tiles.openfreemap.org/styles/liberty';
 
 const double kDefaultInitialZoom = 12.0;
 const double kDefaultMinZoom = 3.0;
@@ -18,8 +17,7 @@ class EstateMapController {
 
   LatLng? get center => _controller?.cameraPosition?.target;
 
-  double get zoom =>
-      _controller?.cameraPosition?.zoom ?? kDefaultInitialZoom;
+  double get zoom => _controller?.cameraPosition?.zoom ?? kDefaultInitialZoom;
 
   void attach(MapLibreMapController controller) {
     _controller = controller;
@@ -28,9 +26,7 @@ class EstateMapController {
   Future<void> move(LatLng center, double zoom) async {
     final controller = _controller;
     if (controller == null) return;
-    await controller.moveCamera(
-      CameraUpdate.newLatLngZoom(center, zoom),
-    );
+    await controller.moveCamera(CameraUpdate.newLatLngZoom(center, zoom));
   }
 
   Future<void> animateTo(

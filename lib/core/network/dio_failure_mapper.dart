@@ -3,6 +3,13 @@ import 'package:estate_app/core/errors/api_error.dart';
 import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/core/network/interceptors/request_id_interceptor.dart';
 
+/// Maps a [DioException] to a [Failure].
+///
+/// Errors are read only from the backend error envelope:
+/// `{"error": {"code": str, "message": str, "details": object}}`.
+/// A 422 carries the field errors in `error.details.fields`, a list of
+/// `{field, msg, type}`. A body without the envelope (a proxy page, an empty
+/// body) gets a fixed message for its status code.
 final class DioFailureMapper {
   const DioFailureMapper();
 
@@ -25,108 +32,135 @@ final class DioFailureMapper {
     final statusCode = exception.response?.statusCode;
     final requestId =
         exception.requestOptions.extra[RequestIdKeys.requestId] as String?;
+    final envelope = ErrorEnvelopeBody.tryParse(exception.response?.data);
+    final message = envelope?.message ?? _fallbackMessage(statusCode);
 
     if (statusCode == 401) {
       return UnauthorizedFailure(
-        _tryExtractMessage(exception.response?.data) ?? 'Unauthorized',
+        message,
         cause: exception,
+        code: envelope?.code,
       );
     }
 
     if (statusCode == 404) {
-      return NotFoundFailure(
-        _tryExtractMessage(exception.response?.data) ?? 'Not found',
-        cause: exception,
-      );
+      return NotFoundFailure(message, cause: exception, code: envelope?.code);
     }
 
     if (statusCode == 400 || statusCode == 422) {
-      final fields = _tryExtractFieldErrors(exception.response?.data);
       return ValidationFailure(
-        _tryExtractMessage(exception.response?.data) ?? 'Invalid request',
-        fields: fields,
+        message,
+        fields: envelope?.fieldErrors ?? const <String, String>{},
         cause: exception,
+        code: envelope?.code,
       );
     }
 
     final apiError = ApiError(
       statusCode: statusCode,
-      message: _tryExtractMessage(exception.response?.data) ?? 'Request failed',
-      details: _tryExtractDetails(exception.response?.data),
+      message: message,
+      code: envelope?.code,
+      details: envelope?.details,
       requestId: requestId,
+      retryAfterSeconds: retryAfterSeconds(exception.response),
     );
 
     return ApiFailure(error: apiError, cause: exception);
   }
 
-  static String? _tryExtractMessage(Object? data) {
-    if (data is Map) {
-      final detail = data['detail'];
-      if (detail is String && detail.trim().isNotEmpty) {
-        return detail;
-      }
-      if (detail is Map) {
-        final detailMessage = detail['message'] ?? detail['error'] ?? detail['msg'];
-        if (detailMessage is String && detailMessage.trim().isNotEmpty) {
-          return detailMessage;
-        }
-      }
-      if (detail is List) {
-        for (final item in detail) {
-          if (item is String && item.trim().isNotEmpty) {
-            return item;
-          }
-          if (item is Map) {
-            final msg = item['message'] ?? item['error'] ?? item['msg'];
-            if (msg is String && msg.trim().isNotEmpty) {
-              return msg;
-            }
-          }
-        }
-      }
-      final v = data['message'] ?? data['error'] ?? data['msg'];
-      if (v is String && v.trim().isNotEmpty) return v;
-    }
-    if (data is String && data.trim().isNotEmpty) return data;
-    return null;
+  static String _fallbackMessage(int? statusCode) {
+    return switch (statusCode) {
+      401 => 'Unauthorized',
+      403 => 'You do not have access to this',
+      404 => 'Not found',
+      400 || 422 => 'Invalid request',
+      429 => 'Too many requests. Try again shortly.',
+      _ => 'Request failed',
+    };
   }
 
-  static Object? _tryExtractDetails(Object? data) {
-    if (data is Map) {
-      if (data.containsKey('details')) return data['details'];
-      if (data.containsKey('data')) return data['data'];
-      return data;
-    }
-    return data;
+  /// `Retry-After` in whole seconds, or null when absent or not a number.
+  static int? retryAfterSeconds(Response<dynamic>? response) {
+    final raw = response?.headers.value('retry-after');
+    if (raw == null) return null;
+    final seconds = int.tryParse(raw.trim());
+    if (seconds == null || seconds < 0) return null;
+    return seconds;
+  }
+}
+
+/// The parsed `{"error": {...}}` body of a non-2xx response.
+final class ErrorEnvelopeBody {
+  const ErrorEnvelopeBody({
+    required this.code,
+    required this.message,
+    this.details,
+    this.fieldErrors = const <String, String>{},
+  });
+
+  final String? code;
+  final String? message;
+
+  /// `error.details` when it is an object.
+  final Map<String, dynamic>? details;
+
+  /// `error.details.fields` as `field name -> message`.
+  final Map<String, String> fieldErrors;
+
+  static ErrorEnvelopeBody? tryParse(Object? data) {
+    if (data is! Map) return null;
+    final error = data['error'];
+    if (error is! Map) return null;
+
+    final code = error['code'];
+    final message = error['message'];
+    final rawDetails = error['details'];
+    final details = rawDetails is Map
+        ? Map<String, dynamic>.from(rawDetails)
+        : null;
+
+    return ErrorEnvelopeBody(
+      code: code is String && code.trim().isNotEmpty ? code : null,
+      message: message is String && message.trim().isNotEmpty ? message : null,
+      details: details,
+      fieldErrors: _fieldErrors(details),
+    );
   }
 
-  static Map<String, String> _tryExtractFieldErrors(Object? data) {
-    if (data is! Map) return const {};
-    final errors = data['errors'];
-    if (errors is Map) {
-      return errors.map(
-        (key, value) => MapEntry(key.toString(), value?.toString() ?? ''),
-      );
+  static Map<String, String> _fieldErrors(Map<String, dynamic>? details) {
+    final fields = details?['fields'];
+    if (fields is! List) return const <String, String>{};
+    final result = <String, String>{};
+    for (final item in fields) {
+      if (item is! Map) continue;
+      final msg = item['msg'];
+      if (msg is! String || msg.trim().isEmpty) continue;
+      final raw = item['field'];
+      final key = _fieldKey(raw is String ? raw : '');
+      final previous = result[key];
+      result[key] = previous == null ? msg.trim() : '$previous\n${msg.trim()}';
     }
-    final detail = data['detail'];
-    if (detail is List) {
-      final fields = <String, String>{};
-      for (final item in detail) {
-        if (item is! Map) continue;
-        final loc = item['loc'];
-        final msg = item['msg'] ?? item['message'] ?? item['error'];
-        if (msg is! String || msg.trim().isEmpty) continue;
-        String? field;
-        if (loc is List && loc.isNotEmpty) {
-          final last = loc.last;
-          if (last is String && last.trim().isNotEmpty) {
-            field = last;
-          }
-        }
-        fields[field ?? 'error'] = msg.trim();
-      }
-      return fields;
+    return result;
+  }
+
+  /// `body.monthly_rent` -> `monthly_rent`. The source prefix is dropped.
+  static String _fieldKey(String field) {
+    final trimmed = field.trim();
+    if (trimmed.isEmpty) return 'error';
+    final dot = trimmed.indexOf('.');
+    if (dot == -1) return trimmed;
+    final source = trimmed.substring(0, dot);
+    if (const {
+      'body',
+      'query',
+      'path',
+      'header',
+      'cookie',
+      'form',
+    }.contains(source)) {
+      final rest = trimmed.substring(dot + 1);
+      return rest.isEmpty ? 'error' : rest;
     }
-    return const {};
+    return trimmed;
   }
 }

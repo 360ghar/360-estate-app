@@ -1,3 +1,6 @@
+import 'package:estate_app/core/presentation/design_system/app_radii.dart';
+import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -20,15 +23,12 @@ class SafeMap extends StatelessWidget {
     required this.longitude,
     super.key,
     this.zoom = 15,
-    this.unsupportedMessage =
-        'Interactive map not available on this platform',
   });
 
   final WidgetBuilder mapBuilder;
   final double latitude;
   final double longitude;
   final double zoom;
-  final String unsupportedMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +39,6 @@ class SafeMap extends StatelessWidget {
       latitude: latitude,
       longitude: longitude,
       zoom: zoom,
-      message: unsupportedMessage,
     );
   }
 }
@@ -49,54 +48,50 @@ class _UnsupportedMapPlaceholder extends StatelessWidget {
     required this.latitude,
     required this.longitude,
     required this.zoom,
-    required this.message,
   });
 
   final double latitude;
   final double longitude;
   final double zoom;
-  final String message;
 
   @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final textStyles = Theme.of(context).textTheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: context.colors.surfaceContainerHigh,
+      borderRadius: AppRadii.lg,
+    ),
+    child: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ExcludeSemantics(
+              child: Icon(
                 Icons.map_outlined,
                 size: 40,
-                color: colors.onSurface.withValues(alpha: 0.6),
+                color: context.colors.outline,
               ),
-              const SizedBox(height: 12),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: textStyles.bodyMedium?.copyWith(
-                  color: colors.onSurface.withValues(alpha: 0.7),
-                ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              context.l10n.mapUnsupported,
+              textAlign: TextAlign.center,
+              style: context.text.bodyMedium?.copyWith(
+                color: context.colors.onSurfaceVariant,
               ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: _openInBrowser,
-                icon: const Icon(Icons.open_in_new, size: 18),
-                label: const Text('Open in browser'),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextButton.icon(
+              onPressed: _openInBrowser,
+              icon: const Icon(Icons.open_in_new_rounded, size: 18),
+              label: Text(context.l10n.mapOpenInBrowser),
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
 
   Future<void> _openInBrowser() async {
     final z = zoom.round();

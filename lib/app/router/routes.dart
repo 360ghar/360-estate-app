@@ -53,6 +53,7 @@ abstract final class Routes {
 
   static const inspections = '/more/inspections';
   static const inspectionsNew = '/more/inspections/new';
+  static const inspectionTemplates = '/more/inspections/templates';
   static String inspectionDetail(String id) => '/more/inspections/$id';
 
   static const expenses = '/more/expenses';

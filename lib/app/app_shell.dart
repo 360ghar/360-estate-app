@@ -1,7 +1,6 @@
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
-import 'package:estate_app/core/presentation/design_system/app_radii.dart';
-import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
-import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:estate_app/core/presentation/design_system/app_durations.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
+import 'package:estate_app/core/presentation/widgets/motion.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,14 +27,21 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
+    final l10n = context.l10n;
     // The double-back-to-exit gesture only makes sense on Android, where
     // SystemNavigator.pop() exits the app. On iOS/web/desktop back handling is
     // inconsistent, so we let the platform manage it normally.
     final interceptRootBack =
         !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+    final index = widget.navigationShell.currentIndex;
+
+    final destinations = [
+      (Icons.home_outlined, Icons.home_rounded, l10n.navHome),
+      (Icons.apartment_outlined, Icons.apartment_rounded, l10n.navProperties),
+      (Icons.payments_outlined, Icons.payments_rounded, l10n.navCollections),
+      (Icons.task_alt_outlined, Icons.task_alt_rounded, l10n.navTasks),
+      (Icons.grid_view_outlined, Icons.grid_view_rounded, l10n.navMore),
+    ];
 
     return PopScope(
       canPop: !interceptRootBack,
@@ -48,93 +54,90 @@ class _AppShellState extends State<AppShell> {
         } else {
           _lastBackPress = now;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Press back again to exit'),
-              duration: Duration(seconds: 3),
-              behavior: SnackBarBehavior.floating,
+            SnackBar(
+              content: Text(l10n.navPressBackToExit),
+              duration: const Duration(seconds: 3),
             ),
           );
         }
       },
       child: Scaffold(
         body: widget.navigationShell,
-        bottomNavigationBar: SafeArea(
-          minimum: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            0,
-            AppSpacing.lg,
-            AppSpacing.sm,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurface : scheme.surface,
-              borderRadius: AppRadii.xl,
-              border: Border.all(
-                color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
-                width: 0.5,
+        bottomNavigationBar: Stack(
+          children: [
+            // Tab labels stop growing at 1.15x, as on iOS, so five labels
+            // keep one line each at the largest text sizes.
+            MediaQuery.withClampedTextScaling(
+              maxScaleFactor: 1.15,
+              child: NavigationBar(
+                selectedIndex: index,
+                onDestinationSelected: _onTap,
+                destinations: [
+                  for (final (icon, selected, label) in destinations)
+                    NavigationDestination(
+                      icon: Icon(icon),
+                      selectedIcon: Icon(selected),
+                      label: label,
+                    ),
+                ],
               ),
-              boxShadow: AppShadows.cardElevated,
             ),
-            child: NavigationBar(
-              selectedIndex: widget.navigationShell.currentIndex,
-              onDestinationSelected: _onTap,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              destinations: [
-                _buildDestination(
-                  context,
-                  index: 0,
-                  icon: Icons.home_outlined,
-                  selectedIcon: Icons.home_rounded,
-                  label: 'Home',
-                ),
-                _buildDestination(
-                  context,
-                  index: 1,
-                  icon: Icons.apartment_outlined,
-                  selectedIcon: Icons.apartment_rounded,
-                  label: 'Properties',
-                ),
-                _buildDestination(
-                  context,
-                  index: 2,
-                  icon: Icons.payments_outlined,
-                  selectedIcon: Icons.payments_rounded,
-                  label: 'Collections',
-                ),
-                _buildDestination(
-                  context,
-                  index: 3,
-                  icon: Icons.task_outlined,
-                  selectedIcon: Icons.task_alt_rounded,
-                  label: 'Tasks',
-                ),
-                _buildDestination(
-                  context,
-                  index: 4,
-                  icon: Icons.grid_view_outlined,
-                  selectedIcon: Icons.grid_view_rounded,
-                  label: 'More',
-                ),
-              ],
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: _SlidingIndicator(
+                index: index,
+                count: destinations.length,
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
+}
 
-  NavigationDestination _buildDestination(
-    BuildContext context, {
-    required int index,
-    required IconData icon,
-    required IconData selectedIcon,
-    required String label,
-  }) {
-    final isSelected = widget.navigationShell.currentIndex == index;
-    return NavigationDestination(
-      icon: Icon(isSelected ? selectedIcon : icon),
-      label: label,
+/// A short rounded bar on the top edge of the nav, over the active tab. It
+/// slides from tab to tab; with reduced motion it jumps.
+class _SlidingIndicator extends StatelessWidget {
+  const _SlidingIndicator({required this.index, required this.count});
+
+  final int index;
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final x = count == 1 ? 0.0 : -1 + 2 * index / (count - 1);
+    return IgnorePointer(
+      child: SizedBox(
+        height: 3,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final slot = constraints.maxWidth / count;
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: (slot - 32) / 2),
+              child: AnimatedAlign(
+                alignment: Alignment(x, 0),
+                duration: reduceMotion(context)
+                    ? Duration.zero
+                    : AppDurations.medium,
+                curve: AppDurations.defaultCurve,
+                child: Container(
+                  width: 32,
+                  height: 3,
+                  decoration: BoxDecoration(
+                    color: context.colors.primary,
+                    borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(3),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

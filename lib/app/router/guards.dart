@@ -26,7 +26,7 @@ String? resolveRedirect({
       location == Routes.profileCompletion ||
       location == Routes.onboarding;
 
-  // Legal consent pages must always render — even logged out and even when
+  // Legal consent pages must always render: even logged out and even when
   // public applications are disabled (sign-up consent links live on the
   // entry screens).
   if (location.startsWith('/legal/')) {

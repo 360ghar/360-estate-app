@@ -80,7 +80,11 @@ class PagedListState<T> {
 
 class PagedListController<T> extends StateNotifier<PagedListState<T>> {
   PagedListController({required PageFetcher<T> fetchPage, int pageSize = 20})
-    : _fetchPage = fetchPage,
+    : assert(
+        pageSize >= 1 && pageSize <= kMaxPageLimit,
+        'pageSize must be 1 to $kMaxPageLimit (the backend refuses more)',
+      ),
+      _fetchPage = fetchPage,
       super(PagedListState<T>(limit: pageSize)) {
     unawaited(loadInitial());
   }

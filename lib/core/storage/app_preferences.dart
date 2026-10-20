@@ -9,7 +9,7 @@ abstract final class PrefKeys {
   // User & Mode
   static const lastSelectedMode = 'last_selected_mode';
 
-  // Auth — remember the last successful sign-in method to pre-select it.
+  // Auth: remember the last successful sign-in method to pre-select it.
   static const lastAuthMethod = 'last_auth_method';
   static const lastAuthIdentifierMasked = 'last_auth_identifier_masked';
 
@@ -47,7 +47,15 @@ final class AppPreferences {
 
   String? getString(String key) => _prefs.getString(key);
   int? getInt(String key) => _prefs.getInt(key);
-  bool? getBool(String key) => _prefs.getBool(key);
+
+  /// A value an older build saved as the string 'true' or 'false' still
+  /// reads as a bool, so a type mismatch never stops the app at launch.
+  bool? getBool(String key) => switch (_prefs.get(key)) {
+    final bool value => value,
+    'true' => true,
+    'false' => false,
+    _ => null,
+  };
 
   Future<bool> setString(String key, String value) =>
       _prefs.setString(key, value);

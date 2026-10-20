@@ -28,31 +28,61 @@ final class AppLogger {
     Object? error,
     StackTrace? stackTrace,
     String? requestId,
-  }) => _logAt(LogLevel.trace, message, error: error, stackTrace: stackTrace, requestId: requestId);
+  }) => _logAt(
+    LogLevel.trace,
+    message,
+    error: error,
+    stackTrace: stackTrace,
+    requestId: requestId,
+  );
   static void d(
     String message, {
     Object? error,
     StackTrace? stackTrace,
     String? requestId,
-  }) => _logAt(LogLevel.debug, message, error: error, stackTrace: stackTrace, requestId: requestId);
+  }) => _logAt(
+    LogLevel.debug,
+    message,
+    error: error,
+    stackTrace: stackTrace,
+    requestId: requestId,
+  );
   static void i(
     String message, {
     Object? error,
     StackTrace? stackTrace,
     String? requestId,
-  }) => _logAt(LogLevel.info, message, error: error, stackTrace: stackTrace, requestId: requestId);
+  }) => _logAt(
+    LogLevel.info,
+    message,
+    error: error,
+    stackTrace: stackTrace,
+    requestId: requestId,
+  );
   static void w(
     String message, {
     Object? error,
     StackTrace? stackTrace,
     String? requestId,
-  }) => _logAt(LogLevel.warn, message, error: error, stackTrace: stackTrace, requestId: requestId);
+  }) => _logAt(
+    LogLevel.warn,
+    message,
+    error: error,
+    stackTrace: stackTrace,
+    requestId: requestId,
+  );
   static void e(
     String message, {
     Object? error,
     StackTrace? stackTrace,
     String? requestId,
-  }) => _logAt(LogLevel.error, message, error: error, stackTrace: stackTrace, requestId: requestId);
+  }) => _logAt(
+    LogLevel.error,
+    message,
+    error: error,
+    stackTrace: stackTrace,
+    requestId: requestId,
+  );
 
   static void _logAt(
     LogLevel level,
