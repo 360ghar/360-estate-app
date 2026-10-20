@@ -1,0 +1,88 @@
+{
+  "auth_gate": {
+    "missing_fields": [
+      "full_name"
+    ],
+    "next_action": "complete_profile",
+    "stage": "profile_completion"
+  },
+  "bug": {
+    "actual_behavior": null,
+    "app_version": "1.0.0",
+    "assigned_to": null,
+    "bug_type": "feature_request",
+    "created_at": "2026-10-01T10:15:02Z",
+    "description": "Please.",
+    "device_info": null,
+    "expected_behavior": null,
+    "id": 3,
+    "media_urls": null,
+    "resolution": null,
+    "resolved_at": null,
+    "severity": "low",
+    "source": "mobile",
+    "status": "open",
+    "steps_to_reproduce": null,
+    "tags": null,
+    "title": "Add dark map",
+    "updated_at": null,
+    "user_id": 7
+  },
+  "identifier_status": {
+    "channel": "phone",
+    "exists": true,
+    "has_password": false,
+    "next_step": "otp",
+    "verified": true
+  },
+  "profile": {
+    "agent_id": null,
+    "created_at": "2026-10-01T10:15:02Z",
+    "current_latitude": null,
+    "current_longitude": null,
+    "date_of_birth": "1988-04-02",
+    "email": "owner@example.com",
+    "email_verified": false,
+    "full_name": "Asha Verma",
+    "id": 7,
+    "is_active": true,
+    "is_verified": true,
+    "last_auth_method": null,
+    "last_auth_method_at": null,
+    "notification_settings": {
+      "email_notifications": true,
+      "promotional_emails": false,
+      "push_notifications": true,
+      "sms_notifications": false
+    },
+    "phone": "+919800000000",
+    "phone_verified": false,
+    "preferences": {
+      "area_max": null,
+      "area_min": null,
+      "bedrooms_max": null,
+      "bedrooms_min": null,
+      "budget_max": null,
+      "budget_min": null,
+      "location_preference": null,
+      "max_distance_km": 5,
+      "property_type": null,
+      "purpose": null
+    },
+    "privacy_settings": {
+      "allow_location_tracking": true,
+      "contact_sharing": true,
+      "data_sharing_consent": false,
+      "hide_last_name": false,
+      "location_sharing": true,
+      "profile_visibility": "public",
+      "search_history_tracking": true,
+      "show_email": false,
+      "show_phone": false
+    },
+    "profile_image_url": "https://cdn.example.com/u7.webp",
+    "role": "user",
+    "supabase_user_id": "0f5e8d9a-1c2b-4d3e-8f7a-6b5c4d3e2f1a",
+    "updated_at": null
+  }
+}

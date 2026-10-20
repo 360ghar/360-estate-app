@@ -1,0 +1,53 @@
+{
+  "activity_page": {
+    "has_more": false,
+    "items": [
+      {
+        "amount": 32000.0,
+        "at": "2026-10-01T10:15:02Z",
+        "description": "Rs 32,000 from Meera Nair",
+        "id": 201,
+        "lease_id": 31,
+        "property_id": 1,
+        "status": "settled",
+        "title": "Rent received",
+        "type": "rent_payment"
+      },
+      {
+        "amount": null,
+        "at": "2026-10-02T08:00:00Z",
+        "description": null,
+        "id": 71,
+        "lease_id": null,
+        "property_id": 1,
+        "status": null,
+        "title": "New request",
+        "type": "maintenance_request"
+      },
+      {
+        "amount": null,
+        "at": "2026-10-02T08:00:00Z",
+        "description": null,
+        "id": null,
+        "lease_id": null,
+        "property_id": null,
+        "status": null,
+        "title": "Lease expiring soon",
+        "type": "lease"
+      }
+    ],
+    "limit": 20,
+    "next_cursor": null,
+    "total": null
+  },
+  "overview": {
+    "monthly_revenue_current": 284500.5,
+    "monthly_revenue_previous": 261000.0,
+    "occupied_properties": 9,
+    "outstanding_rent_total": 48000.0,
+    "total_properties": 12,
+    "under_maintenance_properties": 1,
+    "upcoming_expenses_total": 15300.25,
+    "vacant_properties": 2
+  }
+}

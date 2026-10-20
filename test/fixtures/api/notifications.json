@@ -1,0 +1,43 @@
+{
+  "inbox_last_page": {
+    "has_more": false,
+    "items": [],
+    "limit": 50,
+    "next_cursor": null,
+    "total": null,
+    "unread_count": 0
+  },
+  "inbox_page": {
+    "has_more": true,
+    "items": [
+      {
+        "body": "Rent is due on 5 Oct.",
+        "created_at": "2026-10-01T10:15:02Z",
+        "data": {
+          "route": "/collections"
+        },
+        "id": "d-1001",
+        "read_at": null,
+        "title": "Rent due",
+        "type": "rent_due"
+      },
+      {
+        "body": "Hello",
+        "created_at": "2026-10-02T08:00:00Z",
+        "data": null,
+        "id": "d-1000",
+        "read_at": "2026-10-02T08:00:00Z",
+        "title": "Welcome",
+        "type": null
+      }
+    ],
+    "limit": 50,
+    "next_cursor": "eyJrIjpbIjIwMjYtMTAtMDEiLCJkLTEwMDAiXSwiZiI6ImFiYyJ9",
+    "total": null,
+    "unread_count": 1
+  },
+  "opened": {
+    "delivery_id": "d-1001",
+    "read_at": "2026-10-01T10:15:02Z"
+  }
+}

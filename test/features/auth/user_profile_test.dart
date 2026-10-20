@@ -14,15 +14,7 @@ void main() {
     });
 
     test('profile with full_name is complete', () {
-      const profile = UserProfile(
-        fullName: 'Asha Sharma',
-        phone: '9999999999',
-      );
-      expect(profile.isProfileComplete, isTrue);
-    });
-
-    test('profile with first/last name is complete', () {
-      const profile = UserProfile(firstName: 'Asha', lastName: 'Sharma');
+      const profile = UserProfile(fullName: 'Asha Sharma', phone: '9999999999');
       expect(profile.isProfileComplete, isTrue);
     });
 

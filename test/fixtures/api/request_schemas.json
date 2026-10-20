@@ -1,0 +1,433 @@
+{
+  "BugReportCreate": {
+    "properties": [
+      "actual_behavior",
+      "app_version",
+      "bug_type",
+      "description",
+      "device_info",
+      "expected_behavior",
+      "media_urls",
+      "severity",
+      "source",
+      "steps_to_reproduce",
+      "tags",
+      "title"
+    ],
+    "required": [
+      "bug_type",
+      "description",
+      "severity",
+      "source",
+      "title"
+    ],
+    "strict": true
+  },
+  "DeviceRegisterIn": {
+    "properties": [
+      "app_key",
+      "app_version",
+      "locale",
+      "platform",
+      "token"
+    ],
+    "required": [
+      "app_key",
+      "platform",
+      "token"
+    ],
+    "strict": true
+  },
+  "ExpenseCreate": {
+    "properties": [
+      "amount",
+      "category",
+      "description",
+      "expense_date",
+      "notes",
+      "owner_id",
+      "property_id",
+      "receipt_document_id",
+      "title"
+    ],
+    "required": [
+      "amount",
+      "category",
+      "expense_date",
+      "property_id"
+    ],
+    "strict": true
+  },
+  "ExpenseUpdate": {
+    "properties": [
+      "amount",
+      "category",
+      "description",
+      "expense_date",
+      "notes",
+      "property_id",
+      "receipt_document_id",
+      "title"
+    ],
+    "required": [],
+    "strict": true
+  },
+  "InspectionChecklistCreate": {
+    "properties": [
+      "conducted_at",
+      "inspection_type",
+      "lease_id",
+      "overall_notes",
+      "owner_id",
+      "rooms_data"
+    ],
+    "required": [
+      "inspection_type",
+      "lease_id"
+    ],
+    "strict": true
+  },
+  "InspectionSign": {
+    "properties": [
+      "owner_signature_document_id",
+      "tenant_signature_document_id"
+    ],
+    "required": [],
+    "strict": true
+  },
+  "LeaseCreate": {
+    "properties": [
+      "end_date",
+      "grace_period_days",
+      "late_fee_amount",
+      "late_fee_percentage",
+      "lease_document_id",
+      "lease_terms",
+      "monthly_rent",
+      "owner_id",
+      "payment_due_day",
+      "property_id",
+      "security_deposit",
+      "special_clauses",
+      "start_date",
+      "status",
+      "tenant_email",
+      "tenant_name",
+      "tenant_phone",
+      "tenant_user_id"
+    ],
+    "required": [
+      "end_date",
+      "monthly_rent",
+      "property_id",
+      "security_deposit",
+      "start_date"
+    ],
+    "strict": true
+  },
+  "LeaseRenew": {
+    "properties": [
+      "end_date",
+      "make_active",
+      "monthly_rent",
+      "security_deposit",
+      "start_date"
+    ],
+    "required": [
+      "end_date",
+      "start_date"
+    ],
+    "strict": true
+  },
+  "LeaseTerminate": {
+    "properties": [
+      "reason",
+      "termination_date"
+    ],
+    "required": [],
+    "strict": true
+  },
+  "LeaseUploadSigned": {
+    "properties": [
+      "lease_document_id",
+      "signed_by_owner",
+      "signed_by_tenant"
+    ],
+    "required": [
+      "lease_document_id"
+    ],
+    "strict": true
+  },
+  "MaintenanceRequestCreate": {
+    "properties": [
+      "assigned_agent_id",
+      "availability_notes",
+      "category",
+      "description",
+      "estimated_cost",
+      "lease_id",
+      "preferred_contact_method",
+      "property_id",
+      "scheduled_for",
+      "title",
+      "urgency"
+    ],
+    "required": [
+      "category",
+      "property_id",
+      "title",
+      "urgency"
+    ],
+    "strict": true
+  },
+  "MaintenanceRequestUpdate": {
+    "properties": [
+      "actual_cost",
+      "assigned_agent_id",
+      "closed_at",
+      "completed_at",
+      "completion_notes",
+      "estimated_cost",
+      "request_status",
+      "scheduled_for",
+      "urgency",
+      "vendor_contact",
+      "vendor_name",
+      "work_order_status"
+    ],
+    "required": [],
+    "strict": true
+  },
+  "ManagedPropertyCreate": {
+    "properties": [
+      "age_of_property",
+      "amenity_ids",
+      "area_sqft",
+      "area_type",
+      "available_from",
+      "balconies",
+      "base_price",
+      "bathrooms",
+      "bedrooms",
+      "builder_name",
+      "calendar_data",
+      "city",
+      "country",
+      "daily_rate",
+      "description",
+      "features",
+      "floor_number",
+      "floor_plan_url",
+      "full_address",
+      "furnishing_level",
+      "gender_preference",
+      "google_street_view_url",
+      "grace_period_days",
+      "image_urls",
+      "is_available",
+      "kitchen_type",
+      "landmark",
+      "late_fee_policy",
+      "latitude",
+      "listing_preferences",
+      "locality",
+      "longitude",
+      "main_image_url",
+      "maintenance_charges",
+      "management_status",
+      "max_occupancy",
+      "minimum_stay_days",
+      "monthly_rent",
+      "other_charges",
+      "other_charges_description",
+      "owner_contact",
+      "owner_id",
+      "owner_name",
+      "parking_spaces",
+      "payment_due_day",
+      "pincode",
+      "property_type",
+      "purpose",
+      "search_keywords",
+      "security_deposit",
+      "setup_cost",
+      "sharing_type",
+      "society_amenities",
+      "society_type",
+      "society_vibe_tags",
+      "state",
+      "status",
+      "sub_locality",
+      "tags",
+      "title",
+      "total_floors",
+      "ventilation_shafts",
+      "ventilation_type",
+      "video_tour_url",
+      "video_urls",
+      "virtual_tour_url",
+      "windows_count"
+    ],
+    "required": [
+      "base_price",
+      "property_type",
+      "purpose",
+      "title"
+    ],
+    "strict": true
+  },
+  "ManagedPropertyUpdate": {
+    "properties": [
+      "age_of_property",
+      "amenity_ids",
+      "area_sqft",
+      "area_type",
+      "available_from",
+      "balconies",
+      "base_price",
+      "bathrooms",
+      "bedrooms",
+      "builder_name",
+      "calendar_data",
+      "city",
+      "country",
+      "daily_rate",
+      "description",
+      "features",
+      "floor_number",
+      "floor_plan_url",
+      "floor_plans",
+      "full_address",
+      "furnishing_level",
+      "gender_preference",
+      "google_street_view_url",
+      "grace_period_days",
+      "image_urls",
+      "images",
+      "is_available",
+      "kitchen_type",
+      "landmark",
+      "late_fee_policy",
+      "latitude",
+      "listing_preferences",
+      "locality",
+      "longitude",
+      "main_image_url",
+      "maintenance_charges",
+      "management_status",
+      "max_occupancy",
+      "minimum_stay_days",
+      "monthly_rent",
+      "other_charges",
+      "other_charges_description",
+      "owner_contact",
+      "owner_name",
+      "parking_spaces",
+      "payment_due_day",
+      "pincode",
+      "property_type",
+      "purpose",
+      "search_keywords",
+      "security_deposit",
+      "setup_cost",
+      "sharing_type",
+      "society_amenities",
+      "society_type",
+      "society_vibe_tags",
+      "state",
+      "status",
+      "sub_locality",
+      "tags",
+      "title",
+      "total_floors",
+      "ventilation_shafts",
+      "ventilation_type",
+      "video_tour_url",
+      "video_urls",
+      "virtual_tour_url",
+      "windows_count"
+    ],
+    "required": [],
+    "strict": true
+  },
+  "RentChargeGenerateRequest": {
+    "properties": [
+      "lease_id",
+      "months",
+      "owner_id",
+      "start_month"
+    ],
+    "required": [],
+    "strict": true
+  },
+  "RentPaymentCreate": {
+    "properties": [
+      "amount_paid",
+      "charge_id",
+      "notes",
+      "paid_at",
+      "payment_method",
+      "receipt_document_id",
+      "reference"
+    ],
+    "required": [
+      "amount_paid",
+      "charge_id"
+    ],
+    "strict": true
+  },
+  "RentalApplicationDecision": {
+    "properties": [
+      "decision",
+      "notes"
+    ],
+    "required": [
+      "decision"
+    ],
+    "strict": true
+  },
+  "RentalApplicationFormCreate": {
+    "properties": [
+      "application_fee_amount",
+      "config",
+      "custom_fields",
+      "description",
+      "expires_at",
+      "is_active",
+      "owner_id",
+      "property_id",
+      "required_document_types",
+      "title"
+    ],
+    "required": [
+      "title"
+    ],
+    "strict": true
+  },
+  "RentalApplicationSubmit": {
+    "properties": [
+      "answers",
+      "applicant_email",
+      "applicant_full_name",
+      "applicant_phone",
+      "application_data",
+      "emergency_contacts",
+      "property_id"
+    ],
+    "required": [],
+    "strict": true
+  },
+  "UserUpdate": {
+    "properties": [
+      "current_latitude",
+      "current_longitude",
+      "date_of_birth",
+      "full_name",
+      "notification_settings",
+      "phone",
+      "privacy_settings"
+    ],
+    "required": [],
+    "strict": true
+  }
+}

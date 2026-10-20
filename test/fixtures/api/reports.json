@@ -1,0 +1,56 @@
+{
+  "expenses": {
+    "end": "2026-10-31",
+    "start": "2026-10-01",
+    "total_expenses": 15300.25
+  },
+  "income": {
+    "end": "2026-10-31",
+    "start": "2026-10-01",
+    "total_income": 284500.5
+  },
+  "income_all_time": {
+    "end": null,
+    "start": null,
+    "total_income": 1000000.0
+  },
+  "maintenance": {
+    "total_requests": 7
+  },
+  "occupancy": {
+    "occupied": 9,
+    "total": 12,
+    "vacant": 3
+  },
+  "pnl": {
+    "end": "2026-10-31",
+    "net_income": 269200.25,
+    "start": "2026-10-01",
+    "total_expenses": 15300.25,
+    "total_income": 284500.5
+  },
+  "rent_roll_page": {
+    "has_more": false,
+    "items": [
+      {
+        "lease_end_date": "2027-03-31",
+        "monthly_rent": 32000.0,
+        "occupancy": "occupied",
+        "property_id": 1,
+        "tenant_user_id": 52,
+        "title": "2 BHK Sector 51"
+      },
+      {
+        "lease_end_date": null,
+        "monthly_rent": null,
+        "occupancy": "vacant",
+        "property_id": 2,
+        "tenant_user_id": null,
+        "title": "1 BHK Sector 52"
+      }
+    ],
+    "limit": 100,
+    "next_cursor": null,
+    "total": null
+  }
+}

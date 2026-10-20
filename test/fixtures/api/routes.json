@@ -1,0 +1,2518 @@
+{
+  "DELETE /notifications/devices/unregister": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "token": "string"
+      },
+      "properties": [
+        "token"
+      ],
+      "required": [
+        "token"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "DELETE /pm/expenses/{expense_id}": {
+    "body": null,
+    "query": {}
+  },
+  "DELETE /pm/rent/payments/{payment_id}": {
+    "body": null,
+    "query": {}
+  },
+  "DELETE /upload/media/{media_id}": {
+    "body": null,
+    "query": {}
+  },
+  "DELETE /users/me": {
+    "body": null,
+    "query": {}
+  },
+  "GET /agents/assigned": {
+    "body": null,
+    "query": {}
+  },
+  "GET /amenities": {
+    "body": null,
+    "query": {
+      "cursor": {
+        "kind": "string"
+      },
+      "include_total": {
+        "kind": "boolean"
+      },
+      "limit": {
+        "kind": "integer",
+        "maximum": 100
+      }
+    }
+  },
+  "GET /auth/config": {
+    "body": null,
+    "query": {}
+  },
+  "GET /bugs": {
+    "body": null,
+    "query": {
+      "bug_type": {
+        "enum": [
+          "ui_bug",
+          "functionality_bug",
+          "performance_issue",
+          "crash",
+          "feature_request",
+          "other"
+        ],
+        "kind": "string"
+      },
+      "cursor": {
+        "kind": "string"
+      },
+      "include_total": {
+        "kind": "boolean"
+      },
+      "limit": {
+        "kind": "integer",
+        "maximum": 100
+      },
+      "severity": {
+        "enum": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ],
+        "kind": "string"
+      },
+      "status": {
+        "enum": [
+          "open",
+          "in_progress",
+          "resolved",
+          "closed"
+        ],
+        "kind": "string"
+      }
+    }
+  },
+  "GET /bugs/{bug_id}": {
+    "body": null,
+    "query": {}
+  },
+  "GET /notifications/me": {
+    "body": null,
+    "query": {
+      "cursor": {
+        "kind": "string"
+      },
+      "include_total": {
+        "kind": "boolean"
+      },
+      "limit": {
+        "kind": "integer",
+        "maximum": 100
+      },
+      "unread_only": {
+        "kind": "boolean"
+      }
+    }
+  },
+  "GET /notifications/users/{user_id}": {
+    "body": null,
+    "query": {
+      "cursor": {
+        "kind": "string"
+      },
+      "include_total": {
+        "kind": "boolean"
+      },
+      "limit": {
+        "kind": "integer",
+        "maximum": 100
+      }
+    }
+  },
+  "GET /pm/applications": {
+    "body": null,
+    "query": {
+      "cursor": {
+        "kind": "string"
+      },
+      "form_id": {
+        "kind": "integer"
+      },
+      "include_total": {
+        "kind": "boolean"
+      },
+      "limit": {
+        "kind": "integer",
+        "maximum": 100
+      },
+      "owner_id": {
+        "kind": "integer"
+      },
+      "property_id": {
+        "kind": "integer"
+      },
+      "status": {
+        "enum": [
+          "applicant",
+          "approved",
+          "rejected"
+        ],
+        "kind": "string"
+      },
+      "submitted_from": {
+        "kind": "string:date-time"
+      },
+      "submitted_to": {
+        "kind": "string:date-time"
+      }
+    }
+  },
+  "GET /pm/applications/forms": {
+    "body": null,
+    "query": {
+      "cursor": {
+        "kind": "string"
+      },
+      "include_total": {
+        "kind": "boolean"
+      },
+      "limit": {
+        "kind": "integer",
+        "maximum": 100
+      },
+      "owner_id": {
+        "kind": "integer"
+      },
+      "property_id": {
+        "kind": "integer"
+      },
+      "q": {
+        "kind": "string"
+      }
+    }
+  },
+  "GET /pm/applications/forms/{form_id}": {
+    "body": null,
+    "query": {}
+  },
+  "GET /pm/applications/{application_id}": {
+    "body": null,
+    "query": {}
+  },
+  "GET /pm/dashboard/activity": {
+    "body": null,
+    "query": {
+      "cursor": {
+        "kind": "string"
+      },
+      "include_total": {
+        "kind": "boolean"
+      },
+      "limit": {
+        "kind": "integer",
+        "maximum": 100
+      },
+      "owner_id": {
+        "kind": "integer"
+      }
+    }
+  },
+  "GET /pm/dashboard/overview": {
+    "body": null,
+    "query": {
+      "owner_id": {
+        "kind": "integer"
+      }
+    }
+  },
+  "GET /pm/documents": {
+    "body": null,
+    "query": {
+      "as_tenant": {
+        "kind": "boolean"
+      },
+      "cursor": {
+        "kind": "string"
+      },
+      "document_type": {
+        "enum": [
+          "lease_agreement",
+          "id_proof",
+          "address_proof",
+          "income_proof",
+          "inspection_report",
+          "receipt",
+          "invoice",
+          "property_deed",
+          "insurance_policy",
+          "other"
+        ],
+        "kind": "string"
+      },
+      "include_total": {
+        "kind": "boolean"
+      },
+      "lease_id": {
+        "kind": "integer"
+      },
+      "limit": {
+        "kind": "integer",
+        "maximum": 100
+      },
+      "maintenance_request_id": {
+        "kind": "integer"
+      },
+      "owner_id": {
+        "kind": "integer"
+      },
+      "property_id": {
+        "kind": "integer"
+      },
+      "rental_application_id": {
+        "kind": "integer"
+      },
+      "user_id": {
+        "kind": "integer"
+      }
+    }
+  },
+  "GET /pm/documents/{document_id}": {
+    "body": null,
+    "query": {}
+  },
+  "GET /pm/documents/{document_id}/download": {
+    "body": null,
+    "query": {}
+  },
+  "GET /pm/expenses": {
+    "body": null,
+    "query": {
+      "category": {
+        "enum": [
+          "maintenance",
+          "repairs",
+          "insurance",
+          "property_tax",
+          "hoa",
+          "utilities",
+          "marketing",
+          "legal",
+          "other"
+        ],
+        "kind": "string"
+      },
+      "cursor": {
+        "kind": "string"
+      },
+      "end_date": {
+        "kind": "string:date"
+      },
+      "include_total": {
+        "kind": "boolean"
+      },
+      "limit": {
+        "kind": "integer",
+        "maximum": 100
+      },
+      "owner_id": {
+        "kind": "integer"
+      },
+      "property_id": {
+        "kind": "integer"
+      },
+      "start_date": {
+        "kind": "string:date"
+      }
+    }
+  },
+  "GET /pm/inspections": {
+    "body": null,
+    "query": {
+      "as_tenant": {
+        "kind": "boolean"
+      },
+      "cursor": {
+        "kind": "string"
+      },
+      "include_total": {
+        "kind": "boolean"
+      },
+      "lease_id": {
+        "kind": "integer"
+      },
+      "limit": {
+        "kind": "integer",
+        "maximum": 100
+      },
+      "owner_id": {
+        "kind": "integer"
+      },
+      "property_id": {
+        "kind": "integer"
+      }
+    }
+  },
+  "GET /pm/inspections/{inspection_id}": {
+    "body": null,
+    "query": {}
+  },
+  "GET /pm/leases": {
+    "body": null,
+    "query": {
+      "as_tenant": {
+        "kind": "boolean"
+      },
+      "cursor": {
+        "kind": "string"
+      },
+      "include_total": {
+        "kind": "boolean"
+      },
+      "limit": {
+        "kind": "integer",
+        "maximum": 100
+      },
+      "owner_id": {
+        "kind": "integer"
+      },
+      "property_id": {
+        "kind": "integer"
+      },
+      "status": {
+        "enum": [
+          "draft",
+          "pending_signature",
+          "active",
+          "expiring_soon",
+          "expired",
+          "terminated",
+          "renewed"
+        ],
+        "kind": "string"
+      },
+      "tenant_user_id": {
+        "kind": "integer"
+      }
+    }
+  },
+  "GET /pm/leases/{lease_id}": {
+    "body": null,
+    "query": {}
+  },
+  "GET /pm/maintenance/requests": {
+    "body": null,
+    "query": {
+      "cursor": {
+        "kind": "string"
+      },
+      "include_total": {
+        "kind": "boolean"
+      },
+      "lease_id": {
+        "kind": "integer"
+      },
+      "limit": {
+        "kind": "integer",
+        "maximum": 100
+      },
+      "owner_id": {
+        "kind": "integer"
+      },
+      "property_id": {
+        "kind": "integer"
+      },
+      "request_status": {
+        "enum": [
+          "open",
+          "in_review",
+          "work_order_created",
+          "resolved",
+          "closed"
+        ],
+        "kind": "string"
+      },
+      "work_order_status": {
+        "enum": [
+          "created",
+          "assigned",
+          "in_progress",
+          "completed",
+          "closed",
+          "cancelled"
+        ],
+        "kind": "string"
+      }
+    }
+  },
+  "GET /pm/properties": {
+    "body": null,
+    "query": {
+      "cursor": {
+        "kind": "string"
+      },
+      "include_total": {
+        "kind": "boolean"
+      },
+      "limit": {
+        "kind": "integer",
+        "maximum": 100
+      },
+      "occupancy": {
+        "enum": [
+          "occupied",
+          "vacant"
+        ],
+        "kind": "string"
+      },
+      "owner_id": {
+        "kind": "integer"
+      },
+      "q": {
+        "kind": "string"
+      }
+    }
+  },
+  "GET /pm/properties/{property_id}": {
+    "body": null,
+    "query": {}
+  },
+  "GET /pm/public/applications/{slug}": {
+    "body": null,
+    "query": {}
+  },
+  "GET /pm/rent/charges": {
+    "body": null,
+    "query": {
+      "as_tenant": {
+        "kind": "boolean"
+      },
+      "cursor": {
+        "kind": "string"
+      },
+      "include_total": {
+        "kind": "boolean"
+      },
+      "lease_id": {
+        "kind": "integer"
+      },
+      "limit": {
+        "kind": "integer",
+        "maximum": 100
+      },
+      "owner_id": {
+        "kind": "integer"
+      },
+      "property_id": {
+        "kind": "integer"
+      },
+      "status": {
+        "enum": [
+          "pending",
+          "partial",
+          "paid",
+          "overdue",
+          "waived"
+        ],
+        "kind": "string"
+      }
+    }
+  },
+  "GET /pm/rent/payments": {
+    "body": null,
+    "query": {
+      "as_tenant": {
+        "kind": "boolean"
+      },
+      "cursor": {
+        "kind": "string"
+      },
+      "include_total": {
+        "kind": "boolean"
+      },
+      "lease_id": {
+        "kind": "integer"
+      },
+      "limit": {
+        "kind": "integer",
+        "maximum": 100
+      },
+      "owner_id": {
+        "kind": "integer"
+      },
+      "property_id": {
+        "kind": "integer"
+      },
+      "status": {
+        "enum": [
+          "pending",
+          "settled"
+        ],
+        "kind": "string"
+      }
+    }
+  },
+  "GET /pm/reports/expenses": {
+    "body": null,
+    "query": {
+      "end": {
+        "kind": "string:date"
+      },
+      "owner_id": {
+        "kind": "integer"
+      },
+      "start": {
+        "kind": "string:date"
+      }
+    }
+  },
+  "GET /pm/reports/income": {
+    "body": null,
+    "query": {
+      "end": {
+        "kind": "string:date"
+      },
+      "owner_id": {
+        "kind": "integer"
+      },
+      "start": {
+        "kind": "string:date"
+      }
+    }
+  },
+  "GET /pm/reports/maintenance": {
+    "body": null,
+    "query": {
+      "owner_id": {
+        "kind": "integer"
+      }
+    }
+  },
+  "GET /pm/reports/occupancy": {
+    "body": null,
+    "query": {
+      "owner_id": {
+        "kind": "integer"
+      }
+    }
+  },
+  "GET /pm/reports/pnl": {
+    "body": null,
+    "query": {
+      "end": {
+        "kind": "string:date"
+      },
+      "owner_id": {
+        "kind": "integer"
+      },
+      "start": {
+        "kind": "string:date"
+      }
+    }
+  },
+  "GET /pm/reports/rent-roll": {
+    "body": null,
+    "query": {
+      "cursor": {
+        "kind": "string"
+      },
+      "include_total": {
+        "kind": "boolean"
+      },
+      "limit": {
+        "kind": "integer",
+        "maximum": 100
+      },
+      "owner_id": {
+        "kind": "integer"
+      }
+    }
+  },
+  "GET /pm/tenants": {
+    "body": null,
+    "query": {
+      "cursor": {
+        "kind": "string"
+      },
+      "include_total": {
+        "kind": "boolean"
+      },
+      "limit": {
+        "kind": "integer",
+        "maximum": 100
+      },
+      "owner_id": {
+        "kind": "integer"
+      }
+    }
+  },
+  "GET /pm/tenants/{tenant_user_id}": {
+    "body": null,
+    "query": {
+      "owner_id": {
+        "kind": "integer"
+      }
+    }
+  },
+  "GET /upload/media": {
+    "body": null,
+    "query": {
+      "cursor": {
+        "kind": "string"
+      },
+      "include_total": {
+        "kind": "boolean"
+      },
+      "is_processed": {
+        "kind": "boolean"
+      },
+      "limit": {
+        "kind": "integer",
+        "maximum": 100
+      },
+      "mime_type": {
+        "kind": "string"
+      },
+      "search": {
+        "kind": "string"
+      },
+      "tour_id": {
+        "kind": "string"
+      },
+      "upload_status": {
+        "enum": [
+          "pending",
+          "complete",
+          "failed"
+        ],
+        "kind": "string"
+      },
+      "visibility": {
+        "enum": [
+          "private",
+          "unlisted",
+          "public"
+        ],
+        "kind": "string"
+      }
+    }
+  },
+  "GET /upload/media/{media_id}": {
+    "body": null,
+    "query": {}
+  },
+  "GET /users/me": {
+    "body": null,
+    "query": {}
+  },
+  "GET /users/me/auth-state": {
+    "body": null,
+    "query": {
+      "app": {
+        "enum": [
+          "ghar",
+          "estate",
+          "flatmates",
+          "stays"
+        ],
+        "kind": "string"
+      }
+    }
+  },
+  "GET /users/profile": {
+    "body": null,
+    "query": {}
+  },
+  "PATCH /pm/assignments/{owner_user_id}": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "agent_id": "integer"
+      },
+      "properties": [
+        "agent_id"
+      ],
+      "required": [],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "PATCH /pm/documents/{document_id}": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "shared_with_agent": "boolean",
+        "shared_with_tenant": "boolean",
+        "title": "string"
+      },
+      "properties": [
+        "shared_with_agent",
+        "shared_with_tenant",
+        "title"
+      ],
+      "required": [],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "PATCH /pm/expenses/{expense_id}": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {
+        "category": [
+          "maintenance",
+          "repairs",
+          "insurance",
+          "property_tax",
+          "hoa",
+          "utilities",
+          "marketing",
+          "legal",
+          "other"
+        ]
+      },
+      "kinds": {
+        "amount": "number",
+        "category": "string",
+        "description": "string",
+        "expense_date": "string:date",
+        "notes": "string",
+        "property_id": "integer",
+        "receipt_document_id": "integer",
+        "title": "string"
+      },
+      "properties": [
+        "amount",
+        "category",
+        "description",
+        "expense_date",
+        "notes",
+        "property_id",
+        "receipt_document_id",
+        "title"
+      ],
+      "required": [],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "PATCH /pm/maintenance/requests/{request_id}": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {
+        "request_status": [
+          "open",
+          "in_review",
+          "work_order_created",
+          "resolved",
+          "closed"
+        ],
+        "urgency": [
+          "emergency",
+          "high",
+          "medium",
+          "low"
+        ],
+        "work_order_status": [
+          "created",
+          "assigned",
+          "in_progress",
+          "completed",
+          "closed",
+          "cancelled"
+        ]
+      },
+      "kinds": {
+        "actual_cost": "number",
+        "assigned_agent_id": "integer",
+        "closed_at": "string:date-time",
+        "completed_at": "string:date-time",
+        "completion_notes": "string",
+        "estimated_cost": "number",
+        "request_status": "string",
+        "scheduled_for": "string:date-time",
+        "urgency": "string",
+        "vendor_contact": "string",
+        "vendor_name": "string",
+        "work_order_status": "string"
+      },
+      "properties": [
+        "actual_cost",
+        "assigned_agent_id",
+        "closed_at",
+        "completed_at",
+        "completion_notes",
+        "estimated_cost",
+        "request_status",
+        "scheduled_for",
+        "urgency",
+        "vendor_contact",
+        "vendor_name",
+        "work_order_status"
+      ],
+      "required": [],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "PATCH /pm/properties/{property_id}": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {
+        "furnishing_level": [
+          "furnished",
+          "semi_furnished",
+          "unfurnished"
+        ],
+        "gender_preference": [
+          "any",
+          "male",
+          "female"
+        ],
+        "kitchen_type": [
+          "vegetarian",
+          "non_vegetarian",
+          "eggetarian",
+          "any"
+        ],
+        "management_status": [
+          "draft",
+          "active",
+          "archived"
+        ],
+        "property_type": [
+          "house",
+          "apartment",
+          "builder_floor",
+          "room",
+          "villa",
+          "plot",
+          "condo",
+          "penthouse",
+          "studio",
+          "loft",
+          "pg",
+          "flatmate",
+          "office",
+          "shop",
+          "warehouse"
+        ],
+        "purpose": [
+          "buy",
+          "rent",
+          "short_stay"
+        ],
+        "sharing_type": [
+          "private_room",
+          "shared_room",
+          "master_bedroom",
+          "entire_flat"
+        ],
+        "status": [
+          "available",
+          "sold",
+          "rented",
+          "under_offer",
+          "maintenance"
+        ],
+        "ventilation_type": [
+          "good",
+          "average",
+          "poor"
+        ]
+      },
+      "kinds": {
+        "age_of_property": "integer",
+        "amenity_ids": "array",
+        "area_sqft": "number",
+        "area_type": "string",
+        "available_from": "string:date",
+        "balconies": "integer",
+        "base_price": "number",
+        "bathrooms": "integer",
+        "bedrooms": "integer",
+        "builder_name": "string",
+        "calendar_data": "object",
+        "city": "string",
+        "country": "string",
+        "daily_rate": "number",
+        "description": "string",
+        "features": "array",
+        "floor_number": "integer",
+        "floor_plan_url": "string",
+        "floor_plans": "array",
+        "full_address": "string",
+        "furnishing_level": "string",
+        "gender_preference": "string",
+        "google_street_view_url": "string",
+        "grace_period_days": "integer",
+        "image_urls": "array",
+        "images": "array",
+        "is_available": "boolean",
+        "kitchen_type": "string",
+        "landmark": "string",
+        "late_fee_policy": "object",
+        "latitude": "number",
+        "listing_preferences": "object",
+        "locality": "string",
+        "longitude": "number",
+        "main_image_url": "string",
+        "maintenance_charges": "number",
+        "management_status": "string",
+        "max_occupancy": "integer",
+        "minimum_stay_days": "integer",
+        "monthly_rent": "number",
+        "other_charges": "number",
+        "other_charges_description": "string",
+        "owner_contact": "string",
+        "owner_name": "string",
+        "parking_spaces": "integer",
+        "payment_due_day": "integer",
+        "pincode": "string",
+        "property_type": "string",
+        "purpose": "string",
+        "search_keywords": "string",
+        "security_deposit": "number",
+        "setup_cost": "number",
+        "sharing_type": "string",
+        "society_amenities": "array",
+        "society_type": "string",
+        "society_vibe_tags": "array",
+        "state": "string",
+        "status": "string",
+        "sub_locality": "string",
+        "tags": "array",
+        "title": "string",
+        "total_floors": "integer",
+        "ventilation_shafts": "integer",
+        "ventilation_type": "string",
+        "video_tour_url": "string",
+        "video_urls": "array",
+        "virtual_tour_url": "string",
+        "windows_count": "integer"
+      },
+      "properties": [
+        "age_of_property",
+        "amenity_ids",
+        "area_sqft",
+        "area_type",
+        "available_from",
+        "balconies",
+        "base_price",
+        "bathrooms",
+        "bedrooms",
+        "builder_name",
+        "calendar_data",
+        "city",
+        "country",
+        "daily_rate",
+        "description",
+        "features",
+        "floor_number",
+        "floor_plan_url",
+        "floor_plans",
+        "full_address",
+        "furnishing_level",
+        "gender_preference",
+        "google_street_view_url",
+        "grace_period_days",
+        "image_urls",
+        "images",
+        "is_available",
+        "kitchen_type",
+        "landmark",
+        "late_fee_policy",
+        "latitude",
+        "listing_preferences",
+        "locality",
+        "longitude",
+        "main_image_url",
+        "maintenance_charges",
+        "management_status",
+        "max_occupancy",
+        "minimum_stay_days",
+        "monthly_rent",
+        "other_charges",
+        "other_charges_description",
+        "owner_contact",
+        "owner_name",
+        "parking_spaces",
+        "payment_due_day",
+        "pincode",
+        "property_type",
+        "purpose",
+        "search_keywords",
+        "security_deposit",
+        "setup_cost",
+        "sharing_type",
+        "society_amenities",
+        "society_type",
+        "society_vibe_tags",
+        "state",
+        "status",
+        "sub_locality",
+        "tags",
+        "title",
+        "total_floors",
+        "ventilation_shafts",
+        "ventilation_type",
+        "video_tour_url",
+        "video_urls",
+        "virtual_tour_url",
+        "windows_count"
+      ],
+      "required": [],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "PATCH /upload/media/{media_id}": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {
+        "visibility": [
+          "private",
+          "unlisted",
+          "public"
+        ]
+      },
+      "kinds": {
+        "cdn_url": "string",
+        "expires_at": "string:date-time",
+        "is_processed": "boolean",
+        "thumbnail_url": "string",
+        "visibility": "string"
+      },
+      "properties": [
+        "cdn_url",
+        "expires_at",
+        "is_processed",
+        "thumbnail_url",
+        "visibility"
+      ],
+      "required": [],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /auth/delete-account": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "confirm": "boolean"
+      },
+      "properties": [
+        "confirm"
+      ],
+      "required": [
+        "confirm"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /auth/identifier-status": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "identifier": "string"
+      },
+      "properties": [
+        "identifier"
+      ],
+      "required": [
+        "identifier"
+      ],
+      "required_body": true,
+      "strict": false
+    },
+    "query": {}
+  },
+  "POST /auth/last-method": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {
+        "method": [
+          "google",
+          "apple",
+          "email_password",
+          "phone_password",
+          "phone_otp",
+          "email_otp"
+        ]
+      },
+      "kinds": {
+        "method": "string"
+      },
+      "properties": [
+        "method"
+      ],
+      "required": [
+        "method"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /bugs": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {
+        "bug_type": [
+          "ui_bug",
+          "functionality_bug",
+          "performance_issue",
+          "crash",
+          "feature_request",
+          "other"
+        ],
+        "severity": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ]
+      },
+      "kinds": {
+        "actual_behavior": "string",
+        "app_version": "string",
+        "bug_type": "string",
+        "description": "string",
+        "device_info": "object",
+        "expected_behavior": "string",
+        "media_urls": "array",
+        "severity": "string",
+        "source": "string",
+        "steps_to_reproduce": "string",
+        "tags": "array",
+        "title": "string"
+      },
+      "properties": [
+        "actual_behavior",
+        "app_version",
+        "bug_type",
+        "description",
+        "device_info",
+        "expected_behavior",
+        "media_urls",
+        "severity",
+        "source",
+        "steps_to_reproduce",
+        "tags",
+        "title"
+      ],
+      "required": [
+        "bug_type",
+        "description",
+        "severity",
+        "source",
+        "title"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /bugs/with-media": {
+    "body": {
+      "content_type": "multipart/form-data",
+      "enums": {
+        "bug_type": [
+          "ui_bug",
+          "functionality_bug",
+          "performance_issue",
+          "crash",
+          "feature_request",
+          "other"
+        ],
+        "severity": [
+          "low",
+          "medium",
+          "high",
+          "critical"
+        ]
+      },
+      "kinds": {
+        "actual_behavior": "string",
+        "app_version": "string",
+        "bug_type": "string",
+        "description": "string",
+        "device_info": "string",
+        "expected_behavior": "string",
+        "files": "array",
+        "severity": "string",
+        "source": "string",
+        "steps_to_reproduce": "string",
+        "tags": "string",
+        "title": "string"
+      },
+      "properties": [
+        "actual_behavior",
+        "app_version",
+        "bug_type",
+        "description",
+        "device_info",
+        "expected_behavior",
+        "files",
+        "severity",
+        "source",
+        "steps_to_reproduce",
+        "tags",
+        "title"
+      ],
+      "required": [
+        "bug_type",
+        "description",
+        "severity",
+        "source",
+        "title"
+      ],
+      "required_body": true,
+      "strict": false
+    },
+    "query": {}
+  },
+  "POST /notifications/deliveries/{delivery_id}/opened": {
+    "body": null,
+    "query": {}
+  },
+  "POST /notifications/devices/register": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {
+        "app_key": [
+          "ghar",
+          "estate",
+          "flatmates",
+          "stays"
+        ],
+        "platform": [
+          "android",
+          "ios",
+          "web"
+        ]
+      },
+      "kinds": {
+        "app_key": "string",
+        "app_version": "string",
+        "locale": "string",
+        "platform": "string",
+        "token": "string"
+      },
+      "properties": [
+        "app_key",
+        "app_version",
+        "locale",
+        "platform",
+        "token"
+      ],
+      "required": [
+        "app_key",
+        "platform",
+        "token"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /notifications/marketing/broadcast": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {
+        "type_key": [
+          "promotion_generic",
+          "discount_offer",
+          "win_back",
+          "upsell_suggestion",
+          "onboarding_nudge",
+          "property_recommendation",
+          "daily_digest"
+        ]
+      },
+      "kinds": {
+        "body": "string",
+        "data": "object",
+        "deep_link": "string",
+        "title": "string",
+        "type_key": "string"
+      },
+      "properties": [
+        "body",
+        "data",
+        "deep_link",
+        "title",
+        "type_key"
+      ],
+      "required": [
+        "body",
+        "title",
+        "type_key"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /notifications/marketing/segment": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {
+        "type_key": [
+          "promotion_generic",
+          "discount_offer",
+          "win_back",
+          "upsell_suggestion",
+          "onboarding_nudge",
+          "property_recommendation",
+          "daily_digest"
+        ]
+      },
+      "kinds": {
+        "body": "string",
+        "data": "object",
+        "deep_link": "string",
+        "filter": "object",
+        "title": "string",
+        "type_key": "string"
+      },
+      "properties": [
+        "body",
+        "data",
+        "deep_link",
+        "filter",
+        "title",
+        "type_key"
+      ],
+      "required": [
+        "body",
+        "filter",
+        "title",
+        "type_key"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /notifications/send/topic": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "body": "string",
+        "data": "object",
+        "deep_link": "string",
+        "title": "string",
+        "topic": "string"
+      },
+      "properties": [
+        "body",
+        "data",
+        "deep_link",
+        "title",
+        "topic"
+      ],
+      "required": [
+        "body",
+        "title",
+        "topic"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /notifications/send/typed/user": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {
+        "type_key": [
+          "booking_confirmed",
+          "payment_failed",
+          "document_approved",
+          "chat_message",
+          "password_changed",
+          "security_alert",
+          "app_update",
+          "policy_update",
+          "promotion_generic",
+          "discount_offer",
+          "win_back",
+          "upsell_suggestion",
+          "onboarding_nudge",
+          "visit_reminder",
+          "property_recommendation",
+          "daily_digest",
+          "flatmate_new_message",
+          "flatmate_new_match",
+          "flatmate_listing_approved",
+          "flatmate_listing_rejected",
+          "flatmate_account_suspended",
+          "flatmate_account_warned",
+          "flatmate_report_actioned",
+          "flatmate_report_dismissed",
+          "flatmate_visit_scheduled",
+          "flatmate_visit_confirmed",
+          "admin_broadcast"
+        ]
+      },
+      "kinds": {
+        "body": "string",
+        "data": "object",
+        "deep_link": "string",
+        "title": "string",
+        "type_key": "string",
+        "user_id": "integer"
+      },
+      "properties": [
+        "body",
+        "data",
+        "deep_link",
+        "title",
+        "type_key",
+        "user_id"
+      ],
+      "required": [
+        "body",
+        "title",
+        "type_key",
+        "user_id"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /pm/applications/forms": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "application_fee_amount": "number",
+        "config": "object",
+        "custom_fields": "array",
+        "description": "string",
+        "expires_at": "string:date-time",
+        "is_active": "boolean",
+        "owner_id": "integer",
+        "property_id": "integer",
+        "required_document_types": "object",
+        "title": "string"
+      },
+      "properties": [
+        "application_fee_amount",
+        "config",
+        "custom_fields",
+        "description",
+        "expires_at",
+        "is_active",
+        "owner_id",
+        "property_id",
+        "required_document_types",
+        "title"
+      ],
+      "required": [
+        "title"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /pm/applications/{application_id}/decision": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {
+        "decision": [
+          "approved",
+          "rejected"
+        ]
+      },
+      "kinds": {
+        "decision": "string",
+        "notes": "string"
+      },
+      "properties": [
+        "decision",
+        "notes"
+      ],
+      "required": [
+        "decision"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /pm/assignments": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "agent_id": "integer",
+        "owner_user_id": "integer"
+      },
+      "properties": [
+        "agent_id",
+        "owner_user_id"
+      ],
+      "required": [],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /pm/documents/upload": {
+    "body": {
+      "content_type": "multipart/form-data",
+      "enums": {
+        "document_type": [
+          "lease_agreement",
+          "id_proof",
+          "address_proof",
+          "income_proof",
+          "inspection_report",
+          "receipt",
+          "invoice",
+          "property_deed",
+          "insurance_policy",
+          "other"
+        ]
+      },
+      "kinds": {
+        "document_type": "string",
+        "file": "string",
+        "lease_id": "integer",
+        "maintenance_request_id": "integer",
+        "owner_id": "integer",
+        "property_id": "integer",
+        "rental_application_id": "integer",
+        "shared_with_agent": "boolean",
+        "shared_with_tenant": "boolean",
+        "title": "string",
+        "user_id": "integer"
+      },
+      "properties": [
+        "document_type",
+        "file",
+        "lease_id",
+        "maintenance_request_id",
+        "owner_id",
+        "property_id",
+        "rental_application_id",
+        "shared_with_agent",
+        "shared_with_tenant",
+        "title",
+        "user_id"
+      ],
+      "required": [
+        "document_type",
+        "file"
+      ],
+      "required_body": true,
+      "strict": false
+    },
+    "query": {}
+  },
+  "POST /pm/expenses": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {
+        "category": [
+          "maintenance",
+          "repairs",
+          "insurance",
+          "property_tax",
+          "hoa",
+          "utilities",
+          "marketing",
+          "legal",
+          "other"
+        ]
+      },
+      "kinds": {
+        "amount": "number",
+        "category": "string",
+        "description": "string",
+        "expense_date": "string:date",
+        "notes": "string",
+        "owner_id": "integer",
+        "property_id": "integer",
+        "receipt_document_id": "integer",
+        "title": "string"
+      },
+      "properties": [
+        "amount",
+        "category",
+        "description",
+        "expense_date",
+        "notes",
+        "owner_id",
+        "property_id",
+        "receipt_document_id",
+        "title"
+      ],
+      "required": [
+        "amount",
+        "category",
+        "expense_date",
+        "property_id"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /pm/inspections": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {
+        "inspection_type": [
+          "move_in",
+          "move_out",
+          "routine"
+        ]
+      },
+      "kinds": {
+        "conducted_at": "string:date-time",
+        "inspection_type": "string",
+        "lease_id": "integer",
+        "overall_notes": "string",
+        "owner_id": "integer",
+        "rooms_data": "object"
+      },
+      "properties": [
+        "conducted_at",
+        "inspection_type",
+        "lease_id",
+        "overall_notes",
+        "owner_id",
+        "rooms_data"
+      ],
+      "required": [
+        "inspection_type",
+        "lease_id"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /pm/inspections/{inspection_id}/sign": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "owner_signature_document_id": "integer",
+        "tenant_signature_document_id": "integer"
+      },
+      "properties": [
+        "owner_signature_document_id",
+        "tenant_signature_document_id"
+      ],
+      "required": [],
+      "required_body": false,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /pm/leases": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {
+        "status": [
+          "draft",
+          "pending_signature",
+          "active",
+          "expiring_soon",
+          "expired",
+          "terminated",
+          "renewed"
+        ]
+      },
+      "kinds": {
+        "end_date": "string:date",
+        "grace_period_days": "integer",
+        "late_fee_amount": "number",
+        "late_fee_percentage": "number",
+        "lease_document_id": "integer",
+        "lease_terms": "object",
+        "monthly_rent": "number",
+        "owner_id": "integer",
+        "payment_due_day": "integer",
+        "property_id": "integer",
+        "security_deposit": "number",
+        "special_clauses": "string",
+        "start_date": "string:date",
+        "status": "string",
+        "tenant_email": "string",
+        "tenant_name": "string",
+        "tenant_phone": "string",
+        "tenant_user_id": "integer"
+      },
+      "properties": [
+        "end_date",
+        "grace_period_days",
+        "late_fee_amount",
+        "late_fee_percentage",
+        "lease_document_id",
+        "lease_terms",
+        "monthly_rent",
+        "owner_id",
+        "payment_due_day",
+        "property_id",
+        "security_deposit",
+        "special_clauses",
+        "start_date",
+        "status",
+        "tenant_email",
+        "tenant_name",
+        "tenant_phone",
+        "tenant_user_id"
+      ],
+      "required": [
+        "end_date",
+        "monthly_rent",
+        "property_id",
+        "security_deposit",
+        "start_date"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /pm/leases/{lease_id}/renew": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "end_date": "string:date",
+        "make_active": "boolean",
+        "monthly_rent": "number",
+        "security_deposit": "number",
+        "start_date": "string:date"
+      },
+      "properties": [
+        "end_date",
+        "make_active",
+        "monthly_rent",
+        "security_deposit",
+        "start_date"
+      ],
+      "required": [
+        "end_date",
+        "start_date"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /pm/leases/{lease_id}/terminate": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "reason": "string",
+        "termination_date": "string:date"
+      },
+      "properties": [
+        "reason",
+        "termination_date"
+      ],
+      "required": [],
+      "required_body": false,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /pm/leases/{lease_id}/upload-signed": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "lease_document_id": "integer",
+        "signed_by_owner": "boolean",
+        "signed_by_tenant": "boolean"
+      },
+      "properties": [
+        "lease_document_id",
+        "signed_by_owner",
+        "signed_by_tenant"
+      ],
+      "required": [
+        "lease_document_id"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /pm/maintenance/requests": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {
+        "category": [
+          "plumbing",
+          "electrical",
+          "hvac",
+          "appliance",
+          "structural",
+          "pest_control",
+          "cleaning",
+          "other"
+        ],
+        "urgency": [
+          "emergency",
+          "high",
+          "medium",
+          "low"
+        ]
+      },
+      "kinds": {
+        "assigned_agent_id": "integer",
+        "availability_notes": "string",
+        "category": "string",
+        "description": "string",
+        "estimated_cost": "number",
+        "lease_id": "integer",
+        "preferred_contact_method": "string",
+        "property_id": "integer",
+        "scheduled_for": "string:date-time",
+        "title": "string",
+        "urgency": "string"
+      },
+      "properties": [
+        "assigned_agent_id",
+        "availability_notes",
+        "category",
+        "description",
+        "estimated_cost",
+        "lease_id",
+        "preferred_contact_method",
+        "property_id",
+        "scheduled_for",
+        "title",
+        "urgency"
+      ],
+      "required": [
+        "category",
+        "property_id",
+        "title",
+        "urgency"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /pm/properties": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {
+        "furnishing_level": [
+          "furnished",
+          "semi_furnished",
+          "unfurnished"
+        ],
+        "gender_preference": [
+          "any",
+          "male",
+          "female"
+        ],
+        "kitchen_type": [
+          "vegetarian",
+          "non_vegetarian",
+          "eggetarian",
+          "any"
+        ],
+        "management_status": [
+          "draft",
+          "active",
+          "archived"
+        ],
+        "property_type": [
+          "house",
+          "apartment",
+          "builder_floor",
+          "room",
+          "villa",
+          "plot",
+          "condo",
+          "penthouse",
+          "studio",
+          "loft",
+          "pg",
+          "flatmate",
+          "office",
+          "shop",
+          "warehouse"
+        ],
+        "purpose": [
+          "buy",
+          "rent",
+          "short_stay"
+        ],
+        "sharing_type": [
+          "private_room",
+          "shared_room",
+          "master_bedroom",
+          "entire_flat"
+        ],
+        "status": [
+          "available",
+          "sold",
+          "rented",
+          "under_offer",
+          "maintenance"
+        ],
+        "ventilation_type": [
+          "good",
+          "average",
+          "poor"
+        ]
+      },
+      "kinds": {
+        "age_of_property": "integer",
+        "amenity_ids": "array",
+        "area_sqft": "number",
+        "area_type": "string",
+        "available_from": "string:date",
+        "balconies": "integer",
+        "base_price": "number",
+        "bathrooms": "integer",
+        "bedrooms": "integer",
+        "builder_name": "string",
+        "calendar_data": "object",
+        "city": "string",
+        "country": "string",
+        "daily_rate": "number",
+        "description": "string",
+        "features": "array",
+        "floor_number": "integer",
+        "floor_plan_url": "string",
+        "full_address": "string",
+        "furnishing_level": "string",
+        "gender_preference": "string",
+        "google_street_view_url": "string",
+        "grace_period_days": "integer",
+        "image_urls": "array",
+        "is_available": "boolean",
+        "kitchen_type": "string",
+        "landmark": "string",
+        "late_fee_policy": "object",
+        "latitude": "number",
+        "listing_preferences": "object",
+        "locality": "string",
+        "longitude": "number",
+        "main_image_url": "string",
+        "maintenance_charges": "number",
+        "management_status": "string",
+        "max_occupancy": "integer",
+        "minimum_stay_days": "integer",
+        "monthly_rent": "number",
+        "other_charges": "number",
+        "other_charges_description": "string",
+        "owner_contact": "string",
+        "owner_id": "integer",
+        "owner_name": "string",
+        "parking_spaces": "integer",
+        "payment_due_day": "integer",
+        "pincode": "string",
+        "property_type": "string",
+        "purpose": "string",
+        "search_keywords": "string",
+        "security_deposit": "number",
+        "setup_cost": "number",
+        "sharing_type": "string",
+        "society_amenities": "array",
+        "society_type": "string",
+        "society_vibe_tags": "array",
+        "state": "string",
+        "status": "string",
+        "sub_locality": "string",
+        "tags": "array",
+        "title": "string",
+        "total_floors": "integer",
+        "ventilation_shafts": "integer",
+        "ventilation_type": "string",
+        "video_tour_url": "string",
+        "video_urls": "array",
+        "virtual_tour_url": "string",
+        "windows_count": "integer"
+      },
+      "properties": [
+        "age_of_property",
+        "amenity_ids",
+        "area_sqft",
+        "area_type",
+        "available_from",
+        "balconies",
+        "base_price",
+        "bathrooms",
+        "bedrooms",
+        "builder_name",
+        "calendar_data",
+        "city",
+        "country",
+        "daily_rate",
+        "description",
+        "features",
+        "floor_number",
+        "floor_plan_url",
+        "full_address",
+        "furnishing_level",
+        "gender_preference",
+        "google_street_view_url",
+        "grace_period_days",
+        "image_urls",
+        "is_available",
+        "kitchen_type",
+        "landmark",
+        "late_fee_policy",
+        "latitude",
+        "listing_preferences",
+        "locality",
+        "longitude",
+        "main_image_url",
+        "maintenance_charges",
+        "management_status",
+        "max_occupancy",
+        "minimum_stay_days",
+        "monthly_rent",
+        "other_charges",
+        "other_charges_description",
+        "owner_contact",
+        "owner_id",
+        "owner_name",
+        "parking_spaces",
+        "payment_due_day",
+        "pincode",
+        "property_type",
+        "purpose",
+        "search_keywords",
+        "security_deposit",
+        "setup_cost",
+        "sharing_type",
+        "society_amenities",
+        "society_type",
+        "society_vibe_tags",
+        "state",
+        "status",
+        "sub_locality",
+        "tags",
+        "title",
+        "total_floors",
+        "ventilation_shafts",
+        "ventilation_type",
+        "video_tour_url",
+        "video_urls",
+        "virtual_tour_url",
+        "windows_count"
+      ],
+      "required": [
+        "base_price",
+        "property_type",
+        "purpose",
+        "title"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /pm/public/applications/{slug}/submit": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "answers": "object",
+        "applicant_email": "string",
+        "applicant_full_name": "string",
+        "applicant_phone": "string",
+        "application_data": "object",
+        "emergency_contacts": "object",
+        "property_id": "integer"
+      },
+      "properties": [
+        "answers",
+        "applicant_email",
+        "applicant_full_name",
+        "applicant_phone",
+        "application_data",
+        "emergency_contacts",
+        "property_id"
+      ],
+      "required": [],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /pm/rent/charges/generate": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "lease_id": "integer",
+        "months": "integer",
+        "owner_id": "integer",
+        "start_month": "string:date"
+      },
+      "properties": [
+        "lease_id",
+        "months",
+        "owner_id",
+        "start_month"
+      ],
+      "required": [],
+      "required_body": false,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /pm/rent/payments": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {
+        "payment_method": [
+          "cash",
+          "bank_transfer",
+          "upi",
+          "cheque",
+          "online",
+          "other"
+        ]
+      },
+      "kinds": {
+        "amount_paid": "number",
+        "charge_id": "integer",
+        "notes": "string",
+        "paid_at": "string:date-time",
+        "payment_method": "string",
+        "receipt_document_id": "integer",
+        "reference": "string"
+      },
+      "properties": [
+        "amount_paid",
+        "charge_id",
+        "notes",
+        "paid_at",
+        "payment_method",
+        "receipt_document_id",
+        "reference"
+      ],
+      "required": [
+        "amount_paid",
+        "charge_id"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /pm/rent/payments/{payment_id}/settle": {
+    "body": null,
+    "query": {}
+  },
+  "POST /upload": {
+    "body": {
+      "content_type": "multipart/form-data",
+      "enums": {
+        "folder_type": [
+          "avatar",
+          "property_image",
+          "property_video",
+          "property_document",
+          "tour_thumbnail",
+          "tour_original",
+          "scene",
+          "document_lease",
+          "document_maintenance",
+          "document_general",
+          "generic"
+        ],
+        "visibility": [
+          "private",
+          "unlisted",
+          "public"
+        ]
+      },
+      "kinds": {
+        "file": "string",
+        "folder_type": "string",
+        "tour_id": "string",
+        "visibility": "string"
+      },
+      "properties": [
+        "file",
+        "folder_type",
+        "tour_id",
+        "visibility"
+      ],
+      "required": [
+        "file"
+      ],
+      "required_body": true,
+      "strict": false
+    },
+    "query": {}
+  },
+  "POST /upload/batch": {
+    "body": {
+      "content_type": "multipart/form-data",
+      "enums": {
+        "folder_type": [
+          "avatar",
+          "property_image",
+          "property_video",
+          "property_document",
+          "tour_thumbnail",
+          "tour_original",
+          "scene",
+          "document_lease",
+          "document_maintenance",
+          "document_general",
+          "generic"
+        ],
+        "visibility": [
+          "private",
+          "unlisted",
+          "public"
+        ]
+      },
+      "kinds": {
+        "files": "array",
+        "folder_type": "string",
+        "tour_id": "string",
+        "visibility": "string"
+      },
+      "properties": [
+        "files",
+        "folder_type",
+        "tour_id",
+        "visibility"
+      ],
+      "required": [
+        "files"
+      ],
+      "required_body": true,
+      "strict": false
+    },
+    "query": {}
+  },
+  "POST /upload/confirm/{upload_id}": {
+    "body": null,
+    "query": {}
+  },
+  "POST /upload/media/batch-delete": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "media_ids": "array"
+      },
+      "properties": [
+        "media_ids"
+      ],
+      "required": [
+        "media_ids"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /upload/presigned": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "files": "array"
+      },
+      "properties": [
+        "files"
+      ],
+      "required": [
+        "files"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "POST /users/me/avatar": {
+    "body": {
+      "content_type": "multipart/form-data",
+      "enums": {},
+      "kinds": {
+        "file": "string"
+      },
+      "properties": [
+        "file"
+      ],
+      "required": [
+        "file"
+      ],
+      "required_body": true,
+      "strict": false
+    },
+    "query": {}
+  },
+  "POST /users/me/onboarding": {
+    "body": null,
+    "query": {
+      "app": {
+        "enum": [
+          "ghar",
+          "estate",
+          "flatmates",
+          "stays"
+        ],
+        "kind": "string"
+      }
+    }
+  },
+  "POST /users/me/profile-image": {
+    "body": {
+      "content_type": "multipart/form-data",
+      "enums": {},
+      "kinds": {
+        "file": "string"
+      },
+      "properties": [
+        "file"
+      ],
+      "required": [
+        "file"
+      ],
+      "required_body": true,
+      "strict": false
+    },
+    "query": {}
+  },
+  "PUT /bugs/{bug_id}": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {
+        "status": [
+          "open",
+          "in_progress",
+          "resolved",
+          "closed"
+        ]
+      },
+      "kinds": {
+        "assigned_to": "integer",
+        "resolution": "string",
+        "status": "string",
+        "tags": "array"
+      },
+      "properties": [
+        "assigned_to",
+        "resolution",
+        "status",
+        "tags"
+      ],
+      "required": [],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "PUT /users/me": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "current_latitude": "number",
+        "current_longitude": "number",
+        "date_of_birth": "string:date",
+        "full_name": "string",
+        "notification_settings": "object",
+        "phone": "string",
+        "privacy_settings": "object"
+      },
+      "properties": [
+        "current_latitude",
+        "current_longitude",
+        "date_of_birth",
+        "full_name",
+        "notification_settings",
+        "phone",
+        "privacy_settings"
+      ],
+      "required": [],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "PUT /users/me/phone": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "phone": "string"
+      },
+      "properties": [
+        "phone"
+      ],
+      "required": [
+        "phone"
+      ],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  },
+  "PUT /users/profile": {
+    "body": {
+      "content_type": "application/json",
+      "enums": {},
+      "kinds": {
+        "current_latitude": "number",
+        "current_longitude": "number",
+        "date_of_birth": "string:date",
+        "full_name": "string",
+        "notification_settings": "object",
+        "phone": "string",
+        "privacy_settings": "object"
+      },
+      "properties": [
+        "current_latitude",
+        "current_longitude",
+        "date_of_birth",
+        "full_name",
+        "notification_settings",
+        "phone",
+        "privacy_settings"
+      ],
+      "required": [],
+      "required_body": true,
+      "strict": true
+    },
+    "query": {}
+  }
+}

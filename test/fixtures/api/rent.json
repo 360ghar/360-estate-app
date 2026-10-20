@@ -1,0 +1,144 @@
+{
+  "charges_last_page": {
+    "has_more": false,
+    "items": [
+      {
+        "amount_due_total": 32000.0,
+        "amount_paid_total": 32000.0,
+        "charge": {
+          "amount_due": 32000.0,
+          "billing_month": "2026-10-01",
+          "created_at": "2026-10-01T10:15:02Z",
+          "due_date": "2026-10-05",
+          "id": 104,
+          "late_fee_assessed": 0.0,
+          "lease_id": 31,
+          "owner_id": 7,
+          "period_end": "2026-10-31",
+          "period_start": "2026-10-01",
+          "property_id": 1,
+          "status": "paid",
+          "tenant_user_id": 52,
+          "updated_at": null
+        },
+        "outstanding": 0.0
+      },
+      {
+        "amount_due_total": 32000.0,
+        "amount_paid_total": 12000.5,
+        "charge": {
+          "amount_due": 32000.0,
+          "billing_month": "2026-10-01",
+          "created_at": "2026-10-01T10:15:02Z",
+          "due_date": "2026-10-05",
+          "id": 105,
+          "late_fee_assessed": 0.0,
+          "lease_id": 31,
+          "owner_id": 7,
+          "period_end": "2026-10-31",
+          "period_start": "2026-10-01",
+          "property_id": 1,
+          "status": "waived",
+          "tenant_user_id": 52,
+          "updated_at": null
+        },
+        "outstanding": 0.0
+      }
+    ],
+    "limit": 100,
+    "next_cursor": null,
+    "total": null
+  },
+  "charges_page": {
+    "has_more": true,
+    "items": [
+      {
+        "amount_due_total": 32000.0,
+        "amount_paid_total": 12000.5,
+        "charge": {
+          "amount_due": 32000.0,
+          "billing_month": "2026-10-01",
+          "created_at": "2026-10-01T10:15:02Z",
+          "due_date": "2026-10-05",
+          "id": 101,
+          "late_fee_assessed": 0.0,
+          "lease_id": 31,
+          "owner_id": 7,
+          "period_end": "2026-10-31",
+          "period_start": "2026-10-01",
+          "property_id": 1,
+          "status": "pending",
+          "tenant_user_id": 52,
+          "updated_at": null
+        },
+        "outstanding": 19999.5
+      },
+      {
+        "amount_due_total": 32000.0,
+        "amount_paid_total": 12000.5,
+        "charge": {
+          "amount_due": 32000.0,
+          "billing_month": "2026-10-01",
+          "created_at": "2026-10-01T10:15:02Z",
+          "due_date": "2026-10-05",
+          "id": 102,
+          "late_fee_assessed": 0.0,
+          "lease_id": 31,
+          "owner_id": 7,
+          "period_end": "2026-10-31",
+          "period_start": "2026-10-01",
+          "property_id": 1,
+          "status": "partial",
+          "tenant_user_id": 52,
+          "updated_at": null
+        },
+        "outstanding": 19999.5
+      },
+      {
+        "amount_due_total": 32000.0,
+        "amount_paid_total": 12000.5,
+        "charge": {
+          "amount_due": 32000.0,
+          "billing_month": "2026-10-01",
+          "created_at": "2026-10-01T10:15:02Z",
+          "due_date": "2026-10-05",
+          "id": 103,
+          "late_fee_assessed": 0.0,
+          "lease_id": 31,
+          "owner_id": 7,
+          "period_end": "2026-10-31",
+          "period_start": "2026-10-01",
+          "property_id": 1,
+          "status": "overdue",
+          "tenant_user_id": 52,
+          "updated_at": null
+        },
+        "outstanding": 19999.5
+      }
+    ],
+    "limit": 100,
+    "next_cursor": "eyJrIjpbMTAzXSwiZiI6ImFiYyJ9",
+    "total": null
+  },
+  "generate_result": {
+    "created": 3,
+    "skipped": 1
+  },
+  "payment": {
+    "amount_paid": 12000.5,
+    "charge_id": 101,
+    "created_at": "2026-10-01T10:15:02Z",
+    "id": 201,
+    "lease_id": 31,
+    "notes": null,
+    "owner_id": 7,
+    "paid_at": "2026-10-01T10:15:02Z",
+    "payment_method": "upi",
+    "property_id": 1,
+    "receipt_document_id": null,
+    "reference": "UPI-1182",
+    "status": "settled",
+    "tenant_user_id": 52,
+    "updated_at": null
+  }
+}
