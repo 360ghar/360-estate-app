@@ -256,23 +256,28 @@ mixin _$Inspection {
   int? get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'property_id', fromJson: parseInt)
   int? get propertyId => throw _privateConstructorUsedError;
-  @JsonKey(name: 'property_name')
-  String? get propertyName => throw _privateConstructorUsedError;
-  @JsonKey(name: 'tenant_id', fromJson: parseInt)
-  int? get tenantId => throw _privateConstructorUsedError;
-  @JsonKey(name: 'tenant_name')
-  String? get tenantName => throw _privateConstructorUsedError;
-  String? get title => throw _privateConstructorUsedError;
-  String? get status => throw _privateConstructorUsedError;
-  @JsonKey(name: 'scheduled_at', fromJson: parseDateTime)
-  DateTime? get scheduledAt => throw _privateConstructorUsedError;
-  @JsonKey(name: 'signed_at', fromJson: parseDateTime)
-  DateTime? get signedAt => throw _privateConstructorUsedError;
-  List<InspectionItem>? get items => throw _privateConstructorUsedError;
+  @JsonKey(name: 'lease_id', fromJson: parseInt)
+  int? get leaseId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'owner_id', fromJson: parseInt)
+  int? get ownerId => throw _privateConstructorUsedError;
+  @JsonKey(
+    name: 'inspection_type',
+    fromJson: InspectionType.fromJson,
+    toJson: InspectionType.toJsonValue,
+  )
+  InspectionType? get inspectionType => throw _privateConstructorUsedError;
+  @JsonKey(name: 'conducted_at', fromJson: parseDateTime)
+  DateTime? get conductedAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'rooms_data')
+  Map<String, dynamic>? get roomsData => throw _privateConstructorUsedError;
+  @JsonKey(name: 'overall_notes')
+  String? get overallNotes => throw _privateConstructorUsedError;
+  @JsonKey(name: 'signed_by_tenant_at', fromJson: parseDateTime)
+  DateTime? get signedByTenantAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'signed_by_owner_at', fromJson: parseDateTime)
+  DateTime? get signedByOwnerAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at', fromJson: parseDateTime)
   DateTime? get createdAt => throw _privateConstructorUsedError;
-  @JsonKey(name: 'updated_at', fromJson: parseDateTime)
-  DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this Inspection to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -294,17 +299,23 @@ abstract class $InspectionCopyWith<$Res> {
   $Res call({
     @JsonKey(fromJson: parseInt) int? id,
     @JsonKey(name: 'property_id', fromJson: parseInt) int? propertyId,
-    @JsonKey(name: 'property_name') String? propertyName,
-    @JsonKey(name: 'tenant_id', fromJson: parseInt) int? tenantId,
-    @JsonKey(name: 'tenant_name') String? tenantName,
-    String? title,
-    String? status,
-    @JsonKey(name: 'scheduled_at', fromJson: parseDateTime)
-    DateTime? scheduledAt,
-    @JsonKey(name: 'signed_at', fromJson: parseDateTime) DateTime? signedAt,
-    List<InspectionItem>? items,
+    @JsonKey(name: 'lease_id', fromJson: parseInt) int? leaseId,
+    @JsonKey(name: 'owner_id', fromJson: parseInt) int? ownerId,
+    @JsonKey(
+      name: 'inspection_type',
+      fromJson: InspectionType.fromJson,
+      toJson: InspectionType.toJsonValue,
+    )
+    InspectionType? inspectionType,
+    @JsonKey(name: 'conducted_at', fromJson: parseDateTime)
+    DateTime? conductedAt,
+    @JsonKey(name: 'rooms_data') Map<String, dynamic>? roomsData,
+    @JsonKey(name: 'overall_notes') String? overallNotes,
+    @JsonKey(name: 'signed_by_tenant_at', fromJson: parseDateTime)
+    DateTime? signedByTenantAt,
+    @JsonKey(name: 'signed_by_owner_at', fromJson: parseDateTime)
+    DateTime? signedByOwnerAt,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) DateTime? createdAt,
-    @JsonKey(name: 'updated_at', fromJson: parseDateTime) DateTime? updatedAt,
   });
 }
 
@@ -325,16 +336,15 @@ class _$InspectionCopyWithImpl<$Res, $Val extends Inspection>
   $Res call({
     Object? id = freezed,
     Object? propertyId = freezed,
-    Object? propertyName = freezed,
-    Object? tenantId = freezed,
-    Object? tenantName = freezed,
-    Object? title = freezed,
-    Object? status = freezed,
-    Object? scheduledAt = freezed,
-    Object? signedAt = freezed,
-    Object? items = freezed,
+    Object? leaseId = freezed,
+    Object? ownerId = freezed,
+    Object? inspectionType = freezed,
+    Object? conductedAt = freezed,
+    Object? roomsData = freezed,
+    Object? overallNotes = freezed,
+    Object? signedByTenantAt = freezed,
+    Object? signedByOwnerAt = freezed,
     Object? createdAt = freezed,
-    Object? updatedAt = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -346,45 +356,41 @@ class _$InspectionCopyWithImpl<$Res, $Val extends Inspection>
                 ? _value.propertyId
                 : propertyId // ignore: cast_nullable_to_non_nullable
                       as int?,
-            propertyName: freezed == propertyName
-                ? _value.propertyName
-                : propertyName // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            tenantId: freezed == tenantId
-                ? _value.tenantId
-                : tenantId // ignore: cast_nullable_to_non_nullable
+            leaseId: freezed == leaseId
+                ? _value.leaseId
+                : leaseId // ignore: cast_nullable_to_non_nullable
                       as int?,
-            tenantName: freezed == tenantName
-                ? _value.tenantName
-                : tenantName // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            title: freezed == title
-                ? _value.title
-                : title // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            status: freezed == status
-                ? _value.status
-                : status // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            scheduledAt: freezed == scheduledAt
-                ? _value.scheduledAt
-                : scheduledAt // ignore: cast_nullable_to_non_nullable
+            ownerId: freezed == ownerId
+                ? _value.ownerId
+                : ownerId // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            inspectionType: freezed == inspectionType
+                ? _value.inspectionType
+                : inspectionType // ignore: cast_nullable_to_non_nullable
+                      as InspectionType?,
+            conductedAt: freezed == conductedAt
+                ? _value.conductedAt
+                : conductedAt // ignore: cast_nullable_to_non_nullable
                       as DateTime?,
-            signedAt: freezed == signedAt
-                ? _value.signedAt
-                : signedAt // ignore: cast_nullable_to_non_nullable
+            roomsData: freezed == roomsData
+                ? _value.roomsData
+                : roomsData // ignore: cast_nullable_to_non_nullable
+                      as Map<String, dynamic>?,
+            overallNotes: freezed == overallNotes
+                ? _value.overallNotes
+                : overallNotes // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            signedByTenantAt: freezed == signedByTenantAt
+                ? _value.signedByTenantAt
+                : signedByTenantAt // ignore: cast_nullable_to_non_nullable
                       as DateTime?,
-            items: freezed == items
-                ? _value.items
-                : items // ignore: cast_nullable_to_non_nullable
-                      as List<InspectionItem>?,
+            signedByOwnerAt: freezed == signedByOwnerAt
+                ? _value.signedByOwnerAt
+                : signedByOwnerAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
             createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-            updatedAt: freezed == updatedAt
-                ? _value.updatedAt
-                : updatedAt // ignore: cast_nullable_to_non_nullable
                       as DateTime?,
           )
           as $Val,
@@ -404,17 +410,23 @@ abstract class _$$InspectionImplCopyWith<$Res>
   $Res call({
     @JsonKey(fromJson: parseInt) int? id,
     @JsonKey(name: 'property_id', fromJson: parseInt) int? propertyId,
-    @JsonKey(name: 'property_name') String? propertyName,
-    @JsonKey(name: 'tenant_id', fromJson: parseInt) int? tenantId,
-    @JsonKey(name: 'tenant_name') String? tenantName,
-    String? title,
-    String? status,
-    @JsonKey(name: 'scheduled_at', fromJson: parseDateTime)
-    DateTime? scheduledAt,
-    @JsonKey(name: 'signed_at', fromJson: parseDateTime) DateTime? signedAt,
-    List<InspectionItem>? items,
+    @JsonKey(name: 'lease_id', fromJson: parseInt) int? leaseId,
+    @JsonKey(name: 'owner_id', fromJson: parseInt) int? ownerId,
+    @JsonKey(
+      name: 'inspection_type',
+      fromJson: InspectionType.fromJson,
+      toJson: InspectionType.toJsonValue,
+    )
+    InspectionType? inspectionType,
+    @JsonKey(name: 'conducted_at', fromJson: parseDateTime)
+    DateTime? conductedAt,
+    @JsonKey(name: 'rooms_data') Map<String, dynamic>? roomsData,
+    @JsonKey(name: 'overall_notes') String? overallNotes,
+    @JsonKey(name: 'signed_by_tenant_at', fromJson: parseDateTime)
+    DateTime? signedByTenantAt,
+    @JsonKey(name: 'signed_by_owner_at', fromJson: parseDateTime)
+    DateTime? signedByOwnerAt,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) DateTime? createdAt,
-    @JsonKey(name: 'updated_at', fromJson: parseDateTime) DateTime? updatedAt,
   });
 }
 
@@ -434,16 +446,15 @@ class __$$InspectionImplCopyWithImpl<$Res>
   $Res call({
     Object? id = freezed,
     Object? propertyId = freezed,
-    Object? propertyName = freezed,
-    Object? tenantId = freezed,
-    Object? tenantName = freezed,
-    Object? title = freezed,
-    Object? status = freezed,
-    Object? scheduledAt = freezed,
-    Object? signedAt = freezed,
-    Object? items = freezed,
+    Object? leaseId = freezed,
+    Object? ownerId = freezed,
+    Object? inspectionType = freezed,
+    Object? conductedAt = freezed,
+    Object? roomsData = freezed,
+    Object? overallNotes = freezed,
+    Object? signedByTenantAt = freezed,
+    Object? signedByOwnerAt = freezed,
     Object? createdAt = freezed,
-    Object? updatedAt = freezed,
   }) {
     return _then(
       _$InspectionImpl(
@@ -455,45 +466,41 @@ class __$$InspectionImplCopyWithImpl<$Res>
             ? _value.propertyId
             : propertyId // ignore: cast_nullable_to_non_nullable
                   as int?,
-        propertyName: freezed == propertyName
-            ? _value.propertyName
-            : propertyName // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        tenantId: freezed == tenantId
-            ? _value.tenantId
-            : tenantId // ignore: cast_nullable_to_non_nullable
+        leaseId: freezed == leaseId
+            ? _value.leaseId
+            : leaseId // ignore: cast_nullable_to_non_nullable
                   as int?,
-        tenantName: freezed == tenantName
-            ? _value.tenantName
-            : tenantName // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        title: freezed == title
-            ? _value.title
-            : title // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        status: freezed == status
-            ? _value.status
-            : status // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        scheduledAt: freezed == scheduledAt
-            ? _value.scheduledAt
-            : scheduledAt // ignore: cast_nullable_to_non_nullable
+        ownerId: freezed == ownerId
+            ? _value.ownerId
+            : ownerId // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        inspectionType: freezed == inspectionType
+            ? _value.inspectionType
+            : inspectionType // ignore: cast_nullable_to_non_nullable
+                  as InspectionType?,
+        conductedAt: freezed == conductedAt
+            ? _value.conductedAt
+            : conductedAt // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
-        signedAt: freezed == signedAt
-            ? _value.signedAt
-            : signedAt // ignore: cast_nullable_to_non_nullable
+        roomsData: freezed == roomsData
+            ? _value._roomsData
+            : roomsData // ignore: cast_nullable_to_non_nullable
+                  as Map<String, dynamic>?,
+        overallNotes: freezed == overallNotes
+            ? _value.overallNotes
+            : overallNotes // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        signedByTenantAt: freezed == signedByTenantAt
+            ? _value.signedByTenantAt
+            : signedByTenantAt // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
-        items: freezed == items
-            ? _value._items
-            : items // ignore: cast_nullable_to_non_nullable
-                  as List<InspectionItem>?,
+        signedByOwnerAt: freezed == signedByOwnerAt
+            ? _value.signedByOwnerAt
+            : signedByOwnerAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        updatedAt: freezed == updatedAt
-            ? _value.updatedAt
-            : updatedAt // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
       ),
     );
@@ -506,17 +513,23 @@ class _$InspectionImpl implements _Inspection {
   const _$InspectionImpl({
     @JsonKey(fromJson: parseInt) this.id,
     @JsonKey(name: 'property_id', fromJson: parseInt) this.propertyId,
-    @JsonKey(name: 'property_name') this.propertyName,
-    @JsonKey(name: 'tenant_id', fromJson: parseInt) this.tenantId,
-    @JsonKey(name: 'tenant_name') this.tenantName,
-    this.title,
-    this.status,
-    @JsonKey(name: 'scheduled_at', fromJson: parseDateTime) this.scheduledAt,
-    @JsonKey(name: 'signed_at', fromJson: parseDateTime) this.signedAt,
-    final List<InspectionItem>? items,
+    @JsonKey(name: 'lease_id', fromJson: parseInt) this.leaseId,
+    @JsonKey(name: 'owner_id', fromJson: parseInt) this.ownerId,
+    @JsonKey(
+      name: 'inspection_type',
+      fromJson: InspectionType.fromJson,
+      toJson: InspectionType.toJsonValue,
+    )
+    this.inspectionType,
+    @JsonKey(name: 'conducted_at', fromJson: parseDateTime) this.conductedAt,
+    @JsonKey(name: 'rooms_data') final Map<String, dynamic>? roomsData,
+    @JsonKey(name: 'overall_notes') this.overallNotes,
+    @JsonKey(name: 'signed_by_tenant_at', fromJson: parseDateTime)
+    this.signedByTenantAt,
+    @JsonKey(name: 'signed_by_owner_at', fromJson: parseDateTime)
+    this.signedByOwnerAt,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) this.createdAt,
-    @JsonKey(name: 'updated_at', fromJson: parseDateTime) this.updatedAt,
-  }) : _items = items;
+  }) : _roomsData = roomsData;
 
   factory _$InspectionImpl.fromJson(Map<String, dynamic> json) =>
       _$$InspectionImplFromJson(json);
@@ -528,44 +541,48 @@ class _$InspectionImpl implements _Inspection {
   @JsonKey(name: 'property_id', fromJson: parseInt)
   final int? propertyId;
   @override
-  @JsonKey(name: 'property_name')
-  final String? propertyName;
+  @JsonKey(name: 'lease_id', fromJson: parseInt)
+  final int? leaseId;
   @override
-  @JsonKey(name: 'tenant_id', fromJson: parseInt)
-  final int? tenantId;
+  @JsonKey(name: 'owner_id', fromJson: parseInt)
+  final int? ownerId;
   @override
-  @JsonKey(name: 'tenant_name')
-  final String? tenantName;
+  @JsonKey(
+    name: 'inspection_type',
+    fromJson: InspectionType.fromJson,
+    toJson: InspectionType.toJsonValue,
+  )
+  final InspectionType? inspectionType;
   @override
-  final String? title;
+  @JsonKey(name: 'conducted_at', fromJson: parseDateTime)
+  final DateTime? conductedAt;
+  final Map<String, dynamic>? _roomsData;
   @override
-  final String? status;
-  @override
-  @JsonKey(name: 'scheduled_at', fromJson: parseDateTime)
-  final DateTime? scheduledAt;
-  @override
-  @JsonKey(name: 'signed_at', fromJson: parseDateTime)
-  final DateTime? signedAt;
-  final List<InspectionItem>? _items;
-  @override
-  List<InspectionItem>? get items {
-    final value = _items;
+  @JsonKey(name: 'rooms_data')
+  Map<String, dynamic>? get roomsData {
+    final value = _roomsData;
     if (value == null) return null;
-    if (_items is EqualUnmodifiableListView) return _items;
+    if (_roomsData is EqualUnmodifiableMapView) return _roomsData;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(value);
+    return EqualUnmodifiableMapView(value);
   }
 
   @override
+  @JsonKey(name: 'overall_notes')
+  final String? overallNotes;
+  @override
+  @JsonKey(name: 'signed_by_tenant_at', fromJson: parseDateTime)
+  final DateTime? signedByTenantAt;
+  @override
+  @JsonKey(name: 'signed_by_owner_at', fromJson: parseDateTime)
+  final DateTime? signedByOwnerAt;
+  @override
   @JsonKey(name: 'created_at', fromJson: parseDateTime)
   final DateTime? createdAt;
-  @override
-  @JsonKey(name: 'updated_at', fromJson: parseDateTime)
-  final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'Inspection(id: $id, propertyId: $propertyId, propertyName: $propertyName, tenantId: $tenantId, tenantName: $tenantName, title: $title, status: $status, scheduledAt: $scheduledAt, signedAt: $signedAt, items: $items, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Inspection(id: $id, propertyId: $propertyId, leaseId: $leaseId, ownerId: $ownerId, inspectionType: $inspectionType, conductedAt: $conductedAt, roomsData: $roomsData, overallNotes: $overallNotes, signedByTenantAt: $signedByTenantAt, signedByOwnerAt: $signedByOwnerAt, createdAt: $createdAt)';
   }
 
   @override
@@ -576,23 +593,24 @@ class _$InspectionImpl implements _Inspection {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.propertyId, propertyId) ||
                 other.propertyId == propertyId) &&
-            (identical(other.propertyName, propertyName) ||
-                other.propertyName == propertyName) &&
-            (identical(other.tenantId, tenantId) ||
-                other.tenantId == tenantId) &&
-            (identical(other.tenantName, tenantName) ||
-                other.tenantName == tenantName) &&
-            (identical(other.title, title) || other.title == title) &&
-            (identical(other.status, status) || other.status == status) &&
-            (identical(other.scheduledAt, scheduledAt) ||
-                other.scheduledAt == scheduledAt) &&
-            (identical(other.signedAt, signedAt) ||
-                other.signedAt == signedAt) &&
-            const DeepCollectionEquality().equals(other._items, _items) &&
+            (identical(other.leaseId, leaseId) || other.leaseId == leaseId) &&
+            (identical(other.ownerId, ownerId) || other.ownerId == ownerId) &&
+            (identical(other.inspectionType, inspectionType) ||
+                other.inspectionType == inspectionType) &&
+            (identical(other.conductedAt, conductedAt) ||
+                other.conductedAt == conductedAt) &&
+            const DeepCollectionEquality().equals(
+              other._roomsData,
+              _roomsData,
+            ) &&
+            (identical(other.overallNotes, overallNotes) ||
+                other.overallNotes == overallNotes) &&
+            (identical(other.signedByTenantAt, signedByTenantAt) ||
+                other.signedByTenantAt == signedByTenantAt) &&
+            (identical(other.signedByOwnerAt, signedByOwnerAt) ||
+                other.signedByOwnerAt == signedByOwnerAt) &&
             (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt) &&
-            (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.createdAt == createdAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -601,16 +619,15 @@ class _$InspectionImpl implements _Inspection {
     runtimeType,
     id,
     propertyId,
-    propertyName,
-    tenantId,
-    tenantName,
-    title,
-    status,
-    scheduledAt,
-    signedAt,
-    const DeepCollectionEquality().hash(_items),
+    leaseId,
+    ownerId,
+    inspectionType,
+    conductedAt,
+    const DeepCollectionEquality().hash(_roomsData),
+    overallNotes,
+    signedByTenantAt,
+    signedByOwnerAt,
     createdAt,
-    updatedAt,
   );
 
   /// Create a copy of Inspection
@@ -631,20 +648,24 @@ abstract class _Inspection implements Inspection {
   const factory _Inspection({
     @JsonKey(fromJson: parseInt) final int? id,
     @JsonKey(name: 'property_id', fromJson: parseInt) final int? propertyId,
-    @JsonKey(name: 'property_name') final String? propertyName,
-    @JsonKey(name: 'tenant_id', fromJson: parseInt) final int? tenantId,
-    @JsonKey(name: 'tenant_name') final String? tenantName,
-    final String? title,
-    final String? status,
-    @JsonKey(name: 'scheduled_at', fromJson: parseDateTime)
-    final DateTime? scheduledAt,
-    @JsonKey(name: 'signed_at', fromJson: parseDateTime)
-    final DateTime? signedAt,
-    final List<InspectionItem>? items,
+    @JsonKey(name: 'lease_id', fromJson: parseInt) final int? leaseId,
+    @JsonKey(name: 'owner_id', fromJson: parseInt) final int? ownerId,
+    @JsonKey(
+      name: 'inspection_type',
+      fromJson: InspectionType.fromJson,
+      toJson: InspectionType.toJsonValue,
+    )
+    final InspectionType? inspectionType,
+    @JsonKey(name: 'conducted_at', fromJson: parseDateTime)
+    final DateTime? conductedAt,
+    @JsonKey(name: 'rooms_data') final Map<String, dynamic>? roomsData,
+    @JsonKey(name: 'overall_notes') final String? overallNotes,
+    @JsonKey(name: 'signed_by_tenant_at', fromJson: parseDateTime)
+    final DateTime? signedByTenantAt,
+    @JsonKey(name: 'signed_by_owner_at', fromJson: parseDateTime)
+    final DateTime? signedByOwnerAt,
     @JsonKey(name: 'created_at', fromJson: parseDateTime)
     final DateTime? createdAt,
-    @JsonKey(name: 'updated_at', fromJson: parseDateTime)
-    final DateTime? updatedAt,
   }) = _$InspectionImpl;
 
   factory _Inspection.fromJson(Map<String, dynamic> json) =
@@ -657,32 +678,36 @@ abstract class _Inspection implements Inspection {
   @JsonKey(name: 'property_id', fromJson: parseInt)
   int? get propertyId;
   @override
-  @JsonKey(name: 'property_name')
-  String? get propertyName;
+  @JsonKey(name: 'lease_id', fromJson: parseInt)
+  int? get leaseId;
   @override
-  @JsonKey(name: 'tenant_id', fromJson: parseInt)
-  int? get tenantId;
+  @JsonKey(name: 'owner_id', fromJson: parseInt)
+  int? get ownerId;
   @override
-  @JsonKey(name: 'tenant_name')
-  String? get tenantName;
+  @JsonKey(
+    name: 'inspection_type',
+    fromJson: InspectionType.fromJson,
+    toJson: InspectionType.toJsonValue,
+  )
+  InspectionType? get inspectionType;
   @override
-  String? get title;
+  @JsonKey(name: 'conducted_at', fromJson: parseDateTime)
+  DateTime? get conductedAt;
   @override
-  String? get status;
+  @JsonKey(name: 'rooms_data')
+  Map<String, dynamic>? get roomsData;
   @override
-  @JsonKey(name: 'scheduled_at', fromJson: parseDateTime)
-  DateTime? get scheduledAt;
+  @JsonKey(name: 'overall_notes')
+  String? get overallNotes;
   @override
-  @JsonKey(name: 'signed_at', fromJson: parseDateTime)
-  DateTime? get signedAt;
+  @JsonKey(name: 'signed_by_tenant_at', fromJson: parseDateTime)
+  DateTime? get signedByTenantAt;
   @override
-  List<InspectionItem>? get items;
+  @JsonKey(name: 'signed_by_owner_at', fromJson: parseDateTime)
+  DateTime? get signedByOwnerAt;
   @override
   @JsonKey(name: 'created_at', fromJson: parseDateTime)
   DateTime? get createdAt;
-  @override
-  @JsonKey(name: 'updated_at', fromJson: parseDateTime)
-  DateTime? get updatedAt;
 
   /// Create a copy of Inspection
   /// with the given fields replaced by the non-null parameter values.

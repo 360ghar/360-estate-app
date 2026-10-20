@@ -1,89 +1,132 @@
-import 'dart:io';
-
-import 'package:dio/dio.dart';
+import 'package:cross_file/cross_file.dart';
+import 'package:estate_app/core/api/wire_enums.dart';
+import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/core/network/api_client.dart';
+import 'package:estate_app/core/network/api_paths.dart';
 import 'package:estate_app/core/network/response_parser.dart';
+import 'package:estate_app/core/pagination/fetch_all.dart';
+import 'package:estate_app/core/pagination/page.dart';
+import 'package:estate_app/core/services/file_upload_service.dart';
+import 'package:estate_app/core/utils/parse.dart';
 import 'package:estate_app/features/leases/domain/repositories/leases_repository.dart';
 import 'package:estate_app/features/leases/models/lease.dart';
 
 class LeasesRepositoryImpl implements LeasesRepository {
-  LeasesRepositoryImpl(this._client);
+  LeasesRepositoryImpl(this._client, this._uploads);
 
   final ApiClient _client;
+  final FileUploadService _uploads;
 
   @override
-  Future<List<Lease>> list({
-    String? propertyId,
-    String? tenantId,
-    String? status,
+  Future<Page<Lease>> listPage({
+    required String? cursor,
+    required int limit,
+    int? propertyId,
+    int? tenantUserId,
+    LeaseStatus? status,
   }) async {
     final response = await _client.get<dynamic>(
-      '/pm/leases',
+      ApiPaths.leases,
+      ownerScoped: true,
       queryParameters: {
+        if (cursor != null) 'cursor': cursor,
+        'limit': limit,
         if (propertyId != null) 'property_id': propertyId,
-        if (tenantId != null) 'tenant_id': tenantId,
-        if (status != null) 'status': status,
+        if (tenantUserId != null) 'tenant_user_id': tenantUserId,
+        if (status != null) 'status': status.wire,
       },
     );
-    final page = unwrapPage(response.data);
-    return page.items
-        .whereType<Map<String, dynamic>>()
-        .map(Lease.fromJson)
-        .toList();
+    final raw = unwrapPage(response.data);
+    return Page<Lease>(
+      items: raw.items
+          .whereType<Map<String, dynamic>>()
+          .map(Lease.fromJson)
+          .toList(),
+      limit: limit,
+      hasMore: raw.hasMore,
+      nextCursor: raw.nextCursor,
+    );
+  }
+
+  @override
+  Future<List<Lease>> listAll({
+    int? propertyId,
+    int? tenantUserId,
+    LeaseStatus? status,
+  }) {
+    return fetchAllPages<Lease>(
+      ({required cursor, required limit}) => listPage(
+        cursor: cursor,
+        limit: limit,
+        propertyId: propertyId,
+        tenantUserId: tenantUserId,
+        status: status,
+      ),
+    );
   }
 
   @override
   Future<Lease> fetch(String leaseId) async {
-    final response = await _client.get<dynamic>('/pm/leases/$leaseId');
-    final data = unwrapMap(response.data);
-    return Lease.fromJson(data);
+    final response = await _client.get<dynamic>('${ApiPaths.leases}/$leaseId');
+    return Lease.fromJson(unwrapMap(response.data));
   }
 
   @override
   Future<Lease> create(LeaseCreateRequest request) async {
     final response = await _client.post<dynamic>(
-      '/pm/leases',
+      ApiPaths.leases,
       data: request.toJson(),
+      ownerScoped: true,
     );
-    final data = unwrapMap(response.data);
-    return Lease.fromJson(data);
+    return Lease.fromJson(unwrapMap(response.data));
   }
 
   @override
-  Future<Lease> uploadSigned(String leaseId, File file) async {
-    final fileName = file.path.split(Platform.pathSeparator).last;
-    final formData = FormData.fromMap({
-      'file': await MultipartFile.fromFile(file.path, filename: fileName),
-    });
-
-    final response = await _client.upload<dynamic>(
-      '/pm/leases/$leaseId/upload-signed',
-      data: formData,
+  Future<Lease> uploadSigned(
+    String leaseId,
+    XFile file, {
+    bool signedByTenant = false,
+  }) async {
+    final id = int.parse(leaseId);
+    // 1. The file is a document of the lease.
+    final document = await _uploads.uploadDocument(
+      file: file,
+      documentType: DocumentType.leaseAgreement,
+      title: 'Signed lease',
+      leaseId: id,
+      sharedWithTenant: signedByTenant,
     );
-    final data = unwrapMap(response.data);
-    if (data.isNotEmpty) return Lease.fromJson(data);
-    return fetch(leaseId);
+    final documentId = parseInt(document['id']);
+    if (documentId == null) {
+      throw const UnknownFailure('The document upload returned no id.');
+    }
+    // 2. The lease points at that document.
+    final response = await _client.post<dynamic>(
+      ApiPaths.leaseUploadSigned(id),
+      data: {
+        'lease_document_id': documentId,
+        'signed_by_owner': true,
+        'signed_by_tenant': signedByTenant,
+      },
+    );
+    return Lease.fromJson(unwrapMap(response.data));
   }
 
   @override
   Future<Lease> renew(String leaseId, LeaseRenewRequest request) async {
     final response = await _client.post<dynamic>(
-      '/pm/leases/$leaseId/renew',
+      ApiPaths.leaseRenew(int.parse(leaseId)),
       data: request.toJson(),
     );
-    final data = unwrapMap(response.data);
-    if (data.isNotEmpty) return Lease.fromJson(data);
-    return fetch(leaseId);
+    return Lease.fromJson(unwrapMap(response.data));
   }
 
   @override
   Future<Lease> terminate(String leaseId, LeaseTerminateRequest request) async {
     final response = await _client.post<dynamic>(
-      '/pm/leases/$leaseId/terminate',
+      ApiPaths.leaseTerminate(int.parse(leaseId)),
       data: request.toJson(),
     );
-    final data = unwrapMap(response.data);
-    if (data.isNotEmpty) return Lease.fromJson(data);
-    return fetch(leaseId);
+    return Lease.fromJson(unwrapMap(response.data));
   }
 }

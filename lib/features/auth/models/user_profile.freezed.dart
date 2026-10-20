@@ -15,22 +15,21 @@ final _privateConstructorUsedError = UnsupportedError(
   'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
 );
 
+UserProfile _$UserProfileFromJson(Map<String, dynamic> json) {
+  return _UserProfile.fromJson(json);
+}
+
 /// @nodoc
 mixin _$UserProfile {
   @JsonKey(fromJson: parseInt)
   int? get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'full_name')
   String? get fullName => throw _privateConstructorUsedError;
-  @JsonKey(name: 'first_name')
-  String? get firstName => throw _privateConstructorUsedError;
-  @JsonKey(name: 'last_name')
-  String? get lastName => throw _privateConstructorUsedError;
   String? get phone => throw _privateConstructorUsedError;
   String? get email => throw _privateConstructorUsedError;
-  String? get role =>
-      throw _privateConstructorUsedError; // Client field name is avatarUrl; backend wire name is profile_image_url
-  // (avatar_url accepted as legacy alias via fromJson normalization below).
-  @JsonKey(name: 'avatar_url')
+  @JsonKey(fromJson: UserRole.fromJson)
+  UserRole? get role => throw _privateConstructorUsedError;
+  @JsonKey(name: 'profile_image_url')
   String? get avatarUrl => throw _privateConstructorUsedError;
 
   /// Create a copy of UserProfile
@@ -50,12 +49,10 @@ abstract class $UserProfileCopyWith<$Res> {
   $Res call({
     @JsonKey(fromJson: parseInt) int? id,
     @JsonKey(name: 'full_name') String? fullName,
-    @JsonKey(name: 'first_name') String? firstName,
-    @JsonKey(name: 'last_name') String? lastName,
     String? phone,
     String? email,
-    String? role,
-    @JsonKey(name: 'avatar_url') String? avatarUrl,
+    @JsonKey(fromJson: UserRole.fromJson) UserRole? role,
+    @JsonKey(name: 'profile_image_url') String? avatarUrl,
   });
 }
 
@@ -76,8 +73,6 @@ class _$UserProfileCopyWithImpl<$Res, $Val extends UserProfile>
   $Res call({
     Object? id = freezed,
     Object? fullName = freezed,
-    Object? firstName = freezed,
-    Object? lastName = freezed,
     Object? phone = freezed,
     Object? email = freezed,
     Object? role = freezed,
@@ -93,14 +88,6 @@ class _$UserProfileCopyWithImpl<$Res, $Val extends UserProfile>
                 ? _value.fullName
                 : fullName // ignore: cast_nullable_to_non_nullable
                       as String?,
-            firstName: freezed == firstName
-                ? _value.firstName
-                : firstName // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            lastName: freezed == lastName
-                ? _value.lastName
-                : lastName // ignore: cast_nullable_to_non_nullable
-                      as String?,
             phone: freezed == phone
                 ? _value.phone
                 : phone // ignore: cast_nullable_to_non_nullable
@@ -112,7 +99,7 @@ class _$UserProfileCopyWithImpl<$Res, $Val extends UserProfile>
             role: freezed == role
                 ? _value.role
                 : role // ignore: cast_nullable_to_non_nullable
-                      as String?,
+                      as UserRole?,
             avatarUrl: freezed == avatarUrl
                 ? _value.avatarUrl
                 : avatarUrl // ignore: cast_nullable_to_non_nullable
@@ -135,12 +122,10 @@ abstract class _$$UserProfileImplCopyWith<$Res>
   $Res call({
     @JsonKey(fromJson: parseInt) int? id,
     @JsonKey(name: 'full_name') String? fullName,
-    @JsonKey(name: 'first_name') String? firstName,
-    @JsonKey(name: 'last_name') String? lastName,
     String? phone,
     String? email,
-    String? role,
-    @JsonKey(name: 'avatar_url') String? avatarUrl,
+    @JsonKey(fromJson: UserRole.fromJson) UserRole? role,
+    @JsonKey(name: 'profile_image_url') String? avatarUrl,
   });
 }
 
@@ -160,8 +145,6 @@ class __$$UserProfileImplCopyWithImpl<$Res>
   $Res call({
     Object? id = freezed,
     Object? fullName = freezed,
-    Object? firstName = freezed,
-    Object? lastName = freezed,
     Object? phone = freezed,
     Object? email = freezed,
     Object? role = freezed,
@@ -177,14 +160,6 @@ class __$$UserProfileImplCopyWithImpl<$Res>
             ? _value.fullName
             : fullName // ignore: cast_nullable_to_non_nullable
                   as String?,
-        firstName: freezed == firstName
-            ? _value.firstName
-            : firstName // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        lastName: freezed == lastName
-            ? _value.lastName
-            : lastName // ignore: cast_nullable_to_non_nullable
-                  as String?,
         phone: freezed == phone
             ? _value.phone
             : phone // ignore: cast_nullable_to_non_nullable
@@ -196,7 +171,7 @@ class __$$UserProfileImplCopyWithImpl<$Res>
         role: freezed == role
             ? _value.role
             : role // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as UserRole?,
         avatarUrl: freezed == avatarUrl
             ? _value.avatarUrl
             : avatarUrl // ignore: cast_nullable_to_non_nullable
@@ -207,18 +182,19 @@ class __$$UserProfileImplCopyWithImpl<$Res>
 }
 
 /// @nodoc
-
+@JsonSerializable(createToJson: false)
 class _$UserProfileImpl implements _UserProfile {
   const _$UserProfileImpl({
     @JsonKey(fromJson: parseInt) this.id,
     @JsonKey(name: 'full_name') this.fullName,
-    @JsonKey(name: 'first_name') this.firstName,
-    @JsonKey(name: 'last_name') this.lastName,
     this.phone,
     this.email,
-    this.role,
-    @JsonKey(name: 'avatar_url') this.avatarUrl,
+    @JsonKey(fromJson: UserRole.fromJson) this.role,
+    @JsonKey(name: 'profile_image_url') this.avatarUrl,
   });
+
+  factory _$UserProfileImpl.fromJson(Map<String, dynamic> json) =>
+      _$$UserProfileImplFromJson(json);
 
   @override
   @JsonKey(fromJson: parseInt)
@@ -227,26 +203,19 @@ class _$UserProfileImpl implements _UserProfile {
   @JsonKey(name: 'full_name')
   final String? fullName;
   @override
-  @JsonKey(name: 'first_name')
-  final String? firstName;
-  @override
-  @JsonKey(name: 'last_name')
-  final String? lastName;
-  @override
   final String? phone;
   @override
   final String? email;
   @override
-  final String? role;
-  // Client field name is avatarUrl; backend wire name is profile_image_url
-  // (avatar_url accepted as legacy alias via fromJson normalization below).
+  @JsonKey(fromJson: UserRole.fromJson)
+  final UserRole? role;
   @override
-  @JsonKey(name: 'avatar_url')
+  @JsonKey(name: 'profile_image_url')
   final String? avatarUrl;
 
   @override
   String toString() {
-    return 'UserProfile(id: $id, fullName: $fullName, firstName: $firstName, lastName: $lastName, phone: $phone, email: $email, role: $role, avatarUrl: $avatarUrl)';
+    return 'UserProfile(id: $id, fullName: $fullName, phone: $phone, email: $email, role: $role, avatarUrl: $avatarUrl)';
   }
 
   @override
@@ -257,10 +226,6 @@ class _$UserProfileImpl implements _UserProfile {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.fullName, fullName) ||
                 other.fullName == fullName) &&
-            (identical(other.firstName, firstName) ||
-                other.firstName == firstName) &&
-            (identical(other.lastName, lastName) ||
-                other.lastName == lastName) &&
             (identical(other.phone, phone) || other.phone == phone) &&
             (identical(other.email, email) || other.email == email) &&
             (identical(other.role, role) || other.role == role) &&
@@ -268,18 +233,10 @@ class _$UserProfileImpl implements _UserProfile {
                 other.avatarUrl == avatarUrl));
   }
 
+  @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    fullName,
-    firstName,
-    lastName,
-    phone,
-    email,
-    role,
-    avatarUrl,
-  );
+  int get hashCode =>
+      Object.hash(runtimeType, id, fullName, phone, email, role, avatarUrl);
 
   /// Create a copy of UserProfile
   /// with the given fields replaced by the non-null parameter values.
@@ -294,13 +251,14 @@ abstract class _UserProfile implements UserProfile {
   const factory _UserProfile({
     @JsonKey(fromJson: parseInt) final int? id,
     @JsonKey(name: 'full_name') final String? fullName,
-    @JsonKey(name: 'first_name') final String? firstName,
-    @JsonKey(name: 'last_name') final String? lastName,
     final String? phone,
     final String? email,
-    final String? role,
-    @JsonKey(name: 'avatar_url') final String? avatarUrl,
+    @JsonKey(fromJson: UserRole.fromJson) final UserRole? role,
+    @JsonKey(name: 'profile_image_url') final String? avatarUrl,
   }) = _$UserProfileImpl;
+
+  factory _UserProfile.fromJson(Map<String, dynamic> json) =
+      _$UserProfileImpl.fromJson;
 
   @override
   @JsonKey(fromJson: parseInt)
@@ -309,20 +267,14 @@ abstract class _UserProfile implements UserProfile {
   @JsonKey(name: 'full_name')
   String? get fullName;
   @override
-  @JsonKey(name: 'first_name')
-  String? get firstName;
-  @override
-  @JsonKey(name: 'last_name')
-  String? get lastName;
-  @override
   String? get phone;
   @override
   String? get email;
   @override
-  String? get role; // Client field name is avatarUrl; backend wire name is profile_image_url
-  // (avatar_url accepted as legacy alias via fromJson normalization below).
+  @JsonKey(fromJson: UserRole.fromJson)
+  UserRole? get role;
   @override
-  @JsonKey(name: 'avatar_url')
+  @JsonKey(name: 'profile_image_url')
   String? get avatarUrl;
 
   /// Create a copy of UserProfile

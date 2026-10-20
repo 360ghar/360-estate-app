@@ -21,11 +21,10 @@ NotificationItem _$NotificationItemFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$NotificationItem {
-  @JsonKey(fromJson: parseInt)
-  int? get id => throw _privateConstructorUsedError;
+  String? get id => throw _privateConstructorUsedError;
+  String? get type => throw _privateConstructorUsedError;
   String? get title => throw _privateConstructorUsedError;
   String? get body => throw _privateConstructorUsedError;
-  String? get type => throw _privateConstructorUsedError;
   Map<String, dynamic>? get data => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at', fromJson: parseDateTime)
   DateTime? get createdAt => throw _privateConstructorUsedError;
@@ -50,10 +49,10 @@ abstract class $NotificationItemCopyWith<$Res> {
   ) = _$NotificationItemCopyWithImpl<$Res, NotificationItem>;
   @useResult
   $Res call({
-    @JsonKey(fromJson: parseInt) int? id,
+    String? id,
+    String? type,
     String? title,
     String? body,
-    String? type,
     Map<String, dynamic>? data,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) DateTime? createdAt,
     @JsonKey(name: 'read_at', fromJson: parseDateTime) DateTime? readAt,
@@ -76,9 +75,9 @@ class _$NotificationItemCopyWithImpl<$Res, $Val extends NotificationItem>
   @override
   $Res call({
     Object? id = freezed,
+    Object? type = freezed,
     Object? title = freezed,
     Object? body = freezed,
-    Object? type = freezed,
     Object? data = freezed,
     Object? createdAt = freezed,
     Object? readAt = freezed,
@@ -88,7 +87,11 @@ class _$NotificationItemCopyWithImpl<$Res, $Val extends NotificationItem>
             id: freezed == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
-                      as int?,
+                      as String?,
+            type: freezed == type
+                ? _value.type
+                : type // ignore: cast_nullable_to_non_nullable
+                      as String?,
             title: freezed == title
                 ? _value.title
                 : title // ignore: cast_nullable_to_non_nullable
@@ -96,10 +99,6 @@ class _$NotificationItemCopyWithImpl<$Res, $Val extends NotificationItem>
             body: freezed == body
                 ? _value.body
                 : body // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            type: freezed == type
-                ? _value.type
-                : type // ignore: cast_nullable_to_non_nullable
                       as String?,
             data: freezed == data
                 ? _value.data
@@ -129,10 +128,10 @@ abstract class _$$NotificationItemImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    @JsonKey(fromJson: parseInt) int? id,
+    String? id,
+    String? type,
     String? title,
     String? body,
-    String? type,
     Map<String, dynamic>? data,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) DateTime? createdAt,
     @JsonKey(name: 'read_at', fromJson: parseDateTime) DateTime? readAt,
@@ -154,9 +153,9 @@ class __$$NotificationItemImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = freezed,
+    Object? type = freezed,
     Object? title = freezed,
     Object? body = freezed,
-    Object? type = freezed,
     Object? data = freezed,
     Object? createdAt = freezed,
     Object? readAt = freezed,
@@ -166,7 +165,11 @@ class __$$NotificationItemImplCopyWithImpl<$Res>
         id: freezed == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
-                  as int?,
+                  as String?,
+        type: freezed == type
+            ? _value.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String?,
         title: freezed == title
             ? _value.title
             : title // ignore: cast_nullable_to_non_nullable
@@ -174,10 +177,6 @@ class __$$NotificationItemImplCopyWithImpl<$Res>
         body: freezed == body
             ? _value.body
             : body // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        type: freezed == type
-            ? _value.type
-            : type // ignore: cast_nullable_to_non_nullable
                   as String?,
         data: freezed == data
             ? _value._data
@@ -200,10 +199,10 @@ class __$$NotificationItemImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$NotificationItemImpl implements _NotificationItem {
   const _$NotificationItemImpl({
-    @JsonKey(fromJson: parseInt) this.id,
+    this.id,
+    this.type,
     this.title,
     this.body,
-    this.type,
     final Map<String, dynamic>? data,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) this.createdAt,
     @JsonKey(name: 'read_at', fromJson: parseDateTime) this.readAt,
@@ -213,14 +212,13 @@ class _$NotificationItemImpl implements _NotificationItem {
       _$$NotificationItemImplFromJson(json);
 
   @override
-  @JsonKey(fromJson: parseInt)
-  final int? id;
+  final String? id;
+  @override
+  final String? type;
   @override
   final String? title;
   @override
   final String? body;
-  @override
-  final String? type;
   final Map<String, dynamic>? _data;
   @override
   Map<String, dynamic>? get data {
@@ -240,7 +238,7 @@ class _$NotificationItemImpl implements _NotificationItem {
 
   @override
   String toString() {
-    return 'NotificationItem(id: $id, title: $title, body: $body, type: $type, data: $data, createdAt: $createdAt, readAt: $readAt)';
+    return 'NotificationItem(id: $id, type: $type, title: $title, body: $body, data: $data, createdAt: $createdAt, readAt: $readAt)';
   }
 
   @override
@@ -249,9 +247,9 @@ class _$NotificationItemImpl implements _NotificationItem {
         (other.runtimeType == runtimeType &&
             other is _$NotificationItemImpl &&
             (identical(other.id, id) || other.id == id) &&
+            (identical(other.type, type) || other.type == type) &&
             (identical(other.title, title) || other.title == title) &&
             (identical(other.body, body) || other.body == body) &&
-            (identical(other.type, type) || other.type == type) &&
             const DeepCollectionEquality().equals(other._data, _data) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
@@ -263,9 +261,9 @@ class _$NotificationItemImpl implements _NotificationItem {
   int get hashCode => Object.hash(
     runtimeType,
     id,
+    type,
     title,
     body,
-    type,
     const DeepCollectionEquality().hash(_data),
     createdAt,
     readAt,
@@ -290,10 +288,10 @@ class _$NotificationItemImpl implements _NotificationItem {
 
 abstract class _NotificationItem implements NotificationItem {
   const factory _NotificationItem({
-    @JsonKey(fromJson: parseInt) final int? id,
+    final String? id,
+    final String? type,
     final String? title,
     final String? body,
-    final String? type,
     final Map<String, dynamic>? data,
     @JsonKey(name: 'created_at', fromJson: parseDateTime)
     final DateTime? createdAt,
@@ -304,14 +302,13 @@ abstract class _NotificationItem implements NotificationItem {
       _$NotificationItemImpl.fromJson;
 
   @override
-  @JsonKey(fromJson: parseInt)
-  int? get id;
+  String? get id;
+  @override
+  String? get type;
   @override
   String? get title;
   @override
   String? get body;
-  @override
-  String? get type;
   @override
   Map<String, dynamic>? get data;
   @override

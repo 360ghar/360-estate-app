@@ -25,6 +25,7 @@ mixin _$ReportRow {
   @JsonKey(fromJson: parseDouble)
   double? get amount => throw _privateConstructorUsedError;
   String? get value => throw _privateConstructorUsedError;
+  String? get detail => throw _privateConstructorUsedError;
 
   /// Serializes this ReportRow to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -45,6 +46,7 @@ abstract class $ReportRowCopyWith<$Res> {
     String? label,
     @JsonKey(fromJson: parseDouble) double? amount,
     String? value,
+    String? detail,
   });
 }
 
@@ -66,6 +68,7 @@ class _$ReportRowCopyWithImpl<$Res, $Val extends ReportRow>
     Object? label = freezed,
     Object? amount = freezed,
     Object? value = freezed,
+    Object? detail = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -80,6 +83,10 @@ class _$ReportRowCopyWithImpl<$Res, $Val extends ReportRow>
             value: freezed == value
                 ? _value.value
                 : value // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            detail: freezed == detail
+                ? _value.detail
+                : detail // ignore: cast_nullable_to_non_nullable
                       as String?,
           )
           as $Val,
@@ -100,6 +107,7 @@ abstract class _$$ReportRowImplCopyWith<$Res>
     String? label,
     @JsonKey(fromJson: parseDouble) double? amount,
     String? value,
+    String? detail,
   });
 }
 
@@ -120,6 +128,7 @@ class __$$ReportRowImplCopyWithImpl<$Res>
     Object? label = freezed,
     Object? amount = freezed,
     Object? value = freezed,
+    Object? detail = freezed,
   }) {
     return _then(
       _$ReportRowImpl(
@@ -135,6 +144,10 @@ class __$$ReportRowImplCopyWithImpl<$Res>
             ? _value.value
             : value // ignore: cast_nullable_to_non_nullable
                   as String?,
+        detail: freezed == detail
+            ? _value.detail
+            : detail // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -147,6 +160,7 @@ class _$ReportRowImpl implements _ReportRow {
     this.label,
     @JsonKey(fromJson: parseDouble) this.amount,
     this.value,
+    this.detail,
   });
 
   factory _$ReportRowImpl.fromJson(Map<String, dynamic> json) =>
@@ -159,10 +173,12 @@ class _$ReportRowImpl implements _ReportRow {
   final double? amount;
   @override
   final String? value;
+  @override
+  final String? detail;
 
   @override
   String toString() {
-    return 'ReportRow(label: $label, amount: $amount, value: $value)';
+    return 'ReportRow(label: $label, amount: $amount, value: $value, detail: $detail)';
   }
 
   @override
@@ -172,12 +188,13 @@ class _$ReportRowImpl implements _ReportRow {
             other is _$ReportRowImpl &&
             (identical(other.label, label) || other.label == label) &&
             (identical(other.amount, amount) || other.amount == amount) &&
-            (identical(other.value, value) || other.value == value));
+            (identical(other.value, value) || other.value == value) &&
+            (identical(other.detail, detail) || other.detail == detail));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, label, amount, value);
+  int get hashCode => Object.hash(runtimeType, label, amount, value, detail);
 
   /// Create a copy of ReportRow
   /// with the given fields replaced by the non-null parameter values.
@@ -198,6 +215,7 @@ abstract class _ReportRow implements ReportRow {
     final String? label,
     @JsonKey(fromJson: parseDouble) final double? amount,
     final String? value,
+    final String? detail,
   }) = _$ReportRowImpl;
 
   factory _ReportRow.fromJson(Map<String, dynamic> json) =
@@ -210,6 +228,8 @@ abstract class _ReportRow implements ReportRow {
   double? get amount;
   @override
   String? get value;
+  @override
+  String? get detail;
 
   /// Create a copy of ReportRow
   /// with the given fields replaced by the non-null parameter values.

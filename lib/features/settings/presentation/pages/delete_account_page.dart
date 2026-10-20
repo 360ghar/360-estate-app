@@ -1,13 +1,9 @@
 import 'package:estate_app/core/errors/failure.dart';
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
-import 'package:estate_app/core/presentation/design_system/app_durations.dart';
-import 'package:estate_app/core/presentation/design_system/app_gradients.dart';
-import 'package:estate_app/core/presentation/design_system/app_radii.dart';
-import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
+import 'package:estate_app/core/network/api_paths.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
-import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
+import 'package:estate_app/core/presentation/widgets/feedback.dart';
 import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:flutter/material.dart';
@@ -61,12 +57,14 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
     setState(() {});
   }
 
-  bool get _isConfirmed =>
-      _confirmController.text.trim() == _expectedWord;
+  bool get _isConfirmed => _confirmController.text.trim() == _expectedWord;
 
   String _buildEmailBody() {
-    final registeredEmail =
-        ref.read(authControllerProvider).user?.email?.trim();
+    final registeredEmail = ref
+        .read(authControllerProvider)
+        .user
+        ?.email
+        ?.trim();
     final emailLine = (registeredEmail != null && registeredEmail.isNotEmpty)
         ? registeredEmail
         : 'Not available';
@@ -97,18 +95,11 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
     // email fallback, since the account has already been deleted server-side.
     try {
       final apiClient = ref.read(apiClientProvider);
-      await apiClient.delete<void>('/users/me');
+      await apiClient.delete<void>(ApiPaths.userMe);
     } on NetworkFailure catch (e) {
       if (!mounted) return;
       if (e.isOffline) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'You appear to be offline. Check your connection and try again.',
-            ),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        context.showSnack(context.l10n.errorOfflineHint);
         setState(() => _isSubmitting = false);
         return;
       }
@@ -123,15 +114,7 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
     }
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          context.l10n?.deleteAccountSuccess ??
-              'Your account has been deleted successfully.',
-        ),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    context.showSnack(context.l10n.deleteAccountSuccess);
     await ref.read(authControllerProvider.notifier).logout();
     if (!mounted) return;
     context.go('/enter-phone');
@@ -149,29 +132,17 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
     if (!mounted) return;
 
     if (launched) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.l10n?.deleteAccountEmailSent ??
-                'Email app opened. Please send the message to complete your request.',
-          ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      context.showSnack(context.l10n.deleteAccountEmailSent);
       if (context.canPop()) {
         context.pop();
       } else {
         context.go('/more/profile/settings');
       }
     } else {
-      final fallbackMessage = context.l10n?.deleteAccountManualFallback ??
-          'Could not delete account or open your email app. Please email $_supportEmail with subject "$_emailSubject".';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(fallbackMessage),
-          backgroundColor: AppColors.danger,
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 6),
+          content: Text(context.l10n.deleteAccountManualFallback),
+          duration: const Duration(seconds: 8),
         ),
       );
       setState(() => _isSubmitting = false);
@@ -180,205 +151,80 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return AppScaffold(
-      appBar: AppBar(
-        title: Text(context.l10n?.deleteAccount ?? 'Delete Account'),
-      ),
-      scrollable: true,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    final l10n = context.l10n;
+    final colors = context.colors;
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.settingsDeleteAccount)),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.xxl,
+        ),
         children: [
-          _WarningCard(isDark: isDark),
-          const SizedBox(height: AppSpacing.lg),
-          AppSectionCard(
-            title: context.l10n?.deleteAccount ?? 'Delete Account',
-            icon: Icons.delete_outline,
-            iconColor: AppColors.danger,
-            children: [
-              Text(
-                context.l10n?.deleteAccountConfirmLabel(_expectedWord) ??
-                    'Type $_expectedWord to confirm',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
-                ),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: ExcludeSemantics(
+              child: Icon(
+                Icons.warning_amber_rounded,
+                size: 40,
+                color: colors.error,
               ),
-              const SizedBox(height: AppSpacing.md),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Semantics(
+            header: true,
+            child: Text(l10n.deleteTitle, style: context.text.headlineMedium),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            l10n.deleteAccountWarning,
+            style: context.text.bodyLarge?.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          AppSectionCard(
+            children: [
               TextField(
                 controller: _confirmController,
                 focusNode: _confirmFocus,
                 textCapitalization: TextCapitalization.characters,
                 autocorrect: false,
                 enableSuggestions: false,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _confirmDelete(),
                 inputFormatters: [
                   LengthLimitingTextInputFormatter(_expectedWord.length + 8),
                 ],
                 decoration: InputDecoration(
-                  hintText:
-                      context.l10n?.deleteAccountConfirmHint ?? _expectedWord,
-                  prefixIcon: Icon(
-                    Icons.edit_outlined,
-                    color: _isConfirmed
-                        ? AppColors.danger
-                        : theme.colorScheme.onSurfaceVariant,
-                  ),
+                  labelText: l10n.deleteAccountConfirmLabel(_expectedWord),
+                  hintText: _expectedWord,
                   suffixIcon: _isConfirmed
-                      ? const Icon(Icons.check_circle, color: AppColors.danger)
+                      ? Icon(Icons.check_rounded, color: colors.error)
                       : null,
-                  border: OutlineInputBorder(
-                    borderRadius: AppRadii.md,
-                    borderSide: BorderSide(
-                      color: isDark
-                          ? AppColors.darkCardBorder
-                          : AppColors.cardBorder,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: AppRadii.md,
-                    borderSide: BorderSide(
-                      color: isDark
-                          ? AppColors.darkCardBorder
-                          : AppColors.cardBorder,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: AppRadii.md,
-                    borderSide: const BorderSide(
-                      color: AppColors.danger,
-                      width: 1.5,
-                    ),
-                  ),
-                ),
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.5,
                 ),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
-          SizedBox(
-            width: double.infinity,
-            child: AnimatedContainer(
-              duration: AppDurations.fast,
-              curve: AppDurations.defaultCurve,
-              decoration: BoxDecoration(
-                borderRadius: AppRadii.md,
-                boxShadow: _isConfirmed
-                    ? [
-                        BoxShadow(
-                          color: AppColors.danger.withValues(alpha: 0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ]
-                    : null,
-              ),
-              child: FilledButton(
-                onPressed: (_isConfirmed && !_isSubmitting)
-                    ? _confirmDelete
-                    : null,
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.danger,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor:
-                      AppColors.danger.withValues(alpha: 0.35),
-                  disabledForegroundColor: Colors.white.withValues(alpha: 0.7),
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: AppRadii.md,
-                  ),
-                ),
-                child: _isSubmitting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : Text(
-                        context.l10n?.deleteAccount ?? 'Delete Account',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-              ),
+          FilledButton(
+            onPressed: _isConfirmed && !_isSubmitting ? _confirmDelete : null,
+            style: FilledButton.styleFrom(
+              backgroundColor: colors.error,
+              foregroundColor: colors.onError,
             ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-        ],
-      ),
-    );
-  }
-}
-
-class _WarningCard extends StatelessWidget {
-  const _WarningCard({required this.isDark});
-
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        gradient: AppGradients.dangerSubtle,
-        color: isDark
-            ? AppColors.danger.withValues(alpha: 0.08)
-            : AppColors.danger.withValues(alpha: 0.04),
-        borderRadius: AppRadii.lg,
-        border: Border.all(
-          color: AppColors.danger.withValues(alpha: isDark ? 0.2 : 0.15),
-        ),
-        boxShadow: AppShadows.cardResting,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.danger.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.warning_amber_rounded,
-              color: AppColors.danger,
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n?.deleteAccount ?? 'Delete Account',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: AppColors.danger,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  context.l10n?.deleteAccountWarning ??
-                      'This action cannot be undone. All your data will be permanently deleted.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface,
-                    height: 1.45,
-                  ),
-                ),
-              ],
-            ),
+            child: _isSubmitting
+                ? SizedBox.square(
+                    dimension: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: colors.onError,
+                    ),
+                  )
+                : Text(l10n.deleteSubmit),
           ),
         ],
       ),

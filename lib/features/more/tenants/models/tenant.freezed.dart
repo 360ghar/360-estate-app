@@ -21,18 +21,19 @@ Tenant _$TenantFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Tenant {
-  @JsonKey(fromJson: parseInt)
-  int? get id => throw _privateConstructorUsedError;
-  String? get name => throw _privateConstructorUsedError;
+  @JsonKey(name: 'user_id', fromJson: parseInt)
+  int? get userId => throw _privateConstructorUsedError;
   @JsonKey(name: 'full_name')
   String? get fullName => throw _privateConstructorUsedError;
   String? get phone => throw _privateConstructorUsedError;
   String? get email => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: TenantStatus.fromJson, toJson: TenantStatus.toJsonValue)
+  TenantStatus? get status => throw _privateConstructorUsedError;
   @JsonKey(name: 'property_name')
   String? get propertyName => throw _privateConstructorUsedError;
-  @JsonKey(name: 'room_number')
-  String? get roomNumber => throw _privateConstructorUsedError;
-  String? get status => throw _privateConstructorUsedError;
+  @JsonKey(name: 'active_leases_count', fromJson: parseInt)
+  int? get activeLeasesCount => throw _privateConstructorUsedError; // Only the detail route sends the leases.
+  List<Lease>? get leases => throw _privateConstructorUsedError;
 
   /// Serializes this Tenant to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -49,14 +50,16 @@ abstract class $TenantCopyWith<$Res> {
       _$TenantCopyWithImpl<$Res, Tenant>;
   @useResult
   $Res call({
-    @JsonKey(fromJson: parseInt) int? id,
-    String? name,
+    @JsonKey(name: 'user_id', fromJson: parseInt) int? userId,
     @JsonKey(name: 'full_name') String? fullName,
     String? phone,
     String? email,
+    @JsonKey(fromJson: TenantStatus.fromJson, toJson: TenantStatus.toJsonValue)
+    TenantStatus? status,
     @JsonKey(name: 'property_name') String? propertyName,
-    @JsonKey(name: 'room_number') String? roomNumber,
-    String? status,
+    @JsonKey(name: 'active_leases_count', fromJson: parseInt)
+    int? activeLeasesCount,
+    List<Lease>? leases,
   });
 }
 
@@ -75,25 +78,21 @@ class _$TenantCopyWithImpl<$Res, $Val extends Tenant>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = freezed,
-    Object? name = freezed,
+    Object? userId = freezed,
     Object? fullName = freezed,
     Object? phone = freezed,
     Object? email = freezed,
-    Object? propertyName = freezed,
-    Object? roomNumber = freezed,
     Object? status = freezed,
+    Object? propertyName = freezed,
+    Object? activeLeasesCount = freezed,
+    Object? leases = freezed,
   }) {
     return _then(
       _value.copyWith(
-            id: freezed == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
+            userId: freezed == userId
+                ? _value.userId
+                : userId // ignore: cast_nullable_to_non_nullable
                       as int?,
-            name: freezed == name
-                ? _value.name
-                : name // ignore: cast_nullable_to_non_nullable
-                      as String?,
             fullName: freezed == fullName
                 ? _value.fullName
                 : fullName // ignore: cast_nullable_to_non_nullable
@@ -106,18 +105,22 @@ class _$TenantCopyWithImpl<$Res, $Val extends Tenant>
                 ? _value.email
                 : email // ignore: cast_nullable_to_non_nullable
                       as String?,
+            status: freezed == status
+                ? _value.status
+                : status // ignore: cast_nullable_to_non_nullable
+                      as TenantStatus?,
             propertyName: freezed == propertyName
                 ? _value.propertyName
                 : propertyName // ignore: cast_nullable_to_non_nullable
                       as String?,
-            roomNumber: freezed == roomNumber
-                ? _value.roomNumber
-                : roomNumber // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            status: freezed == status
-                ? _value.status
-                : status // ignore: cast_nullable_to_non_nullable
-                      as String?,
+            activeLeasesCount: freezed == activeLeasesCount
+                ? _value.activeLeasesCount
+                : activeLeasesCount // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            leases: freezed == leases
+                ? _value.leases
+                : leases // ignore: cast_nullable_to_non_nullable
+                      as List<Lease>?,
           )
           as $Val,
     );
@@ -133,14 +136,16 @@ abstract class _$$TenantImplCopyWith<$Res> implements $TenantCopyWith<$Res> {
   @override
   @useResult
   $Res call({
-    @JsonKey(fromJson: parseInt) int? id,
-    String? name,
+    @JsonKey(name: 'user_id', fromJson: parseInt) int? userId,
     @JsonKey(name: 'full_name') String? fullName,
     String? phone,
     String? email,
+    @JsonKey(fromJson: TenantStatus.fromJson, toJson: TenantStatus.toJsonValue)
+    TenantStatus? status,
     @JsonKey(name: 'property_name') String? propertyName,
-    @JsonKey(name: 'room_number') String? roomNumber,
-    String? status,
+    @JsonKey(name: 'active_leases_count', fromJson: parseInt)
+    int? activeLeasesCount,
+    List<Lease>? leases,
   });
 }
 
@@ -158,25 +163,21 @@ class __$$TenantImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = freezed,
-    Object? name = freezed,
+    Object? userId = freezed,
     Object? fullName = freezed,
     Object? phone = freezed,
     Object? email = freezed,
-    Object? propertyName = freezed,
-    Object? roomNumber = freezed,
     Object? status = freezed,
+    Object? propertyName = freezed,
+    Object? activeLeasesCount = freezed,
+    Object? leases = freezed,
   }) {
     return _then(
       _$TenantImpl(
-        id: freezed == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
+        userId: freezed == userId
+            ? _value.userId
+            : userId // ignore: cast_nullable_to_non_nullable
                   as int?,
-        name: freezed == name
-            ? _value.name
-            : name // ignore: cast_nullable_to_non_nullable
-                  as String?,
         fullName: freezed == fullName
             ? _value.fullName
             : fullName // ignore: cast_nullable_to_non_nullable
@@ -189,18 +190,22 @@ class __$$TenantImplCopyWithImpl<$Res>
             ? _value.email
             : email // ignore: cast_nullable_to_non_nullable
                   as String?,
+        status: freezed == status
+            ? _value.status
+            : status // ignore: cast_nullable_to_non_nullable
+                  as TenantStatus?,
         propertyName: freezed == propertyName
             ? _value.propertyName
             : propertyName // ignore: cast_nullable_to_non_nullable
                   as String?,
-        roomNumber: freezed == roomNumber
-            ? _value.roomNumber
-            : roomNumber // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        status: freezed == status
-            ? _value.status
-            : status // ignore: cast_nullable_to_non_nullable
-                  as String?,
+        activeLeasesCount: freezed == activeLeasesCount
+            ? _value.activeLeasesCount
+            : activeLeasesCount // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        leases: freezed == leases
+            ? _value._leases
+            : leases // ignore: cast_nullable_to_non_nullable
+                  as List<Lease>?,
       ),
     );
   }
@@ -210,24 +215,24 @@ class __$$TenantImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$TenantImpl implements _Tenant {
   const _$TenantImpl({
-    @JsonKey(fromJson: parseInt) this.id,
-    this.name,
+    @JsonKey(name: 'user_id', fromJson: parseInt) this.userId,
     @JsonKey(name: 'full_name') this.fullName,
     this.phone,
     this.email,
-    @JsonKey(name: 'property_name') this.propertyName,
-    @JsonKey(name: 'room_number') this.roomNumber,
+    @JsonKey(fromJson: TenantStatus.fromJson, toJson: TenantStatus.toJsonValue)
     this.status,
-  });
+    @JsonKey(name: 'property_name') this.propertyName,
+    @JsonKey(name: 'active_leases_count', fromJson: parseInt)
+    this.activeLeasesCount,
+    final List<Lease>? leases,
+  }) : _leases = leases;
 
   factory _$TenantImpl.fromJson(Map<String, dynamic> json) =>
       _$$TenantImplFromJson(json);
 
   @override
-  @JsonKey(fromJson: parseInt)
-  final int? id;
-  @override
-  final String? name;
+  @JsonKey(name: 'user_id', fromJson: parseInt)
+  final int? userId;
   @override
   @JsonKey(name: 'full_name')
   final String? fullName;
@@ -236,17 +241,29 @@ class _$TenantImpl implements _Tenant {
   @override
   final String? email;
   @override
+  @JsonKey(fromJson: TenantStatus.fromJson, toJson: TenantStatus.toJsonValue)
+  final TenantStatus? status;
+  @override
   @JsonKey(name: 'property_name')
   final String? propertyName;
   @override
-  @JsonKey(name: 'room_number')
-  final String? roomNumber;
+  @JsonKey(name: 'active_leases_count', fromJson: parseInt)
+  final int? activeLeasesCount;
+  // Only the detail route sends the leases.
+  final List<Lease>? _leases;
+  // Only the detail route sends the leases.
   @override
-  final String? status;
+  List<Lease>? get leases {
+    final value = _leases;
+    if (value == null) return null;
+    if (_leases is EqualUnmodifiableListView) return _leases;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
 
   @override
   String toString() {
-    return 'Tenant(id: $id, name: $name, fullName: $fullName, phone: $phone, email: $email, propertyName: $propertyName, roomNumber: $roomNumber, status: $status)';
+    return 'Tenant(userId: $userId, fullName: $fullName, phone: $phone, email: $email, status: $status, propertyName: $propertyName, activeLeasesCount: $activeLeasesCount, leases: $leases)';
   }
 
   @override
@@ -254,31 +271,31 @@ class _$TenantImpl implements _Tenant {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$TenantImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.name, name) || other.name == name) &&
+            (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.fullName, fullName) ||
                 other.fullName == fullName) &&
             (identical(other.phone, phone) || other.phone == phone) &&
             (identical(other.email, email) || other.email == email) &&
+            (identical(other.status, status) || other.status == status) &&
             (identical(other.propertyName, propertyName) ||
                 other.propertyName == propertyName) &&
-            (identical(other.roomNumber, roomNumber) ||
-                other.roomNumber == roomNumber) &&
-            (identical(other.status, status) || other.status == status));
+            (identical(other.activeLeasesCount, activeLeasesCount) ||
+                other.activeLeasesCount == activeLeasesCount) &&
+            const DeepCollectionEquality().equals(other._leases, _leases));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
     runtimeType,
-    id,
-    name,
+    userId,
     fullName,
     phone,
     email,
-    propertyName,
-    roomNumber,
     status,
+    propertyName,
+    activeLeasesCount,
+    const DeepCollectionEquality().hash(_leases),
   );
 
   /// Create a copy of Tenant
@@ -297,23 +314,23 @@ class _$TenantImpl implements _Tenant {
 
 abstract class _Tenant implements Tenant {
   const factory _Tenant({
-    @JsonKey(fromJson: parseInt) final int? id,
-    final String? name,
+    @JsonKey(name: 'user_id', fromJson: parseInt) final int? userId,
     @JsonKey(name: 'full_name') final String? fullName,
     final String? phone,
     final String? email,
+    @JsonKey(fromJson: TenantStatus.fromJson, toJson: TenantStatus.toJsonValue)
+    final TenantStatus? status,
     @JsonKey(name: 'property_name') final String? propertyName,
-    @JsonKey(name: 'room_number') final String? roomNumber,
-    final String? status,
+    @JsonKey(name: 'active_leases_count', fromJson: parseInt)
+    final int? activeLeasesCount,
+    final List<Lease>? leases,
   }) = _$TenantImpl;
 
   factory _Tenant.fromJson(Map<String, dynamic> json) = _$TenantImpl.fromJson;
 
   @override
-  @JsonKey(fromJson: parseInt)
-  int? get id;
-  @override
-  String? get name;
+  @JsonKey(name: 'user_id', fromJson: parseInt)
+  int? get userId;
   @override
   @JsonKey(name: 'full_name')
   String? get fullName;
@@ -322,13 +339,16 @@ abstract class _Tenant implements Tenant {
   @override
   String? get email;
   @override
+  @JsonKey(fromJson: TenantStatus.fromJson, toJson: TenantStatus.toJsonValue)
+  TenantStatus? get status;
+  @override
   @JsonKey(name: 'property_name')
   String? get propertyName;
   @override
-  @JsonKey(name: 'room_number')
-  String? get roomNumber;
+  @JsonKey(name: 'active_leases_count', fromJson: parseInt)
+  int? get activeLeasesCount; // Only the detail route sends the leases.
   @override
-  String? get status;
+  List<Lease>? get leases;
 
   /// Create a copy of Tenant
   /// with the given fields replaced by the non-null parameter values.

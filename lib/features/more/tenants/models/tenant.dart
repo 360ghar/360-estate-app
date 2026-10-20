@@ -1,43 +1,44 @@
+import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/core/utils/parse.dart';
+import 'package:estate_app/features/leases/models/lease.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'tenant.freezed.dart';
 part 'tenant.g.dart';
 
-/// Canonical Tenant model (UI-backed).
-///
-/// This freezed model under `more/tenants` is the single Tenant used by the
-/// tenants pages and record-payment flow. The parallel legacy clean-arch
-/// Tenant/TenantDto pair was deleted; confirm unexpected backend keys
-/// against `docs/backend-tenant-keys.md` before adding fields here.
+/// A tenant of the owner's properties (`TenantSummary` in the list,
+/// `TenantDetail` on the detail route). The key is `user_id`: the id of the
+/// tenant's user account. Contact fields are what the owner typed on the lease
+/// and are null when the owner typed none.
 @freezed
 class Tenant with _$Tenant {
   const factory Tenant({
-    @JsonKey(fromJson: parseInt) int? id,
-    String? name,
+    @JsonKey(name: 'user_id', fromJson: parseInt) int? userId,
     @JsonKey(name: 'full_name') String? fullName,
     String? phone,
     String? email,
+    @JsonKey(fromJson: TenantStatus.fromJson, toJson: TenantStatus.toJsonValue)
+    TenantStatus? status,
     @JsonKey(name: 'property_name') String? propertyName,
-    @JsonKey(name: 'room_number') String? roomNumber,
-    String? status,
+    @JsonKey(name: 'active_leases_count', fromJson: parseInt)
+    int? activeLeasesCount,
+    // Only the detail route sends the leases.
+    List<Lease>? leases,
   }) = _Tenant;
 
-  factory Tenant.fromJson(Map<String, dynamic> json) =>
-      _$TenantFromJson(json);
+  factory Tenant.fromJson(Map<String, dynamic> json) => _$TenantFromJson(json);
 }
 
 extension TenantX on Tenant {
-  String get displayName => name ?? fullName ?? 'Tenant';
+  String get displayName {
+    final name = fullName?.trim();
+    if (name != null && name.isNotEmpty) return name;
+    return 'Tenant';
+  }
 
-  /// Empty-safe initials derived from [name]/[fullName] (`''` when blank).
-  ///
-  /// Ported from the legacy `tenants/domain/entities` Tenant so the tenant
-  /// list/detail/record-payment flows share one helper. Uses the raw
-  /// name fields (not the `'Tenant'` [displayName] fallback) so a nameless
-  /// record yields `''` instead of `'TE'`.
+  /// Empty-safe initials derived from [fullName] (`''` when blank).
   String get initials {
-    final source = (name ?? fullName ?? '').trim();
+    final source = (fullName ?? '').trim();
     if (source.isEmpty) return '';
     final parts = source.split(RegExp(r'\s+'));
     if (parts.length >= 2) {
@@ -46,4 +47,23 @@ extension TenantX on Tenant {
     final first = parts[0];
     return first.substring(0, first.length >= 2 ? 2 : 1).toUpperCase();
   }
+
+  /// `TenantSummary` (the list) carries the status. `TenantDetail` does not,
+  /// so the detail derives it the way the backend does: active while one of
+  /// the tenant's leases occupies the property (active or expiring soon).
+  TenantStatus? get effectiveStatus {
+    final known = status;
+    if (known != null) return known;
+    final all = leases;
+    if (all == null) return null;
+    return all.any((lease) => lease.isOccupying)
+        ? TenantStatus.active
+        : TenantStatus.vacated;
+  }
+
+  String get statusLabel => switch (effectiveStatus) {
+    TenantStatus.active => 'Active',
+    TenantStatus.vacated => 'Vacated',
+    null => 'Unknown',
+  };
 }

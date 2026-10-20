@@ -1,21 +1,21 @@
-import 'dart:io';
-
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
-import 'package:estate_app/core/presentation/design_system/app_radii.dart';
+import 'package:cross_file/cross_file.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
-import 'package:estate_app/core/presentation/widgets/app_card.dart';
+import 'package:estate_app/core/presentation/errors/user_facing_message.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loading_shimmer.dart';
-import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
-import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
-import 'package:estate_app/core/presentation/widgets/app_status_badge.dart';
-import 'package:estate_app/features/leases/domain/repositories/leases_repository.dart';
+import 'package:estate_app/core/presentation/widgets/feedback.dart';
 import 'package:estate_app/features/leases/leases_providers.dart';
 import 'package:estate_app/features/leases/models/lease.dart';
+import 'package:estate_app/features/leases/presentation/widgets/lease_dialogs.dart';
+import 'package:estate_app/features/leases/presentation/widgets/lease_sections.dart';
+import 'package:estate_app/features/more/documents/documents_providers.dart';
+import 'package:estate_app/features/properties/properties_providers.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LeaseDetailPage extends ConsumerStatefulWidget {
   const LeaseDetailPage({super.key, required this.leaseId});
@@ -27,549 +27,168 @@ class LeaseDetailPage extends ConsumerStatefulWidget {
 }
 
 class _LeaseDetailPageState extends ConsumerState<LeaseDetailPage> {
-  bool _isProcessing = false;
+  bool _busy = false;
 
-  String _formatDate(DateTime? date) {
-    if (date == null) return 'Not set';
-    return DateFormat('d MMM yyyy').format(date);
+  void _refresh() {
+    ref
+      ..invalidate(leaseDetailProvider(widget.leaseId))
+      ..invalidate(leasesListProvider)
+      ..invalidate(leaseTenantNamesProvider);
   }
 
-  AppStatusType _statusType(String status) {
-    switch (status.toLowerCase()) {
-      case 'active':
-        return AppStatusType.success;
-      case 'expired':
-      case 'terminated':
-        return AppStatusType.neutral;
-      case 'expiring':
-      case 'pending':
-        return AppStatusType.warning;
-      default:
-        return AppStatusType.info;
+  /// Runs one lease action with the screen busy, then refreshes the lease and
+  /// says how it went.
+  Future<void> _run(Future<void> Function() action, String done) async {
+    setState(() => _busy = true);
+    try {
+      await action();
+      _refresh();
+      if (mounted) context.showSnack(done);
+    } catch (error) {
+      if (mounted) context.showSnack(userFacingMessage(error));
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
+  /// Picks a PDF. The file goes through the documents route, then the lease
+  /// links to that document (`upload-signed` with `lease_document_id`).
   Future<void> _uploadSigned() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['pdf'],
+      withData: kIsWeb,
     );
-    if (result == null || result.files.isEmpty) return;
-    final path = result.files.single.path;
-    if (path == null) return;
-
-    setState(() => _isProcessing = true);
-    try {
-      await ref
-          .read(leasesRepositoryProvider)
-          .uploadSigned(widget.leaseId, File(path));
-      ref.invalidate(leaseDetailProvider(widget.leaseId));
-      ref.invalidate(leasesListProvider);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Signed lease uploaded.')),
-        );
-      }
-    } catch (error) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
-    } finally {
-      if (mounted) setState(() => _isProcessing = false);
-    }
-  }
-
-  Future<void> _renewLease() async {
-    final endDateController = TextEditingController();
-    final rentController = TextEditingController();
-    final request = await showDialog<LeaseRenewRequest>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Renew lease'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: endDateController,
-                decoration: const InputDecoration(
-                  labelText: 'New end date',
-                  hintText: 'YYYY-MM-DD',
-                ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextField(
-                controller: rentController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'New rent amount'),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final endDate = DateTime.tryParse(
-                  endDateController.text.trim(),
-                );
-                final rentAmount = double.tryParse(
-                  rentController.text.trim(),
-                );
-                Navigator.of(context).pop(
-                  LeaseRenewRequest(
-                    newEndDate: endDate,
-                    newRentAmount: rentAmount,
-                  ),
-                );
-              },
-              child: const Text('Renew'),
-            ),
-          ],
-        );
-      },
-    );
-    if (request == null) return;
-    if (!mounted) return;
-    if (request.newEndDate == null && request.newRentAmount == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter a new end date or rent amount.')),
-      );
+    final picked = result?.files.singleOrNull;
+    if (picked == null || !mounted) return;
+    final XFile file;
+    if (picked.path != null) {
+      file = XFile(picked.path!);
+    } else if (picked.bytes != null) {
+      file = XFile.fromData(picked.bytes!, name: picked.name);
+    } else {
       return;
     }
-
-    setState(() => _isProcessing = true);
-    try {
-      await ref.read(leasesRepositoryProvider).renew(widget.leaseId, request);
-      ref.invalidate(leaseDetailProvider(widget.leaseId));
-      ref.invalidate(leasesListProvider);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Lease renewed.')),
-        );
-      }
-    } catch (error) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
-    } finally {
-      if (mounted) setState(() => _isProcessing = false);
-    }
-  }
-
-  Future<void> _terminateLease() async {
-    final reasonController = TextEditingController();
-    final request = await showDialog<LeaseTerminateRequest>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Terminate lease'),
-          content: TextField(
-            controller: reasonController,
-            maxLines: 3,
-            decoration: const InputDecoration(labelText: 'Reason'),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () {
-                Navigator.of(context).pop(
-                  LeaseTerminateRequest(
-                    reason: reasonController.text.trim(),
-                    terminatedAt: DateTime.now(),
-                  ),
-                );
-              },
-              child: const Text('Terminate'),
-            ),
-          ],
-        );
-      },
+    await _run(
+      () =>
+          ref.read(leasesRepositoryProvider).uploadSigned(widget.leaseId, file),
+      context.l10n.leaseUploaded,
     );
-    if (request == null) return;
-
-    setState(() => _isProcessing = true);
-    try {
-      await ref.read(leasesRepositoryProvider).terminate(widget.leaseId, request);
-      ref.invalidate(leaseDetailProvider(widget.leaseId));
-      ref.invalidate(leasesListProvider);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Lease terminated.')),
-        );
-      }
-    } catch (error) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
-    } finally {
-      if (mounted) setState(() => _isProcessing = false);
-    }
   }
 
-  double _leaseProgress(Lease lease) {
-    if (lease.startDate == null || lease.endDate == null) return 0;
-    final now = DateTime.now();
-    final total = lease.endDate!.difference(lease.startDate!).inDays;
-    if (total <= 0) return 1;
-    final elapsed = now.difference(lease.startDate!).inDays;
-    return (elapsed / total).clamp(0.0, 1.0);
+  /// Opens the signed lease through the signed download route. A stored
+  /// document is private, so its `file_url` is not used.
+  Future<void> _viewDocument(int documentId) async {
+    var message = context.l10n.leaseOpenFailed;
+    try {
+      final url = await ref
+          .read(documentsRepositoryProvider)
+          .fetchDownloadUrl(documentId);
+      final uri = url == null ? null : Uri.tryParse(url);
+      if (uri != null &&
+          await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        return;
+      }
+    } catch (error) {
+      // The backend answers 403 when the caller may not open the file.
+      message = userFacingMessage(error);
+    }
+    if (mounted) context.showSnack(message);
+  }
+
+  Future<void> _renew(Lease lease) async {
+    final request = await showRenewDialog(context, lease);
+    if (request == null || !mounted) return;
+    await _run(
+      () => ref.read(leasesRepositoryProvider).renew(widget.leaseId, request),
+      context.l10n.leaseRenewed,
+    );
+  }
+
+  Future<void> _terminate() async {
+    final request = await showTerminateDialog(context);
+    if (request == null || !mounted) return;
+    await _run(
+      () =>
+          ref.read(leasesRepositoryProvider).terminate(widget.leaseId, request),
+      context.l10n.leaseTerminated,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final leaseAsync = ref.watch(leaseDetailProvider(widget.leaseId));
+    final titles =
+        ref.watch(propertyTitlesProvider).valueOrNull ?? const <int, String>{};
 
-    return AppScaffold(
-      appBar: AppBar(title: const Text('Lease details')),
-      scrollable: true,
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.leaseDetailTitle)),
       body: leaseAsync.when(
+        loading: () => const AppLoadingShimmer(itemCount: 4, itemHeight: 140),
+        error: (error, _) => AppErrorView(
+          title: l10n.commonLoadFailedTitle,
+          message: userFacingMessage(error),
+          onRetry: () => ref.invalidate(leaseDetailProvider(widget.leaseId)),
+        ),
         data: (lease) {
-          final textTheme = Theme.of(context).textTheme;
-          final scheme = Theme.of(context).colorScheme;
-          final status = lease.status ?? 'Active';
-          final progress = _leaseProgress(lease);
-
-          return Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          const gap = SizedBox(height: AppSpacing.md);
+          final documentId = lease.leaseDocumentId;
+          return RefreshIndicator(
+            onRefresh: () async {
+              _refresh();
+              await ref
+                  .read(leaseDetailProvider(widget.leaseId).future)
+                  .catchError((_) => lease);
+            },
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(AppSpacing.lg),
               children: [
-                // Header card
-                AppCard(
-                  variant: AppCardVariant.tinted,
-                  tintColor: scheme.primary,
-                  padding: const EdgeInsets.all(AppSpacing.xl),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              lease.displayName,
-                              style: textTheme.headlineSmall,
-                            ),
-                          ),
-                          AppStatusBadge(
-                            label: status,
-                            type: _statusType(status),
-                            variant: AppStatusVariant.subtle,
-                          ),
-                        ],
-                      ),
-                      if (lease.tenantName != null) ...[
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          lease.tenantName!,
-                          style: textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ],
+                LeaseHeader(
+                  lease: lease,
+                  propertyTitle: titles[lease.propertyId],
+                ),
+                gap,
+                LeaseTermSection(lease: lease),
+                gap,
+                LeaseTenantSection(lease: lease),
+                gap,
+                LeaseCollectionSection(lease: lease),
+                gap,
+                LeaseDocumentSection(
+                  documentId: documentId,
+                  busy: _busy,
+                  onUpload: _uploadSigned,
+                  onView: () => _viewDocument(documentId!),
+                ),
+                // Only the actions the backend accepts for this status.
+                if (lease.canRenew) ...[
+                  const SizedBox(height: AppSpacing.xl),
+                  FilledButton.icon(
+                    onPressed: _busy ? null : () => _renew(lease),
+                    icon: const Icon(Icons.autorenew_rounded),
+                    label: Text(l10n.leaseRenew),
                   ),
-                ),
+                ],
+                if (lease.canTerminate) ...[
+                  SizedBox(
+                    height: lease.canRenew ? AppSpacing.sm : AppSpacing.xl,
+                  ),
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: context.colors.error,
+                    ),
+                    onPressed: _busy ? null : _terminate,
+                    icon: const Icon(Icons.logout_rounded),
+                    label: Text(l10n.leaseTerminate),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.lg),
-
-                // Timeline section with visual progress bar
-                AppSectionCard(
-                  title: 'Timeline',
-                  icon: Icons.date_range_outlined,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Start',
-                              style: textTheme.bodySmall?.copyWith(
-                                color: AppColors.textTertiary,
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.xxs),
-                            Text(
-                              _formatDate(lease.startDate),
-                              style: textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              'End',
-                              style: textTheme.bodySmall?.copyWith(
-                                color: AppColors.textTertiary,
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.xxs),
-                            Text(
-                              _formatDate(lease.endDate),
-                              style: textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    // Progress bar
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: AppRadii.pill,
-                          child: LinearProgressIndicator(
-                            value: progress,
-                            minHeight: 6,
-                            backgroundColor: AppColors.surfaceSecondary,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              progress >= 0.9
-                                  ? AppColors.warning
-                                  : AppColors.success,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          '${(progress * 100).toInt()}% elapsed',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: AppColors.textTertiary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.lg),
-
-                // Financials section
-                AppSectionCard(
-                  title: 'Financial Terms',
-                  icon: Icons.account_balance_wallet_outlined,
-                  iconColor: AppColors.success,
-                  children: [
-                    // Rent amount - prominent
-                    Row(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: scheme.primary.withValues(alpha: 0.08),
-                            borderRadius: AppRadii.md,
-                          ),
-                          child: Icon(
-                            Icons.payments_outlined,
-                            size: 20,
-                            color: scheme.primary,
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Monthly Rent',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textTertiary,
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.xxs),
-                              Text(
-                                lease.rentAmount != null
-                                    ? '\u20B9${lease.rentAmount!.toStringAsFixed(0)}'
-                                    : 'Not set',
-                                style: textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  color: scheme.primary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Divider(
-                      height: 1,
-                      color: AppColors.cardBorder,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    // Deposit
-                    Row(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: AppColors.success.withValues(alpha: 0.08),
-                            borderRadius: AppRadii.md,
-                          ),
-                          child: Icon(
-                            Icons.shield_outlined,
-                            size: 20,
-                            color: AppColors.success,
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Security Deposit',
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textTertiary,
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.xxs),
-                              Text(
-                                lease.depositAmount != null
-                                    ? '\u20B9${lease.depositAmount!.toStringAsFixed(0)}'
-                                    : 'Not set',
-                                style: textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.lg),
-
-                // Document Upload
-                AppSectionCard(
-                  title: 'Document',
-                  icon: Icons.description_outlined,
-                  children: [
-                    AppCard(
-                      variant: AppCardVariant.outlined,
-                      onTap: _isProcessing ? null : _uploadSigned,
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: AppColors.surfaceSecondary,
-                              borderRadius: AppRadii.md,
-                            ),
-                            child: Icon(
-                              lease.signedDocumentUrl != null
-                                  ? Icons.picture_as_pdf_outlined
-                                  : Icons.upload_file_outlined,
-                              size: 20,
-                              color: lease.signedDocumentUrl != null
-                                  ? AppColors.danger
-                                  : AppColors.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  lease.signedDocumentUrl != null
-                                      ? 'Signed Lease Agreement'
-                                      : 'Upload Signed PDF',
-                                  style: textTheme.titleSmall,
-                                ),
-                                const SizedBox(height: AppSpacing.xxs),
-                                Text(
-                                  lease.signedDocumentUrl != null
-                                      ? 'Tap to replace document'
-                                      : 'PDF format only',
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: AppColors.textTertiary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(
-                            Icons.chevron_right,
-                            size: 20,
-                            color: AppColors.textTertiary,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.lg),
-
-                // Actions section
-                AppSectionCard(
-                  title: 'Actions',
-                  icon: Icons.settings_outlined,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: _isProcessing ? null : _renewLease,
-                            icon: const Icon(Icons.refresh, size: 18),
-                            label: const Text('Renew'),
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: _isProcessing ? null : _terminateLease,
-                            icon: Icon(
-                              Icons.cancel_outlined,
-                              size: 18,
-                              color: _isProcessing ? null : AppColors.danger,
-                            ),
-                            label: Text(
-                              'Terminate',
-                              style: TextStyle(
-                                color: _isProcessing ? null : AppColors.danger,
-                              ),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              side: _isProcessing
-                                  ? null
-                                  : const BorderSide(color: AppColors.danger),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.xl),
               ],
             ),
           );
         },
-        loading: () => const AppLoadingShimmer(itemCount: 3),
-        error: (error, _) => AppErrorView(
-          title: 'Unable to load lease',
-          message: error.toString(),
-          onRetry: () => ref.invalidate(leaseDetailProvider(widget.leaseId)),
-          retryLabel: 'Try again',
-        ),
       ),
     );
   }

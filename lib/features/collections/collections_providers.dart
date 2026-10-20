@@ -1,46 +1,64 @@
+import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/core/pagination/paged_list_controller.dart';
 import 'package:estate_app/core/providers.dart';
+import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:estate_app/features/collections/data/rent_repository.dart';
 import 'package:estate_app/features/collections/models/rent_charge.dart';
-import 'package:estate_app/features/collections/models/rent_payment.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final rentRepositoryProvider = Provider<RentRepository>((ref) {
+  ref.watch(accountScopeProvider);
   return RentRepository(
     ref.read(apiClientProvider),
     ref.read(cacheStoreProvider),
   );
 });
 
-final rentChargesProvider = FutureProvider.family<List<RentCharge>, String?>(
-  (ref, status) => ref.read(rentRepositoryProvider).listCharges(status: status),
+/// Every charge of the account (all pages), for totals and the charge picker.
+final allRentChargesProvider = FutureProvider<List<RentChargeWithTotals>>(
+  (ref) => ref.watch(rentRepositoryProvider).listAllCharges(),
 );
 
-final rentChargesPagedProvider = StateNotifierProvider.family<
-    PagedListController<RentCharge>,
-    PagedListState<RentCharge>,
-    String?>(
-  (ref, status) => PagedListController<RentCharge>(
-    fetchPage: ({required cursor, required limit}) {
-      return ref.read(rentRepositoryProvider).listChargesPage(
+/// The charges that still owe money: due, partly paid or overdue. The record
+/// payment screen picks one of them.
+final unpaidRentChargesProvider = FutureProvider<List<RentChargeWithTotals>>((
+  ref,
+) async {
+  final all = await ref.watch(allRentChargesProvider.future);
+  return [
+    for (final row in all)
+      if ((row.status == RentChargeStatus.pending ||
+              row.status == RentChargeStatus.partial ||
+              row.status == RentChargeStatus.overdue) &&
+          row.balance > 0)
+        row,
+  ];
+});
+
+/// A list that scrolls, one status per tab.
+final rentChargesPagedProvider =
+    StateNotifierProvider.family<
+      PagedListController<RentChargeWithTotals>,
+      PagedListState<RentChargeWithTotals>,
+      RentChargeStatus
+    >((ref, status) {
+      final repository = ref.watch(rentRepositoryProvider);
+      return PagedListController<RentChargeWithTotals>(
+        fetchPage: ({required cursor, required limit}) {
+          return repository.listChargesPage(
             cursor: cursor,
             limit: limit,
             status: status,
           );
-    },
-  ),
-);
+        },
+      );
+    });
 
-final rentPaymentsProvider = FutureProvider<List<RentPayment>>(
-  (ref) => ref.read(rentRepositoryProvider).listPayments(),
-);
-
-/// Property-scoped variant of [rentChargesProvider]. Used by the
-/// property-detail Rent tab so the backend does the filtering instead of
-/// relying on a (fragile) client-side name match (B16).
+/// Property-scoped variant. Used by the property-detail Rent tab: the backend
+/// does the filtering, and every page is read.
 final rentChargesForPropertyProvider =
-    FutureProvider.family<List<RentCharge>, int>((ref, propertyId) {
-  return ref
-      .read(rentRepositoryProvider)
-      .listCharges(propertyId: propertyId);
-});
+    FutureProvider.family<List<RentChargeWithTotals>, int>((ref, propertyId) {
+      return ref
+          .watch(rentRepositoryProvider)
+          .listAllCharges(propertyId: propertyId);
+    });

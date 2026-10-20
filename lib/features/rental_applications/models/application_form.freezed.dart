@@ -21,11 +21,14 @@ ApplicationFormField _$ApplicationFormFieldFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$ApplicationFormField {
-  @JsonKey(fromJson: parseInt)
-  int? get id => throw _privateConstructorUsedError;
+  String? get id => throw _privateConstructorUsedError;
   String? get label => throw _privateConstructorUsedError;
-  @JsonKey(name: 'field_type')
-  String? get fieldType => throw _privateConstructorUsedError;
+  @JsonKey(
+    name: 'field_type',
+    fromJson: ApplicationFieldType.fromJson,
+    toJson: ApplicationFieldType.toJsonValue,
+  )
+  ApplicationFieldType? get fieldType => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_required')
   bool? get isRequired => throw _privateConstructorUsedError;
   List<String>? get options => throw _privateConstructorUsedError;
@@ -48,9 +51,14 @@ abstract class $ApplicationFormFieldCopyWith<$Res> {
   ) = _$ApplicationFormFieldCopyWithImpl<$Res, ApplicationFormField>;
   @useResult
   $Res call({
-    @JsonKey(fromJson: parseInt) int? id,
+    String? id,
     String? label,
-    @JsonKey(name: 'field_type') String? fieldType,
+    @JsonKey(
+      name: 'field_type',
+      fromJson: ApplicationFieldType.fromJson,
+      toJson: ApplicationFieldType.toJsonValue,
+    )
+    ApplicationFieldType? fieldType,
     @JsonKey(name: 'is_required') bool? isRequired,
     List<String>? options,
   });
@@ -85,7 +93,7 @@ class _$ApplicationFormFieldCopyWithImpl<
             id: freezed == id
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
-                      as int?,
+                      as String?,
             label: freezed == label
                 ? _value.label
                 : label // ignore: cast_nullable_to_non_nullable
@@ -93,7 +101,7 @@ class _$ApplicationFormFieldCopyWithImpl<
             fieldType: freezed == fieldType
                 ? _value.fieldType
                 : fieldType // ignore: cast_nullable_to_non_nullable
-                      as String?,
+                      as ApplicationFieldType?,
             isRequired: freezed == isRequired
                 ? _value.isRequired
                 : isRequired // ignore: cast_nullable_to_non_nullable
@@ -118,9 +126,14 @@ abstract class _$$ApplicationFormFieldImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    @JsonKey(fromJson: parseInt) int? id,
+    String? id,
     String? label,
-    @JsonKey(name: 'field_type') String? fieldType,
+    @JsonKey(
+      name: 'field_type',
+      fromJson: ApplicationFieldType.fromJson,
+      toJson: ApplicationFieldType.toJsonValue,
+    )
+    ApplicationFieldType? fieldType,
     @JsonKey(name: 'is_required') bool? isRequired,
     List<String>? options,
   });
@@ -151,7 +164,7 @@ class __$$ApplicationFormFieldImplCopyWithImpl<$Res>
         id: freezed == id
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
-                  as int?,
+                  as String?,
         label: freezed == label
             ? _value.label
             : label // ignore: cast_nullable_to_non_nullable
@@ -159,7 +172,7 @@ class __$$ApplicationFormFieldImplCopyWithImpl<$Res>
         fieldType: freezed == fieldType
             ? _value.fieldType
             : fieldType // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as ApplicationFieldType?,
         isRequired: freezed == isRequired
             ? _value.isRequired
             : isRequired // ignore: cast_nullable_to_non_nullable
@@ -177,9 +190,14 @@ class __$$ApplicationFormFieldImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$ApplicationFormFieldImpl implements _ApplicationFormField {
   const _$ApplicationFormFieldImpl({
-    @JsonKey(fromJson: parseInt) this.id,
+    this.id,
     this.label,
-    @JsonKey(name: 'field_type') this.fieldType,
+    @JsonKey(
+      name: 'field_type',
+      fromJson: ApplicationFieldType.fromJson,
+      toJson: ApplicationFieldType.toJsonValue,
+    )
+    this.fieldType,
     @JsonKey(name: 'is_required') this.isRequired,
     final List<String>? options,
   }) : _options = options;
@@ -188,13 +206,16 @@ class _$ApplicationFormFieldImpl implements _ApplicationFormField {
       _$$ApplicationFormFieldImplFromJson(json);
 
   @override
-  @JsonKey(fromJson: parseInt)
-  final int? id;
+  final String? id;
   @override
   final String? label;
   @override
-  @JsonKey(name: 'field_type')
-  final String? fieldType;
+  @JsonKey(
+    name: 'field_type',
+    fromJson: ApplicationFieldType.fromJson,
+    toJson: ApplicationFieldType.toJsonValue,
+  )
+  final ApplicationFieldType? fieldType;
   @override
   @JsonKey(name: 'is_required')
   final bool? isRequired;
@@ -258,9 +279,14 @@ class _$ApplicationFormFieldImpl implements _ApplicationFormField {
 
 abstract class _ApplicationFormField implements ApplicationFormField {
   const factory _ApplicationFormField({
-    @JsonKey(fromJson: parseInt) final int? id,
+    final String? id,
     final String? label,
-    @JsonKey(name: 'field_type') final String? fieldType,
+    @JsonKey(
+      name: 'field_type',
+      fromJson: ApplicationFieldType.fromJson,
+      toJson: ApplicationFieldType.toJsonValue,
+    )
+    final ApplicationFieldType? fieldType,
     @JsonKey(name: 'is_required') final bool? isRequired,
     final List<String>? options,
   }) = _$ApplicationFormFieldImpl;
@@ -269,13 +295,16 @@ abstract class _ApplicationFormField implements ApplicationFormField {
       _$ApplicationFormFieldImpl.fromJson;
 
   @override
-  @JsonKey(fromJson: parseInt)
-  int? get id;
+  String? get id;
   @override
   String? get label;
   @override
-  @JsonKey(name: 'field_type')
-  String? get fieldType;
+  @JsonKey(
+    name: 'field_type',
+    fromJson: ApplicationFieldType.fromJson,
+    toJson: ApplicationFieldType.toJsonValue,
+  )
+  ApplicationFieldType? get fieldType;
   @override
   @JsonKey(name: 'is_required')
   bool? get isRequired;
@@ -309,7 +338,9 @@ mixin _$ApplicationForm {
   String? get slug => throw _privateConstructorUsedError;
   @JsonKey(name: 'is_active')
   bool? get isActive => throw _privateConstructorUsedError;
-  @JsonKey(name: 'custom_fields', fromJson: _fieldsFromJson)
+  @JsonKey(name: 'application_fee_amount', fromJson: parseDouble)
+  double? get applicationFeeAmount => throw _privateConstructorUsedError;
+  @JsonKey(name: 'custom_fields')
   List<ApplicationFormField>? get fields => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at', fromJson: parseDateTime)
   DateTime? get createdAt => throw _privateConstructorUsedError;
@@ -342,8 +373,9 @@ abstract class $ApplicationFormCopyWith<$Res> {
     String? description,
     String? slug,
     @JsonKey(name: 'is_active') bool? isActive,
-    @JsonKey(name: 'custom_fields', fromJson: _fieldsFromJson)
-    List<ApplicationFormField>? fields,
+    @JsonKey(name: 'application_fee_amount', fromJson: parseDouble)
+    double? applicationFeeAmount,
+    @JsonKey(name: 'custom_fields') List<ApplicationFormField>? fields,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) DateTime? createdAt,
     @JsonKey(name: 'expires_at', fromJson: parseDateTime) DateTime? expiresAt,
   });
@@ -372,6 +404,7 @@ class _$ApplicationFormCopyWithImpl<$Res, $Val extends ApplicationForm>
     Object? description = freezed,
     Object? slug = freezed,
     Object? isActive = freezed,
+    Object? applicationFeeAmount = freezed,
     Object? fields = freezed,
     Object? createdAt = freezed,
     Object? expiresAt = freezed,
@@ -410,6 +443,10 @@ class _$ApplicationFormCopyWithImpl<$Res, $Val extends ApplicationForm>
                 ? _value.isActive
                 : isActive // ignore: cast_nullable_to_non_nullable
                       as bool?,
+            applicationFeeAmount: freezed == applicationFeeAmount
+                ? _value.applicationFeeAmount
+                : applicationFeeAmount // ignore: cast_nullable_to_non_nullable
+                      as double?,
             fields: freezed == fields
                 ? _value.fields
                 : fields // ignore: cast_nullable_to_non_nullable
@@ -446,8 +483,9 @@ abstract class _$$ApplicationFormImplCopyWith<$Res>
     String? description,
     String? slug,
     @JsonKey(name: 'is_active') bool? isActive,
-    @JsonKey(name: 'custom_fields', fromJson: _fieldsFromJson)
-    List<ApplicationFormField>? fields,
+    @JsonKey(name: 'application_fee_amount', fromJson: parseDouble)
+    double? applicationFeeAmount,
+    @JsonKey(name: 'custom_fields') List<ApplicationFormField>? fields,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) DateTime? createdAt,
     @JsonKey(name: 'expires_at', fromJson: parseDateTime) DateTime? expiresAt,
   });
@@ -475,6 +513,7 @@ class __$$ApplicationFormImplCopyWithImpl<$Res>
     Object? description = freezed,
     Object? slug = freezed,
     Object? isActive = freezed,
+    Object? applicationFeeAmount = freezed,
     Object? fields = freezed,
     Object? createdAt = freezed,
     Object? expiresAt = freezed,
@@ -513,6 +552,10 @@ class __$$ApplicationFormImplCopyWithImpl<$Res>
             ? _value.isActive
             : isActive // ignore: cast_nullable_to_non_nullable
                   as bool?,
+        applicationFeeAmount: freezed == applicationFeeAmount
+            ? _value.applicationFeeAmount
+            : applicationFeeAmount // ignore: cast_nullable_to_non_nullable
+                  as double?,
         fields: freezed == fields
             ? _value._fields
             : fields // ignore: cast_nullable_to_non_nullable
@@ -542,8 +585,9 @@ class _$ApplicationFormImpl implements _ApplicationForm {
     this.description,
     this.slug,
     @JsonKey(name: 'is_active') this.isActive,
-    @JsonKey(name: 'custom_fields', fromJson: _fieldsFromJson)
-    final List<ApplicationFormField>? fields,
+    @JsonKey(name: 'application_fee_amount', fromJson: parseDouble)
+    this.applicationFeeAmount,
+    @JsonKey(name: 'custom_fields') final List<ApplicationFormField>? fields,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) this.createdAt,
     @JsonKey(name: 'expires_at', fromJson: parseDateTime) this.expiresAt,
   }) : _fields = fields;
@@ -572,9 +616,12 @@ class _$ApplicationFormImpl implements _ApplicationForm {
   @override
   @JsonKey(name: 'is_active')
   final bool? isActive;
+  @override
+  @JsonKey(name: 'application_fee_amount', fromJson: parseDouble)
+  final double? applicationFeeAmount;
   final List<ApplicationFormField>? _fields;
   @override
-  @JsonKey(name: 'custom_fields', fromJson: _fieldsFromJson)
+  @JsonKey(name: 'custom_fields')
   List<ApplicationFormField>? get fields {
     final value = _fields;
     if (value == null) return null;
@@ -592,7 +639,7 @@ class _$ApplicationFormImpl implements _ApplicationForm {
 
   @override
   String toString() {
-    return 'ApplicationForm(id: $id, propertyId: $propertyId, propertyName: $propertyName, propertyAddress: $propertyAddress, title: $title, description: $description, slug: $slug, isActive: $isActive, fields: $fields, createdAt: $createdAt, expiresAt: $expiresAt)';
+    return 'ApplicationForm(id: $id, propertyId: $propertyId, propertyName: $propertyName, propertyAddress: $propertyAddress, title: $title, description: $description, slug: $slug, isActive: $isActive, applicationFeeAmount: $applicationFeeAmount, fields: $fields, createdAt: $createdAt, expiresAt: $expiresAt)';
   }
 
   @override
@@ -613,6 +660,8 @@ class _$ApplicationFormImpl implements _ApplicationForm {
             (identical(other.slug, slug) || other.slug == slug) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive) &&
+            (identical(other.applicationFeeAmount, applicationFeeAmount) ||
+                other.applicationFeeAmount == applicationFeeAmount) &&
             const DeepCollectionEquality().equals(other._fields, _fields) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
@@ -632,6 +681,7 @@ class _$ApplicationFormImpl implements _ApplicationForm {
     description,
     slug,
     isActive,
+    applicationFeeAmount,
     const DeepCollectionEquality().hash(_fields),
     createdAt,
     expiresAt,
@@ -664,8 +714,9 @@ abstract class _ApplicationForm implements ApplicationForm {
     final String? description,
     final String? slug,
     @JsonKey(name: 'is_active') final bool? isActive,
-    @JsonKey(name: 'custom_fields', fromJson: _fieldsFromJson)
-    final List<ApplicationFormField>? fields,
+    @JsonKey(name: 'application_fee_amount', fromJson: parseDouble)
+    final double? applicationFeeAmount,
+    @JsonKey(name: 'custom_fields') final List<ApplicationFormField>? fields,
     @JsonKey(name: 'created_at', fromJson: parseDateTime)
     final DateTime? createdAt,
     @JsonKey(name: 'expires_at', fromJson: parseDateTime)
@@ -697,7 +748,10 @@ abstract class _ApplicationForm implements ApplicationForm {
   @JsonKey(name: 'is_active')
   bool? get isActive;
   @override
-  @JsonKey(name: 'custom_fields', fromJson: _fieldsFromJson)
+  @JsonKey(name: 'application_fee_amount', fromJson: parseDouble)
+  double? get applicationFeeAmount;
+  @override
+  @JsonKey(name: 'custom_fields')
   List<ApplicationFormField>? get fields;
   @override
   @JsonKey(name: 'created_at', fromJson: parseDateTime)

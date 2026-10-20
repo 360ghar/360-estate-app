@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:cross_file/cross_file.dart';
+import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/core/config/app_config.dart';
 import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/core/logger/app_logger.dart';
+import 'package:estate_app/core/network/owner_scope.dart';
 import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/core/storage/app_preferences.dart';
 import 'package:estate_app/core/storage/auth_token_storage.dart';
@@ -49,12 +51,10 @@ class AuthState {
   /// Has a live session. Includes [AuthStatus.needsPassword]: the account is
   /// signed in but must complete the mandatory set-password step first.
   bool get isLoggedIn =>
-      status == AuthStatus.authenticated ||
-      status == AuthStatus.needsPassword;
+      status == AuthStatus.authenticated || status == AuthStatus.needsPassword;
   // Progressive prompts (in-app, not router gates). Derived from profile.
   bool get needsPhone =>
-      isAuthenticated &&
-      ((user?.phone ?? '').trim().isEmpty);
+      isAuthenticated && ((user?.phone ?? '').trim().isEmpty);
   bool get needsProfileCompletion =>
       isAuthenticated && !(user?.isProfileComplete ?? true);
 
@@ -118,33 +118,60 @@ final authControllerProvider = StateNotifierProvider<AuthController, AuthState>(
       ref.read(appPreferencesProvider),
       ref.read(appConfigProvider),
       ref.read(googleSignInServiceProvider),
-      // Cache-clear seam: invalidate per-user tenants cache on logout without
-      // importing the TenantsRepository definition. Single funnel — every
-      // logout UI path goes through AuthController.logout().
-      onLogoutClear: () =>
-          ref.read(cacheStoreProvider).invalidatePrefix('tenants:'),
+      // Cache seams. Every cached value is owner data, so sign-out and an
+      // account switch drop all of it, and the store scopes its keys to the
+      // bound account. Every logout UI path goes through
+      // AuthController.logout(). `onLogoutClear` drops the entries only: a
+      // token refresh calls it too, and a refresh keeps the account and the
+      // owner an agent picked.
+      onLogoutClear: () => ref.read(cacheStoreProvider).invalidateAll(),
+      onAccountChanged: (user) {
+        final userId = user?.id;
+        ref.read(cacheStoreProvider).bindAccount(userId?.toString());
+        // An agent or admin keeps the owner they picked, per account.
+        final picked = userId == null
+            ? null
+            : ref.read(appPreferencesProvider).getInt(ownerPrefKey(userId));
+        ref.read(ownerScopeProvider.notifier).state = OwnerScope.forRole(
+          user?.role,
+          picked,
+        );
+      },
     );
   },
 );
 
-/// Map the backend auth-gate stage string to the local [AuthStatus] enum.
+/// Identity of the data the app shows: the signed-in account and, for an agent
+/// or admin, the owner they manage. Null when signed out. Every provider that
+/// holds owner data watches this, so its state is rebuilt when the account or
+/// the owner changes and dropped on sign-out. One account's figures never reach
+/// another account.
+final accountScopeProvider = Provider<String?>((ref) {
+  final userId = ref.watch(
+    authControllerProvider.select((state) => state.user?.id),
+  );
+  if (userId == null) return null;
+  final ownerId = ref.watch(
+    ownerScopeProvider.select((scope) => scope.ownerId),
+  );
+  return '$userId:${ownerId ?? ''}';
+});
+
+/// Map the backend auth-gate stage to the local [AuthStatus] enum.
 /// `identifier_verification` keeps the user out and `password_setup` routes
 /// to the mandatory set-password step. profile_completion / app_onboarding
 /// enter the app (in-app prompts, not router gates). Top-level for
 /// testability; [AuthController] delegates to this.
-AuthStatus mapGateStageToAuthStatus(String stage) {
-  switch (stage) {
-    case 'identifier_verification':
-      return AuthStatus.unauthenticated;
-    case 'password_setup':
-      return AuthStatus.needsPassword;
-    case 'profile_completion':
-    case 'app_onboarding':
-    case 'active':
-      return AuthStatus.authenticated;
-    default:
-      return AuthStatus.authenticated;
-  }
+AuthStatus mapGateStageToAuthStatus(AuthGateStage? stage) {
+  return switch (stage) {
+    AuthGateStage.identifierVerification => AuthStatus.unauthenticated,
+    AuthGateStage.passwordSetup => AuthStatus.needsPassword,
+    AuthGateStage.profileCompletion ||
+    AuthGateStage.appOnboarding ||
+    AuthGateStage.active ||
+    // An unknown stage never locks the user out.
+    null => AuthStatus.authenticated,
+  };
 }
 
 class AuthController extends StateNotifier<AuthState> {
@@ -155,6 +182,7 @@ class AuthController extends StateNotifier<AuthState> {
     this._config,
     this._googleSignIn, {
     this.onLogoutClear,
+    this.onAccountChanged,
   }) : super(AuthState.checking) {
     _subscription = _tokenStorage.onTokenChanged.listen(_handleTokenChange);
     if (_config.isSupabaseConfigured) {
@@ -192,9 +220,14 @@ class AuthController extends StateNotifier<AuthState> {
   final AppConfig _config;
 
   /// Optional logout hook for per-user cache invalidation. Wired by
-  /// [authControllerProvider] to clear the `tenants:` cache prefix; defaults
-  /// to null so unit tests can construct the controller without a ref.
+  /// [authControllerProvider] to clear the whole cache store; defaults to
+  /// null so unit tests can construct the controller without a ref.
   final FutureOr<void> Function()? onLogoutClear;
+
+  /// Called with the signed-in profile whenever the account is set (null on
+  /// sign-out). Wired by [authControllerProvider] to bind the cache store and
+  /// the owner scope to the account.
+  final void Function(UserProfile? user)? onAccountChanged;
 
   /// Last non-empty token seen. A *different* non-empty token means account
   /// replacement (B signed in over A): per-user caches must be dropped before
@@ -236,7 +269,7 @@ class AuthController extends StateNotifier<AuthState> {
           return;
         }
       } on UnauthorizedFailure {
-        // The stored session is confirmed invalid — force a clean logout.
+        // The stored session is confirmed invalid: force a clean logout.
         await _tokenStorage.clear();
       } catch (error, stackTrace) {
         // Transient failure (network hiccup, backend 5xx) while restoring a
@@ -266,7 +299,7 @@ class AuthController extends StateNotifier<AuthState> {
       ).wait;
       _applyAuthenticated(user: user, stage: stage);
     } on UnauthorizedFailure {
-      // Token rejected by the backend — the session is truly gone.
+      // Token rejected by the backend: the session is truly gone.
       await _tokenStorage.clear();
       state = const AuthState(status: AuthStatus.unauthenticated);
     } catch (error, stackTrace) {
@@ -496,7 +529,7 @@ class AuthController extends StateNotifier<AuthState> {
 
   /// Verifies an email OTP and signs the user in.
   ///
-  /// When [requirePassword] is true (the account has no password — req 6), the
+  /// When [requirePassword] is true (the account has no password: req 6), the
   /// user is routed to the mandatory set-password step instead of straight into
   /// the app.
   Future<void> verifyEmailOtp({
@@ -563,7 +596,7 @@ class AuthController extends StateNotifier<AuthState> {
 
   /// Verifies a phone OTP and signs the user in.
   ///
-  /// When [requirePassword] is true (the account has no password — req 6), the
+  /// When [requirePassword] is true (the account has no password: req 6), the
   /// user is routed to the mandatory set-password step instead of straight into
   /// the app.
   Future<void> verifyOtp({
@@ -790,6 +823,8 @@ class AuthController extends StateNotifier<AuthState> {
   Future<void> logout() async {
     await _repository.logout();
     await onLogoutClear?.call();
+    // Sign-out: unbind the cache store from the account and drop the owner.
+    onAccountChanged?.call(null);
     if (_googleSignIn != null) {
       await _googleSignIn.signOut();
     }
@@ -809,8 +844,8 @@ class AuthController extends StateNotifier<AuthState> {
       // so a failed save is visible instead of silent.
       try {
         final gateState = await _repository.getAuthGateState();
-        final stage = gateState['stage'] as String? ?? 'active';
-        if (stage == 'profile_completion') {
+        final stage = gateState.stage;
+        if (stage == AuthGateStage.profileCompletion) {
           AppLogger.w(
             'Gate still reports profile_completion after a successful '
             'profile update; profile may not have saved.',
@@ -839,6 +874,7 @@ class AuthController extends StateNotifier<AuthState> {
       _lastToken = null;
       try {
         await onLogoutClear?.call();
+        onAccountChanged?.call(null);
       } catch (_) {
         // Cache-clear failure must never block expiry logout.
       }
@@ -895,23 +931,27 @@ class AuthController extends StateNotifier<AuthState> {
     _applyAuthenticated(user: user, stage: stage, phone: phone);
   }
 
-  /// Fetches the backend gate stage, defaulting to `'active'` on any failure
-  /// so users are never locked out by a transient backend error.
-  Future<String> _fetchGateStage() async {
+  /// Fetches the backend gate stage. A failure or an unknown stage reads as
+  /// null, which enters the app, so users are never locked out by a transient
+  /// backend error.
+  Future<AuthGateStage?> _fetchGateStage() async {
     try {
       final gateState = await _repository.getAuthGateState();
-      return gateState['stage'] as String? ?? 'active';
+      return gateState.stage;
     } catch (_) {
-      return 'active';
+      return null;
     }
   }
 
   void _applyAuthenticated({
     required UserProfile user,
-    required String stage,
+    required AuthGateStage? stage,
     String? phone,
   }) {
     final gateStatus = _mapGateStageToAuthStatus(stage);
+    // Bind before the state change: listeners that read the cache on the new
+    // state must already see the new account's scope.
+    onAccountChanged?.call(user);
     state = AuthState(
       status: gateStatus,
       user: user,
@@ -919,8 +959,8 @@ class AuthController extends StateNotifier<AuthState> {
     );
   }
 
-  /// Map the backend gate stage string to the local [AuthStatus] enum.
-  AuthStatus _mapGateStageToAuthStatus(String stage) =>
+  /// Map the backend gate stage to the local [AuthStatus] enum.
+  AuthStatus _mapGateStageToAuthStatus(AuthGateStage? stage) =>
       mapGateStageToAuthStatus(stage);
 
   /// Persists the last successful auth method + a masked identifier so the
@@ -979,11 +1019,15 @@ class AuthController extends StateNotifier<AuthState> {
     return 'Something went wrong. Please try again.';
   }
 
-  /// Upload profile photo to Supabase Storage. Web-safe: takes the `XFile`
-  /// returned directly by `image_picker` (no io-File conversion).
+  /// Uploads the profile photo (`POST /users/me/avatar`) and returns its URL.
+  /// The backend returns the updated profile, so the signed-in user is
+  /// refreshed too. Web-safe: takes the `XFile` returned directly by
+  /// `image_picker` (no io-File conversion).
   Future<String> uploadProfilePhoto(XFile imageFile) async {
     try {
-      return await _repository.uploadProfilePhoto(imageFile);
+      final profile = await _repository.uploadProfilePhoto(imageFile);
+      state = state.copyWith(user: profile);
+      return profile.avatarUrl ?? '';
     } catch (error) {
       state = state.copyWith(errorMessage: _messageForError(error));
       rethrow;

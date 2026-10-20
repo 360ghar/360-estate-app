@@ -1,51 +1,27 @@
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
-import 'package:estate_app/core/presentation/design_system/app_gradients.dart';
-import 'package:estate_app/core/presentation/design_system/app_radii.dart';
-import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
+import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/design_system/app_text_styles.dart';
+import 'package:estate_app/core/presentation/errors/user_facing_message.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_empty_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
+import 'package:estate_app/core/presentation/widgets/app_list_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_loading_shimmer.dart';
-import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/app_search_bar.dart';
+import 'package:estate_app/core/presentation/widgets/motion.dart';
+import 'package:estate_app/core/utils/dates.dart';
+import 'package:estate_app/core/utils/money.dart';
 import 'package:estate_app/features/more/expenses/expenses_providers.dart';
 import 'package:estate_app/features/more/expenses/models/expense.dart';
+import 'package:estate_app/features/more/expenses/presentation/expense_category_visual.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-/// Maps expense category to icon and color.
-({IconData icon, Color color}) _categoryVisual(String? category) {
-  final cat = (category ?? '').toLowerCase();
-  if (cat.contains('repair') || cat.contains('maintenance')) {
-    return (icon: Icons.build_rounded, color: const Color(0xFFF59E0B));
-  }
-  if (cat.contains('utility') || cat.contains('electric') || cat.contains('water')) {
-    return (icon: Icons.bolt_rounded, color: const Color(0xFF3B82F6));
-  }
-  if (cat.contains('tax')) {
-    return (icon: Icons.account_balance_rounded, color: const Color(0xFF8B5CF6));
-  }
-  if (cat.contains('insurance')) {
-    return (icon: Icons.shield_rounded, color: const Color(0xFF0284C7));
-  }
-  if (cat.contains('salary') || cat.contains('staff') || cat.contains('labour')) {
-    return (icon: Icons.people_rounded, color: const Color(0xFF059669));
-  }
-  if (cat.contains('legal') || cat.contains('registration')) {
-    return (icon: Icons.gavel_rounded, color: const Color(0xFFDC2626));
-  }
-  if (cat.contains('furnish') || cat.contains('furniture')) {
-    return (icon: Icons.chair_rounded, color: const Color(0xFF14B8A6));
-  }
-  if (cat.contains('travel') || cat.contains('transport')) {
-    return (icon: Icons.directions_car_rounded, color: const Color(0xFF6366F1));
-  }
-  return (icon: Icons.receipt_long_rounded, color: AppColors.textSecondary);
-}
-
+/// What the owner spent: this month's total, then every expense, searchable
+/// and filtered by category.
 class ExpensesPage extends ConsumerStatefulWidget {
   const ExpensesPage({super.key});
 
@@ -55,197 +31,156 @@ class ExpensesPage extends ConsumerStatefulWidget {
 
 class _ExpensesPageState extends ConsumerState<ExpensesPage> {
   String _query = '';
-  String? _selectedCategory;
+  ExpenseCategory? _category;
 
-  List<Expense> _applyFilters(List<Expense> items) {
-    var filtered = items;
-    if (_query.isNotEmpty) {
-      final q = _query.toLowerCase();
-      filtered = filtered
-          .where((e) =>
-              (e.title ?? '').toLowerCase().contains(q) ||
-              (e.category ?? '').toLowerCase().contains(q) ||
-              (e.propertyName ?? '').toLowerCase().contains(q))
-          .toList();
-    }
-    if (_selectedCategory != null) {
-      filtered =
-          filtered.where((e) => e.category == _selectedCategory).toList();
-    }
-    return filtered;
+  bool _matches(Expense e) {
+    if (_category != null && e.category != _category) return false;
+    if (_query.isEmpty) return true;
+    final q = _query.toLowerCase();
+    return (e.title ?? '').toLowerCase().contains(q) ||
+        (e.category?.text(context.l10n) ?? '').toLowerCase().contains(q) ||
+        (e.propertyName ?? '').toLowerCase().contains(q);
   }
 
-  Set<String> _categories(List<Expense> items) {
-    return items
-        .map((e) => e.category)
-        .whereType<String>()
-        .where((c) => c.isNotEmpty)
-        .toSet();
-  }
-
-  double _monthlyTotal(List<Expense> items) {
-    final now = DateTime.now();
-    return items
-        .where((e) =>
-            e.date != null &&
-            e.date!.year == now.year &&
-            e.date!.month == now.month)
-        .fold<double>(0, (sum, e) => sum + (e.amount ?? 0));
+  Future<void> _reload() async {
+    ref.invalidate(expensesListProvider);
+    await ref
+        .read(expensesListProvider.future)
+        .catchError((_) => const <Expense>[]);
   }
 
   @override
   Widget build(BuildContext context) {
-    final expensesAsync = ref.watch(expensesListProvider);
+    final l10n = context.l10n;
+    final expenses = ref.watch(expensesListProvider);
 
-    return AppScaffold(
-      appBar: AppBar(title: const Text('Expenses')),
-      padding: EdgeInsets.zero,
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.expensesTitle)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.go('/more/expenses/new'),
-        icon: const Icon(Icons.add),
-        label: const Text('Add expense'),
+        icon: const Icon(Icons.add_rounded),
+        label: Text(l10n.expensesAdd),
       ),
-      body: expensesAsync.when(
-        data: (items) {
-          if (items.isEmpty) {
-            return const AppEmptyView(
-              title: 'No expenses yet',
-              message: 'Track repair, utility, and vendor expenses here.',
-            );
-          }
-
-          final categories = _categories(items);
-          final filtered = _applyFilters(items);
-          final total = _monthlyTotal(items);
-
-          return Column(
-            children: [
-              // Monthly summary card
-              _MonthlySummaryCard(total: total),
-
-              // Search + filter
-              AppSearchBar(
-                hintText: 'Search expenses...',
-                onChanged: (value) => setState(() => _query = value),
-                filterChips: [
-                  FilterChip(
-                    label: const Text('All'),
-                    selected: _selectedCategory == null,
-                    onSelected: (_) =>
-                        setState(() => _selectedCategory = null),
-                  ),
-                  ...categories.map((cat) => FilterChip(
-                        label: Text(cat),
-                        selected: _selectedCategory == cat,
+      body: RefreshIndicator(
+        onRefresh: _reload,
+        child: expenses.when(
+          loading: () => const AppLoadingShimmer(),
+          error: (error, _) => StateScrollView(
+            child: AppErrorView(
+              title: l10n.commonLoadFailedTitle,
+              message: userFacingMessage(error),
+              onRetry: _reload,
+            ),
+          ),
+          data: (items) {
+            if (items.isEmpty) {
+              return StateScrollView(
+                child: AppEmptyView(
+                  title: l10n.expensesEmptyTitle,
+                  message: l10n.expensesEmptyBody,
+                  icon: Icons.receipt_long_outlined,
+                ),
+              );
+            }
+            final categories = {for (final e in items) ?e.category}.toList()
+              ..sort((a, b) => a.index.compareTo(b.index));
+            final shown = items.where(_matches).toList();
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              // Room at the foot so the last row clears the button.
+              padding: const EdgeInsets.only(bottom: 96),
+              children: [
+                _MonthSummary(items: items),
+                AppSearchBar(
+                  hintText: l10n.expensesSearchHint,
+                  onChanged: (value) => setState(() => _query = value.trim()),
+                  filterChips: [
+                    FilterChip(
+                      label: Text(l10n.tenantsFilterAll),
+                      selected: _category == null,
+                      onSelected: (_) => setState(() => _category = null),
+                    ),
+                    for (final c in categories)
+                      FilterChip(
+                        label: Text(c.text(l10n)),
+                        selected: _category == c,
                         onSelected: (_) => setState(
-                          () => _selectedCategory =
-                              _selectedCategory == cat ? null : cat,
+                          () => _category = _category == c ? null : c,
                         ),
-                      )),
-                ],
-              ),
-
-              // Expense list
-              Expanded(
-                child: filtered.isEmpty
-                    ? const AppEmptyView(
-                        title: 'No matches',
-                        message: 'Try adjusting your search or filters.',
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.lg,
-                          AppSpacing.sm,
-                          AppSpacing.lg,
-                          AppSpacing.xxxl * 2,
-                        ),
-                        itemCount: filtered.length,
-                        separatorBuilder: (_, _) =>
-                            const SizedBox(height: AppSpacing.md),
-                        itemBuilder: (context, index) {
-                          return _ExpenseTile(expense: filtered[index]);
-                        },
                       ),
-              ),
-            ],
-          );
-        },
-        loading: () => const AppLoadingShimmer(),
-        error: (error, _) => AppErrorView(
-          title: 'Unable to load expenses',
-          message: error.toString(),
-          onRetry: () => ref.invalidate(expensesListProvider),
-          retryLabel: 'Try again',
+                  ],
+                ),
+                if (shown.isEmpty)
+                  AppEmptyView(
+                    title: l10n.expensesNoMatchTitle,
+                    message: l10n.expensesNoMatchBody,
+                    icon: Icons.search_off_rounded,
+                  ),
+                for (var i = 0; i < shown.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg,
+                      AppSpacing.sm,
+                      AppSpacing.lg,
+                      AppSpacing.xs,
+                    ),
+                    child: RiseIn(
+                      index: i,
+                      child: _ExpenseRow(expense: shown[i]),
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 }
 
-class _MonthlySummaryCard extends StatelessWidget {
-  const _MonthlySummaryCard({required this.total});
+/// This month's spend in the display face, with the count under it.
+class _MonthSummary extends StatelessWidget {
+  const _MonthSummary({required this.items});
 
-  final double total;
+  final List<Expense> items;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textTheme = Theme.of(context).textTheme;
-    final formatter = NumberFormat.currency(symbol: '\u20B9', decimalDigits: 0);
-    final monthName = DateFormat('MMMM yyyy').format(DateTime.now());
-
+    final l10n = context.l10n;
+    final now = DateTime.now();
+    final month = items
+        .where((e) => e.date?.year == now.year && e.date?.month == now.month)
+        .toList();
+    final total = month.fold<double>(0, (sum, e) => sum + (e.amount ?? 0));
+    final monthName = DateFormat.MMMM(
+      Localizations.localeOf(context).toString(),
+    ).format(now);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.sm,
         AppSpacing.lg,
-        AppSpacing.md,
+        AppSpacing.xs,
       ),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          gradient: AppGradients.primarySubtle,
-          color: isDark ? AppColors.darkAccentSoft : AppColors.accentSoft,
-          borderRadius: AppRadii.lg,
-          border: Border.all(
-            color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
-            width: 0.5,
-          ),
-          boxShadow: AppShadows.cardResting,
-        ),
+      child: AppCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.calendar_month_rounded,
-                  size: 16,
-                  color: AppColors.textSecondary,
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Text(
-                  monthName,
-                  style: textTheme.labelMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
             Text(
-              formatter.format(total),
+              l10n.expensesSpentIn(monthName),
+              style: context.text.titleMedium,
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              rupees(total),
               style: AppTextStyles.currencyLarge.copyWith(
-                color: scheme.onSurface,
+                color: context.colors.onSurface,
               ),
             ),
-            const SizedBox(height: AppSpacing.xxs),
             Text(
-              'Total expenses this month',
-              style: textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
+              l10n.expensesCountThisMonth(month.length),
+              style: context.text.bodySmall?.copyWith(
+                color: context.colors.onSurfaceVariant,
               ),
             ),
           ],
@@ -255,137 +190,41 @@ class _MonthlySummaryCard extends StatelessWidget {
   }
 }
 
-class _ExpenseTile extends StatelessWidget {
-  const _ExpenseTile({required this.expense});
+class _ExpenseRow extends StatelessWidget {
+  const _ExpenseRow({required this.expense});
 
   final Expense expense;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textTheme = Theme.of(context).textTheme;
-
-    final formatter = NumberFormat.currency(symbol: '\u20B9', decimalDigits: 0);
-    final date = expense.date == null
-        ? null
-        : DateFormat('dd MMM yyyy').format(expense.date!);
-    final visual = _categoryVisual(expense.category);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: AppRadii.lg,
-        border: Border.all(
-          color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
-          width: 0.5,
-        ),
-        boxShadow: AppShadows.cardResting,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: AppRadii.lg,
-        child: InkWell(
-          borderRadius: AppRadii.lg,
-          onTap: () => context.go('/more/expenses/${expense.id}/edit'),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Row(
-              children: [
-                // Category icon
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: visual.color.withValues(alpha: isDark ? 0.15 : 0.1),
-                    borderRadius: AppRadii.md,
-                  ),
-                  child: Icon(
-                    visual.icon,
-                    size: 22,
-                    color: visual.color,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-
-                // Title + metadata
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        expense.title ?? 'Expense',
-                        style: textTheme.titleSmall,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: AppSpacing.xxs),
-                      Row(
-                        children: [
-                          if (expense.propertyName != null &&
-                              expense.propertyName!.isNotEmpty) ...[
-                            Flexible(
-                              child: Text(
-                                expense.propertyName!,
-                                style: textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            if (date != null)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: AppSpacing.xs),
-                                child: Text(
-                                  '\u2022',
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: AppColors.textTertiary,
-                                  ),
-                                ),
-                              ),
-                          ],
-                          if (date != null)
-                            Text(
-                              date,
-                              style: textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(width: AppSpacing.md),
-
-                // Amount - bold, right-aligned, tabular figures
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      formatter.format(expense.amount ?? 0),
-                      style: AppTextStyles.currencyXSmall.copyWith(
-                        color: scheme.onSurface,
-                      ),
-                    ),
-                    if (expense.category != null &&
-                        expense.category!.isNotEmpty)
-                      Text(
-                        expense.category!,
-                        style: textTheme.labelSmall?.copyWith(
-                          color: visual.color,
-                        ),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+    final l10n = context.l10n;
+    final category = expense.category;
+    final title = expense.title?.trim();
+    final date = expense.date;
+    return AppListCard(
+      leading: ExcludeSemantics(
+        child: Icon(
+          category?.icon ?? Icons.receipt_long_outlined,
+          color: context.colors.onSurfaceVariant,
         ),
       ),
+      title: title != null && title.isNotEmpty
+          ? title
+          : category?.text(l10n) ?? l10n.expensesUntitled,
+      subtitle: expense.propertyName,
+      facts: [
+        ?category?.text(l10n),
+        if (date != null) shortDate(context, date),
+      ],
+      trailing: Text(
+        rupees(expense.amount ?? 0),
+        style: AppTextStyles.currencySmall.copyWith(
+          color: context.colors.onSurface,
+        ),
+      ),
+      onTap: expense.id == null
+          ? null
+          : () => context.go('/more/expenses/${expense.id}/edit'),
     );
   }
 }

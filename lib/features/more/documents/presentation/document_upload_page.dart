@@ -1,59 +1,39 @@
 import 'dart:async';
 
 import 'package:cross_file/cross_file.dart';
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
-import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
-import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/errors/user_facing_message.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
+import 'package:estate_app/core/presentation/widgets/feedback.dart';
+import 'package:estate_app/core/services/file_upload_service.dart';
 import 'package:estate_app/features/more/documents/documents_providers.dart';
-import 'package:estate_app/features/more/documents/models/document_type.dart';
+import 'package:estate_app/features/more/documents/presentation/document_text.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-const _documentCategories = [
-  'Agreement',
-  'Receipt',
-  'Invoice',
-  'ID Proof',
-  'Tax',
-  'Insurance',
-  'Other',
-];
-
-/// Maps the sheet's display labels to canonical backend values.
-/// 'Tax' has no backend counterpart and falls back to `other`,
-/// matching `DocumentType.fromString` for unknown strings.
-const _documentCategoryValues = {
-  'Agreement': DocumentType.leaseAgreement,
-  'Receipt': DocumentType.receipt,
-  'Invoice': DocumentType.invoice,
-  'ID Proof': DocumentType.idProof,
-  'Tax': DocumentType.other,
-  'Insurance': DocumentType.insurancePolicy,
-  'Other': DocumentType.other,
-};
-
 class DocumentUploadPage extends ConsumerStatefulWidget {
   const DocumentUploadPage({super.key});
 
   @override
-  ConsumerState<DocumentUploadPage> createState() =>
-      _DocumentUploadPageState();
+  ConsumerState<DocumentUploadPage> createState() => _DocumentUploadPageState();
 }
 
 class _DocumentUploadPageState extends ConsumerState<DocumentUploadPage> {
   final _titleController = TextEditingController();
-  String _selectedType = _documentCategories.last;
+  DocumentType _type = DocumentType.other;
   XFile? _file;
   String? _fileName;
   int? _fileSize;
+
+  /// Shown under the file picker: no file, or a file over the size cap.
+  String? _fileError;
   bool _isUploading = false;
-  double _uploadProgress = 0;
 
   @override
   void dispose() {
@@ -66,338 +46,272 @@ class _DocumentUploadPageState extends ConsumerState<DocumentUploadPage> {
     // bytes via XFile.fromData instead of discarding the selection.
     final result = await FilePicker.platform.pickFiles(withData: kIsWeb);
     if (result == null || result.files.isEmpty) return;
-    final platformFile = result.files.single;
-    final path = platformFile.path;
-    final XFile? picked;
+    final picked = result.files.single;
+    final path = picked.path;
+    final XFile file;
     if (path != null && path.isNotEmpty) {
-      picked = XFile(path);
-    } else if (platformFile.bytes != null) {
-      picked = XFile.fromData(platformFile.bytes!, name: platformFile.name);
+      file = XFile(path);
+    } else if (picked.bytes != null) {
+      file = XFile.fromData(picked.bytes!, name: picked.name);
     } else {
       return;
     }
+    if (!mounted) return;
+    final tooLarge = picked.size > kMaxUploadBytes;
     setState(() {
-      _file = picked;
-      _fileName = platformFile.name;
-      _fileSize = platformFile.size;
+      _file = tooLarge ? null : file;
+      _fileName = tooLarge ? null : picked.name;
+      _fileSize = tooLarge ? null : picked.size;
+      _fileError = tooLarge ? context.l10n.documentUploadTooLarge : null;
     });
   }
 
-  String _formatFileSize(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-  }
-
-  IconData _fileIcon(String name) {
-    final lower = name.toLowerCase();
-    if (lower.endsWith('.pdf')) return Icons.picture_as_pdf_rounded;
-    if (lower.endsWith('.jpg') ||
-        lower.endsWith('.jpeg') ||
-        lower.endsWith('.png') ||
-        lower.endsWith('.gif') ||
-        lower.endsWith('.webp')) {
-      return Icons.image_rounded;
-    }
-    if (lower.endsWith('.doc') || lower.endsWith('.docx')) {
-      return Icons.description_rounded;
-    }
-    if (lower.endsWith('.xls') || lower.endsWith('.xlsx') || lower.endsWith('.csv')) {
-      return Icons.table_chart_rounded;
-    }
-    return Icons.insert_drive_file_rounded;
-  }
-
-  Color _fileColor(String name) {
-    final lower = name.toLowerCase();
-    if (lower.endsWith('.pdf')) return const Color(0xFFDC2626);
-    if (lower.endsWith('.jpg') ||
-        lower.endsWith('.jpeg') ||
-        lower.endsWith('.png') ||
-        lower.endsWith('.gif') ||
-        lower.endsWith('.webp')) {
-      return const Color(0xFF059669);
-    }
-    if (lower.endsWith('.doc') || lower.endsWith('.docx')) {
-      return const Color(0xFF2563EB);
-    }
-    return AppColors.textSecondary;
-  }
+  void _clearFile() => setState(() {
+    _file = null;
+    _fileName = null;
+    _fileSize = null;
+  });
 
   Future<void> _upload() async {
-    if (_file == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pick a file first.')),
-      );
+    final l10n = context.l10n;
+    final file = _file;
+    if (file == null) {
+      setState(() => _fileError = l10n.documentUploadNoFile);
       return;
     }
-
-    setState(() {
-      _isUploading = true;
-      _uploadProgress = 0;
-    });
-
-    // Simulate upload progress
-    _simulateProgress();
-
+    setState(() => _isUploading = true);
     try {
-      await ref.read(documentsRepositoryProvider).upload(
-            file: _file!,
-            title: _titleController.text.trim(),
-            type:
-                _documentCategoryValues[_selectedType]?.apiValue ??
-                DocumentType.other.apiValue,
+      final title = _titleController.text.trim();
+      // A blank title is not sent: the backend uses the file name.
+      await ref
+          .read(documentsRepositoryProvider)
+          .upload(
+            file: file,
+            title: title.isEmpty ? _fileName : title,
+            documentType: _type,
           );
-      ref.invalidate(documentsListProvider);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Document uploaded.')),
-        );
-        context.go('/more/documents');
-      }
+      ref
+        ..invalidate(documentsListProvider)
+        ..invalidate(documentsForPropertyProvider);
+      if (!mounted) return;
+      context.showSnack(l10n.documentUploadDone);
+      context.go('/more/documents');
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
+      context.showSnack(
+        userFacingMessage(error),
+        actionLabel: l10n.commonRetry,
+        onAction: _upload,
       );
     } finally {
-      if (mounted) {
-        setState(() => _isUploading = false);
-      }
+      if (mounted) setState(() => _isUploading = false);
     }
-  }
-
-  void _simulateProgress() {
-    Future.doWhile(() async {
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      if (!mounted || !_isUploading) return false;
-      setState(() {
-        _uploadProgress = (_uploadProgress + 0.05).clamp(0.0, 0.95);
-      });
-      return _uploadProgress < 0.95;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textTheme = Theme.of(context).textTheme;
+    final l10n = context.l10n;
+    final colors = context.colors;
+    final error = _fileError;
 
-    return AppScaffold(
-      appBar: AppBar(title: const Text('Upload document')),
-      scrollable: true,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.documentUploadTitle)),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.sm,
+          AppSpacing.lg,
+          AppSpacing.xxl,
+        ),
         children: [
-          // Upload area
-          GestureDetector(
-            onTap: _isUploading ? null : _pickFile,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(
-                vertical: AppSpacing.xxl,
-                horizontal: AppSpacing.lg,
-              ),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? AppColors.darkSurfaceSecondary
-                    : AppColors.surfaceSecondary,
-                borderRadius: AppRadii.lg,
-                border: Border.all(
-                  color: scheme.primary.withValues(alpha: 0.3),
-                  width: 1.5,
-                ),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: scheme.primary.withValues(alpha: isDark ? 0.15 : 0.08),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.cloud_upload_outlined,
-                      size: 28,
-                      color: scheme.primary,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  Text(
-                    _file == null ? 'Tap to select a file' : 'Tap to change file',
-                    style: textTheme.titleSmall?.copyWith(
-                      color: scheme.primary,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    'PDF, images, documents up to 25 MB',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          _FilePicker(
+            fileName: _fileName,
+            bytes: _fileSize,
+            error: error,
+            enabled: !_isUploading,
+            onPick: _pickFile,
+            onClear: _clearFile,
           ),
-
-          // File preview after selection
-          if (_file != null && _fileName != null) ...[
-            const SizedBox(height: AppSpacing.md),
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: scheme.surface,
-                borderRadius: AppRadii.lg,
-                border: Border.all(
-                  color: isDark
-                      ? AppColors.darkCardBorder
-                      : AppColors.cardBorder,
-                  width: 0.5,
-                ),
-                boxShadow: AppShadows.cardResting,
+          if (error != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.sm,
+                AppSpacing.lg,
+                0,
               ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: _fileColor(_fileName!)
-                          .withValues(alpha: isDark ? 0.15 : 0.1),
-                      borderRadius: AppRadii.sm,
-                    ),
-                    child: Icon(
-                      _fileIcon(_fileName!),
-                      size: 20,
-                      color: _fileColor(_fileName!),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _fileName!,
-                          style: textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (_fileSize != null)
-                          Text(
-                            _formatFileSize(_fileSize!),
-                            style: textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: _isUploading
-                        ? null
-                        : () => setState(() {
-                              _file = null;
-                              _fileName = null;
-                              _fileSize = null;
-                            }),
-                    icon: Icon(
-                      Icons.close_rounded,
-                      size: 18,
-                      color: AppColors.textTertiary,
-                    ),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ],
+              child: Semantics(
+                liveRegion: true,
+                child: Text(
+                  error,
+                  style: context.text.bodySmall?.copyWith(color: colors.error),
+                ),
               ),
             ),
-          ],
-
-          const SizedBox(height: AppSpacing.xl),
-
-          // Document details section
+          const SizedBox(height: AppSpacing.md),
           AppSectionCard(
-            title: 'Document details',
-            icon: Icons.edit_document,
+            title: l10n.documentUploadDetails,
             children: [
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Document title',
-                  hintText: 'e.g. Rental Agreement - Unit 3B',
+                enabled: !_isUploading,
+                textInputAction: TextInputAction.done,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  labelText: l10n.documentUploadTitleLabel,
+                  helperText: l10n.documentUploadTitleHelper,
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-              Text(
-                'Category',
-                style: textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              Text(l10n.documentUploadType, style: context.text.titleSmall),
               const SizedBox(height: AppSpacing.sm),
               Wrap(
                 spacing: AppSpacing.sm,
                 runSpacing: AppSpacing.sm,
-                children: _documentCategories.map((cat) {
-                  final isSelected = _selectedType == cat;
-                  return ChoiceChip(
-                    label: Text(cat),
-                    selected: isSelected,
-                    onSelected: (_) => setState(() => _selectedType = cat),
-                  );
-                }).toList(),
+                children: [
+                  for (final t in DocumentType.values)
+                    ChoiceChip(
+                      label: Text(t.text(l10n)),
+                      selected: _type == t,
+                      onSelected: _isUploading
+                          ? null
+                          : (_) => setState(() => _type = t),
+                    ),
+                ],
               ),
             ],
           ),
-
           const SizedBox(height: AppSpacing.xl),
-
-          // Upload progress
           if (_isUploading) ...[
-            ClipRRect(
-              borderRadius: AppRadii.pill,
-              child: LinearProgressIndicator(
-                value: _uploadProgress,
-                minHeight: 6,
-                backgroundColor:
-                    isDark ? AppColors.darkSurfaceVariant : AppColors.surfaceSecondary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Uploading... ${(_uploadProgress * 100).toInt()}%',
-              style: textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
+            Semantics(
+              liveRegion: true,
+              label: l10n.documentUploadUploading,
+              child: const ClipRRect(
+                borderRadius: AppRadii.xs,
+                child: LinearProgressIndicator(minHeight: 6),
               ),
             ),
             const SizedBox(height: AppSpacing.md),
           ],
-
-          // Upload button
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: FilledButton.icon(
-              onPressed: _isUploading ? null : _upload,
-              icon: _isUploading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.cloud_upload_rounded),
-              label: Text(_isUploading ? 'Uploading...' : 'Upload document'),
+          FilledButton.icon(
+            onPressed: _isUploading ? null : _upload,
+            icon: const Icon(Icons.upload_rounded),
+            label: Text(
+              _isUploading
+                  ? l10n.documentUploadUploading
+                  : l10n.documentUploadSubmit,
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// The drop zone: what to pick and the limits, then the picked file.
+class _FilePicker extends StatelessWidget {
+  const _FilePicker({
+    required this.fileName,
+    required this.bytes,
+    required this.error,
+    required this.enabled,
+    required this.onPick,
+    required this.onClear,
+  });
+
+  final String? fileName;
+  final int? bytes;
+  final String? error;
+  final bool enabled;
+  final VoidCallback onPick;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final colors = context.colors;
+    final name = fileName;
+    final size = bytes;
+    final edge = error != null
+        ? colors.error
+        : name == null
+        ? colors.outline
+        : colors.primary;
+
+    return Material(
+      color: context.palette.card,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppRadii.lg,
+        side: BorderSide(color: edge, width: error != null ? 2 : 1),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: enabled ? onPick : null,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: name == null
+              ? Column(
+                  children: [
+                    const SizedBox(height: AppSpacing.md),
+                    ExcludeSemantics(
+                      child: Icon(
+                        Icons.upload_file_rounded,
+                        size: 40,
+                        color: colors.primary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      l10n.documentUploadChoose,
+                      style: context.text.titleLarge,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      l10n.documentUploadLimits,
+                      textAlign: TextAlign.center,
+                      style: context.text.bodySmall?.copyWith(
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                  ],
+                )
+              : Row(
+                  children: [
+                    ExcludeSemantics(
+                      child: Icon(fileIcon(name), color: colors.primary),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.text.titleMedium,
+                          ),
+                          Text(
+                            [
+                              if (size != null) fileSize(size),
+                              l10n.documentUploadChange,
+                            ].join('  ·  '),
+                            style: context.text.bodySmall?.copyWith(
+                              color: colors.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: l10n.documentUploadRemoveFile,
+                      onPressed: enabled ? onClear : null,
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }

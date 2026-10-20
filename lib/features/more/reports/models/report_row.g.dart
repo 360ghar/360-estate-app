@@ -11,6 +11,7 @@ _$ReportRowImpl _$$ReportRowImplFromJson(Map<String, dynamic> json) =>
       label: json['label'] as String?,
       amount: parseDouble(json['amount']),
       value: json['value'] as String?,
+      detail: json['detail'] as String?,
     );
 
 Map<String, dynamic> _$$ReportRowImplToJson(_$ReportRowImpl instance) =>
@@ -18,4 +19,5 @@ Map<String, dynamic> _$$ReportRowImplToJson(_$ReportRowImpl instance) =>
       'label': instance.label,
       'amount': instance.amount,
       'value': instance.value,
+      'detail': instance.detail,
     };

@@ -1,15 +1,23 @@
+import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/core/utils/parse.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'application_form.freezed.dart';
 part 'application_form.g.dart';
 
+/// One question of an application form (`CustomField`). `id` is a string key:
+/// the answers are keyed by it.
 @freezed
 class ApplicationFormField with _$ApplicationFormField {
   const factory ApplicationFormField({
-    @JsonKey(fromJson: parseInt) int? id,
+    String? id,
     String? label,
-    @JsonKey(name: 'field_type') String? fieldType,
+    @JsonKey(
+      name: 'field_type',
+      fromJson: ApplicationFieldType.fromJson,
+      toJson: ApplicationFieldType.toJsonValue,
+    )
+    ApplicationFieldType? fieldType,
     @JsonKey(name: 'is_required') bool? isRequired,
     List<String>? options,
   }) = _ApplicationFormField;
@@ -18,6 +26,10 @@ class ApplicationFormField with _$ApplicationFormField {
       _$ApplicationFormFieldFromJson(json);
 }
 
+/// An application form. The owner routes send `RentalApplicationForm`. The
+/// public route sends `PublicRentalApplicationForm`: it has the `slug`, the
+/// title, the property labels and the questions, but no `id` and no
+/// `is_active`.
 @freezed
 class ApplicationForm with _$ApplicationForm {
   const factory ApplicationForm({
@@ -29,8 +41,9 @@ class ApplicationForm with _$ApplicationForm {
     String? description,
     String? slug,
     @JsonKey(name: 'is_active') bool? isActive,
-    @JsonKey(name: 'custom_fields', fromJson: _fieldsFromJson)
-    List<ApplicationFormField>? fields,
+    @JsonKey(name: 'application_fee_amount', fromJson: parseDouble)
+    double? applicationFeeAmount,
+    @JsonKey(name: 'custom_fields') List<ApplicationFormField>? fields,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) DateTime? createdAt,
     @JsonKey(name: 'expires_at', fromJson: parseDateTime) DateTime? expiresAt,
   }) = _ApplicationForm;
@@ -39,12 +52,8 @@ class ApplicationForm with _$ApplicationForm {
       _$ApplicationFormFromJson(json);
 }
 
-List<ApplicationFormField> _fieldsFromJson(Object? value) {
-  if (value is List) {
-    return value
-        .whereType<Map<String, dynamic>>()
-        .map(ApplicationFormField.fromJson)
-        .toList();
-  }
-  return const <ApplicationFormField>[];
+extension ApplicationFormFieldX on ApplicationFormField {
+  /// The key the answer is stored under. The backend always sends an id; the
+  /// label is a last resort for a malformed form.
+  String get key => (id != null && id!.isNotEmpty) ? id! : (label ?? '');
 }

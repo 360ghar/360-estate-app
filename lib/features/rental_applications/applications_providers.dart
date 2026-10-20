@@ -1,51 +1,55 @@
 import 'package:estate_app/core/pagination/paged_list_controller.dart';
 import 'package:estate_app/core/providers.dart';
+import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:estate_app/features/rental_applications/data/applications_repository.dart';
 import 'package:estate_app/features/rental_applications/models/application_form.dart';
 import 'package:estate_app/features/rental_applications/models/application_submission.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final applicationsRepositoryProvider = Provider<ApplicationsRepository>((ref) {
+  ref.watch(accountScopeProvider);
   return ApplicationsRepository(ref.read(apiClientProvider));
 });
 
-final applicationFormsPagedProvider = StateNotifierProvider<
-    PagedListController<ApplicationForm>,
-    PagedListState<ApplicationForm>>(
-  (ref) => PagedListController<ApplicationForm>(
-    fetchPage: ({required cursor, required limit}) {
-      return ref.read(applicationsRepositoryProvider).listFormsPage(
-            cursor: cursor,
-            limit: limit,
-          );
-    },
-  ),
-);
+final applicationFormsPagedProvider =
+    StateNotifierProvider<
+      PagedListController<ApplicationForm>,
+      PagedListState<ApplicationForm>
+    >((ref) {
+      final repository = ref.watch(applicationsRepositoryProvider);
+      return PagedListController<ApplicationForm>(
+        fetchPage: ({required cursor, required limit}) {
+          return repository.listFormsPage(cursor: cursor, limit: limit);
+        },
+      );
+    });
 
-final applicationInboxPagedProvider = StateNotifierProvider<
-    PagedListController<ApplicationSubmission>,
-    PagedListState<ApplicationSubmission>>(
-  (ref) => PagedListController<ApplicationSubmission>(
-    fetchPage: ({required cursor, required limit}) {
-      return ref.read(applicationsRepositoryProvider).listApplicationsPage(
-            cursor: cursor,
-            limit: limit,
-          );
-    },
-  ),
-);
+final applicationInboxPagedProvider =
+    StateNotifierProvider<
+      PagedListController<ApplicationSubmission>,
+      PagedListState<ApplicationSubmission>
+    >((ref) {
+      final repository = ref.watch(applicationsRepositoryProvider);
+      return PagedListController<ApplicationSubmission>(
+        fetchPage: ({required cursor, required limit}) {
+          return repository.listApplicationsPage(cursor: cursor, limit: limit);
+        },
+      );
+    });
 
 final applicationFormDetailProvider =
-    FutureProvider.family<ApplicationForm, String>(
-  (ref, id) => ref.read(applicationsRepositoryProvider).fetchForm(id),
-);
+    FutureProvider.family<ApplicationForm, int>(
+      (ref, id) => ref.watch(applicationsRepositoryProvider).fetchForm(id),
+    );
 
 final applicationDetailProvider =
-    FutureProvider.family<ApplicationSubmission, String>(
-  (ref, id) => ref.read(applicationsRepositoryProvider).fetchApplication(id),
-);
+    FutureProvider.family<ApplicationSubmission, int>(
+      (ref, id) =>
+          ref.watch(applicationsRepositoryProvider).fetchApplication(id),
+    );
 
 final publicApplicationFormProvider =
     FutureProvider.family<ApplicationForm, String>(
-  (ref, slug) => ref.read(applicationsRepositoryProvider).fetchPublicForm(slug),
-);
+      (ref, slug) =>
+          ref.watch(applicationsRepositoryProvider).fetchPublicForm(slug),
+    );

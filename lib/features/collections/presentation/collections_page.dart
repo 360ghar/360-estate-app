@@ -1,26 +1,24 @@
+import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/core/pagination/paged_list_controller.dart';
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
-import 'package:estate_app/core/presentation/design_system/app_gradients.dart';
-import 'package:estate_app/core/presentation/design_system/app_radii.dart';
-import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
-import 'package:estate_app/core/presentation/widgets/app_card.dart';
-import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/errors/user_facing_message.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/widgets/app_status_badge.dart';
+import 'package:estate_app/core/presentation/widgets/feedback.dart';
 import 'package:estate_app/core/presentation/widgets/paged_list_view.dart';
 import 'package:estate_app/features/collections/collections_providers.dart';
 import 'package:estate_app/features/collections/models/rent_charge.dart';
+import 'package:estate_app/features/collections/presentation/rent_status_text.dart';
+import 'package:estate_app/features/collections/presentation/widgets/charge_row.dart';
+import 'package:estate_app/features/collections/presentation/widgets/collections_summary.dart';
+import 'package:estate_app/features/home/home_providers.dart';
+import 'package:estate_app/features/leases/leases_providers.dart';
+import 'package:estate_app/features/properties/properties_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-/// Professional B2B Collections page with:
-/// - Gradient summary cards for Due/Overdue/Paid totals
-/// - Color-coded urgency indicators
-/// - Quick action buttons for charge tiles
-/// - Visual hierarchy for payment status
+/// Rent charges: the ledger summary on top, then one tab per backend status.
 class CollectionsPage extends ConsumerStatefulWidget {
   const CollectionsPage({super.key, this.initialStatus});
 
@@ -31,51 +29,99 @@ class CollectionsPage extends ConsumerStatefulWidget {
 }
 
 class _CollectionsPageState extends ConsumerState<CollectionsPage> {
-  // API expects 'pending' for due/unpaid charges, not 'due'
-  static const _tabs = ['pending', 'overdue', 'paid'];
+  // One tab per backend status. The backend computes `overdue` when it reads:
+  // an open charge past its grace period.
+  static const _tabs = [
+    RentChargeStatus.pending,
+    RentChargeStatus.partial,
+    RentChargeStatus.overdue,
+    RentChargeStatus.paid,
+    RentChargeStatus.waived,
+  ];
+
+  bool _generating = false;
+
+  Future<void> _generateCharges() async {
+    if (_generating) return;
+    setState(() => _generating = true);
+    try {
+      final result = await ref.read(rentRepositoryProvider).generateCharges();
+      if (mounted) {
+        context.showSnack(
+          context.l10n.collectionsGenerated(
+            result.created ?? 0,
+            result.skipped ?? 0,
+          ),
+        );
+      }
+      ref
+        ..invalidate(allRentChargesProvider)
+        ..invalidate(unpaidRentChargesProvider)
+        ..invalidate(rentChargesPagedProvider)
+        ..invalidate(dashboardOverviewProvider)
+        ..invalidate(dashboardActivityProvider);
+    } catch (error) {
+      if (mounted) context.showSnack(userFacingMessage(error));
+    } finally {
+      if (mounted) setState(() => _generating = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final initialIndex = _tabs.indexOf(widget.initialStatus ?? 'pending');
+    final l10n = context.l10n;
+    // A bad or missing `status` opens the first tab. `due` is the old name of
+    // `pending`.
+    final initial = widget.initialStatus == 'due'
+        ? RentChargeStatus.pending
+        : RentChargeStatus.fromJson(widget.initialStatus);
+    final initialIndex = initial == null ? 0 : _tabs.indexOf(initial);
 
     return DefaultTabController(
       length: _tabs.length,
-      initialIndex: initialIndex == -1 ? 0 : initialIndex,
-      child: AppScaffold(
-        appBar: _buildAppBar(context),
-        padding: EdgeInsets.zero,
+      initialIndex: initialIndex < 0 ? 0 : initialIndex,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.collectionsTitle),
+          actions: [
+            IconButton(
+              tooltip: l10n.collectionsGenerate,
+              icon: const Icon(Icons.post_add_rounded),
+              onPressed: _generating ? null : _generateCharges,
+            ),
+            const SizedBox(width: AppSpacing.xs),
+          ],
+        ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () => context.go('/collections/payments/new'),
-          icon: const Icon(Icons.payment_rounded),
-          label: const Text('Record Payment'),
+          icon: const Icon(Icons.add_rounded),
+          label: Text(l10n.homeRecordPayment),
         ),
         body: Column(
           children: [
-            // Summary Cards with gradient backgrounds
-            const _CollectionsSummaryCards(),
-            // Footnote documenting that totals reflect only the first loaded page.
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
-                vertical: AppSpacing.xs,
+            const Padding(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.xs,
+                AppSpacing.lg,
+                AppSpacing.sm,
               ),
-              child: Text(
-                'Totals reflect the first page of charges only. Scroll the list below to load more.',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppColors.textTertiary,
-                      fontStyle: FontStyle.italic,
-                    ),
-              ),
+              child: CollectionsSummary(),
             ),
-            const Divider(height: 1),
-
-            // Tab Content
+            TabBar(
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              tabs: [for (final status in _tabs) _StatusTab(status: status)],
+            ),
             Expanded(
               child: TabBarView(
                 children: [
-                  _ChargesList(status: 'pending'),
-                  _ChargesList(status: 'overdue'),
-                  _ChargesList(status: 'paid'),
+                  for (final status in _tabs)
+                    _ChargesList(
+                      status: status,
+                      onGenerate: _generating ? null : _generateCharges,
+                    ),
                 ],
               ),
             ),
@@ -84,558 +130,90 @@ class _CollectionsPageState extends ConsumerState<CollectionsPage> {
       ),
     );
   }
+}
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+class _StatusTab extends StatelessWidget {
+  const _StatusTab({required this.status});
 
-    return AppBar(
-      title: const Text('Collections'),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.add_circle_outline_rounded),
-          onPressed: () => _generateCharges(context),
-          tooltip: 'Generate charges',
-        ),
-      ],
-      bottom: TabBar(
-        indicatorSize: TabBarIndicatorSize.tab,
-        indicator: BoxDecoration(
-          borderRadius: AppRadii.md,
-          color: scheme.primary.withValues(alpha: 0.12),
-        ),
-        dividerColor: Colors.transparent,
-        splashBorderRadius: AppRadii.md,
-        labelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-          fontWeight: FontWeight.w600,
-        ),
-        unselectedLabelStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
-          fontWeight: FontWeight.w500,
-        ),
-        tabs: [
-          _buildTab('Due', AppColors.warning),
-          _buildTab('Overdue', AppColors.danger),
-          _buildTab('Paid', AppColors.success),
-        ],
-      ),
-    );
-  }
+  final RentChargeStatus status;
 
-  Widget _buildTab(String label, Color color) {
+  @override
+  Widget build(BuildContext context) {
+    final type = status.statusType;
+    final (ink, _) = statusColors(context, type);
     return Tab(
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label),
-          const SizedBox(width: 6),
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _generateCharges(BuildContext context) async {
-    try {
-      await ref.read(rentRepositoryProvider).generateCharges();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Charges generated successfully.')),
-        );
-      }
-      ref.invalidate(rentChargesProvider);
-      ref.invalidate(rentChargesPagedProvider);
-    } catch (error) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${error.toString()}')),
-        );
-      }
-    }
-  }
-}
-
-/// Summary cards showing total Due, Overdue, and Paid amounts
-/// with subtle gradient backgrounds.
-class _CollectionsSummaryCards extends ConsumerWidget {
-  const _CollectionsSummaryCards();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Watch all charges to calculate totals.
-    // NOTE: Each paged provider only fetches the first page (default 20 items),
-    // so these totals are partial sums of the currently loaded page, not grand
-    // totals. The backend returns a `total` count but not a total amount, so a
-    // true grand total would require fetching every charge. This limitation is
-    // accepted for now; the summary reflects the first page only.
-    final dueAsync = ref.watch<PagedListState<RentCharge>>(rentChargesPagedProvider('pending'));
-    final overdueAsync = ref.watch<PagedListState<RentCharge>>(rentChargesPagedProvider('overdue'));
-    final paidAsync = ref.watch<PagedListState<RentCharge>>(rentChargesPagedProvider('paid'));
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Row(
-        children: [
-          Expanded(
-            child: _SummaryCard(
-              label: 'Due',
-              amount: _calculateTotal(dueAsync),
-              color: AppColors.warning,
-              gradient: AppGradients.warningSubtle,
-              icon: Icons.schedule_outlined,
+          ExcludeSemantics(
+            child: CustomPaint(
+              size: const Size.square(10),
+              painter: StatusMarkPainter(type, ink),
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: _SummaryCard(
-              label: 'Overdue',
-              amount: _calculateTotal(overdueAsync),
-              color: AppColors.danger,
-              gradient: AppGradients.dangerSubtle,
-              icon: Icons.warning_amber_outlined,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: _SummaryCard(
-              label: 'Paid',
-              amount: _calculateTotal(paidAsync),
-              color: AppColors.success,
-              gradient: AppGradients.successSubtle,
-              icon: Icons.check_circle_outline,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  double _calculateTotal(PagedListState<RentCharge> state) {
-    return state.items.fold<double>(
-      0,
-      (sum, charge) => sum + (charge.amount ?? 0),
-    );
-  }
-}
-
-/// Individual summary card with gradient background and icon.
-class _SummaryCard extends StatelessWidget {
-  final String label;
-  final double amount;
-  final Color color;
-  final LinearGradient gradient;
-  final IconData icon;
-
-  const _SummaryCard({
-    required this.label,
-    required this.amount,
-    required this.color,
-    required this.gradient,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final formatter = NumberFormat.currency(
-      symbol: '\u20B9',
-      decimalDigits: 0,
-    );
-    final amountStr = formatter.format(amount);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        gradient: gradient,
-        color: color.withValues(alpha: isDark ? 0.12 : 0.06),
-        borderRadius: AppRadii.lg,
-        border: Border.all(
-          color: color.withValues(alpha: isDark ? 0.25 : 0.15),
-          width: 0.5,
-        ),
-        boxShadow: AppShadows.cardResting,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 16, color: color),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  label,
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            amountStr,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w700,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+          Text(status.text(context.l10n)),
         ],
       ),
     );
   }
 }
 
-/// List of charges for a specific status.
+/// The charges of one status, paged.
 class _ChargesList extends ConsumerWidget {
-  const _ChargesList({required this.status});
+  const _ChargesList({required this.status, required this.onGenerate});
 
-  final String status;
+  final RentChargeStatus status;
+  final VoidCallback? onGenerate;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch<PagedListState<RentCharge>>(rentChargesPagedProvider(status));
+    final l10n = context.l10n;
+    final state = ref.watch<PagedListState<RentChargeWithTotals>>(
+      rentChargesPagedProvider(status),
+    );
     final controller = ref.read(rentChargesPagedProvider(status).notifier);
+    final tenants = ref.watch(leaseTenantNamesProvider).valueOrNull;
+    final properties = ref.watch(propertyTitlesProvider).valueOrNull;
 
-    return PagedListView<RentCharge>(
+    final emptyTitle = switch (status) {
+      RentChargeStatus.pending => l10n.collectionsEmptyDue,
+      RentChargeStatus.partial => l10n.collectionsEmptyPartial,
+      RentChargeStatus.overdue => l10n.collectionsEmptyOverdue,
+      RentChargeStatus.paid => l10n.collectionsEmptyPaid,
+      RentChargeStatus.waived => l10n.collectionsEmptyWaived,
+    };
+
+    return PagedListView<RentChargeWithTotals>(
       state: state,
-      emptyTitle: 'No ${status.toLowerCase()} charges',
-      emptyMessage: status == 'pending'
-          ? 'All charges are paid or overdue.'
-          : 'No charges found.',
+      // Room under the last row for the floating button.
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        96,
+      ),
+      emptyTitle: emptyTitle,
+      emptyMessage: status == RentChargeStatus.pending
+          ? l10n.collectionsEmptyDueBody
+          : l10n.collectionsEmptyBody,
+      emptyIcon: Icons.receipt_long_outlined,
+      emptyAction: status == RentChargeStatus.pending
+          ? FilledButton.icon(
+              onPressed: onGenerate,
+              icon: const Icon(Icons.post_add_rounded),
+              label: Text(l10n.collectionsGenerateShort),
+            )
+          : null,
       onLoadMore: controller.loadMore,
       onRefresh: controller.refresh,
       onRetry: controller.loadInitial,
       onLoadMoreRetry: controller.retryLoadMore,
-      itemBuilder: (context, charge) => _ChargeTile(
-        charge: charge,
-        status: status,
+      itemBuilder: (context, row) => ChargeRow(
+        row: row,
+        tenantName: tenants?[row.charge.leaseId],
+        propertyTitle: properties?[row.charge.propertyId],
       ),
     );
   }
 }
-
-/// Enhanced charge tile with colored left border, bold amount,
-/// urgency indicators and quick actions using AppCard.
-class _ChargeTile extends StatelessWidget {
-  const _ChargeTile({
-    required this.charge,
-    required this.status,
-  });
-
-  final RentCharge charge;
-  final String status;
-
-  Color _statusColor() {
-    return switch (status.toLowerCase()) {
-      'paid' => AppColors.success,
-      'overdue' => AppColors.danger,
-      'pending' => AppColors.warning,
-      _ => AppColors.textSecondary,
-    };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final formatter = NumberFormat.currency(
-      symbol: '\u20B9',
-      decimalDigits: 0,
-    );
-    final dueDate = charge.dueDate;
-    final dateStr = dueDate == null
-        ? 'Due date not set'
-        : DateFormat('dd MMM yyyy').format(dueDate);
-
-    // Calculate days overdue for urgency
-    final daysOverdue = dueDate == null
-        ? 0
-        : DateTime.now().difference(dueDate).inDays;
-
-    final statusType = _getStatusType();
-    final urgencyLevel = _getUrgencyLevel(daysOverdue);
-    final accentColor = _statusColor();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.xs,
-      ),
-      child: AppCard(
-        headerColor: accentColor,
-        onTap: () => context.go(
-          '/collections/payments/new?chargeId=${charge.id}',
-        ),
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header row with tenant and status
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    charge.displayTenant,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                AppStatusBadge(
-                  label: status.toUpperCase(),
-                  type: statusType,
-                  variant: AppStatusVariant.subtle,
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-
-            // Property and due date
-            Row(
-              children: [
-                Icon(
-                  Icons.apartment_outlined,
-                  size: 16,
-                  color: AppColors.textSecondary,
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    charge.displayProperty,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(
-                  Icons.calendar_today_outlined,
-                  size: 16,
-                  color: _getDueDateColor(urgencyLevel),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  dateStr,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: _getDueDateColor(urgencyLevel),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                if (daysOverdue > 0) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getUrgencyColor(urgencyLevel).withValues(alpha: 
-                        isDark ? 0.2 : 0.1,
-                      ),
-                      borderRadius: AppRadii.pill,
-                    ),
-                    child: Text(
-                      '$daysOverdue days overdue',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: _getUrgencyColor(urgencyLevel),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            // Amount (large + bold) and quick actions
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  formatter.format(charge.displayAmount),
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: accentColor,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _QuickActionButton(
-                      icon: Icons.sms_outlined,
-                      label: 'Remind',
-                      onTap: () => _sendReminder(context),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    _QuickActionButton(
-                      icon: Icons.payment_rounded,
-                      label: 'Pay',
-                      isPrimary: true,
-                      onTap: () => context.go(
-                        '/collections/payments/new?chargeId=${charge.id}',
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  AppStatusType _getStatusType() {
-    return switch (status.toLowerCase()) {
-      'paid' => AppStatusType.success,
-      'overdue' => AppStatusType.danger,
-      'pending' => AppStatusType.warning,
-      _ => AppStatusType.neutral,
-    };
-  }
-
-  _UrgencyLevel _getUrgencyLevel(int daysOverdue) {
-    if (status == 'paid') return _UrgencyLevel.none;
-    if (status == 'overdue') {
-      if (daysOverdue >= 7) return _UrgencyLevel.critical;
-      if (daysOverdue >= 3) return _UrgencyLevel.high;
-      return _UrgencyLevel.medium;
-    }
-    return _UrgencyLevel.low;
-  }
-
-  Color _getDueDateColor(_UrgencyLevel level) {
-    return switch (level) {
-      _UrgencyLevel.critical => AppColors.danger,
-      _UrgencyLevel.high => AppColors.danger,
-      _UrgencyLevel.medium => AppColors.warning,
-      _UrgencyLevel.low => AppColors.textSecondary,
-      _UrgencyLevel.none => AppColors.success,
-    };
-  }
-
-  Color _getUrgencyColor(_UrgencyLevel level) {
-    return switch (level) {
-      _UrgencyLevel.critical => AppColors.danger,
-      _UrgencyLevel.high => AppColors.danger,
-      _UrgencyLevel.medium => AppColors.warning,
-      _UrgencyLevel.low => AppColors.textSecondary,
-      _UrgencyLevel.none => AppColors.success,
-    };
-  }
-
-  void _sendReminder(BuildContext context) {
-    final amountStr = NumberFormat.currency(
-      symbol: '\u20B9',
-      decimalDigits: 0,
-    ).format(charge.displayAmount);
-    final dueStr = charge.dueDate != null
-        ? DateFormat('d MMM yyyy').format(charge.dueDate!)
-        : 'soon';
-    final message = 'Hi ${charge.displayTenant}, this is a friendly reminder '
-        'that your rent of $amountStr for ${charge.displayProperty} '
-        'is due on $dueStr. Please make the payment at your earliest '
-        'convenience. Thank you!';
-    final encoded = Uri.encodeComponent(message);
-    _launchReminder(context, encoded);
-  }
-
-  Future<void> _launchReminder(BuildContext context, String encodedMessage) async {
-    // Try WhatsApp first (opens contact picker so the user selects the tenant).
-    final whatsappUri = Uri.parse('https://wa.me/?text=$encodedMessage');
-    if (await launchUrl(whatsappUri, mode: LaunchMode.externalApplication)) {
-      return;
-    }
-    // Fallback to SMS (also opens the SMS app with the message pre-filled).
-    final smsUri = Uri.parse('sms:?body=$encodedMessage');
-    if (await launchUrl(smsUri)) {
-      return;
-    }
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No messaging app available to send the reminder.'),
-        ),
-      );
-    }
-  }
-}
-
-/// Quick action button for charge tiles.
-class _QuickActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool isPrimary;
-
-  const _QuickActionButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.isPrimary = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final color = scheme.primary;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: AppRadii.md,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: isPrimary
-              ? BoxDecoration(
-                  color: color.withValues(alpha: isDark ? 0.15 : 0.08),
-                  borderRadius: AppRadii.md,
-                  border: Border.all(
-                    color: color.withValues(alpha: isDark ? 0.25 : 0.15),
-                    width: 0.5,
-                  ),
-                )
-              : null,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 16,
-                color: color,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-enum _UrgencyLevel { none, low, medium, high, critical }

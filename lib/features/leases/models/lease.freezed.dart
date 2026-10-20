@@ -25,23 +25,46 @@ mixin _$Lease {
   int? get id => throw _privateConstructorUsedError;
   @JsonKey(name: 'property_id', fromJson: parseInt)
   int? get propertyId => throw _privateConstructorUsedError;
-  @JsonKey(name: 'property_name')
-  String? get propertyName => throw _privateConstructorUsedError;
-  @JsonKey(name: 'tenant_id', fromJson: parseInt)
-  int? get tenantId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'owner_id', fromJson: parseInt)
+  int? get ownerId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'tenant_user_id', fromJson: parseInt)
+  int? get tenantUserId => throw _privateConstructorUsedError;
   @JsonKey(name: 'tenant_name')
   String? get tenantName => throw _privateConstructorUsedError;
+  @JsonKey(name: 'tenant_phone')
+  String? get tenantPhone => throw _privateConstructorUsedError;
+  @JsonKey(name: 'tenant_email')
+  String? get tenantEmail => throw _privateConstructorUsedError;
+  @JsonKey(fromJson: LeaseStatus.fromJson, toJson: LeaseStatus.toJsonValue)
+  LeaseStatus? get status => throw _privateConstructorUsedError;
   @JsonKey(name: 'start_date', fromJson: parseDateTime)
   DateTime? get startDate => throw _privateConstructorUsedError;
   @JsonKey(name: 'end_date', fromJson: parseDateTime)
   DateTime? get endDate => throw _privateConstructorUsedError;
-  @JsonKey(name: 'rent_amount', fromJson: parseDouble)
-  double? get rentAmount => throw _privateConstructorUsedError;
-  @JsonKey(name: 'deposit_amount', fromJson: parseDouble)
-  double? get depositAmount => throw _privateConstructorUsedError;
-  String? get status => throw _privateConstructorUsedError;
-  @JsonKey(name: 'signed_document_url')
-  String? get signedDocumentUrl => throw _privateConstructorUsedError;
+  @JsonKey(name: 'monthly_rent', fromJson: parseDouble)
+  double? get monthlyRent => throw _privateConstructorUsedError;
+  @JsonKey(name: 'security_deposit', fromJson: parseDouble)
+  double? get securityDeposit => throw _privateConstructorUsedError;
+  @JsonKey(name: 'late_fee_amount', fromJson: parseDouble)
+  double? get lateFeeAmount => throw _privateConstructorUsedError;
+  @JsonKey(name: 'late_fee_percentage', fromJson: parseDouble)
+  double? get lateFeePercentage => throw _privateConstructorUsedError;
+  @JsonKey(name: 'grace_period_days', fromJson: parseInt)
+  int? get gracePeriodDays => throw _privateConstructorUsedError;
+  @JsonKey(name: 'payment_due_day', fromJson: parseInt)
+  int? get paymentDueDay => throw _privateConstructorUsedError;
+  @JsonKey(name: 'special_clauses')
+  String? get specialClauses => throw _privateConstructorUsedError;
+  @JsonKey(name: 'signed_by_tenant_at', fromJson: parseDateTime)
+  DateTime? get signedByTenantAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'signed_by_owner_at', fromJson: parseDateTime)
+  DateTime? get signedByOwnerAt => throw _privateConstructorUsedError;
+  @JsonKey(name: 'termination_date', fromJson: parseDateTime)
+  DateTime? get terminationDate => throw _privateConstructorUsedError;
+  @JsonKey(name: 'termination_reason')
+  String? get terminationReason => throw _privateConstructorUsedError;
+  @JsonKey(name: 'lease_document_id', fromJson: parseInt)
+  int? get leaseDocumentId => throw _privateConstructorUsedError;
   @JsonKey(name: 'created_at', fromJson: parseDateTime)
   DateTime? get createdAt => throw _privateConstructorUsedError;
   @JsonKey(name: 'updated_at', fromJson: parseDateTime)
@@ -64,16 +87,35 @@ abstract class $LeaseCopyWith<$Res> {
   $Res call({
     @JsonKey(fromJson: parseInt) int? id,
     @JsonKey(name: 'property_id', fromJson: parseInt) int? propertyId,
-    @JsonKey(name: 'property_name') String? propertyName,
-    @JsonKey(name: 'tenant_id', fromJson: parseInt) int? tenantId,
+    @JsonKey(name: 'owner_id', fromJson: parseInt) int? ownerId,
+    @JsonKey(name: 'tenant_user_id', fromJson: parseInt) int? tenantUserId,
     @JsonKey(name: 'tenant_name') String? tenantName,
+    @JsonKey(name: 'tenant_phone') String? tenantPhone,
+    @JsonKey(name: 'tenant_email') String? tenantEmail,
+    @JsonKey(fromJson: LeaseStatus.fromJson, toJson: LeaseStatus.toJsonValue)
+    LeaseStatus? status,
     @JsonKey(name: 'start_date', fromJson: parseDateTime) DateTime? startDate,
     @JsonKey(name: 'end_date', fromJson: parseDateTime) DateTime? endDate,
-    @JsonKey(name: 'rent_amount', fromJson: parseDouble) double? rentAmount,
-    @JsonKey(name: 'deposit_amount', fromJson: parseDouble)
-    double? depositAmount,
-    String? status,
-    @JsonKey(name: 'signed_document_url') String? signedDocumentUrl,
+    @JsonKey(name: 'monthly_rent', fromJson: parseDouble) double? monthlyRent,
+    @JsonKey(name: 'security_deposit', fromJson: parseDouble)
+    double? securityDeposit,
+    @JsonKey(name: 'late_fee_amount', fromJson: parseDouble)
+    double? lateFeeAmount,
+    @JsonKey(name: 'late_fee_percentage', fromJson: parseDouble)
+    double? lateFeePercentage,
+    @JsonKey(name: 'grace_period_days', fromJson: parseInt)
+    int? gracePeriodDays,
+    @JsonKey(name: 'payment_due_day', fromJson: parseInt) int? paymentDueDay,
+    @JsonKey(name: 'special_clauses') String? specialClauses,
+    @JsonKey(name: 'signed_by_tenant_at', fromJson: parseDateTime)
+    DateTime? signedByTenantAt,
+    @JsonKey(name: 'signed_by_owner_at', fromJson: parseDateTime)
+    DateTime? signedByOwnerAt,
+    @JsonKey(name: 'termination_date', fromJson: parseDateTime)
+    DateTime? terminationDate,
+    @JsonKey(name: 'termination_reason') String? terminationReason,
+    @JsonKey(name: 'lease_document_id', fromJson: parseInt)
+    int? leaseDocumentId,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) DateTime? createdAt,
     @JsonKey(name: 'updated_at', fromJson: parseDateTime) DateTime? updatedAt,
   });
@@ -96,15 +138,26 @@ class _$LeaseCopyWithImpl<$Res, $Val extends Lease>
   $Res call({
     Object? id = freezed,
     Object? propertyId = freezed,
-    Object? propertyName = freezed,
-    Object? tenantId = freezed,
+    Object? ownerId = freezed,
+    Object? tenantUserId = freezed,
     Object? tenantName = freezed,
+    Object? tenantPhone = freezed,
+    Object? tenantEmail = freezed,
+    Object? status = freezed,
     Object? startDate = freezed,
     Object? endDate = freezed,
-    Object? rentAmount = freezed,
-    Object? depositAmount = freezed,
-    Object? status = freezed,
-    Object? signedDocumentUrl = freezed,
+    Object? monthlyRent = freezed,
+    Object? securityDeposit = freezed,
+    Object? lateFeeAmount = freezed,
+    Object? lateFeePercentage = freezed,
+    Object? gracePeriodDays = freezed,
+    Object? paymentDueDay = freezed,
+    Object? specialClauses = freezed,
+    Object? signedByTenantAt = freezed,
+    Object? signedByOwnerAt = freezed,
+    Object? terminationDate = freezed,
+    Object? terminationReason = freezed,
+    Object? leaseDocumentId = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -118,18 +171,30 @@ class _$LeaseCopyWithImpl<$Res, $Val extends Lease>
                 ? _value.propertyId
                 : propertyId // ignore: cast_nullable_to_non_nullable
                       as int?,
-            propertyName: freezed == propertyName
-                ? _value.propertyName
-                : propertyName // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            tenantId: freezed == tenantId
-                ? _value.tenantId
-                : tenantId // ignore: cast_nullable_to_non_nullable
+            ownerId: freezed == ownerId
+                ? _value.ownerId
+                : ownerId // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            tenantUserId: freezed == tenantUserId
+                ? _value.tenantUserId
+                : tenantUserId // ignore: cast_nullable_to_non_nullable
                       as int?,
             tenantName: freezed == tenantName
                 ? _value.tenantName
                 : tenantName // ignore: cast_nullable_to_non_nullable
                       as String?,
+            tenantPhone: freezed == tenantPhone
+                ? _value.tenantPhone
+                : tenantPhone // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            tenantEmail: freezed == tenantEmail
+                ? _value.tenantEmail
+                : tenantEmail // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            status: freezed == status
+                ? _value.status
+                : status // ignore: cast_nullable_to_non_nullable
+                      as LeaseStatus?,
             startDate: freezed == startDate
                 ? _value.startDate
                 : startDate // ignore: cast_nullable_to_non_nullable
@@ -138,22 +203,54 @@ class _$LeaseCopyWithImpl<$Res, $Val extends Lease>
                 ? _value.endDate
                 : endDate // ignore: cast_nullable_to_non_nullable
                       as DateTime?,
-            rentAmount: freezed == rentAmount
-                ? _value.rentAmount
-                : rentAmount // ignore: cast_nullable_to_non_nullable
+            monthlyRent: freezed == monthlyRent
+                ? _value.monthlyRent
+                : monthlyRent // ignore: cast_nullable_to_non_nullable
                       as double?,
-            depositAmount: freezed == depositAmount
-                ? _value.depositAmount
-                : depositAmount // ignore: cast_nullable_to_non_nullable
+            securityDeposit: freezed == securityDeposit
+                ? _value.securityDeposit
+                : securityDeposit // ignore: cast_nullable_to_non_nullable
                       as double?,
-            status: freezed == status
-                ? _value.status
-                : status // ignore: cast_nullable_to_non_nullable
+            lateFeeAmount: freezed == lateFeeAmount
+                ? _value.lateFeeAmount
+                : lateFeeAmount // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            lateFeePercentage: freezed == lateFeePercentage
+                ? _value.lateFeePercentage
+                : lateFeePercentage // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            gracePeriodDays: freezed == gracePeriodDays
+                ? _value.gracePeriodDays
+                : gracePeriodDays // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            paymentDueDay: freezed == paymentDueDay
+                ? _value.paymentDueDay
+                : paymentDueDay // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            specialClauses: freezed == specialClauses
+                ? _value.specialClauses
+                : specialClauses // ignore: cast_nullable_to_non_nullable
                       as String?,
-            signedDocumentUrl: freezed == signedDocumentUrl
-                ? _value.signedDocumentUrl
-                : signedDocumentUrl // ignore: cast_nullable_to_non_nullable
+            signedByTenantAt: freezed == signedByTenantAt
+                ? _value.signedByTenantAt
+                : signedByTenantAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
+            signedByOwnerAt: freezed == signedByOwnerAt
+                ? _value.signedByOwnerAt
+                : signedByOwnerAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
+            terminationDate: freezed == terminationDate
+                ? _value.terminationDate
+                : terminationDate // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
+            terminationReason: freezed == terminationReason
+                ? _value.terminationReason
+                : terminationReason // ignore: cast_nullable_to_non_nullable
                       as String?,
+            leaseDocumentId: freezed == leaseDocumentId
+                ? _value.leaseDocumentId
+                : leaseDocumentId // ignore: cast_nullable_to_non_nullable
+                      as int?,
             createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -179,16 +276,35 @@ abstract class _$$LeaseImplCopyWith<$Res> implements $LeaseCopyWith<$Res> {
   $Res call({
     @JsonKey(fromJson: parseInt) int? id,
     @JsonKey(name: 'property_id', fromJson: parseInt) int? propertyId,
-    @JsonKey(name: 'property_name') String? propertyName,
-    @JsonKey(name: 'tenant_id', fromJson: parseInt) int? tenantId,
+    @JsonKey(name: 'owner_id', fromJson: parseInt) int? ownerId,
+    @JsonKey(name: 'tenant_user_id', fromJson: parseInt) int? tenantUserId,
     @JsonKey(name: 'tenant_name') String? tenantName,
+    @JsonKey(name: 'tenant_phone') String? tenantPhone,
+    @JsonKey(name: 'tenant_email') String? tenantEmail,
+    @JsonKey(fromJson: LeaseStatus.fromJson, toJson: LeaseStatus.toJsonValue)
+    LeaseStatus? status,
     @JsonKey(name: 'start_date', fromJson: parseDateTime) DateTime? startDate,
     @JsonKey(name: 'end_date', fromJson: parseDateTime) DateTime? endDate,
-    @JsonKey(name: 'rent_amount', fromJson: parseDouble) double? rentAmount,
-    @JsonKey(name: 'deposit_amount', fromJson: parseDouble)
-    double? depositAmount,
-    String? status,
-    @JsonKey(name: 'signed_document_url') String? signedDocumentUrl,
+    @JsonKey(name: 'monthly_rent', fromJson: parseDouble) double? monthlyRent,
+    @JsonKey(name: 'security_deposit', fromJson: parseDouble)
+    double? securityDeposit,
+    @JsonKey(name: 'late_fee_amount', fromJson: parseDouble)
+    double? lateFeeAmount,
+    @JsonKey(name: 'late_fee_percentage', fromJson: parseDouble)
+    double? lateFeePercentage,
+    @JsonKey(name: 'grace_period_days', fromJson: parseInt)
+    int? gracePeriodDays,
+    @JsonKey(name: 'payment_due_day', fromJson: parseInt) int? paymentDueDay,
+    @JsonKey(name: 'special_clauses') String? specialClauses,
+    @JsonKey(name: 'signed_by_tenant_at', fromJson: parseDateTime)
+    DateTime? signedByTenantAt,
+    @JsonKey(name: 'signed_by_owner_at', fromJson: parseDateTime)
+    DateTime? signedByOwnerAt,
+    @JsonKey(name: 'termination_date', fromJson: parseDateTime)
+    DateTime? terminationDate,
+    @JsonKey(name: 'termination_reason') String? terminationReason,
+    @JsonKey(name: 'lease_document_id', fromJson: parseInt)
+    int? leaseDocumentId,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) DateTime? createdAt,
     @JsonKey(name: 'updated_at', fromJson: parseDateTime) DateTime? updatedAt,
   });
@@ -210,15 +326,26 @@ class __$$LeaseImplCopyWithImpl<$Res>
   $Res call({
     Object? id = freezed,
     Object? propertyId = freezed,
-    Object? propertyName = freezed,
-    Object? tenantId = freezed,
+    Object? ownerId = freezed,
+    Object? tenantUserId = freezed,
     Object? tenantName = freezed,
+    Object? tenantPhone = freezed,
+    Object? tenantEmail = freezed,
+    Object? status = freezed,
     Object? startDate = freezed,
     Object? endDate = freezed,
-    Object? rentAmount = freezed,
-    Object? depositAmount = freezed,
-    Object? status = freezed,
-    Object? signedDocumentUrl = freezed,
+    Object? monthlyRent = freezed,
+    Object? securityDeposit = freezed,
+    Object? lateFeeAmount = freezed,
+    Object? lateFeePercentage = freezed,
+    Object? gracePeriodDays = freezed,
+    Object? paymentDueDay = freezed,
+    Object? specialClauses = freezed,
+    Object? signedByTenantAt = freezed,
+    Object? signedByOwnerAt = freezed,
+    Object? terminationDate = freezed,
+    Object? terminationReason = freezed,
+    Object? leaseDocumentId = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -232,18 +359,30 @@ class __$$LeaseImplCopyWithImpl<$Res>
             ? _value.propertyId
             : propertyId // ignore: cast_nullable_to_non_nullable
                   as int?,
-        propertyName: freezed == propertyName
-            ? _value.propertyName
-            : propertyName // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        tenantId: freezed == tenantId
-            ? _value.tenantId
-            : tenantId // ignore: cast_nullable_to_non_nullable
+        ownerId: freezed == ownerId
+            ? _value.ownerId
+            : ownerId // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        tenantUserId: freezed == tenantUserId
+            ? _value.tenantUserId
+            : tenantUserId // ignore: cast_nullable_to_non_nullable
                   as int?,
         tenantName: freezed == tenantName
             ? _value.tenantName
             : tenantName // ignore: cast_nullable_to_non_nullable
                   as String?,
+        tenantPhone: freezed == tenantPhone
+            ? _value.tenantPhone
+            : tenantPhone // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        tenantEmail: freezed == tenantEmail
+            ? _value.tenantEmail
+            : tenantEmail // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        status: freezed == status
+            ? _value.status
+            : status // ignore: cast_nullable_to_non_nullable
+                  as LeaseStatus?,
         startDate: freezed == startDate
             ? _value.startDate
             : startDate // ignore: cast_nullable_to_non_nullable
@@ -252,22 +391,54 @@ class __$$LeaseImplCopyWithImpl<$Res>
             ? _value.endDate
             : endDate // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
-        rentAmount: freezed == rentAmount
-            ? _value.rentAmount
-            : rentAmount // ignore: cast_nullable_to_non_nullable
+        monthlyRent: freezed == monthlyRent
+            ? _value.monthlyRent
+            : monthlyRent // ignore: cast_nullable_to_non_nullable
                   as double?,
-        depositAmount: freezed == depositAmount
-            ? _value.depositAmount
-            : depositAmount // ignore: cast_nullable_to_non_nullable
+        securityDeposit: freezed == securityDeposit
+            ? _value.securityDeposit
+            : securityDeposit // ignore: cast_nullable_to_non_nullable
                   as double?,
-        status: freezed == status
-            ? _value.status
-            : status // ignore: cast_nullable_to_non_nullable
+        lateFeeAmount: freezed == lateFeeAmount
+            ? _value.lateFeeAmount
+            : lateFeeAmount // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        lateFeePercentage: freezed == lateFeePercentage
+            ? _value.lateFeePercentage
+            : lateFeePercentage // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        gracePeriodDays: freezed == gracePeriodDays
+            ? _value.gracePeriodDays
+            : gracePeriodDays // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        paymentDueDay: freezed == paymentDueDay
+            ? _value.paymentDueDay
+            : paymentDueDay // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        specialClauses: freezed == specialClauses
+            ? _value.specialClauses
+            : specialClauses // ignore: cast_nullable_to_non_nullable
                   as String?,
-        signedDocumentUrl: freezed == signedDocumentUrl
-            ? _value.signedDocumentUrl
-            : signedDocumentUrl // ignore: cast_nullable_to_non_nullable
+        signedByTenantAt: freezed == signedByTenantAt
+            ? _value.signedByTenantAt
+            : signedByTenantAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        signedByOwnerAt: freezed == signedByOwnerAt
+            ? _value.signedByOwnerAt
+            : signedByOwnerAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        terminationDate: freezed == terminationDate
+            ? _value.terminationDate
+            : terminationDate // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        terminationReason: freezed == terminationReason
+            ? _value.terminationReason
+            : terminationReason // ignore: cast_nullable_to_non_nullable
                   as String?,
+        leaseDocumentId: freezed == leaseDocumentId
+            ? _value.leaseDocumentId
+            : leaseDocumentId // ignore: cast_nullable_to_non_nullable
+                  as int?,
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -287,15 +458,34 @@ class _$LeaseImpl implements _Lease {
   const _$LeaseImpl({
     @JsonKey(fromJson: parseInt) this.id,
     @JsonKey(name: 'property_id', fromJson: parseInt) this.propertyId,
-    @JsonKey(name: 'property_name') this.propertyName,
-    @JsonKey(name: 'tenant_id', fromJson: parseInt) this.tenantId,
+    @JsonKey(name: 'owner_id', fromJson: parseInt) this.ownerId,
+    @JsonKey(name: 'tenant_user_id', fromJson: parseInt) this.tenantUserId,
     @JsonKey(name: 'tenant_name') this.tenantName,
+    @JsonKey(name: 'tenant_phone') this.tenantPhone,
+    @JsonKey(name: 'tenant_email') this.tenantEmail,
+    @JsonKey(fromJson: LeaseStatus.fromJson, toJson: LeaseStatus.toJsonValue)
+    this.status,
     @JsonKey(name: 'start_date', fromJson: parseDateTime) this.startDate,
     @JsonKey(name: 'end_date', fromJson: parseDateTime) this.endDate,
-    @JsonKey(name: 'rent_amount', fromJson: parseDouble) this.rentAmount,
-    @JsonKey(name: 'deposit_amount', fromJson: parseDouble) this.depositAmount,
-    this.status,
-    @JsonKey(name: 'signed_document_url') this.signedDocumentUrl,
+    @JsonKey(name: 'monthly_rent', fromJson: parseDouble) this.monthlyRent,
+    @JsonKey(name: 'security_deposit', fromJson: parseDouble)
+    this.securityDeposit,
+    @JsonKey(name: 'late_fee_amount', fromJson: parseDouble) this.lateFeeAmount,
+    @JsonKey(name: 'late_fee_percentage', fromJson: parseDouble)
+    this.lateFeePercentage,
+    @JsonKey(name: 'grace_period_days', fromJson: parseInt)
+    this.gracePeriodDays,
+    @JsonKey(name: 'payment_due_day', fromJson: parseInt) this.paymentDueDay,
+    @JsonKey(name: 'special_clauses') this.specialClauses,
+    @JsonKey(name: 'signed_by_tenant_at', fromJson: parseDateTime)
+    this.signedByTenantAt,
+    @JsonKey(name: 'signed_by_owner_at', fromJson: parseDateTime)
+    this.signedByOwnerAt,
+    @JsonKey(name: 'termination_date', fromJson: parseDateTime)
+    this.terminationDate,
+    @JsonKey(name: 'termination_reason') this.terminationReason,
+    @JsonKey(name: 'lease_document_id', fromJson: parseInt)
+    this.leaseDocumentId,
     @JsonKey(name: 'created_at', fromJson: parseDateTime) this.createdAt,
     @JsonKey(name: 'updated_at', fromJson: parseDateTime) this.updatedAt,
   });
@@ -310,14 +500,23 @@ class _$LeaseImpl implements _Lease {
   @JsonKey(name: 'property_id', fromJson: parseInt)
   final int? propertyId;
   @override
-  @JsonKey(name: 'property_name')
-  final String? propertyName;
+  @JsonKey(name: 'owner_id', fromJson: parseInt)
+  final int? ownerId;
   @override
-  @JsonKey(name: 'tenant_id', fromJson: parseInt)
-  final int? tenantId;
+  @JsonKey(name: 'tenant_user_id', fromJson: parseInt)
+  final int? tenantUserId;
   @override
   @JsonKey(name: 'tenant_name')
   final String? tenantName;
+  @override
+  @JsonKey(name: 'tenant_phone')
+  final String? tenantPhone;
+  @override
+  @JsonKey(name: 'tenant_email')
+  final String? tenantEmail;
+  @override
+  @JsonKey(fromJson: LeaseStatus.fromJson, toJson: LeaseStatus.toJsonValue)
+  final LeaseStatus? status;
   @override
   @JsonKey(name: 'start_date', fromJson: parseDateTime)
   final DateTime? startDate;
@@ -325,16 +524,41 @@ class _$LeaseImpl implements _Lease {
   @JsonKey(name: 'end_date', fromJson: parseDateTime)
   final DateTime? endDate;
   @override
-  @JsonKey(name: 'rent_amount', fromJson: parseDouble)
-  final double? rentAmount;
+  @JsonKey(name: 'monthly_rent', fromJson: parseDouble)
+  final double? monthlyRent;
   @override
-  @JsonKey(name: 'deposit_amount', fromJson: parseDouble)
-  final double? depositAmount;
+  @JsonKey(name: 'security_deposit', fromJson: parseDouble)
+  final double? securityDeposit;
   @override
-  final String? status;
+  @JsonKey(name: 'late_fee_amount', fromJson: parseDouble)
+  final double? lateFeeAmount;
   @override
-  @JsonKey(name: 'signed_document_url')
-  final String? signedDocumentUrl;
+  @JsonKey(name: 'late_fee_percentage', fromJson: parseDouble)
+  final double? lateFeePercentage;
+  @override
+  @JsonKey(name: 'grace_period_days', fromJson: parseInt)
+  final int? gracePeriodDays;
+  @override
+  @JsonKey(name: 'payment_due_day', fromJson: parseInt)
+  final int? paymentDueDay;
+  @override
+  @JsonKey(name: 'special_clauses')
+  final String? specialClauses;
+  @override
+  @JsonKey(name: 'signed_by_tenant_at', fromJson: parseDateTime)
+  final DateTime? signedByTenantAt;
+  @override
+  @JsonKey(name: 'signed_by_owner_at', fromJson: parseDateTime)
+  final DateTime? signedByOwnerAt;
+  @override
+  @JsonKey(name: 'termination_date', fromJson: parseDateTime)
+  final DateTime? terminationDate;
+  @override
+  @JsonKey(name: 'termination_reason')
+  final String? terminationReason;
+  @override
+  @JsonKey(name: 'lease_document_id', fromJson: parseInt)
+  final int? leaseDocumentId;
   @override
   @JsonKey(name: 'created_at', fromJson: parseDateTime)
   final DateTime? createdAt;
@@ -344,7 +568,7 @@ class _$LeaseImpl implements _Lease {
 
   @override
   String toString() {
-    return 'Lease(id: $id, propertyId: $propertyId, propertyName: $propertyName, tenantId: $tenantId, tenantName: $tenantName, startDate: $startDate, endDate: $endDate, rentAmount: $rentAmount, depositAmount: $depositAmount, status: $status, signedDocumentUrl: $signedDocumentUrl, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Lease(id: $id, propertyId: $propertyId, ownerId: $ownerId, tenantUserId: $tenantUserId, tenantName: $tenantName, tenantPhone: $tenantPhone, tenantEmail: $tenantEmail, status: $status, startDate: $startDate, endDate: $endDate, monthlyRent: $monthlyRent, securityDeposit: $securityDeposit, lateFeeAmount: $lateFeeAmount, lateFeePercentage: $lateFeePercentage, gracePeriodDays: $gracePeriodDays, paymentDueDay: $paymentDueDay, specialClauses: $specialClauses, signedByTenantAt: $signedByTenantAt, signedByOwnerAt: $signedByOwnerAt, terminationDate: $terminationDate, terminationReason: $terminationReason, leaseDocumentId: $leaseDocumentId, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -355,22 +579,43 @@ class _$LeaseImpl implements _Lease {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.propertyId, propertyId) ||
                 other.propertyId == propertyId) &&
-            (identical(other.propertyName, propertyName) ||
-                other.propertyName == propertyName) &&
-            (identical(other.tenantId, tenantId) ||
-                other.tenantId == tenantId) &&
+            (identical(other.ownerId, ownerId) || other.ownerId == ownerId) &&
+            (identical(other.tenantUserId, tenantUserId) ||
+                other.tenantUserId == tenantUserId) &&
             (identical(other.tenantName, tenantName) ||
                 other.tenantName == tenantName) &&
+            (identical(other.tenantPhone, tenantPhone) ||
+                other.tenantPhone == tenantPhone) &&
+            (identical(other.tenantEmail, tenantEmail) ||
+                other.tenantEmail == tenantEmail) &&
+            (identical(other.status, status) || other.status == status) &&
             (identical(other.startDate, startDate) ||
                 other.startDate == startDate) &&
             (identical(other.endDate, endDate) || other.endDate == endDate) &&
-            (identical(other.rentAmount, rentAmount) ||
-                other.rentAmount == rentAmount) &&
-            (identical(other.depositAmount, depositAmount) ||
-                other.depositAmount == depositAmount) &&
-            (identical(other.status, status) || other.status == status) &&
-            (identical(other.signedDocumentUrl, signedDocumentUrl) ||
-                other.signedDocumentUrl == signedDocumentUrl) &&
+            (identical(other.monthlyRent, monthlyRent) ||
+                other.monthlyRent == monthlyRent) &&
+            (identical(other.securityDeposit, securityDeposit) ||
+                other.securityDeposit == securityDeposit) &&
+            (identical(other.lateFeeAmount, lateFeeAmount) ||
+                other.lateFeeAmount == lateFeeAmount) &&
+            (identical(other.lateFeePercentage, lateFeePercentage) ||
+                other.lateFeePercentage == lateFeePercentage) &&
+            (identical(other.gracePeriodDays, gracePeriodDays) ||
+                other.gracePeriodDays == gracePeriodDays) &&
+            (identical(other.paymentDueDay, paymentDueDay) ||
+                other.paymentDueDay == paymentDueDay) &&
+            (identical(other.specialClauses, specialClauses) ||
+                other.specialClauses == specialClauses) &&
+            (identical(other.signedByTenantAt, signedByTenantAt) ||
+                other.signedByTenantAt == signedByTenantAt) &&
+            (identical(other.signedByOwnerAt, signedByOwnerAt) ||
+                other.signedByOwnerAt == signedByOwnerAt) &&
+            (identical(other.terminationDate, terminationDate) ||
+                other.terminationDate == terminationDate) &&
+            (identical(other.terminationReason, terminationReason) ||
+                other.terminationReason == terminationReason) &&
+            (identical(other.leaseDocumentId, leaseDocumentId) ||
+                other.leaseDocumentId == leaseDocumentId) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -379,22 +624,33 @@ class _$LeaseImpl implements _Lease {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     id,
     propertyId,
-    propertyName,
-    tenantId,
+    ownerId,
+    tenantUserId,
     tenantName,
+    tenantPhone,
+    tenantEmail,
+    status,
     startDate,
     endDate,
-    rentAmount,
-    depositAmount,
-    status,
-    signedDocumentUrl,
+    monthlyRent,
+    securityDeposit,
+    lateFeeAmount,
+    lateFeePercentage,
+    gracePeriodDays,
+    paymentDueDay,
+    specialClauses,
+    signedByTenantAt,
+    signedByOwnerAt,
+    terminationDate,
+    terminationReason,
+    leaseDocumentId,
     createdAt,
     updatedAt,
-  );
+  ]);
 
   /// Create a copy of Lease
   /// with the given fields replaced by the non-null parameter values.
@@ -414,18 +670,39 @@ abstract class _Lease implements Lease {
   const factory _Lease({
     @JsonKey(fromJson: parseInt) final int? id,
     @JsonKey(name: 'property_id', fromJson: parseInt) final int? propertyId,
-    @JsonKey(name: 'property_name') final String? propertyName,
-    @JsonKey(name: 'tenant_id', fromJson: parseInt) final int? tenantId,
+    @JsonKey(name: 'owner_id', fromJson: parseInt) final int? ownerId,
+    @JsonKey(name: 'tenant_user_id', fromJson: parseInt)
+    final int? tenantUserId,
     @JsonKey(name: 'tenant_name') final String? tenantName,
+    @JsonKey(name: 'tenant_phone') final String? tenantPhone,
+    @JsonKey(name: 'tenant_email') final String? tenantEmail,
+    @JsonKey(fromJson: LeaseStatus.fromJson, toJson: LeaseStatus.toJsonValue)
+    final LeaseStatus? status,
     @JsonKey(name: 'start_date', fromJson: parseDateTime)
     final DateTime? startDate,
     @JsonKey(name: 'end_date', fromJson: parseDateTime) final DateTime? endDate,
-    @JsonKey(name: 'rent_amount', fromJson: parseDouble)
-    final double? rentAmount,
-    @JsonKey(name: 'deposit_amount', fromJson: parseDouble)
-    final double? depositAmount,
-    final String? status,
-    @JsonKey(name: 'signed_document_url') final String? signedDocumentUrl,
+    @JsonKey(name: 'monthly_rent', fromJson: parseDouble)
+    final double? monthlyRent,
+    @JsonKey(name: 'security_deposit', fromJson: parseDouble)
+    final double? securityDeposit,
+    @JsonKey(name: 'late_fee_amount', fromJson: parseDouble)
+    final double? lateFeeAmount,
+    @JsonKey(name: 'late_fee_percentage', fromJson: parseDouble)
+    final double? lateFeePercentage,
+    @JsonKey(name: 'grace_period_days', fromJson: parseInt)
+    final int? gracePeriodDays,
+    @JsonKey(name: 'payment_due_day', fromJson: parseInt)
+    final int? paymentDueDay,
+    @JsonKey(name: 'special_clauses') final String? specialClauses,
+    @JsonKey(name: 'signed_by_tenant_at', fromJson: parseDateTime)
+    final DateTime? signedByTenantAt,
+    @JsonKey(name: 'signed_by_owner_at', fromJson: parseDateTime)
+    final DateTime? signedByOwnerAt,
+    @JsonKey(name: 'termination_date', fromJson: parseDateTime)
+    final DateTime? terminationDate,
+    @JsonKey(name: 'termination_reason') final String? terminationReason,
+    @JsonKey(name: 'lease_document_id', fromJson: parseInt)
+    final int? leaseDocumentId,
     @JsonKey(name: 'created_at', fromJson: parseDateTime)
     final DateTime? createdAt,
     @JsonKey(name: 'updated_at', fromJson: parseDateTime)
@@ -441,14 +718,23 @@ abstract class _Lease implements Lease {
   @JsonKey(name: 'property_id', fromJson: parseInt)
   int? get propertyId;
   @override
-  @JsonKey(name: 'property_name')
-  String? get propertyName;
+  @JsonKey(name: 'owner_id', fromJson: parseInt)
+  int? get ownerId;
   @override
-  @JsonKey(name: 'tenant_id', fromJson: parseInt)
-  int? get tenantId;
+  @JsonKey(name: 'tenant_user_id', fromJson: parseInt)
+  int? get tenantUserId;
   @override
   @JsonKey(name: 'tenant_name')
   String? get tenantName;
+  @override
+  @JsonKey(name: 'tenant_phone')
+  String? get tenantPhone;
+  @override
+  @JsonKey(name: 'tenant_email')
+  String? get tenantEmail;
+  @override
+  @JsonKey(fromJson: LeaseStatus.fromJson, toJson: LeaseStatus.toJsonValue)
+  LeaseStatus? get status;
   @override
   @JsonKey(name: 'start_date', fromJson: parseDateTime)
   DateTime? get startDate;
@@ -456,16 +742,41 @@ abstract class _Lease implements Lease {
   @JsonKey(name: 'end_date', fromJson: parseDateTime)
   DateTime? get endDate;
   @override
-  @JsonKey(name: 'rent_amount', fromJson: parseDouble)
-  double? get rentAmount;
+  @JsonKey(name: 'monthly_rent', fromJson: parseDouble)
+  double? get monthlyRent;
   @override
-  @JsonKey(name: 'deposit_amount', fromJson: parseDouble)
-  double? get depositAmount;
+  @JsonKey(name: 'security_deposit', fromJson: parseDouble)
+  double? get securityDeposit;
   @override
-  String? get status;
+  @JsonKey(name: 'late_fee_amount', fromJson: parseDouble)
+  double? get lateFeeAmount;
   @override
-  @JsonKey(name: 'signed_document_url')
-  String? get signedDocumentUrl;
+  @JsonKey(name: 'late_fee_percentage', fromJson: parseDouble)
+  double? get lateFeePercentage;
+  @override
+  @JsonKey(name: 'grace_period_days', fromJson: parseInt)
+  int? get gracePeriodDays;
+  @override
+  @JsonKey(name: 'payment_due_day', fromJson: parseInt)
+  int? get paymentDueDay;
+  @override
+  @JsonKey(name: 'special_clauses')
+  String? get specialClauses;
+  @override
+  @JsonKey(name: 'signed_by_tenant_at', fromJson: parseDateTime)
+  DateTime? get signedByTenantAt;
+  @override
+  @JsonKey(name: 'signed_by_owner_at', fromJson: parseDateTime)
+  DateTime? get signedByOwnerAt;
+  @override
+  @JsonKey(name: 'termination_date', fromJson: parseDateTime)
+  DateTime? get terminationDate;
+  @override
+  @JsonKey(name: 'termination_reason')
+  String? get terminationReason;
+  @override
+  @JsonKey(name: 'lease_document_id', fromJson: parseInt)
+  int? get leaseDocumentId;
   @override
   @JsonKey(name: 'created_at', fromJson: parseDateTime)
   DateTime? get createdAt;

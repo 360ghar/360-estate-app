@@ -1,15 +1,17 @@
-import 'dart:async';
-
+import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:estate_app/core/presentation/errors/user_facing_message.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
+import 'package:estate_app/core/presentation/widgets/feedback.dart';
+import 'package:estate_app/core/utils/dates.dart';
 import 'package:estate_app/features/auth/data/auth_repository.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
+import 'package:estate_app/features/auth/presentation/widgets/auth_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
-/// Profile completion screen shown when the backend gate evaluation returns
-/// `stage: profile_completion`. Collects mandatory fields (full_name,
-/// date_of_birth) and updates the profile before routing to the app.
+/// Shown when the backend gate returns `stage: profile_completion`. Collects
+/// the mandatory full name and date of birth, then moves on.
 class ProfileCompletionPage extends ConsumerStatefulWidget {
   const ProfileCompletionPage({super.key});
 
@@ -20,24 +22,17 @@ class ProfileCompletionPage extends ConsumerStatefulWidget {
 
 class _ProfileCompletionPageState extends ConsumerState<ProfileCompletionPage> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
+  late final _nameController = TextEditingController(
+    text: ref.read(authControllerProvider).user?.fullName ?? '',
+  );
+  final _dateController = TextEditingController();
   DateTime? _dateOfBirth;
   bool _isSubmitting = false;
 
   @override
-  void initState() {
-    super.initState();
-    // Pre-fill from existing profile data.
-    final authState = ref.read(authControllerProvider);
-    final user = authState.user;
-    if (user != null) {
-      _nameController.text = user.fullName ?? user.firstName ?? '';
-    }
-  }
-
-  @override
   void dispose() {
     _nameController.dispose();
+    _dateController.dispose();
     super.dispose();
   }
 
@@ -48,138 +43,87 @@ class _ProfileCompletionPageState extends ConsumerState<ProfileCompletionPage> {
       initialDate: _dateOfBirth ?? DateTime(now.year - 25, now.month, now.day),
       firstDate: DateTime(1900),
       lastDate: now,
-      helpText: 'Select Date of Birth',
+      helpText: context.l10n.authDateOfBirth,
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
     );
-    if (picked != null) {
-      setState(() => _dateOfBirth = picked);
-    }
+    if (picked == null || !mounted) return;
+    setState(() {
+      _dateOfBirth = picked;
+      _dateController.text = shortDate(context, picked);
+    });
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (_dateOfBirth == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select your date of birth')),
-      );
-      return;
-    }
-
+    if (!(_formKey.currentState?.validate() ?? false)) return;
     setState(() => _isSubmitting = true);
     try {
-      final controller = ref.read(authControllerProvider.notifier);
-      await controller.updateProfile(
-        UserProfileUpdate(
-          fullName: _nameController.text.trim(),
-          dateOfBirth: _dateOfBirth,
-        ),
-      );
-
-      // The controller re-evaluates the gate after update, so the GoRouter
-      // redirect will route to the next stage (app_onboarding or active).
-      if (mounted) {
-        context.go('/home');
-      }
+      await ref
+          .read(authControllerProvider.notifier)
+          .updateProfile(
+            UserProfileUpdate(
+              fullName: _nameController.text.trim(),
+              dateOfBirth: _dateOfBirth,
+            ),
+          );
+      // The controller re-evaluates the gate after the update; the redirect
+      // takes over from /home (onboarding or the app).
+      if (mounted) context.go('/home');
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update profile: $e')),
+        context.showSnack(
+          userFacingMessage(e, fallback: context.l10n.authProfileSaveFailed),
         );
       }
     } finally {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-      }
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Complete Your Profile'),
-        automaticallyImplyLeading: false,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'We need a few more details',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Please provide your full name and date of birth to continue.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Full Name
-                TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Full Name',
-                    hintText: 'Enter your full name',
-                    prefixIcon: Icon(Icons.person_outline),
-                    border: OutlineInputBorder(),
-                  ),
-                  textInputAction: TextInputAction.next,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your full name';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-
-                // Date of Birth
-                InkWell(
-                  onTap: _pickDate,
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Date of Birth',
-                      prefixIcon: Icon(Icons.calendar_today_outlined),
-                      border: OutlineInputBorder(),
-                    ),
-                    child: Text(
-                      _dateOfBirth != null
-                          ? DateFormat.yMMMMd().format(_dateOfBirth!)
-                          : 'Select your date of birth',
-                      style: TextStyle(
-                        color: _dateOfBirth != null
-                            ? theme.colorScheme.onSurface
-                            : theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Submit button
-                FilledButton(
-                  onPressed: _isSubmitting ? null : _submit,
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Complete Profile'),
-                ),
-              ],
+    final l10n = context.l10n;
+    return AuthScaffold(
+      title: l10n.authProfileTitle,
+      subtitle: Text(l10n.authProfileBody),
+      card: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextFormField(
+              controller: _nameController,
+              textCapitalization: TextCapitalization.words,
+              textInputAction: TextInputAction.next,
+              autofillHints: const [AutofillHints.name],
+              decoration: InputDecoration(
+                labelText: l10n.authFullName,
+                prefixIcon: const Icon(Icons.person_outline_rounded),
+              ),
+              validator: (v) => (v?.trim().isEmpty ?? true)
+                  ? l10n.authFullNameRequired
+                  : null,
             ),
-          ),
+            const SizedBox(height: AppSpacing.lg),
+            TextFormField(
+              controller: _dateController,
+              readOnly: true,
+              onTap: _pickDate,
+              decoration: InputDecoration(
+                labelText: l10n.authDateOfBirth,
+                hintText: l10n.authDateOfBirthHint,
+                prefixIcon: const Icon(Icons.cake_outlined),
+                suffixIcon: const Icon(Icons.calendar_month_outlined),
+              ),
+              validator: (_) =>
+                  _dateOfBirth == null ? l10n.authDateOfBirthRequired : null,
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            AuthPrimaryButton(
+              label: l10n.commonContinue,
+              busy: _isSubmitting,
+              onPressed: _submit,
+            ),
+          ],
         ),
       ),
     );

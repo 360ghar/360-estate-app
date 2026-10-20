@@ -1,58 +1,73 @@
+import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
+import 'package:estate_app/features/auth/presentation/widgets/auth_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Placeholder onboarding page for the estate app.
-///
-/// The estate app uses minimal onboarding — profile completion is the only
-/// mandatory gate. This page marks onboarding as complete (persisted to the
-/// backend so the gate advances past app_onboarding on the next launch) and
-/// redirects to home. Replace with a real onboarding flow if needed.
-class OnboardingPage extends ConsumerWidget {
+/// The one welcome step after sign-up: what the app is for and the first
+/// thing to do. Either action marks onboarding done on the backend (so the
+/// gate moves past `app_onboarding`), then opens the app.
+class OnboardingPage extends ConsumerStatefulWidget {
   const OnboardingPage({super.key});
 
-  Future<void> _completeAndContinue(WidgetRef ref, BuildContext context) async {
+  @override
+  ConsumerState<OnboardingPage> createState() => _OnboardingPageState();
+}
+
+class _OnboardingPageState extends ConsumerState<OnboardingPage> {
+  bool _busy = false;
+
+  Future<void> _finish(String location) async {
+    setState(() => _busy = true);
     try {
       await ref.read(authRepositoryProvider).completeOnboarding();
     } catch (_) {
-      // Non-critical; ignore.
+      // Not critical: the gate asks again on the next launch.
     }
-    if (context.mounted) {
-      context.go('/home');
-    }
+    if (mounted) context.go(location);
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.check_circle_outline,
-              size: 64,
-              color: Colors.green,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Welcome to Estate App',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'You\'re all set!',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final steps = [
+      (Icons.apartment_outlined, l10n.onboardingStepProperty),
+      (Icons.people_outline_rounded, l10n.onboardingStepTenants),
+      (Icons.payments_outlined, l10n.onboardingStepRent),
+    ];
+    return AuthScaffold(
+      title: l10n.onboardingTitle,
+      subtitle: Text(l10n.onboardingBody),
+      card: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final (icon, label) in steps)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+              child: Row(
+                children: [
+                  ExcludeSemantics(
+                    child: Icon(icon, color: context.colors.primary),
+                  ),
+                  const SizedBox(width: AppSpacing.lg),
+                  Expanded(child: Text(label, style: context.text.titleMedium)),
+                ],
               ),
             ),
-            const SizedBox(height: 32),
-            FilledButton(
-              onPressed: () => _completeAndContinue(ref, context),
-              child: const Text('Get Started'),
-            ),
-          ],
+          const SizedBox(height: AppSpacing.sm),
+          AuthPrimaryButton(
+            label: l10n.onboardingAddProperty,
+            busy: _busy,
+            onPressed: () => _finish('/properties/create'),
+          ),
+        ],
+      ),
+      footer: Center(
+        child: TextButton(
+          onPressed: _busy ? null : () => _finish('/home'),
+          child: Text(l10n.onboardingGoHome),
         ),
       ),
     );

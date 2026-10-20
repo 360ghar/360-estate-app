@@ -27,32 +27,28 @@ _$InspectionImpl _$$InspectionImplFromJson(Map<String, dynamic> json) =>
     _$InspectionImpl(
       id: parseInt(json['id']),
       propertyId: parseInt(json['property_id']),
-      propertyName: json['property_name'] as String?,
-      tenantId: parseInt(json['tenant_id']),
-      tenantName: json['tenant_name'] as String?,
-      title: json['title'] as String?,
-      status: json['status'] as String?,
-      scheduledAt: parseDateTime(json['scheduled_at']),
-      signedAt: parseDateTime(json['signed_at']),
-      items: (json['items'] as List<dynamic>?)
-          ?.map((e) => InspectionItem.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      leaseId: parseInt(json['lease_id']),
+      ownerId: parseInt(json['owner_id']),
+      inspectionType: InspectionType.fromJson(json['inspection_type']),
+      conductedAt: parseDateTime(json['conducted_at']),
+      roomsData: json['rooms_data'] as Map<String, dynamic>?,
+      overallNotes: json['overall_notes'] as String?,
+      signedByTenantAt: parseDateTime(json['signed_by_tenant_at']),
+      signedByOwnerAt: parseDateTime(json['signed_by_owner_at']),
       createdAt: parseDateTime(json['created_at']),
-      updatedAt: parseDateTime(json['updated_at']),
     );
 
 Map<String, dynamic> _$$InspectionImplToJson(_$InspectionImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'property_id': instance.propertyId,
-      'property_name': instance.propertyName,
-      'tenant_id': instance.tenantId,
-      'tenant_name': instance.tenantName,
-      'title': instance.title,
-      'status': instance.status,
-      'scheduled_at': instance.scheduledAt?.toIso8601String(),
-      'signed_at': instance.signedAt?.toIso8601String(),
-      'items': instance.items,
+      'lease_id': instance.leaseId,
+      'owner_id': instance.ownerId,
+      'inspection_type': InspectionType.toJsonValue(instance.inspectionType),
+      'conducted_at': instance.conductedAt?.toIso8601String(),
+      'rooms_data': instance.roomsData,
+      'overall_notes': instance.overallNotes,
+      'signed_by_tenant_at': instance.signedByTenantAt?.toIso8601String(),
+      'signed_by_owner_at': instance.signedByOwnerAt?.toIso8601String(),
       'created_at': instance.createdAt?.toIso8601String(),
-      'updated_at': instance.updatedAt?.toIso8601String(),
     };

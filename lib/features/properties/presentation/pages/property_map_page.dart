@@ -2,12 +2,13 @@ import 'dart:math' as math;
 
 import 'package:estate_app/core/map/map_controller.dart';
 import 'package:estate_app/core/map/safe_map.dart';
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
-import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:flutter/material.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
+/// Properties as pins on the map. One pin centres the map on it; several
+/// fit the view around them.
 class PropertyMapPage extends StatefulWidget {
   const PropertyMapPage({
     super.key,
@@ -18,7 +19,6 @@ class PropertyMapPage extends StatefulWidget {
   });
 
   final List<PropertyMarker> markers;
-
   final double initialLatitude;
   final double initialLongitude;
   final double initialZoom;
@@ -26,6 +26,10 @@ class PropertyMapPage extends StatefulWidget {
   @override
   State<PropertyMapPage> createState() => _PropertyMapPageState();
 }
+
+/// `#RRGGBB` for the map style, which takes colours as strings.
+String _hex(Color c) =>
+    '#${(c.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}';
 
 class _PropertyMapPageState extends State<PropertyMapPage> {
   final EstateMapController _mapController = EstateMapController();
@@ -45,47 +49,46 @@ class _PropertyMapPageState extends State<PropertyMapPage> {
 
   Future<void> _addMarkers() async {
     final controller = _mapController.controller;
-    if (controller == null) return;
+    if (controller == null || !mounted) return;
+    final colors = context.colors;
+    final pin = _hex(colors.primary);
+    final ring = _hex(context.palette.card);
+    final ink = _hex(colors.onSurface);
 
     for (final marker in widget.markers) {
+      final point = LatLng(marker.latitude, marker.longitude);
       await controller.addCircle(
         CircleOptions(
-          geometry: LatLng(marker.latitude, marker.longitude),
+          geometry: point,
           circleRadius: 8,
-          circleColor: '#1E3A5F',
+          circleColor: pin,
           circleStrokeWidth: 2,
-          circleStrokeColor: '#FFFFFF',
+          circleStrokeColor: ring,
         ),
       );
       await controller.addSymbol(
         SymbolOptions(
-          geometry: LatLng(marker.latitude, marker.longitude),
+          geometry: point,
           textField: marker.label,
           textSize: 12,
           textOffset: const Offset(0, 1.5),
           textAnchor: 'top',
-          textColor: '#111827',
-          textHaloColor: '#FFFFFF',
+          textColor: ink,
+          textHaloColor: ring,
           textHaloWidth: 1,
         ),
       );
     }
 
     if (widget.markers.length >= 2) {
-      final lats = widget.markers.map((m) => m.latitude).toList();
-      final lngs = widget.markers.map((m) => m.longitude).toList();
-      final minLat = lats.reduce((a, b) => a < b ? a : b);
-      final maxLat = lats.reduce((a, b) => a > b ? a : b);
-      final minLng = lngs.reduce((a, b) => a < b ? a : b);
-      final maxLng = lngs.reduce((a, b) => a > b ? a : b);
-
-      final bounds = LatLngBounds(
-        southwest: LatLng(minLat, minLng),
-        northeast: LatLng(maxLat, maxLng),
-      );
+      final lats = widget.markers.map((m) => m.latitude);
+      final lngs = widget.markers.map((m) => m.longitude);
       await controller.animateCamera(
         CameraUpdate.newLatLngBounds(
-          bounds,
+          LatLngBounds(
+            southwest: LatLng(lats.reduce(math.min), lngs.reduce(math.min)),
+            northeast: LatLng(lats.reduce(math.max), lngs.reduce(math.max)),
+          ),
           top: 80,
           left: 40,
           bottom: 40,
@@ -93,8 +96,7 @@ class _PropertyMapPageState extends State<PropertyMapPage> {
         ),
       );
     } else if (widget.markers.length == 1) {
-      // A single marker won't fit-to-bounds, so center the camera on it
-      // explicitly; otherwise it stays at the far-away initial view.
+      // One pin cannot fit bounds: centre on it instead of the country view.
       final marker = widget.markers.first;
       await controller.animateCamera(
         CameraUpdate.newLatLngZoom(
@@ -107,85 +109,57 @@ class _PropertyMapPageState extends State<PropertyMapPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
+    final l10n = context.l10n;
+    return Scaffold(
       appBar: AppBar(
         title: Text(
           widget.markers.length == 1
               ? widget.markers.first.label
-              : '${widget.markers.length} Properties',
+              : l10n.propertiesCount(widget.markers.length),
         ),
       ),
       body: SafeMap(
         latitude: widget.initialLatitude,
         longitude: widget.initialLongitude,
         zoom: widget.initialZoom,
-        mapBuilder: (context) {
-          return Stack(
-            children: [
-              MapLibreMap(
-                styleString: kLibertyStyle,
-                initialCameraPosition: CameraPosition(
-                  target: LatLng(
-                    widget.initialLatitude,
-                    widget.initialLongitude,
-                  ),
-                  zoom: widget.initialZoom,
-                ),
-                minMaxZoomPreference: MinMaxZoomPreference(
-                  kDefaultMinZoom,
-                  kDefaultMaxZoom,
-                ),
-                onMapCreated: _onMapCreated,
-                attributionButtonMargins: const math.Point(8, 8),
+        mapBuilder: (context) => Stack(
+          children: [
+            MapLibreMap(
+              styleString: kLibertyStyle,
+              initialCameraPosition: CameraPosition(
+                target: LatLng(widget.initialLatitude, widget.initialLongitude),
+                zoom: widget.initialZoom,
               ),
-              if (_mapReady) ...[
-                Positioned(
-                  right: AppSpacing.md,
-                  bottom: AppSpacing.md,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _ZoomButton(
-                        icon: Icons.add,
-                        onPressed: () => _mapController.zoomIn(),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      _ZoomButton(
-                        icon: Icons.remove,
-                        onPressed: () => _mapController.zoomOut(),
-                      ),
-                    ],
-                  ),
+              minMaxZoomPreference: MinMaxZoomPreference(
+                kDefaultMinZoom,
+                kDefaultMaxZoom,
+              ),
+              onMapCreated: _onMapCreated,
+              attributionButtonMargins: const math.Point(8, 8),
+            ),
+            if (_mapReady)
+              Positioned(
+                right: AppSpacing.md,
+                bottom: AppSpacing.md,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton.filledTonal(
+                      tooltip: l10n.mapZoomIn,
+                      onPressed: _mapController.zoomIn,
+                      icon: const Icon(Icons.add_rounded),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    IconButton.filledTonal(
+                      tooltip: l10n.mapZoomOut,
+                      onPressed: _mapController.zoomOut,
+                      icon: const Icon(Icons.remove_rounded),
+                    ),
+                  ],
                 ),
-              ],
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _ZoomButton extends StatelessWidget {
-  const _ZoomButton({required this.icon, required this.onPressed});
-
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return SizedBox(
-      width: 40,
-      height: 40,
-      child: FloatingActionButton.small(
-        heroTag: null,
-        onPressed: onPressed,
-        backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
-        foregroundColor:
-            isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-        elevation: 2,
-        child: Icon(icon, size: 20),
+              ),
+          ],
+        ),
       ),
     );
   }

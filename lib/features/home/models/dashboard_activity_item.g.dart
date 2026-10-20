@@ -10,18 +10,26 @@ _$DashboardActivityItemImpl _$$DashboardActivityItemImplFromJson(
   Map<String, dynamic> json,
 ) => _$DashboardActivityItemImpl(
   id: parseInt(json['id']),
-  type: json['type'] as String?,
+  type: ActivityType.fromJson(json['type']),
+  at: parseDateTime(json['at']),
   title: json['title'] as String?,
-  message: json['message'] as String?,
-  createdAt: parseDateTime(json['created_at']),
+  description: json['description'] as String?,
+  propertyId: parseInt(json['property_id']),
+  leaseId: parseInt(json['lease_id']),
+  amount: parseDouble(json['amount']),
+  status: json['status'] as String?,
 );
 
 Map<String, dynamic> _$$DashboardActivityItemImplToJson(
   _$DashboardActivityItemImpl instance,
 ) => <String, dynamic>{
   'id': instance.id,
-  'type': instance.type,
+  'type': ActivityType.toJsonValue(instance.type),
+  'at': instance.at?.toIso8601String(),
   'title': instance.title,
-  'message': instance.message,
-  'created_at': instance.createdAt?.toIso8601String(),
+  'description': instance.description,
+  'property_id': instance.propertyId,
+  'lease_id': instance.leaseId,
+  'amount': instance.amount,
+  'status': instance.status,
 };

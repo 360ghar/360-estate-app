@@ -23,13 +23,31 @@ DocumentItem _$DocumentItemFromJson(Map<String, dynamic> json) {
 mixin _$DocumentItem {
   @JsonKey(fromJson: parseInt)
   int? get id => throw _privateConstructorUsedError;
+  @JsonKey(name: 'owner_id', fromJson: parseInt)
+  int? get ownerId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'property_id', fromJson: parseInt)
+  int? get propertyId => throw _privateConstructorUsedError;
+  @JsonKey(name: 'lease_id', fromJson: parseInt)
+  int? get leaseId => throw _privateConstructorUsedError;
+  @JsonKey(
+    name: 'document_type',
+    fromJson: DocumentType.fromJson,
+    toJson: DocumentType.toJsonValue,
+  )
+  DocumentType? get documentType => throw _privateConstructorUsedError;
   String? get title => throw _privateConstructorUsedError;
-  String? get type => throw _privateConstructorUsedError;
-  @JsonKey(name: 'file_name')
-  String? get fileName => throw _privateConstructorUsedError;
-  @JsonKey(name: 'uploaded_at', fromJson: parseDateTime)
-  DateTime? get uploadedAt => throw _privateConstructorUsedError;
-  String? get url => throw _privateConstructorUsedError;
+  @JsonKey(name: 'file_url')
+  String? get fileUrl => throw _privateConstructorUsedError;
+  @JsonKey(name: 'mime_type')
+  String? get mimeType => throw _privateConstructorUsedError;
+  @JsonKey(name: 'file_size', fromJson: parseInt)
+  int? get fileSize => throw _privateConstructorUsedError;
+  @JsonKey(name: 'shared_with_tenant')
+  bool? get sharedWithTenant => throw _privateConstructorUsedError;
+  @JsonKey(name: 'shared_with_agent')
+  bool? get sharedWithAgent => throw _privateConstructorUsedError;
+  @JsonKey(name: 'created_at', fromJson: parseDateTime)
+  DateTime? get createdAt => throw _privateConstructorUsedError;
 
   /// Serializes this DocumentItem to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -50,11 +68,22 @@ abstract class $DocumentItemCopyWith<$Res> {
   @useResult
   $Res call({
     @JsonKey(fromJson: parseInt) int? id,
+    @JsonKey(name: 'owner_id', fromJson: parseInt) int? ownerId,
+    @JsonKey(name: 'property_id', fromJson: parseInt) int? propertyId,
+    @JsonKey(name: 'lease_id', fromJson: parseInt) int? leaseId,
+    @JsonKey(
+      name: 'document_type',
+      fromJson: DocumentType.fromJson,
+      toJson: DocumentType.toJsonValue,
+    )
+    DocumentType? documentType,
     String? title,
-    String? type,
-    @JsonKey(name: 'file_name') String? fileName,
-    @JsonKey(name: 'uploaded_at', fromJson: parseDateTime) DateTime? uploadedAt,
-    String? url,
+    @JsonKey(name: 'file_url') String? fileUrl,
+    @JsonKey(name: 'mime_type') String? mimeType,
+    @JsonKey(name: 'file_size', fromJson: parseInt) int? fileSize,
+    @JsonKey(name: 'shared_with_tenant') bool? sharedWithTenant,
+    @JsonKey(name: 'shared_with_agent') bool? sharedWithAgent,
+    @JsonKey(name: 'created_at', fromJson: parseDateTime) DateTime? createdAt,
   });
 }
 
@@ -74,11 +103,17 @@ class _$DocumentItemCopyWithImpl<$Res, $Val extends DocumentItem>
   @override
   $Res call({
     Object? id = freezed,
+    Object? ownerId = freezed,
+    Object? propertyId = freezed,
+    Object? leaseId = freezed,
+    Object? documentType = freezed,
     Object? title = freezed,
-    Object? type = freezed,
-    Object? fileName = freezed,
-    Object? uploadedAt = freezed,
-    Object? url = freezed,
+    Object? fileUrl = freezed,
+    Object? mimeType = freezed,
+    Object? fileSize = freezed,
+    Object? sharedWithTenant = freezed,
+    Object? sharedWithAgent = freezed,
+    Object? createdAt = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -86,26 +121,50 @@ class _$DocumentItemCopyWithImpl<$Res, $Val extends DocumentItem>
                 ? _value.id
                 : id // ignore: cast_nullable_to_non_nullable
                       as int?,
+            ownerId: freezed == ownerId
+                ? _value.ownerId
+                : ownerId // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            propertyId: freezed == propertyId
+                ? _value.propertyId
+                : propertyId // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            leaseId: freezed == leaseId
+                ? _value.leaseId
+                : leaseId // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            documentType: freezed == documentType
+                ? _value.documentType
+                : documentType // ignore: cast_nullable_to_non_nullable
+                      as DocumentType?,
             title: freezed == title
                 ? _value.title
                 : title // ignore: cast_nullable_to_non_nullable
                       as String?,
-            type: freezed == type
-                ? _value.type
-                : type // ignore: cast_nullable_to_non_nullable
+            fileUrl: freezed == fileUrl
+                ? _value.fileUrl
+                : fileUrl // ignore: cast_nullable_to_non_nullable
                       as String?,
-            fileName: freezed == fileName
-                ? _value.fileName
-                : fileName // ignore: cast_nullable_to_non_nullable
+            mimeType: freezed == mimeType
+                ? _value.mimeType
+                : mimeType // ignore: cast_nullable_to_non_nullable
                       as String?,
-            uploadedAt: freezed == uploadedAt
-                ? _value.uploadedAt
-                : uploadedAt // ignore: cast_nullable_to_non_nullable
+            fileSize: freezed == fileSize
+                ? _value.fileSize
+                : fileSize // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            sharedWithTenant: freezed == sharedWithTenant
+                ? _value.sharedWithTenant
+                : sharedWithTenant // ignore: cast_nullable_to_non_nullable
+                      as bool?,
+            sharedWithAgent: freezed == sharedWithAgent
+                ? _value.sharedWithAgent
+                : sharedWithAgent // ignore: cast_nullable_to_non_nullable
+                      as bool?,
+            createdAt: freezed == createdAt
+                ? _value.createdAt
+                : createdAt // ignore: cast_nullable_to_non_nullable
                       as DateTime?,
-            url: freezed == url
-                ? _value.url
-                : url // ignore: cast_nullable_to_non_nullable
-                      as String?,
           )
           as $Val,
     );
@@ -123,11 +182,22 @@ abstract class _$$DocumentItemImplCopyWith<$Res>
   @useResult
   $Res call({
     @JsonKey(fromJson: parseInt) int? id,
+    @JsonKey(name: 'owner_id', fromJson: parseInt) int? ownerId,
+    @JsonKey(name: 'property_id', fromJson: parseInt) int? propertyId,
+    @JsonKey(name: 'lease_id', fromJson: parseInt) int? leaseId,
+    @JsonKey(
+      name: 'document_type',
+      fromJson: DocumentType.fromJson,
+      toJson: DocumentType.toJsonValue,
+    )
+    DocumentType? documentType,
     String? title,
-    String? type,
-    @JsonKey(name: 'file_name') String? fileName,
-    @JsonKey(name: 'uploaded_at', fromJson: parseDateTime) DateTime? uploadedAt,
-    String? url,
+    @JsonKey(name: 'file_url') String? fileUrl,
+    @JsonKey(name: 'mime_type') String? mimeType,
+    @JsonKey(name: 'file_size', fromJson: parseInt) int? fileSize,
+    @JsonKey(name: 'shared_with_tenant') bool? sharedWithTenant,
+    @JsonKey(name: 'shared_with_agent') bool? sharedWithAgent,
+    @JsonKey(name: 'created_at', fromJson: parseDateTime) DateTime? createdAt,
   });
 }
 
@@ -146,11 +216,17 @@ class __$$DocumentItemImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = freezed,
+    Object? ownerId = freezed,
+    Object? propertyId = freezed,
+    Object? leaseId = freezed,
+    Object? documentType = freezed,
     Object? title = freezed,
-    Object? type = freezed,
-    Object? fileName = freezed,
-    Object? uploadedAt = freezed,
-    Object? url = freezed,
+    Object? fileUrl = freezed,
+    Object? mimeType = freezed,
+    Object? fileSize = freezed,
+    Object? sharedWithTenant = freezed,
+    Object? sharedWithAgent = freezed,
+    Object? createdAt = freezed,
   }) {
     return _then(
       _$DocumentItemImpl(
@@ -158,26 +234,50 @@ class __$$DocumentItemImplCopyWithImpl<$Res>
             ? _value.id
             : id // ignore: cast_nullable_to_non_nullable
                   as int?,
+        ownerId: freezed == ownerId
+            ? _value.ownerId
+            : ownerId // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        propertyId: freezed == propertyId
+            ? _value.propertyId
+            : propertyId // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        leaseId: freezed == leaseId
+            ? _value.leaseId
+            : leaseId // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        documentType: freezed == documentType
+            ? _value.documentType
+            : documentType // ignore: cast_nullable_to_non_nullable
+                  as DocumentType?,
         title: freezed == title
             ? _value.title
             : title // ignore: cast_nullable_to_non_nullable
                   as String?,
-        type: freezed == type
-            ? _value.type
-            : type // ignore: cast_nullable_to_non_nullable
+        fileUrl: freezed == fileUrl
+            ? _value.fileUrl
+            : fileUrl // ignore: cast_nullable_to_non_nullable
                   as String?,
-        fileName: freezed == fileName
-            ? _value.fileName
-            : fileName // ignore: cast_nullable_to_non_nullable
+        mimeType: freezed == mimeType
+            ? _value.mimeType
+            : mimeType // ignore: cast_nullable_to_non_nullable
                   as String?,
-        uploadedAt: freezed == uploadedAt
-            ? _value.uploadedAt
-            : uploadedAt // ignore: cast_nullable_to_non_nullable
+        fileSize: freezed == fileSize
+            ? _value.fileSize
+            : fileSize // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        sharedWithTenant: freezed == sharedWithTenant
+            ? _value.sharedWithTenant
+            : sharedWithTenant // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        sharedWithAgent: freezed == sharedWithAgent
+            ? _value.sharedWithAgent
+            : sharedWithAgent // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        createdAt: freezed == createdAt
+            ? _value.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
-        url: freezed == url
-            ? _value.url
-            : url // ignore: cast_nullable_to_non_nullable
-                  as String?,
       ),
     );
   }
@@ -188,11 +288,22 @@ class __$$DocumentItemImplCopyWithImpl<$Res>
 class _$DocumentItemImpl implements _DocumentItem {
   const _$DocumentItemImpl({
     @JsonKey(fromJson: parseInt) this.id,
+    @JsonKey(name: 'owner_id', fromJson: parseInt) this.ownerId,
+    @JsonKey(name: 'property_id', fromJson: parseInt) this.propertyId,
+    @JsonKey(name: 'lease_id', fromJson: parseInt) this.leaseId,
+    @JsonKey(
+      name: 'document_type',
+      fromJson: DocumentType.fromJson,
+      toJson: DocumentType.toJsonValue,
+    )
+    this.documentType,
     this.title,
-    this.type,
-    @JsonKey(name: 'file_name') this.fileName,
-    @JsonKey(name: 'uploaded_at', fromJson: parseDateTime) this.uploadedAt,
-    this.url,
+    @JsonKey(name: 'file_url') this.fileUrl,
+    @JsonKey(name: 'mime_type') this.mimeType,
+    @JsonKey(name: 'file_size', fromJson: parseInt) this.fileSize,
+    @JsonKey(name: 'shared_with_tenant') this.sharedWithTenant,
+    @JsonKey(name: 'shared_with_agent') this.sharedWithAgent,
+    @JsonKey(name: 'created_at', fromJson: parseDateTime) this.createdAt,
   });
 
   factory _$DocumentItemImpl.fromJson(Map<String, dynamic> json) =>
@@ -202,21 +313,45 @@ class _$DocumentItemImpl implements _DocumentItem {
   @JsonKey(fromJson: parseInt)
   final int? id;
   @override
+  @JsonKey(name: 'owner_id', fromJson: parseInt)
+  final int? ownerId;
+  @override
+  @JsonKey(name: 'property_id', fromJson: parseInt)
+  final int? propertyId;
+  @override
+  @JsonKey(name: 'lease_id', fromJson: parseInt)
+  final int? leaseId;
+  @override
+  @JsonKey(
+    name: 'document_type',
+    fromJson: DocumentType.fromJson,
+    toJson: DocumentType.toJsonValue,
+  )
+  final DocumentType? documentType;
+  @override
   final String? title;
   @override
-  final String? type;
+  @JsonKey(name: 'file_url')
+  final String? fileUrl;
   @override
-  @JsonKey(name: 'file_name')
-  final String? fileName;
+  @JsonKey(name: 'mime_type')
+  final String? mimeType;
   @override
-  @JsonKey(name: 'uploaded_at', fromJson: parseDateTime)
-  final DateTime? uploadedAt;
+  @JsonKey(name: 'file_size', fromJson: parseInt)
+  final int? fileSize;
   @override
-  final String? url;
+  @JsonKey(name: 'shared_with_tenant')
+  final bool? sharedWithTenant;
+  @override
+  @JsonKey(name: 'shared_with_agent')
+  final bool? sharedWithAgent;
+  @override
+  @JsonKey(name: 'created_at', fromJson: parseDateTime)
+  final DateTime? createdAt;
 
   @override
   String toString() {
-    return 'DocumentItem(id: $id, title: $title, type: $type, fileName: $fileName, uploadedAt: $uploadedAt, url: $url)';
+    return 'DocumentItem(id: $id, ownerId: $ownerId, propertyId: $propertyId, leaseId: $leaseId, documentType: $documentType, title: $title, fileUrl: $fileUrl, mimeType: $mimeType, fileSize: $fileSize, sharedWithTenant: $sharedWithTenant, sharedWithAgent: $sharedWithAgent, createdAt: $createdAt)';
   }
 
   @override
@@ -225,19 +360,43 @@ class _$DocumentItemImpl implements _DocumentItem {
         (other.runtimeType == runtimeType &&
             other is _$DocumentItemImpl &&
             (identical(other.id, id) || other.id == id) &&
+            (identical(other.ownerId, ownerId) || other.ownerId == ownerId) &&
+            (identical(other.propertyId, propertyId) ||
+                other.propertyId == propertyId) &&
+            (identical(other.leaseId, leaseId) || other.leaseId == leaseId) &&
+            (identical(other.documentType, documentType) ||
+                other.documentType == documentType) &&
             (identical(other.title, title) || other.title == title) &&
-            (identical(other.type, type) || other.type == type) &&
-            (identical(other.fileName, fileName) ||
-                other.fileName == fileName) &&
-            (identical(other.uploadedAt, uploadedAt) ||
-                other.uploadedAt == uploadedAt) &&
-            (identical(other.url, url) || other.url == url));
+            (identical(other.fileUrl, fileUrl) || other.fileUrl == fileUrl) &&
+            (identical(other.mimeType, mimeType) ||
+                other.mimeType == mimeType) &&
+            (identical(other.fileSize, fileSize) ||
+                other.fileSize == fileSize) &&
+            (identical(other.sharedWithTenant, sharedWithTenant) ||
+                other.sharedWithTenant == sharedWithTenant) &&
+            (identical(other.sharedWithAgent, sharedWithAgent) ||
+                other.sharedWithAgent == sharedWithAgent) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, title, type, fileName, uploadedAt, url);
+  int get hashCode => Object.hash(
+    runtimeType,
+    id,
+    ownerId,
+    propertyId,
+    leaseId,
+    documentType,
+    title,
+    fileUrl,
+    mimeType,
+    fileSize,
+    sharedWithTenant,
+    sharedWithAgent,
+    createdAt,
+  );
 
   /// Create a copy of DocumentItem
   /// with the given fields replaced by the non-null parameter values.
@@ -256,12 +415,23 @@ class _$DocumentItemImpl implements _DocumentItem {
 abstract class _DocumentItem implements DocumentItem {
   const factory _DocumentItem({
     @JsonKey(fromJson: parseInt) final int? id,
+    @JsonKey(name: 'owner_id', fromJson: parseInt) final int? ownerId,
+    @JsonKey(name: 'property_id', fromJson: parseInt) final int? propertyId,
+    @JsonKey(name: 'lease_id', fromJson: parseInt) final int? leaseId,
+    @JsonKey(
+      name: 'document_type',
+      fromJson: DocumentType.fromJson,
+      toJson: DocumentType.toJsonValue,
+    )
+    final DocumentType? documentType,
     final String? title,
-    final String? type,
-    @JsonKey(name: 'file_name') final String? fileName,
-    @JsonKey(name: 'uploaded_at', fromJson: parseDateTime)
-    final DateTime? uploadedAt,
-    final String? url,
+    @JsonKey(name: 'file_url') final String? fileUrl,
+    @JsonKey(name: 'mime_type') final String? mimeType,
+    @JsonKey(name: 'file_size', fromJson: parseInt) final int? fileSize,
+    @JsonKey(name: 'shared_with_tenant') final bool? sharedWithTenant,
+    @JsonKey(name: 'shared_with_agent') final bool? sharedWithAgent,
+    @JsonKey(name: 'created_at', fromJson: parseDateTime)
+    final DateTime? createdAt,
   }) = _$DocumentItemImpl;
 
   factory _DocumentItem.fromJson(Map<String, dynamic> json) =
@@ -271,17 +441,41 @@ abstract class _DocumentItem implements DocumentItem {
   @JsonKey(fromJson: parseInt)
   int? get id;
   @override
+  @JsonKey(name: 'owner_id', fromJson: parseInt)
+  int? get ownerId;
+  @override
+  @JsonKey(name: 'property_id', fromJson: parseInt)
+  int? get propertyId;
+  @override
+  @JsonKey(name: 'lease_id', fromJson: parseInt)
+  int? get leaseId;
+  @override
+  @JsonKey(
+    name: 'document_type',
+    fromJson: DocumentType.fromJson,
+    toJson: DocumentType.toJsonValue,
+  )
+  DocumentType? get documentType;
+  @override
   String? get title;
   @override
-  String? get type;
+  @JsonKey(name: 'file_url')
+  String? get fileUrl;
   @override
-  @JsonKey(name: 'file_name')
-  String? get fileName;
+  @JsonKey(name: 'mime_type')
+  String? get mimeType;
   @override
-  @JsonKey(name: 'uploaded_at', fromJson: parseDateTime)
-  DateTime? get uploadedAt;
+  @JsonKey(name: 'file_size', fromJson: parseInt)
+  int? get fileSize;
   @override
-  String? get url;
+  @JsonKey(name: 'shared_with_tenant')
+  bool? get sharedWithTenant;
+  @override
+  @JsonKey(name: 'shared_with_agent')
+  bool? get sharedWithAgent;
+  @override
+  @JsonKey(name: 'created_at', fromJson: parseDateTime)
+  DateTime? get createdAt;
 
   /// Create a copy of DocumentItem
   /// with the given fields replaced by the non-null parameter values.

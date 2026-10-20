@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:flutter/material.dart';
 
 /// Standard cooldown (in seconds) before an OTP can be resent. Shared by every
@@ -54,9 +55,8 @@ mixin ResendOtpTimer<T extends StatefulWidget> on State<T> {
   }
 }
 
-/// Shared "Resend code" control used by every OTP step. While the cooldown is
-/// active (or a request is in flight) it is disabled and shows the remaining
-/// seconds; once [canResend] is true it becomes tappable.
+/// "Didn't get the code?  Resend in 24s": the countdown is visible, and the
+/// button turns on when it reaches zero.
 class ResendOtpButton extends StatelessWidget {
   const ResendOtpButton({
     super.key,
@@ -71,42 +71,31 @@ class ResendOtpButton extends StatelessWidget {
   final bool isBusy;
   final VoidCallback onResend;
 
-  static const Color _accent = Color(0xFF3B82F6);
-
   @override
   Widget build(BuildContext context) {
-    final enabled = canResend && !isBusy;
-    final color = enabled ? _accent : Colors.white.withValues(alpha: 0.3);
-    final label = canResend ? 'Resend Code' : 'Resend in ${remainingSeconds}s';
-
-    return Opacity(
-      opacity: enabled ? 1.0 : 0.6,
-      child: GestureDetector(
-        onTap: enabled ? onResend : null,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.refresh_rounded, size: 18, color: color),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: color,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+    final l10n = context.l10n;
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(
+          l10n.authDidNotGetCode,
+          style: context.text.bodyMedium?.copyWith(
+            color: context.colors.onSurfaceVariant,
           ),
         ),
-      ),
+        TextButton(
+          onPressed: canResend && !isBusy ? onResend : null,
+          child: Text(
+            canResend
+                ? l10n.authResendCode
+                : l10n.authResendIn(remainingSeconds),
+            style: const TextStyle(
+              fontFeatures: [FontFeature.tabularFigures()],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

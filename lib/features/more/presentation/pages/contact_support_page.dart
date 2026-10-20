@@ -1,26 +1,26 @@
+import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/core/errors/failure.dart';
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
-import 'package:estate_app/core/presentation/design_system/app_radii.dart';
-import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/errors/failure_localization.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
-import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
+import 'package:estate_app/core/presentation/widgets/feedback.dart';
+import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:estate_app/features/feedback/data/feedback_repository.dart';
 import 'package:estate_app/features/feedback/feedback_providers.dart';
+import 'package:estate_app/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-/// Contact support page with form for submitting support requests
+/// A message to support: a topic, who you are, and what happened.
 class ContactSupportPage extends ConsumerStatefulWidget {
   const ContactSupportPage({super.key, this.initialCategory});
 
   final String? initialCategory;
 
   @override
-  ConsumerState<ContactSupportPage> createState() =>
-      _ContactSupportPageState();
+  ConsumerState<ContactSupportPage> createState() => _ContactSupportPageState();
 }
 
 class _ContactSupportPageState extends ConsumerState<ContactSupportPage> {
@@ -33,54 +33,28 @@ class _ContactSupportPageState extends ConsumerState<ContactSupportPage> {
   String _selectedCategory = 'general';
   bool _isSubmitting = false;
 
-  static const List<_SupportCategory> _categories = [
-    _SupportCategory(
-      value: 'general',
-      icon: Icons.help_outline,
-      label: 'General',
-      color: Color(0xFF3B82F6),
-    ),
-    _SupportCategory(
-      value: 'technical',
-      icon: Icons.bug_report_outlined,
-      label: 'Technical',
-      color: Color(0xFFEF4444),
-    ),
-    _SupportCategory(
-      value: 'billing',
-      icon: Icons.payment_outlined,
-      label: 'Billing',
-      color: Color(0xFF10B981),
-    ),
-    _SupportCategory(
-      value: 'feature',
-      icon: Icons.lightbulb_outline,
-      label: 'Feature Request',
-      color: Color(0xFFF59E0B),
-    ),
-    _SupportCategory(
-      value: 'report',
-      icon: Icons.report_problem_outlined,
-      label: 'Report Problem',
-      color: Color(0xFF8B5CF6),
-    ),
-  ];
+  static const _categories = ['general', 'technical', 'billing', 'feature'];
 
   @override
   void initState() {
     super.initState();
-    const validCategories = {
-      'general',
-      'technical',
-      'billing',
-      'feature',
-      'report',
-    };
-    final initial = widget.initialCategory;
-    if (initial != null && validCategories.contains(initial)) {
-      _selectedCategory = initial;
-    }
+    // 'report' is the older name of 'technical'.
+    final initial = widget.initialCategory == 'report'
+        ? 'technical'
+        : widget.initialCategory;
+    if (_categories.contains(initial)) _selectedCategory = initial!;
+    final user = ref.read(authControllerProvider).user;
+    _nameController.text = user?.fullName ?? '';
+    _emailController.text = user?.email ?? '';
   }
+
+  static String _categoryLabel(AppLocalizations l10n, String value) =>
+      switch (value) {
+        'technical' => l10n.contactCatTechnical,
+        'billing' => l10n.contactCatBilling,
+        'feature' => l10n.contactCatFeature,
+        _ => l10n.contactCatGeneral,
+      };
 
   @override
   void dispose() {
@@ -92,17 +66,17 @@ class _ContactSupportPageState extends ConsumerState<ContactSupportPage> {
   }
 
   /// Maps the selected support category to the backend `bug_type` value.
-  String _bugTypeForCategory(String category) {
+  BugType _bugTypeForCategory(String category) {
     switch (category) {
       case 'feature':
-        return 'feature_request';
+        return BugType.featureRequest;
       case 'technical':
       case 'report':
-        return 'functionality_bug';
+        return BugType.functionalityBug;
       case 'general':
       case 'billing':
       default:
-        return 'other';
+        return BugType.other;
     }
   }
 
@@ -133,30 +107,14 @@ class _ContactSupportPageState extends ConsumerState<ContactSupportPage> {
     try {
       await ref.read(feedbackRepositoryProvider).submitBugReport(payload);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.l10n?.supportRequestSent ??
-                'Support request sent successfully',
-          ),
-        ),
-      );
-      Navigator.pop(context);
+      context.showSnack(context.l10n.contactSent);
+      context.pop();
     } on Failure catch (failure) {
       if (!mounted) return;
-      final l10n = context.l10n;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n != null ? failure.localizedMessage(l10n) : failure.message,
-          ),
-        ),
-      );
-    } catch (error) {
+      context.showSnack(failure.localizedMessage(context.l10n));
+    } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
+      context.showSnack(context.l10n.errorSomethingWentWrong);
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
@@ -166,334 +124,131 @@ class _ContactSupportPageState extends ConsumerState<ContactSupportPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return AppScaffold(
-      appBar: AppBar(
-        title: Text(context.l10n?.contactUs ?? 'Contact Us'),
-      ),
-      scrollable: true,
+    final l10n = context.l10n;
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.moreContact)),
       body: Form(
         key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.sm,
+            AppSpacing.lg,
+            AppSpacing.xxl,
+          ),
           children: [
-            // Header banner
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.darkAccentSoft : AppColors.accentSoft,
-                borderRadius: AppRadii.lg,
-                border: Border.all(
-                  color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
-                  width: 0.5,
-                ),
-                boxShadow: AppShadows.cardResting,
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withValues(alpha: 0.10),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.support_agent_rounded,
-                      size: 24,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          context.l10n?.howCanWeHelp ?? 'How can we help?',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                        ),
-                        const SizedBox(height: AppSpacing.xxs),
-                        Text(
-                          context.l10n?.supportResponseTime ??
-                              'We typically respond within 24 hours',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+            Text(l10n.howCanWeHelp, style: context.text.headlineMedium),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              l10n.supportResponseTime,
+              style: context.text.bodyMedium?.copyWith(
+                color: context.colors.onSurfaceVariant,
               ),
             ),
-
-            const SizedBox(height: AppSpacing.xl),
-
-            // Category selection header
-            Row(
+            const SizedBox(height: AppSpacing.lg),
+            AppSectionCard(
+              title: l10n.contactTopic,
               children: [
-                Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF3B82F6).withValues(alpha: 0.08),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.category_outlined, size: 16, color: Color(0xFF3B82F6)),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  context.l10n?.category ?? 'Category',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  children: [
+                    for (final value in _categories)
+                      ChoiceChip(
+                        label: Text(_categoryLabel(l10n, value)),
+                        selected: _selectedCategory == value,
+                        onSelected: (_) =>
+                            setState(() => _selectedCategory = value),
+                      ),
+                  ],
                 ),
               ],
             ),
             const SizedBox(height: AppSpacing.md),
-
-            // Category chips as ChoiceChips
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: _categories.map((category) {
-                final isSelected = _selectedCategory == category.value;
-                return ChoiceChip(
-                  label: Text(category.label),
-                  avatar: Icon(
-                    category.icon,
-                    size: 16,
-                    color: isSelected
-                        ? theme.colorScheme.onPrimary
-                        : category.color,
-                  ),
-                  selected: isSelected,
-                  selectedColor: theme.colorScheme.primary,
-                  backgroundColor: isDark
-                      ? AppColors.darkSurfaceSecondary
-                      : AppColors.surfaceSecondary,
-                  labelStyle: theme.textTheme.labelMedium?.copyWith(
-                    color: isSelected
-                        ? theme.colorScheme.onPrimary
-                        : theme.colorScheme.onSurfaceVariant,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  ),
-                  side: BorderSide(
-                    color: isSelected
-                        ? theme.colorScheme.primary
-                        : isDark
-                            ? AppColors.darkCardBorder
-                            : AppColors.cardBorder,
-                    width: 0.5,
-                  ),
-                  showCheckmark: false,
-                  onSelected: (selected) {
-                    setState(() {
-                      _selectedCategory = category.value;
-                    });
-                  },
-                );
-              }).toList(),
-            ),
-
-            const SizedBox(height: AppSpacing.xl),
-
-            // Form fields in section card - Contact Info
             AppSectionCard(
-              title: 'Contact Information',
-              icon: Icons.person_outline,
-              iconColor: const Color(0xFF3B82F6),
+              title: l10n.profileDetailsTitle,
               children: [
+                const SizedBox(height: AppSpacing.sm),
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Your Name',
-                    prefixIcon: Icon(Icons.person_outline),
-                    hintText: 'Enter your full name',
-                  ),
+                  decoration: InputDecoration(labelText: l10n.contactName),
                   textCapitalization: TextCapitalization.words,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return context.l10n?.validationNameRequired ?? 'Name is required';
-                    }
-                    return null;
-                  },
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.name],
+                  validator: (v) => v == null || v.trim().isEmpty
+                      ? l10n.validationNameRequired
+                      : null,
                 ),
-
-                const SizedBox(height: AppSpacing.md),
-
+                const SizedBox(height: AppSpacing.lg),
                 TextFormField(
                   controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email Address',
-                    prefixIcon: Icon(Icons.email_outlined),
-                    hintText: 'you@example.com',
-                  ),
+                  decoration: InputDecoration(labelText: l10n.profileEmail),
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return context.l10n?.validationEmailRequired ?? 'Email is required';
-                    }
-                    if (!value.contains('@')) {
-                      return context.l10n?.validationEmailInvalid ?? 'Invalid email';
-                    }
-                    return null;
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.email],
+                  validator: (v) {
+                    final value = v?.trim() ?? '';
+                    if (value.isEmpty) return l10n.validationEmailRequired;
+                    return value.contains('@')
+                        ? null
+                        : l10n.validationEmailInvalid;
                   },
                 ),
               ],
             ),
-
-            const SizedBox(height: AppSpacing.lg),
-
-            // Message section
+            const SizedBox(height: AppSpacing.md),
             AppSectionCard(
-              title: 'Your Message',
-              icon: Icons.message_outlined,
-              iconColor: const Color(0xFF8B5CF6),
+              title: l10n.contactMessageTitle,
               children: [
+                const SizedBox(height: AppSpacing.sm),
                 TextFormField(
                   controller: _subjectController,
-                  decoration: const InputDecoration(
-                    labelText: 'Subject',
-                    prefixIcon: Icon(Icons.short_text_rounded),
-                    hintText: 'Brief summary of your request',
-                  ),
+                  decoration: InputDecoration(labelText: l10n.contactSubject),
                   textCapitalization: TextCapitalization.sentences,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return context.l10n?.validationSubjectRequired ?? 'Subject is required';
-                    }
-                    return null;
-                  },
+                  textInputAction: TextInputAction.next,
+                  validator: (v) => v == null || v.trim().isEmpty
+                      ? l10n.validationSubjectRequired
+                      : null,
                 ),
-
-                const SizedBox(height: AppSpacing.md),
-
-                // Description multiline text area
+                const SizedBox(height: AppSpacing.lg),
                 TextFormField(
                   controller: _messageController,
                   decoration: InputDecoration(
-                    labelText: context.l10n?.message ?? 'Description',
+                    labelText: l10n.message,
+                    helperText: l10n.contactMessageHelper,
                     alignLabelWithHint: true,
-                    hintText: 'Describe your issue or request in detail...',
-                    border: OutlineInputBorder(
-                      borderRadius: AppRadii.md,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: AppRadii.md,
-                      borderSide: BorderSide(
-                        color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: AppRadii.md,
-                      borderSide: BorderSide(
-                        color: theme.colorScheme.primary,
-                        width: 1.5,
-                      ),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: AppRadii.md,
-                      borderSide: BorderSide(
-                        color: theme.colorScheme.error,
-                      ),
-                    ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: AppRadii.md,
-                      borderSide: BorderSide(
-                        color: theme.colorScheme.error,
-                        width: 1.5,
-                      ),
-                    ),
-                    contentPadding: const EdgeInsets.all(AppSpacing.lg),
                   ),
-                  maxLines: 6,
+                  minLines: 4,
+                  maxLines: 8,
                   textCapitalization: TextCapitalization.sentences,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return context.l10n?.validationMessageRequired ?? 'Message is required';
-                    }
-                    if (value.trim().length < 10) {
-                      return context.l10n?.validationMessageTooShort ??
-                              'Please provide more details (at least 10 characters)';
-                    }
-                    return null;
+                  validator: (v) {
+                    final value = v?.trim() ?? '';
+                    if (value.isEmpty) return l10n.validationMessageRequired;
+                    return value.length < 10
+                        ? l10n.validationMessageTooShort
+                        : null;
                   },
                 ),
               ],
             ),
-
             const SizedBox(height: AppSpacing.xl),
-
-            // Submit button - prominent primary filled with send icon
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: FilledButton.icon(
-                onPressed: _isSubmitting ? null : _submitSupport,
-                icon: _isSubmitting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.send_rounded, size: 20),
-                label: Text(
-                  _isSubmitting
-                      ? 'Sending...'
-                      : (context.l10n?.sendRequest ?? 'Send Request'),
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+            FilledButton.icon(
+              onPressed: _isSubmitting ? null : _submitSupport,
+              icon: _isSubmitting
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.send_rounded, size: 18),
+              label: Text(l10n.contactSend),
             ),
-
             const SizedBox(height: AppSpacing.lg),
-
-            // Alternative contact info card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? AppColors.darkSurfaceSecondary
-                    : AppColors.surfaceSecondary,
-                borderRadius: AppRadii.lg,
-                border: Border.all(
-                  color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
-                  width: 0.5,
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.alternate_email_rounded,
-                    size: 16,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    context.l10n?.orEmailUs ?? 'Or email us directly at support@360estate.app',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+            SelectableText(
+              l10n.contactEmailDirect(kSupportEmail),
+              textAlign: TextAlign.center,
+              style: context.text.bodySmall?.copyWith(
+                color: context.colors.onSurfaceVariant,
               ),
             ),
-
-            const SizedBox(height: AppSpacing.xl),
           ],
         ),
       ),
@@ -501,16 +256,5 @@ class _ContactSupportPageState extends ConsumerState<ContactSupportPage> {
   }
 }
 
-class _SupportCategory {
-  const _SupportCategory({
-    required this.value,
-    required this.icon,
-    required this.label,
-    required this.color,
-  });
-
-  final String value;
-  final IconData icon;
-  final String label;
-  final Color color;
-}
+/// The support inbox (the same address the account deletion email goes to).
+const kSupportEmail = 'info@360ghar.com';

@@ -1,264 +1,78 @@
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
-import 'package:estate_app/core/presentation/design_system/app_radii.dart';
-import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
+import 'package:estate_app/app/router/routes.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
-import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
+import 'package:estate_app/core/presentation/widgets/app_avatar.dart';
+import 'package:estate_app/core/presentation/widgets/app_list_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_status_badge.dart';
+import 'package:estate_app/core/presentation/widgets/feedback.dart';
 import 'package:estate_app/core/presentation/widgets/paged_list_view.dart';
+import 'package:estate_app/core/services/deep_link_service.dart';
+import 'package:estate_app/core/utils/dates.dart';
+import 'package:estate_app/core/utils/money.dart';
 import 'package:estate_app/features/rental_applications/applications_providers.dart';
 import 'package:estate_app/features/rental_applications/models/application_form.dart';
 import 'package:estate_app/features/rental_applications/models/application_submission.dart';
+import 'package:estate_app/features/rental_applications/presentation/application_field_type_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
-class ApplicationsPage extends StatelessWidget {
+/// Applications that came in, and the forms that collect them. The inbox is
+/// first: it is what an owner checks.
+class ApplicationsPage extends ConsumerStatefulWidget {
   const ApplicationsPage({super.key});
 
   @override
+  ConsumerState<ApplicationsPage> createState() => _ApplicationsPageState();
+}
+
+class _ApplicationsPageState extends ConsumerState<ApplicationsPage>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabs = TabController(length: 2, vsync: this)
+    ..addListener(() {
+      if (!_tabs.indexIsChanging) setState(() {});
+    });
+
+  @override
+  void dispose() {
+    _tabs.dispose();
+    super.dispose();
+  }
+
+  void _newForm() => context.go(Routes.applicationsFormsNew);
+
+  @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: AppScaffold(
-        appBar: AppBar(
-          title: const Text('Applications'),
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'Forms'),
-              Tab(text: 'Inbox'),
-            ],
-          ),
-        ),
-        padding: EdgeInsets.zero,
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => context.go('/more/applications/forms/new'),
-          icon: const Icon(Icons.add),
-          label: const Text('New form'),
-        ),
-        body: const TabBarView(
-          children: [
-            _FormsTab(),
-            _InboxTab(),
+    final l10n = context.l10n;
+    final forms = ref.watch(applicationFormsPagedProvider);
+    // The empty forms list has its own "New form" button.
+    final showFab =
+        _tabs.index == 1 && !(forms.items.isEmpty && !forms.isInitialLoading);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.applicationsTitle),
+        bottom: TabBar(
+          controller: _tabs,
+          tabs: [
+            Tab(text: l10n.applicationsTabInbox),
+            Tab(text: l10n.applicationsTabForms),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _FormsTab extends ConsumerWidget {
-  const _FormsTab();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(applicationFormsPagedProvider);
-    final controller = ref.read(applicationFormsPagedProvider.notifier);
-
-    return PagedListView<ApplicationForm>(
-      state: state,
-      emptyTitle: 'No forms yet',
-      emptyMessage: 'Create a rental application form to get started.',
-      onLoadMore: controller.loadMore,
-      onRefresh: controller.refresh,
-      onRetry: controller.loadInitial,
-      onLoadMoreRetry: controller.retryLoadMore,
-      itemBuilder: (context, form) => _FormTile(form: form),
-    );
-  }
-}
-
-class _FormTile extends StatelessWidget {
-  const _FormTile({required this.form});
-
-  final ApplicationForm form;
-
-  String _formatDate(DateTime? date) {
-    if (date == null) return 'No expiry';
-    return DateFormat('d MMM yyyy').format(date);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final slug = form.slug ?? 'draft';
-    final isActive = form.isActive == true;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.xs,
-      ),
-      child: GestureDetector(
-        onTap: () => context.go('/more/applications/forms/${form.id}'),
-        child: Container(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: AppRadii.lg,
-            border: Border.all(
-              color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
-              width: 0.5,
-            ),
-            boxShadow: AppShadows.cardResting,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: (isDark ? AppColors.darkAccentSoft : AppColors.accentSoft),
-                        borderRadius: AppRadii.md,
-                      ),
-                      child: Icon(
-                        Icons.description_outlined,
-                        size: 20,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            form.title ?? form.propertyName ?? 'Application form',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: AppSpacing.xxs),
-                          Text(
-                            'Expires: ${_formatDate(form.expiresAt)}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    AppStatusBadge(
-                      label: isActive ? 'Active' : 'Inactive',
-                      type: isActive ? AppStatusType.success : AppStatusType.neutral,
-                      variant: AppStatusVariant.subtle,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Divider(
-                  height: 1,
-                  thickness: 0.5,
-                  color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.link,
-                      size: 14,
-                      color: AppColors.textTertiary,
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Expanded(
-                      child: Text(
-                        slug,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.textTertiary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    _ActionChip(
-                      icon: Icons.copy_rounded,
-                      label: 'Copy link',
-                      onTap: slug.isEmpty
-                          ? null
-                          : () async {
-                              final link = '/public/applications/$slug';
-                              await Clipboard.setData(ClipboardData(text: link));
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Public link copied.')),
-                                );
-                              }
-                            },
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    _ActionChip(
-                      icon: Icons.edit_outlined,
-                      label: 'Edit',
-                      onTap: () => context.go('/more/applications/forms/${form.id}'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ActionChip extends StatelessWidget {
-  const _ActionChip({
-    required this.icon,
-    required this.label,
-    this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: AppRadii.pill,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.sm,
-            vertical: AppSpacing.xs,
-          ),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.darkSurfaceVariant : AppColors.surfaceSecondary,
-            borderRadius: AppRadii.pill,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 14,
-                color: onTap != null ? AppColors.textSecondary : AppColors.textDisabled,
-              ),
-              const SizedBox(width: AppSpacing.xs),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: onTap != null ? AppColors.textSecondary : AppColors.textDisabled,
-                ),
-              ),
-            ],
-          ),
-        ),
+      floatingActionButton: showFab
+          ? FloatingActionButton.extended(
+              onPressed: _newForm,
+              icon: const Icon(Icons.add_rounded),
+              label: Text(l10n.applicationsNewForm),
+            )
+          : null,
+      body: TabBarView(
+        controller: _tabs,
+        children: [
+          const _InboxTab(),
+          _FormsTab(onNewForm: _newForm),
+        ],
       ),
     );
   }
@@ -269,166 +83,128 @@ class _InboxTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final state = ref.watch(applicationInboxPagedProvider);
     final controller = ref.read(applicationInboxPagedProvider.notifier);
-
     return PagedListView<ApplicationSubmission>(
       state: state,
-      emptyTitle: 'No applications yet',
-      emptyMessage: 'Applications submitted by tenants will show here.',
+      emptyTitle: l10n.applicationsInboxEmptyTitle,
+      emptyMessage: l10n.applicationsInboxEmptyBody,
       onLoadMore: controller.loadMore,
       onRefresh: controller.refresh,
       onRetry: controller.loadInitial,
       onLoadMoreRetry: controller.retryLoadMore,
-      itemBuilder: (context, submission) =>
-          _SubmissionTile(submission: submission),
+      itemBuilder: (context, submission) => _SubmissionRow(submission),
     );
   }
 }
 
-class _SubmissionTile extends StatelessWidget {
-  const _SubmissionTile({required this.submission});
+class _SubmissionRow extends StatelessWidget {
+  const _SubmissionRow(this.submission);
 
   final ApplicationSubmission submission;
 
-  String _formatDate(DateTime? date) {
-    if (date == null) return 'New';
-    return DateFormat('d MMM yyyy').format(date);
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final name = submission.applicantFullName ?? l10n.applicationsApplicant;
+    final status = submission.status;
+    final submitted = submission.submittedAt;
+    return AppListCard(
+      leading: AppAvatar(name: name),
+      title: name,
+      subtitle: submission.propertyName,
+      facts: [
+        if (submitted != null)
+          l10n.applicationsSubmittedOn(shortDate(context, submitted)),
+      ],
+      status: AppStatusBadge(
+        label: status?.text(l10n) ?? l10n.applicationsStatusUnknown,
+        type: status?.statusType ?? AppStatusType.neutral,
+      ),
+      onTap: () => context.go(Routes.applicationInbox('${submission.id}')),
+    );
   }
+}
 
-  AppStatusType _statusType(String status) {
-    switch (status.toLowerCase()) {
-      case 'new':
-      case 'pending':
-        return AppStatusType.info;
-      case 'reviewed':
-        return AppStatusType.warning;
-      case 'approved':
-        return AppStatusType.success;
-      case 'rejected':
-        return AppStatusType.danger;
-      default:
-        return AppStatusType.neutral;
-    }
-  }
+class _FormsTab extends ConsumerWidget {
+  const _FormsTab({required this.onNewForm});
 
-  String _statusLabel(String status) {
-    if (status.isEmpty) return 'New';
-    return status[0].toUpperCase() + status.substring(1);
-  }
+  final VoidCallback onNewForm;
 
-  String _initials(String name) {
-    final parts = name.trim().split(RegExp(r'\s+'));
-    if (parts.isEmpty) return '?';
-    if (parts.length == 1) return parts[0][0].toUpperCase();
-    return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final state = ref.watch(applicationFormsPagedProvider);
+    final controller = ref.read(applicationFormsPagedProvider.notifier);
+    return PagedListView<ApplicationForm>(
+      state: state,
+      // Room under the last row for the floating button.
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        96,
+      ),
+      emptyTitle: l10n.applicationsFormsEmptyTitle,
+      emptyMessage: l10n.applicationsFormsEmptyBody,
+      emptyIcon: Icons.description_outlined,
+      emptyAction: FilledButton.icon(
+        onPressed: onNewForm,
+        icon: const Icon(Icons.add_rounded),
+        label: Text(l10n.applicationsNewForm),
+      ),
+      onLoadMore: controller.loadMore,
+      onRefresh: controller.refresh,
+      onRetry: controller.loadInitial,
+      onLoadMoreRetry: controller.retryLoadMore,
+      itemBuilder: (context, form) => _FormRow(form),
+    );
   }
+}
+
+class _FormRow extends StatelessWidget {
+  const _FormRow(this.form);
+
+  final ApplicationForm form;
 
   @override
   Widget build(BuildContext context) {
-    final status = submission.status ?? 'pending';
-    final applicant = submission.applicantName ?? 'Applicant';
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.xs,
-      ),
-      child: GestureDetector(
-        onTap: () => context.go('/more/applications/inbox/${submission.id}'),
-        child: Container(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: AppRadii.lg,
-            border: Border.all(
-              color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
-              width: 0.5,
+    final l10n = context.l10n;
+    final slug = form.slug ?? '';
+    final active = form.isActive == true;
+    final expires = form.expiresAt;
+    final fee = form.applicationFeeAmount;
+    return AppListCard(
+      title:
+          form.title ?? form.propertyName ?? l10n.applicationFormDefaultTitle,
+      subtitle: form.propertyName,
+      facts: [
+        l10n.applicationsQuestionCount(form.fields?.length ?? 0),
+        if (expires != null)
+          l10n.applicationsExpires(shortDate(context, expires)),
+        if (fee != null && fee > 0) l10n.applicationsFee(rupees(fee)),
+      ],
+      trailing: slug.isEmpty
+          ? null
+          : IconButton(
+              tooltip: l10n.applicationsCopyLink,
+              icon: const Icon(Icons.link_rounded),
+              color: context.colors.onSurfaceVariant,
+              onPressed: () async {
+                await Clipboard.setData(
+                  ClipboardData(text: DeepLinkService.applicationUrl(slug)),
+                );
+                if (context.mounted) {
+                  context.showSnack(l10n.applicationsLinkCopied);
+                }
+              },
             ),
-            boxShadow: AppShadows.cardResting,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColors.darkAccentSoft : AppColors.accentSoft,
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    _initials(applicant),
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        applicant,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: AppSpacing.xxs),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.apartment_rounded,
-                            size: 13,
-                            color: AppColors.textTertiary,
-                          ),
-                          const SizedBox(width: AppSpacing.xxs),
-                          Flexible(
-                            child: Text(
-                              submission.propertyName ?? 'Property',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          Icon(
-                            Icons.schedule_rounded,
-                            size: 13,
-                            color: AppColors.textTertiary,
-                          ),
-                          const SizedBox(width: AppSpacing.xxs),
-                          Text(
-                            _formatDate(submission.submittedAt),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                AppStatusBadge(
-                  label: _statusLabel(status),
-                  type: _statusType(status),
-                  variant: AppStatusVariant.subtle,
-                ),
-              ],
-            ),
-          ),
-        ),
+      status: AppStatusBadge(
+        label: active ? l10n.applicationsActive : l10n.applicationsInactive,
+        type: active ? AppStatusType.success : AppStatusType.neutral,
       ),
+      onTap: () => context.go(Routes.applicationForm('${form.id}')),
     );
   }
 }

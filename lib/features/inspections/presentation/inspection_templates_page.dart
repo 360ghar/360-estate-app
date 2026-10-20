@@ -1,11 +1,15 @@
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
-import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
+import 'package:estate_app/core/presentation/widgets/app_empty_view.dart';
+import 'package:estate_app/core/presentation/widgets/feedback.dart';
+import 'package:estate_app/core/presentation/widgets/motion.dart';
 import 'package:estate_app/features/inspections/inspections_providers.dart';
 import 'package:estate_app/features/inspections/models/inspection_template.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// Checklists kept on this device, to start an inspection from.
 class InspectionTemplatesPage extends ConsumerStatefulWidget {
   const InspectionTemplatesPage({super.key});
 
@@ -19,139 +23,65 @@ class _InspectionTemplatesPageState
   @override
   void initState() {
     super.initState();
-    // Seed default templates on first load if none exist.
+    // Seed the default templates on first use.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final templates = ref.read(inspectionTemplatesProvider);
-      if (templates.isEmpty) {
-        for (final t in defaultInspectionTemplates) {
-          ref.read(inspectionTemplatesProvider.notifier).addTemplate(t);
-        }
+      if (!mounted) return;
+      if (ref.read(inspectionTemplatesProvider).isNotEmpty) return;
+      final notifier = ref.read(inspectionTemplatesProvider.notifier);
+      for (final template in defaultInspectionTemplates) {
+        notifier.addTemplate(template);
       }
     });
   }
 
+  Future<void> _create() async {
+    final template = await showDialog<InspectionTemplate>(
+      context: context,
+      builder: (_) => const _TemplateDialog(),
+    );
+    if (template == null) return;
+    await ref.read(inspectionTemplatesProvider.notifier).addTemplate(template);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final templates = ref.watch(inspectionTemplatesProvider);
-
-    return AppScaffold(
-      appBar: AppBar(
-        title: const Text('Inspection Templates'),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showCreateDialog,
-        icon: const Icon(Icons.add),
-        label: const Text('New Template'),
-      ),
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.inspectionTemplatesTitle)),
+      floatingActionButton: templates.isEmpty
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: _create,
+              icon: const Icon(Icons.add_rounded),
+              label: Text(l10n.inspectionTemplatesNew),
+            ),
       body: templates.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.fact_check_outlined,
-                    size: 64,
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  const Text('No templates yet'),
-                  const SizedBox(height: AppSpacing.sm),
-                  const Text(
-                    'Create reusable checklists for move-in, annual, '
-                    'and move-out inspections.',
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+          ? AppEmptyView(
+              title: l10n.inspectionTemplatesEmptyTitle,
+              message: l10n.inspectionTemplatesEmptyBody,
+              icon: Icons.checklist_rounded,
+              action: FilledButton.icon(
+                onPressed: _create,
+                icon: const Icon(Icons.add_rounded),
+                label: Text(l10n.inspectionTemplatesNew),
               ),
             )
           : ListView.separated(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.sm,
+                AppSpacing.lg,
+                96,
+              ),
               itemCount: templates.length,
-              separatorBuilder: (_, _) =>
-                  const SizedBox(height: AppSpacing.md),
-              itemBuilder: (context, index) =>
-                  _TemplateCard(template: templates[index]),
+              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
+              itemBuilder: (context, index) => RiseIn(
+                index: index,
+                child: _TemplateCard(template: templates[index]),
+              ),
             ),
     );
-  }
-
-  Future<void> _showCreateDialog() async {
-    final nameController = TextEditingController();
-    final descController = TextEditingController();
-    final itemsController = TextEditingController();
-    try {
-      await showDialog<void>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-        title: const Text('New Template'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Template name',
-                  hintText: 'e.g. Move-in Checklist',
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: descController,
-                decoration: const InputDecoration(
-                  labelText: 'Description (optional)',
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              TextField(
-                controller: itemsController,
-                maxLines: 6,
-                decoration: const InputDecoration(
-                  labelText: 'Checklist items',
-                  hintText: 'One item per line',
-                  alignLabelWithHint: true,
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              final name = nameController.text.trim();
-              if (name.isEmpty) return;
-              final items = itemsController.text
-                  .split('\n')
-                  .map((s) => s.trim())
-                  .where((s) => s.isNotEmpty)
-                  .toList();
-              if (items.isEmpty) return;
-              final template = InspectionTemplate.create(
-                name: name,
-                description: descController.text.trim().isEmpty
-                    ? null
-                    : descController.text.trim(),
-                items: items,
-              );
-              ref
-                  .read(inspectionTemplatesProvider.notifier)
-                  .addTemplate(template);
-              Navigator.pop(dialogContext);
-            },
-            child: const Text('Create'),
-          ),
-        ],
-      ),
-    );
-    } finally {
-      nameController.dispose();
-      descController.dispose();
-      itemsController.dispose();
-    }
   }
 }
 
@@ -162,73 +92,203 @@ class _TemplateCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    template.name,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, size: 20),
-                  onPressed: () {
-                    ref
-                        .read(inspectionTemplatesProvider.notifier)
-                        .deleteTemplate(template.id);
-                  },
-                ),
-              ],
-            ),
-            if (template.description != null) ...[
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                template.description!,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+    final l10n = context.l10n;
+    final muted = context.text.bodyMedium?.copyWith(
+      color: context.colors.onSurfaceVariant,
+    );
+    final description = template.description?.trim() ?? '';
+
+    Future<void> delete() async {
+      final ok = await context.confirm(
+        title: l10n.inspectionTemplatesDeleteTitle,
+        message: l10n.inspectionTemplatesDeleteBody(template.name),
+        confirmLabel: l10n.delete,
+        destructive: true,
+      );
+      if (!ok) return;
+      await ref
+          .read(inspectionTemplatesProvider.notifier)
+          .deleteTemplate(template.id);
+    }
+
+    return AppCard(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.xs,
+        AppSpacing.lg,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(template.name, style: context.text.titleLarge),
+              ),
+              IconButton(
+                tooltip: l10n.inspectionTemplatesDelete,
+                icon: const Icon(Icons.delete_outline_rounded),
+                onPressed: delete,
               ),
             ],
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              '${template.items.length} items',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: AppColors.textTertiary,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: AppSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (description.isNotEmpty) Text(description, style: muted),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  l10n.inspectionTemplatesItemCount(template.items.length),
+                  style: context.text.labelMedium?.copyWith(
+                    color: context.colors.onSurfaceVariant,
                   ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                for (final (index, item) in template.items.indexed)
+                  _NumberedLine(number: index + 1, text: item),
+              ],
             ),
-            const SizedBox(height: AppSpacing.sm),
-            ...template.items.map(
-              (item) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.check_circle_outline,
-                      size: 16,
-                      color: AppColors.textTertiary,
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Text(
-                        item,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ),
-                  ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "3  Kitchen appliances working", with the number in tabular figures.
+class _NumberedLine extends StatelessWidget {
+  const _NumberedLine({required this.number, required this.text});
+
+  final int number;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 28,
+          child: Text(
+            '$number',
+            style: context.text.bodyMedium?.copyWith(
+              color: context.colors.onSurfaceVariant,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ),
+        Expanded(child: Text(text, style: context.text.bodyMedium)),
+      ],
+    ),
+  );
+}
+
+/// Name, description and one item per line. Pops the new template, or null.
+class _TemplateDialog extends StatefulWidget {
+  const _TemplateDialog();
+
+  @override
+  State<_TemplateDialog> createState() => _TemplateDialogState();
+}
+
+class _TemplateDialogState extends State<_TemplateDialog> {
+  final _formKey = GlobalKey<FormState>();
+  final _name = TextEditingController();
+  final _description = TextEditingController();
+  final _items = TextEditingController();
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _description.dispose();
+    _items.dispose();
+    super.dispose();
+  }
+
+  List<String> get _lines => _items.text
+      .split('\n')
+      .map((s) => s.trim())
+      .where((s) => s.isNotEmpty)
+      .toList();
+
+  void _save() {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    final description = _description.text.trim();
+    Navigator.of(context).pop(
+      InspectionTemplate.create(
+        name: _name.text.trim(),
+        description: description.isEmpty ? null : description,
+        items: _lines,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return AlertDialog(
+      title: Text(l10n.inspectionTemplatesNew),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _name,
+                autofocus: true,
+                textCapitalization: TextCapitalization.sentences,
+                textInputAction: TextInputAction.next,
+                decoration: InputDecoration(
+                  labelText: l10n.inspectionTemplatesName,
+                  hintText: l10n.inspectionTemplatesNameHint,
+                ),
+                validator: (v) => (v ?? '').trim().isEmpty
+                    ? l10n.inspectionTemplatesNameRequired
+                    : null,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              TextFormField(
+                controller: _description,
+                textCapitalization: TextCapitalization.sentences,
+                textInputAction: TextInputAction.next,
+                decoration: InputDecoration(
+                  labelText: l10n.inspectionTemplatesDescription,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: AppSpacing.lg),
+              TextFormField(
+                controller: _items,
+                minLines: 4,
+                maxLines: 8,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  labelText: l10n.inspectionTemplatesItems,
+                  helperText: l10n.inspectionTemplatesItemsHelp,
+                  alignLabelWithHint: true,
+                ),
+                validator: (_) => _lines.isEmpty
+                    ? l10n.inspectionTemplatesItemsRequired
+                    : null,
+              ),
+            ],
+          ),
         ),
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.commonCancel),
+        ),
+        FilledButton(
+          onPressed: _save,
+          child: Text(l10n.inspectionTemplatesCreate),
+        ),
+      ],
     );
   }
 }
