@@ -82,6 +82,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # maplibre_gl compiles with Java 21; the runner default is older.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
