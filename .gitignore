@@ -75,3 +75,9 @@ android/local.properties
 DerivedData/
 .vscode/*
 !.vscode/extensions.json
+
+# Screen tour output (test/screenshots/screen_tour_test.dart)
+/test/screenshots/goldens/
+
+# Vendored agent skills
+/.claude/skills/

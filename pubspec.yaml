@@ -29,7 +29,6 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   app_links: ^6.4.1
-  cached_network_image: ^3.4.1
   connectivity_plus: ^7.0.0
   cross_file: ^0.3.5+1
   crypto: ^3.0.6
@@ -47,7 +46,6 @@ dependencies:
   freezed_annotation: ^2.4.4
   geolocator: ^14.0.2
   go_router: ^14.2.7
-  google_fonts: ^6.2.1
   google_sign_in: ^7.1.0
   image_picker: ^1.1.2
   intl: ^0.20.2
@@ -90,6 +88,16 @@ flutter:
   assets:
     - .env
     - assets/images/
+
+  # Uncut Sans (SIL OFL 1.1, assets/fonts/LICENSE-UncutSans.txt): headings and
+  # amounts. Body text uses the system font.
+  fonts:
+    - family: UncutSans
+      fonts:
+        - asset: assets/fonts/UncutSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/UncutSans-Bold.ttf
+          weight: 700
 
   # To add assets to your application, add an assets section, like this:
   # assets:

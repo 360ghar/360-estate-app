@@ -40,6 +40,9 @@ jobs:
             exit 1
           fi
 
+      - name: Contract tests
+        run: flutter test test/contract
+
       - name: Test with coverage
         run: flutter test --coverage
 

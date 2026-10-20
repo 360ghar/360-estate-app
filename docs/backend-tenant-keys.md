@@ -1,37 +1,16 @@
-# Backend Tenant Keys Request
+# Tenant keys (resolved)
 
-Endpoints: `GET /pm/tenants`, `GET /pm/tenants/:id`
+Endpoints: `GET /pm/tenants` (`CursorPage[TenantSummary]`) and `GET /pm/tenants/{tenant_user_id}` (`TenantDetail`).
 
-## Canonical keys today (from `more/tenants/models/tenant.g.dart`)
+The backend contract is fixed (see `test/fixtures/api/tenants.json`, built from the backend response models):
 
-```json
-{
-  "id": 1,
-  "name": "Asha",
-  "full_name": "Asha Sharma",
-  "phone": "9999999999",
-  "email": "asha@example.com",
-  "property_name": "Sunrise PG",
-  "room_number": "101",
-  "status": "active"
-}
-```
+| Key | List (`TenantSummary`) | Detail (`TenantDetail`) |
+| --- | --- | --- |
+| `user_id` | yes (the key of the tenant) | yes |
+| `full_name`, `phone`, `email` | yes (what the owner typed on the lease, null if none) | yes |
+| `status` | yes: `active` or `vacated` | no (the app derives it from the leases) |
+| `property_name` | yes | no |
+| `active_leases_count` | yes | no |
+| `leases` | no | yes (`Lease[]`) |
 
-## 8 unported fields (historically parsed by the legacy `TenantDto`, now removed; canonical drops)
-
-1. `user_id` (String?)
-2. `emergency_contact` (String?)
-3. `emergency_phone` (String?)
-4. `government_id_type` (String?)
-5. `government_id_number` (String?)
-6. `notes` (String?)
-7. `created_at` / `updated_at` (DateTime?)
-8. `current_lease` (object?) / `lease_history` (array?)
-
-## Question for backend
-
-For `GET /pm/tenants` and `GET /pm/tenants/:id`: which of the
-8 keys above are actually returned? For each returned key, confirm
-type and nullability (e.g. `emergency_phone: string | null`).
-If a key is never returned, confirm it is dead so we close this
-request without porting it into the canonical model.
+The keys `id`, `name`, `room_number`, `emergency_contact`, `government_id_*`, `notes`, `current_lease` and `lease_history` are not sent. The app does not read them.
