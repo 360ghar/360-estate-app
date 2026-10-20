@@ -218,6 +218,7 @@
   "documentUploadLimits": "PDF, इमेज या दस्तावेज़, 25 MB तक",
   "documentUploadNoFile": "अपलोड करने के लिए फ़ाइल चुनें।",
   "documentUploadTooLarge": "यह फ़ाइल 25 MB से बड़ी है। छोटी फ़ाइल चुनें।",
+  "documentUploadPickFailed": "फ़ाइल चुनने वाला नहीं खुल सका। फिर से कोशिश करें।",
   "documentUploadRemoveFile": "फ़ाइल हटाएं",
   "documentUploadDetails": "विवरण",
   "documentUploadTitleLabel": "शीर्षक",

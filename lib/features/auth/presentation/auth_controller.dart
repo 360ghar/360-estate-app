@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cross_file/cross_file.dart';
+import 'package:estate_app/app/router/routes.dart';
 import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/core/config/app_config.dart';
 import 'package:estate_app/core/errors/failure.dart';
@@ -28,6 +29,18 @@ enum AuthStatus {
   /// Router gate: only `/set-password` is reachable until it completes.
   needsPassword,
 
+  /// Passwordless social user without a phone. Router gate: only
+  /// `/add-phone` (skippable) is reachable.
+  needsPhone,
+
+  /// Backend stage `profile_completion`. Router gate: only
+  /// `/profile-completion` is reachable.
+  needsProfileCompletion,
+
+  /// Backend stage `app_onboarding`. Router gate: only `/onboarding` is
+  /// reachable.
+  needsOnboarding,
+
   authenticated,
 }
 
@@ -48,15 +61,22 @@ class AuthState {
 
   bool get isAuthenticated => status == AuthStatus.authenticated;
 
-  /// Has a live session. Includes [AuthStatus.needsPassword]: the account is
-  /// signed in but must complete the mandatory set-password step first.
+  /// Has a live session. Includes the gate states ([AuthStatus.needsPassword],
+  /// [AuthStatus.needsPhone], [AuthStatus.needsProfileCompletion],
+  /// [AuthStatus.needsOnboarding]): the account is signed in but must finish
+  /// that step before the app opens.
   bool get isLoggedIn =>
-      status == AuthStatus.authenticated || status == AuthStatus.needsPassword;
-  // Progressive prompts (in-app, not router gates). Derived from profile.
-  bool get needsPhone =>
-      isAuthenticated && ((user?.phone ?? '').trim().isEmpty);
-  bool get needsProfileCompletion =>
-      isAuthenticated && !(user?.isProfileComplete ?? true);
+      status != AuthStatus.checking && status != AuthStatus.unauthenticated;
+
+  /// The route a signed-in user is held on until the gate step completes, or
+  /// null when the app is open.
+  String? get gateRoute => switch (status) {
+    AuthStatus.needsPassword => Routes.setPassword,
+    AuthStatus.needsPhone => Routes.addPhone,
+    AuthStatus.needsProfileCompletion => Routes.profileCompletion,
+    AuthStatus.needsOnboarding => Routes.onboarding,
+    _ => null,
+  };
 
   AuthState copyWith({
     AuthStatus? status,
@@ -159,15 +179,15 @@ final accountScopeProvider = Provider<String?>((ref) {
 
 /// Map the backend auth-gate stage to the local [AuthStatus] enum.
 /// `identifier_verification` keeps the user out and `password_setup` routes
-/// to the mandatory set-password step. profile_completion / app_onboarding
-/// enter the app (in-app prompts, not router gates). Top-level for
-/// testability; [AuthController] delegates to this.
+/// to the mandatory set-password step; `profile_completion` and
+/// `app_onboarding` hold the user on their own screen until done. Top-level
+/// for testability; [AuthController] delegates to this.
 AuthStatus mapGateStageToAuthStatus(AuthGateStage? stage) {
   return switch (stage) {
     AuthGateStage.identifierVerification => AuthStatus.unauthenticated,
     AuthGateStage.passwordSetup => AuthStatus.needsPassword,
-    AuthGateStage.profileCompletion ||
-    AuthGateStage.appOnboarding ||
+    AuthGateStage.profileCompletion => AuthStatus.needsProfileCompletion,
+    AuthGateStage.appOnboarding => AuthStatus.needsOnboarding,
     AuthGateStage.active ||
     // An unknown stage never locks the user out.
     null => AuthStatus.authenticated,
@@ -450,7 +470,7 @@ class AuthController extends StateNotifier<AuthState> {
     if (!hasPhone) {
       // Skippable add-phone interstitial for passwordless social users.
       _pendingSocialMethod = method;
-      state = AuthState(status: AuthStatus.authenticated, user: user);
+      state = AuthState(status: AuthStatus.needsPhone, user: user);
       return;
     }
     await _setAuthenticated(user, phone: user.phone, method: method);
@@ -798,7 +818,7 @@ class AuthController extends StateNotifier<AuthState> {
       return true;
     } catch (error) {
       state = state.copyWith(
-        status: AuthStatus.authenticated,
+        status: AuthStatus.needsPhone,
         errorMessage: _messageForError(error),
         isBusy: false,
       );
@@ -838,17 +858,16 @@ class AuthController extends StateNotifier<AuthState> {
     try {
       final user = await _repository.updateProfile(update);
 
-      // Re-evaluate the gate after profile update (advisory only).
-      // 3-state model: profile completion is an in-app prompt, never a
-      // router block. Log when the backend still reports profile_completion
-      // so a failed save is visible instead of silent.
+      // Re-evaluate the gate after the update. When the backend still reports
+      // profile_completion the status stays needsProfileCompletion, so the
+      // user can retry; the log makes a failed save visible.
       try {
         final gateState = await _repository.getAuthGateState();
         final stage = gateState.stage;
         if (stage == AuthGateStage.profileCompletion) {
           AppLogger.w(
             'Gate still reports profile_completion after a successful '
-            'profile update; profile may not have saved.',
+            'profile update; the profile may not have saved.',
           );
         }
         final gateStatus = _mapGateStageToAuthStatus(stage);
@@ -878,8 +897,7 @@ class AuthController extends StateNotifier<AuthState> {
       } catch (_) {
         // Cache-clear failure must never block expiry logout.
       }
-      if (state.status == AuthStatus.authenticated ||
-          state.status == AuthStatus.needsPassword) {
+      if (state.isLoggedIn) {
         state = const AuthState(status: AuthStatus.unauthenticated);
       }
       if (_config.isSupabaseConfigured &&

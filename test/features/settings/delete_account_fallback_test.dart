@@ -4,20 +4,21 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('shouldFallbackToEmailOnDelete', () {
-    test('NetworkFailure -> no mailto fallback (stay with offline snackbar)', () {
-      expect(
-        shouldFallbackToEmailOnDelete(
-          const NetworkFailure('offline', isOffline: true),
-        ),
-        isFalse,
-      );
-    });
+    test(
+      'NetworkFailure -> no mailto fallback (stay with offline snackbar)',
+      () {
+        expect(
+          shouldFallbackToEmailOnDelete(
+            const NetworkFailure('offline', isOffline: true),
+          ),
+          isFalse,
+        );
+      },
+    );
 
     test('online NetworkFailure (timeout) -> offer mailto fallback', () {
       expect(
-        shouldFallbackToEmailOnDelete(
-          const NetworkFailure('timeout'),
-        ),
+        shouldFallbackToEmailOnDelete(const NetworkFailure('timeout')),
         isTrue,
       );
     });

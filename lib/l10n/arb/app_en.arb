@@ -305,6 +305,7 @@
   "documentUploadLimits": "PDF, image or document, up to 25 MB",
   "documentUploadNoFile": "Choose a file to upload.",
   "documentUploadTooLarge": "This file is over 25 MB. Choose a smaller one.",
+  "documentUploadPickFailed": "Could not open the file picker. Try again.",
   "documentUploadRemoveFile": "Remove file",
   "documentUploadDetails": "Details",
   "documentUploadTitleLabel": "Title",

@@ -3,15 +3,17 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('DeepLinkService.mapUriToPath', () {
-    test('maps public rental application slug to /public/applications/{slug}',
-        () {
-      expect(
-        DeepLinkService.mapUriToPath(
-          Uri.parse('https://the360ghar.com/estate/apply/sunrise-tower'),
-        ),
-        '/public/applications/sunrise-tower',
-      );
-    });
+    test(
+      'maps public rental application slug to /public/applications/{slug}',
+      () {
+        expect(
+          DeepLinkService.mapUriToPath(
+            Uri.parse('https://the360ghar.com/estate/apply/sunrise-tower'),
+          ),
+          '/public/applications/sunrise-tower',
+        );
+      },
+    );
 
     test('maps property deep link to /properties/{id}', () {
       expect(
@@ -66,9 +68,7 @@ void main() {
 
     test('maps custom-scheme deep link with property host', () {
       expect(
-        DeepLinkService.mapUriToPath(
-          Uri.parse('estate360://property/abc-123'),
-        ),
+        DeepLinkService.mapUriToPath(Uri.parse('estate360://property/abc-123')),
         '/properties/abc-123',
       );
     });
@@ -118,9 +118,7 @@ void main() {
         isNull,
       );
       expect(
-        DeepLinkService.mapUriToPath(
-          Uri.parse('estate360://property/$longId'),
-        ),
+        DeepLinkService.mapUriToPath(Uri.parse('estate360://property/$longId')),
         isNull,
       );
     });

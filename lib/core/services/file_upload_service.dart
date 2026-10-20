@@ -44,17 +44,13 @@ class FileUploadService {
     return path.split(RegExp(r'[/\\]')).last;
   }
 
-  /// Shared image validation used by avatar + document upload paths.
+  /// Validates a profile photo: an image type (or unknown mime type) and the
+  /// 5 MB avatar cap. Documents are not images, so they skip this check and
+  /// only enforce [kMaxUploadBytes].
   ///
-  /// Pass [isAvatar] true for profile photos (5 MB cap with the legacy
-  /// avatar error strings); default enforces the 25 MB document cap.
   /// The `application/octet-stream` passthrough preserves the legacy
   /// `AuthRepository.uploadProfilePhoto` behavior for unknown mime types.
-  static void validateImage({
-    required int length,
-    String? mimeType,
-    bool isAvatar = false,
-  }) {
+  static void validateImage({required int length, String? mimeType}) {
     if (mimeType == null ||
         (!mimeType.startsWith('image/') &&
             mimeType != 'application/octet-stream')) {
@@ -62,14 +58,8 @@ class FileUploadService {
         'Invalid file type. Please select an image.',
       );
     }
-    final maxBytes = isAvatar ? kMaxAvatarBytes : kMaxUploadBytes;
-    if (length > maxBytes) {
-      if (isAvatar) {
-        throw const ValidationFailure('Image size must be less than 5MB');
-      }
-      throw ValidationFailure(
-        'File is too large. Maximum size is ${(maxBytes / (1024 * 1024)).toStringAsFixed(0)}MB.',
-      );
+    if (length > kMaxAvatarBytes) {
+      throw const ValidationFailure('Image size must be less than 5MB');
     }
   }
 

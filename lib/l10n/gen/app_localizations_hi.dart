@@ -701,6 +701,10 @@ class AppLocalizationsHi extends AppLocalizations {
       'यह फ़ाइल 25 MB से बड़ी है। छोटी फ़ाइल चुनें।';
 
   @override
+  String get documentUploadPickFailed =>
+      'फ़ाइल चुनने वाला नहीं खुल सका। फिर से कोशिश करें।';
+
+  @override
   String get documentUploadRemoveFile => 'फ़ाइल हटाएं';
 
   @override

@@ -95,7 +95,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           location.startsWith('/public') || location.startsWith('/legal/');
       String? pending;
       if (authState.isLoggedIn &&
-          authState.status != AuthStatus.needsPassword &&
+          authState.gateRoute == null &&
           !isSplash &&
           !isAuthRoute &&
           !isPublicRoute) {
@@ -106,7 +106,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         location: location,
         isChecking: isChecking,
         isLoggedIn: authState.isLoggedIn,
-        needsPassword: authState.status == AuthStatus.needsPassword,
+        gateRoute: authState.gateRoute,
         enablePublicApplications: flags.enablePublicApplications,
         enableApplicationsModule: flags.enableApplicationsModule,
         pendingPath: pending,

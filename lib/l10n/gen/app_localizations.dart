@@ -1364,6 +1364,12 @@ abstract class AppLocalizations {
   /// **'This file is over 25 MB. Choose a smaller one.'**
   String get documentUploadTooLarge;
 
+  /// No description provided for @documentUploadPickFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the file picker. Try again.'**
+  String get documentUploadPickFailed;
+
   /// No description provided for @documentUploadRemoveFile.
   ///
   /// In en, this message translates to:

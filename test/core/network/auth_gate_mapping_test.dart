@@ -18,17 +18,17 @@ void main() {
       );
     });
 
-    test('profile_completion -> authenticated (in-app prompt, not gate)', () {
+    test('profile_completion -> needsProfileCompletion', () {
       expect(
         mapGateStageToAuthStatus(AuthGateStage.profileCompletion),
-        AuthStatus.authenticated,
+        AuthStatus.needsProfileCompletion,
       );
     });
 
-    test('app_onboarding -> authenticated (in-app prompt, not gate)', () {
+    test('app_onboarding -> needsOnboarding', () {
       expect(
         mapGateStageToAuthStatus(AuthGateStage.appOnboarding),
-        AuthStatus.authenticated,
+        AuthStatus.needsOnboarding,
       );
     });
 

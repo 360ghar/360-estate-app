@@ -36,18 +36,6 @@ extension TenantX on Tenant {
     return 'Tenant';
   }
 
-  /// Empty-safe initials derived from [fullName] (`''` when blank).
-  String get initials {
-    final source = (fullName ?? '').trim();
-    if (source.isEmpty) return '';
-    final parts = source.split(RegExp(r'\s+'));
-    if (parts.length >= 2) {
-      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
-    }
-    final first = parts[0];
-    return first.substring(0, first.length >= 2 ? 2 : 1).toUpperCase();
-  }
-
   /// `TenantSummary` (the list) carries the status. `TenantDetail` does not,
   /// so the detail derives it the way the backend does: active while one of
   /// the tenant's leases occupies the property (active or expiring soon).

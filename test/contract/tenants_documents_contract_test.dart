@@ -16,7 +16,6 @@ void main() {
           .toList();
       expect(tenants.first.userId, 52);
       expect(tenants.first.displayName, 'Meera Nair');
-      expect(tenants.first.initials, 'MN');
       expect(tenants.first.status, TenantStatus.active);
       expect(tenants.first.statusLabel, 'Active');
       expect(tenants.first.propertyName, '2 BHK Sector 51');

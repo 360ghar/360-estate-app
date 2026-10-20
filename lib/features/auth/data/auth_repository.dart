@@ -643,8 +643,7 @@ class AuthRepository {
   /// The backend stores it and returns the updated profile, so one call sets
   /// the photo. Web-safe: takes the `XFile` returned directly by
   /// `image_picker`, no `dart:io` File. Validation strings and the 5MB avatar
-  /// cap are unchanged (via `FileUploadService.validateImage` with
-  /// `isAvatar: true`).
+  /// cap are unchanged (via `FileUploadService.validateImage`).
   Future<UserProfile> uploadProfilePhoto(XFile imageFile) async {
     final user = _supabase.auth.currentUser;
     if (user == null) {
@@ -653,11 +652,7 @@ class AuthRepository {
 
     final mimeType = imageFile.mimeType ?? lookupMimeType(imageFile.path);
     final fileSize = await imageFile.length();
-    FileUploadService.validateImage(
-      length: fileSize,
-      mimeType: mimeType,
-      isAvatar: true,
-    );
+    FileUploadService.validateImage(length: fileSize, mimeType: mimeType);
 
     final fileName = imageFile.name.isNotEmpty
         ? imageFile.name

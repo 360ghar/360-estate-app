@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   analyze-test:
     runs-on: ubuntu-latest
@@ -19,12 +22,16 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      # .env is a bundled asset (pubspec.yaml) and is not committed.
+      - name: Create .env from the example
+        run: cp .env.example .env
+
       - name: Analyze
         run: flutter analyze
 
       - name: Forbid /api/v1 literals in call sites
         run: |
-          if grep -rnE "['\"]/api/v1" lib --include="*.dart" | grep -v "CI greps for" | grep -v "const prefix = '/api/v1'"; then
+          if grep -rnE "['\"]/api/v1" lib --include="*.dart" | grep -v '^lib/core/network/api_paths\.dart:' | grep -v "const prefix = '/api/v1'"; then
             echo "Found '/api/v1' literal in lib/. Use ApiPaths (base URL already includes /api/v1)."
             exit 1
           fi
@@ -82,6 +89,9 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Create .env from the example
+        run: cp .env.example .env
 
       - name: Build APK (debug)
         run: flutter build apk --debug

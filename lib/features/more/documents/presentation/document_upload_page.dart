@@ -44,7 +44,15 @@ class _DocumentUploadPageState extends ConsumerState<DocumentUploadPage> {
   Future<void> _pickFile() async {
     // withData on web: browser picks have no filesystem path, so retain the
     // bytes via XFile.fromData instead of discarding the selection.
-    final result = await FilePicker.platform.pickFiles(withData: kIsWeb);
+    final FilePickerResult? result;
+    try {
+      result = await FilePicker.platform.pickFiles(withData: kIsWeb);
+    } catch (_) {
+      if (mounted) {
+        setState(() => _fileError = context.l10n.documentUploadPickFailed);
+      }
+      return;
+    }
     if (result == null || result.files.isEmpty) return;
     final picked = result.files.single;
     final path = picked.path;

@@ -12,6 +12,12 @@ extension FailureLocalization on Failure {
         message,
         fields,
       ),
+      // The server's message is the actionable part for these.
+      UnauthorizedFailure(:final message) ||
+      NotFoundFailure(:final message) ||
+      ApiFailure(
+        :final message,
+      ) => message.trim().isEmpty ? l10n.errorSomethingWentWrong : message,
       _ => l10n.errorSomethingWentWrong,
     };
   }
@@ -25,5 +31,7 @@ String _validationText(String message, Map<String, String> fields) {
     if (message.trim().isNotEmpty) message,
   ];
   final text = parts.join('\n');
-  return text.length > 200 ? text.substring(0, 200) : text;
+  if (text.length <= 200) return text;
+  // Cut by code point so an emoji at the boundary is not split.
+  return String.fromCharCodes(text.runes.take(200));
 }

@@ -702,6 +702,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'This file is over 25 MB. Choose a smaller one.';
 
   @override
+  String get documentUploadPickFailed =>
+      'Could not open the file picker. Try again.';
+
+  @override
   String get documentUploadRemoveFile => 'Remove file';
 
   @override

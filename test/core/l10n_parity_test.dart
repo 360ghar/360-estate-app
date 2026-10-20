@@ -19,8 +19,7 @@ void main() {
     for (final lang in ['en', 'hi']) {
       final dashed = [
         for (final e in arb(lang).entries)
-          if (e.value is String && (e.value! as String).contains('—'))
-            e.key,
+          if (e.value is String && (e.value! as String).contains('—')) e.key,
       ];
       expect(dashed, isEmpty, reason: lang);
     }

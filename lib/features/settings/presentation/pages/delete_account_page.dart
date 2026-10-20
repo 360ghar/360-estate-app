@@ -96,19 +96,15 @@ class _DeleteAccountPageState extends ConsumerState<DeleteAccountPage> {
     try {
       final apiClient = ref.read(apiClientProvider);
       await apiClient.delete<void>(ApiPaths.userMe);
-    } on NetworkFailure catch (e) {
+    } catch (e) {
       if (!mounted) return;
-      if (e.isOffline) {
+      if (!shouldFallbackToEmailOnDelete(e)) {
         context.showSnack(context.l10n.errorOfflineHint);
         setState(() => _isSubmitting = false);
         return;
       }
       // Online request that still failed (timeout/server): the user cannot
       // retry their way out, so offer the email path.
-      await _fallbackEmailDeletion();
-      return;
-    } catch (e) {
-      if (!mounted) return;
       await _fallbackEmailDeletion();
       return;
     }
