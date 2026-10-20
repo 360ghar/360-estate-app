@@ -53,7 +53,7 @@ jobs:
       - name: Test with coverage
         run: flutter test --coverage
 
-      - name: Enforce minimum coverage (10%)
+      - name: Enforce minimum coverage (40%)
         run: |
           python3 - <<'EOF'
           import sys
@@ -70,9 +70,9 @@ jobs:
               sys.exit(1)
           pct = (hit / found * 100) if found else 0
           print(f'Line coverage: {hit}/{found} ({pct:.1f}%)')
-          # Suite sits at ~13% (2026-09); raise toward 30% as coverage grows.
-          if pct < 10:
-              print('Coverage below 10% gate')
+          # Suite sits at ~50% (2026-10). Floor is 40%; raise it as coverage grows.
+          if pct < 40:
+              print('Coverage below 40% gate')
               sys.exit(1)
           EOF
 
