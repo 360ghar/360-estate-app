@@ -1,27 +1,10 @@
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
-import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:flutter/material.dart';
 
-/// A grouped card container for form sections and detail page sections.
-///
-/// Provides consistent visual grouping with:
-/// - Optional title row with icon and label
-/// - Optional divider below title
-/// - Padded content area
-///
-/// Example:
-/// ```dart
-/// AppSectionCard(
-///   title: 'Personal Information',
-///   icon: Icons.person_outline,
-///   children: [
-///     AppTextField(label: 'Name'),
-///     AppTextField(label: 'Email'),
-///   ],
-/// )
-/// ```
+/// A titled group on a card surface: form sections and detail sections.
+/// The title is plain type; the icon, when given, stands bare beside it.
 class AppSectionCard extends StatelessWidget {
   const AppSectionCard({
     super.key,
@@ -29,102 +12,74 @@ class AppSectionCard extends StatelessWidget {
     this.icon,
     this.iconColor,
     this.trailing,
-    this.contentPadding = const EdgeInsets.all(AppSpacing.lg),
+    this.contentPadding = const EdgeInsets.fromLTRB(
+      AppSpacing.lg,
+      AppSpacing.sm,
+      AppSpacing.lg,
+      AppSpacing.lg,
+    ),
     this.children = const [],
     this.child,
   });
 
-  /// Section title displayed in the header
   final String? title;
-
-  /// Leading icon in the header
   final IconData? icon;
-
-  /// Color for the icon background circle
   final Color? iconColor;
-
-  /// Optional trailing widget in the header (e.g., action button)
   final Widget? trailing;
-
-  /// Padding applied to the content area
   final EdgeInsetsGeometry contentPadding;
-
-  /// Content widgets displayed in a Column
   final List<Widget> children;
-
-  /// Single child widget (alternative to [children])
   final Widget? child;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textTheme = Theme.of(context).textTheme;
-    final hasHeader = title != null;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: scheme.surface,
-        borderRadius: AppRadii.lg,
-        border: Border.all(
-          color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
-          width: 0.5,
-        ),
-        boxShadow: AppShadows.cardResting,
-      ),
+    final colors = context.colors;
+    return Material(
+      color: context.palette.card,
+      borderRadius: AppRadii.lg,
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (hasHeader) ...[
+          if (title != null)
             Padding(
-              padding: const EdgeInsets.fromLTRB(
+              padding: EdgeInsets.fromLTRB(
                 AppSpacing.lg,
-                AppSpacing.md,
                 AppSpacing.lg,
-                AppSpacing.md,
+                trailing == null ? AppSpacing.lg : AppSpacing.sm,
+                0,
               ),
-              child: Row(
-                children: [
-                  if (icon != null) ...[
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: (iconColor ?? scheme.primary).withValues(alpha: 
-                          isDark ? 0.15 : 0.08,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 24),
+                child: Row(
+                  children: [
+                    if (icon != null) ...[
+                      ExcludeSemantics(
+                        child: Icon(
+                          icon,
+                          size: 20,
+                          color: iconColor ?? colors.onSurfaceVariant,
                         ),
-                        borderRadius: AppRadii.sm,
                       ),
-                      child: Icon(
-                        icon,
-                        size: 18,
-                        color: iconColor ?? scheme.primary,
+                      const SizedBox(width: AppSpacing.sm),
+                    ],
+                    Expanded(
+                      child: Semantics(
+                        header: true,
+                        child: Text(title!, style: context.text.titleLarge),
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.sm),
+                    ?trailing,
                   ],
-                  Expanded(
-                    child: Text(
-                      title!,
-                      style: textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  if (trailing != null) trailing!,
-                ],
+                ),
               ),
             ),
-            Divider(
-              height: 1,
-              thickness: 0.5,
-              color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
-            ),
-          ],
           Padding(
-            padding: contentPadding,
-            child: child ??
+            padding: title == null
+                ? const EdgeInsets.all(AppSpacing.lg)
+                : contentPadding,
+            child:
+                child ??
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: children,

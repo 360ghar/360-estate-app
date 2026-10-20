@@ -1,297 +1,184 @@
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'dart:math' as math;
+
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_text_styles.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:flutter/material.dart';
 
-/// Semantic status types for consistent color usage across the app.
-/// Colors are used ONLY for status communication, not decoration.
+/// Status meaning. Each has its own colour AND its own mark, so the status
+/// never depends on colour alone.
 enum AppStatusType {
-  /// Success state - Paid, Completed, Active, Approved
+  /// Paid, completed, active, approved: a filled disc.
   success,
 
-  /// Warning state - Due, Pending, Expiring
+  /// Due, pending, expiring: a half-filled disc.
   warning,
 
-  /// Danger state - Overdue, Critical, Rejected, Failed
+  /// Overdue, failed, rejected: a filled diamond.
   danger,
 
-  /// Info state - Information, Notes, Neutral
+  /// Notes, scheduled: a ring.
   info,
 
-  /// Neutral state - Default, Disabled
+  /// Draft, closed, unknown: a short bar.
   neutral,
 }
 
-/// Status badge variant for different visual styles.
 enum AppStatusVariant {
-  /// Filled background with contrasting text
+  /// A tonal block behind the text, for the one status a screen leads with.
   filled,
 
-  /// Outlined with colored border and text
-  outline,
-
-  /// Subtle background with tinted text
+  /// Mark and text, no fill. The default look in lists.
   subtle,
-
-  /// Small dot indicator with text label
-  dot,
 }
 
-/// Color-coded status badge for semantic status display.
-///
-/// Used for payment status, task status, property status, etc.
-/// Colors follow semantic meaning:
-/// - Green (Success): Paid, Completed, Active
-/// - Orange (Warning): Due, Pending, Expiring
-/// - Red (Danger): Overdue, Critical, Rejected
-/// - Blue (Info): Information, Notes
-/// - Gray (Neutral): Default, Disabled
-///
-/// Example:
-/// ```dart
-/// AppStatusBadge(
-///   label: 'PAID',
-///   type: AppStatusType.success,
-/// )
-///
-/// AppStatusBadge(
-///   label: 'OVERDUE',
-///   type: AppStatusType.danger,
-///   variant: AppStatusVariant.outline,
-/// )
-/// ```
+/// A status: a small mark and the word, in the status colour.
 class AppStatusBadge extends StatelessWidget {
-  final String label;
-  final AppStatusType type;
-  final AppStatusVariant variant;
-  final IconData? icon;
-  final VoidCallback? onTap;
-
   const AppStatusBadge({
     super.key,
     required this.label,
     required this.type,
-    this.variant = AppStatusVariant.filled,
+    this.variant = AppStatusVariant.subtle,
     this.icon,
     this.onTap,
   });
 
+  final String label;
+  final AppStatusType type;
+  final AppStatusVariant variant;
+
+  /// Replaces the mark when the status is better told by a glyph.
+  final IconData? icon;
+  final VoidCallback? onTap;
+
+  static String _sentence(String s) =>
+      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+
   @override
   Widget build(BuildContext context) {
-    final colors = _getColors(context);
-    final effectiveIcon = icon;
+    final (Color ink, Color fill) = statusColors(context, type);
+    final filled = variant == AppStatusVariant.filled;
+    // The mark grows with the text, so it stays legible at large text sizes.
+    final mark = MediaQuery.textScalerOf(context).scale(10).clamp(10.0, 16.0);
+    final text = _sentence(label.replaceAll('_', ' '));
 
-    Widget badge = Container(
-      padding: _getPadding(),
-      decoration: BoxDecoration(
-        color: colors.background,
-        border: variant == AppStatusVariant.outline
-            ? Border.all(color: colors.foreground)
-            : null,
-        borderRadius: AppRadii.pill,
-      ),
+    Widget badge = Padding(
+      padding: filled
+          ? const EdgeInsets.symmetric(horizontal: 8, vertical: 4)
+          : const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (variant == AppStatusVariant.dot) ...[
-            Container(
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(
-                color: colors.foreground,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 6),
-          ],
-          if (effectiveIcon != null) ...[
-            Icon(effectiveIcon, size: 14, color: colors.foreground),
-            const SizedBox(width: 4),
-          ],
-          Text(
-            label.toUpperCase(),
-            style: AppTextStyles.statusLabel.copyWith(
-              color: colors.foreground,
+          ExcludeSemantics(
+            child: icon != null
+                ? Icon(icon, size: mark + 4, color: ink)
+                : CustomPaint(
+                    size: Size.square(mark),
+                    painter: StatusMarkPainter(type, ink),
+                  ),
+          ),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.statusLabel.copyWith(color: ink),
             ),
           ),
         ],
       ),
     );
 
+    if (filled) {
+      badge = DecoratedBox(
+        decoration: BoxDecoration(color: fill, borderRadius: AppRadii.sm),
+        child: badge,
+      );
+    }
     if (onTap != null) {
-      badge = Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: AppRadii.pill,
-          child: badge,
+      badge = InkWell(
+        onTap: onTap,
+        borderRadius: AppRadii.sm,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Align(widthFactor: 1, child: badge),
         ),
       );
     }
-
-    return badge;
-  }
-
-  EdgeInsets _getPadding() {
-    if (variant == AppStatusVariant.dot) {
-      return const EdgeInsets.symmetric(horizontal: 8, vertical: 6);
-    }
-    return switch ((variant, icon != null)) {
-      (AppStatusVariant.outline, true) => const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 5,
-        ),
-      (AppStatusVariant.outline, false) => const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 6,
-        ),
-      (AppStatusVariant.subtle, _) => const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 6,
-        ),
-      (AppStatusVariant.filled, true) => const EdgeInsets.symmetric(
-          horizontal: 10,
-          vertical: 5,
-        ),
-      (AppStatusVariant.filled, false) => const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 6,
-        ),
-      (AppStatusVariant.dot, _) => const EdgeInsets.symmetric(
-          horizontal: 8,
-          vertical: 6,
-        ),
-    };
-  }
-
-  _StatusColors _getColors(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return switch (type) {
-      AppStatusType.success => switch (variant) {
-          AppStatusVariant.filled => _StatusColors(
-              background: isDark ? AppColors.successLight : AppColors.success,
-              foreground: Colors.white,
-            ),
-          AppStatusVariant.outline => _StatusColors(
-              background: Colors.transparent,
-              foreground: isDark ? AppColors.successLight : AppColors.success,
-            ),
-          AppStatusVariant.subtle => _StatusColors(
-              background: isDark
-                  ? AppColors.success.withValues(alpha: 0.15)
-                  : AppColors.success.withValues(alpha: 0.1),
-              foreground: isDark ? AppColors.successLight : AppColors.success,
-            ),
-          AppStatusVariant.dot => _StatusColors(
-              background: Colors.transparent,
-              foreground: isDark ? AppColors.successLight : AppColors.success,
-            ),
-        },
-
-      AppStatusType.warning => switch (variant) {
-          AppStatusVariant.filled => _StatusColors(
-              background: isDark ? AppColors.warningLight : AppColors.warning,
-              foreground: Colors.white,
-            ),
-          AppStatusVariant.outline => _StatusColors(
-              background: Colors.transparent,
-              foreground: isDark ? AppColors.warningLight : AppColors.warning,
-            ),
-          AppStatusVariant.subtle => _StatusColors(
-              background: isDark
-                  ? AppColors.warning.withValues(alpha: 0.15)
-                  : AppColors.warning.withValues(alpha: 0.1),
-              foreground: isDark ? AppColors.warningLight : AppColors.warning,
-            ),
-          AppStatusVariant.dot => _StatusColors(
-              background: Colors.transparent,
-              foreground: isDark ? AppColors.warningLight : AppColors.warning,
-            ),
-        },
-
-      AppStatusType.danger => switch (variant) {
-          AppStatusVariant.filled => _StatusColors(
-              background: isDark ? AppColors.dangerLight : AppColors.danger,
-              foreground: Colors.white,
-            ),
-          AppStatusVariant.outline => _StatusColors(
-              background: Colors.transparent,
-              foreground: isDark ? AppColors.dangerLight : AppColors.danger,
-            ),
-          AppStatusVariant.subtle => _StatusColors(
-              background: isDark
-                  ? AppColors.danger.withValues(alpha: 0.15)
-                  : AppColors.danger.withValues(alpha: 0.1),
-              foreground: isDark ? AppColors.dangerLight : AppColors.danger,
-            ),
-          AppStatusVariant.dot => _StatusColors(
-              background: Colors.transparent,
-              foreground: isDark ? AppColors.dangerLight : AppColors.danger,
-            ),
-        },
-
-      AppStatusType.info => switch (variant) {
-          AppStatusVariant.filled => _StatusColors(
-              background: isDark ? AppColors.infoLight : AppColors.info,
-              foreground: Colors.white,
-            ),
-          AppStatusVariant.outline => _StatusColors(
-              background: Colors.transparent,
-              foreground: isDark ? AppColors.infoLight : AppColors.info,
-            ),
-          AppStatusVariant.subtle => _StatusColors(
-              background: isDark
-                  ? AppColors.info.withValues(alpha: 0.15)
-                  : AppColors.info.withValues(alpha: 0.1),
-              foreground: isDark ? AppColors.infoLight : AppColors.info,
-            ),
-          AppStatusVariant.dot => _StatusColors(
-              background: Colors.transparent,
-              foreground: isDark ? AppColors.infoLight : AppColors.info,
-            ),
-        },
-
-      AppStatusType.neutral => switch (variant) {
-          AppStatusVariant.filled => _StatusColors(
-              background: isDark
-                  ? AppColors.darkSurfaceVariant
-                  : AppColors.borderLight,
-              foreground: isDark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.textSecondary,
-            ),
-          AppStatusVariant.outline => _StatusColors(
-              background: Colors.transparent,
-              foreground: isDark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.textSecondary,
-            ),
-          AppStatusVariant.subtle => _StatusColors(
-              background: isDark
-                  ? AppColors.darkSurfaceVariant
-                  : AppColors.borderLight,
-              foreground: isDark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.textSecondary,
-            ),
-          AppStatusVariant.dot => _StatusColors(
-              background: Colors.transparent,
-              foreground: isDark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.textSecondary,
-            ),
-        },
-    };
+    return Semantics(label: text, excludeSemantics: true, child: badge);
   }
 }
 
-class _StatusColors {
-  final Color background;
-  final Color foreground;
+/// The (text colour, tonal fill) pair for a status, for both themes.
+(Color, Color) statusColors(BuildContext context, AppStatusType type) {
+  final colors = context.colors;
+  final palette = context.palette;
+  return switch (type) {
+    AppStatusType.success => (palette.success, palette.successContainer),
+    AppStatusType.warning => (palette.warning, palette.warningContainer),
+    AppStatusType.danger => (colors.error, colors.errorContainer),
+    AppStatusType.info => (colors.secondary, colors.secondaryContainer),
+    AppStatusType.neutral => (
+      colors.onSurfaceVariant,
+      colors.surfaceContainerHigh,
+    ),
+  };
+}
 
-  const _StatusColors({
-    required this.background,
-    required this.foreground,
-  });
+/// Draws the status mark centred in its box.
+class StatusMarkPainter extends CustomPainter {
+  const StatusMarkPainter(this.type, this.color);
+
+  final AppStatusType type;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = size.center(Offset.zero);
+    final r = size.shortestSide / 2;
+    final fill = Paint()..color = color;
+    final stroke = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6;
+    switch (type) {
+      case AppStatusType.success:
+        canvas.drawCircle(c, r - 1, fill);
+      case AppStatusType.warning:
+        canvas.drawCircle(c, r - 1.5, stroke);
+        canvas.drawArc(
+          Rect.fromCircle(center: c, radius: r - 1.5),
+          math.pi / 2,
+          math.pi,
+          true,
+          fill,
+        );
+      case AppStatusType.danger:
+        final d = r - 0.5;
+        canvas.drawPath(
+          Path()
+            ..moveTo(c.dx, c.dy - d)
+            ..lineTo(c.dx + d, c.dy)
+            ..lineTo(c.dx, c.dy + d)
+            ..lineTo(c.dx - d, c.dy)
+            ..close(),
+          fill,
+        );
+      case AppStatusType.info:
+        canvas.drawCircle(c, r - 1.5, stroke);
+      case AppStatusType.neutral:
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromCenter(center: c, width: r * 1.8, height: 2.4),
+            const Radius.circular(1.2),
+          ),
+          fill,
+        );
+    }
+  }
+
+  @override
+  bool shouldRepaint(StatusMarkPainter old) =>
+      old.type != type || old.color != color;
 }

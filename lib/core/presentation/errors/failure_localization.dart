@@ -8,8 +8,10 @@ extension FailureLocalization on Failure {
         isOffline ? l10n.errorOfflineHint : l10n.errorSomethingWentWrong,
       // Field errors first (the actionable part), then the top-level
       // message as fallback. Truncated to 200 chars.
-      ValidationFailure(:final message, :final fields) =>
-        _validationText(message, fields),
+      ValidationFailure(:final message, :final fields) => _validationText(
+        message,
+        fields,
+      ),
       _ => l10n.errorSomethingWentWrong,
     };
   }

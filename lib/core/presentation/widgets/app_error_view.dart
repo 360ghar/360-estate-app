@@ -1,6 +1,9 @@
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
+import 'package:estate_app/core/presentation/widgets/app_empty_view.dart';
 import 'package:flutter/material.dart';
 
+/// A failed load: what went wrong and one way out.
 class AppErrorView extends StatelessWidget {
   const AppErrorView({
     super.key,
@@ -8,7 +11,7 @@ class AppErrorView extends StatelessWidget {
     required this.message,
     this.onRetry,
     this.retryLabel,
-  }) : assert(onRetry == null || retryLabel != null);
+  });
 
   final String title;
   final String message;
@@ -16,46 +19,45 @@ class AppErrorView extends StatelessWidget {
   final String? retryLabel;
 
   @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Center(
-      child: Padding(
-        padding: AppInsets.screen,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 64,
-              height: 64,
-              decoration: BoxDecoration(
-                color: scheme.error.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.error_outline, size: 32, color: scheme.error),
+  Widget build(BuildContext context) => Semantics(
+    liveRegion: true,
+    child: AppStateMessage(
+      icon: Icons.cloud_off_rounded,
+      iconColor: context.colors.error,
+      title: title,
+      message: message,
+      action: onRetry == null
+          ? null
+          : FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: Text(retryLabel ?? context.l10n.commonRetry),
             ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              message,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
-              textAlign: TextAlign.center,
-            ),
-            if (onRetry != null) ...[
-              const SizedBox(height: AppSpacing.lg),
-              FilledButton(onPressed: onRetry, child: Text(retryLabel!)),
-            ],
-          ],
+    ),
+  );
+}
+
+/// Pads [AppErrorView] or [AppEmptyView] so a [RefreshIndicator] can still
+/// be pulled when the list has nothing to show.
+class StateScrollView extends StatelessWidget {
+  const StateScrollView({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) => ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: constraints.maxHeight.isFinite
+                ? constraints.maxHeight - AppSpacing.xxl
+                : 0,
+          ),
+          child: Center(child: child),
         ),
-      ),
-    );
-  }
+      ],
+    ),
+  );
 }

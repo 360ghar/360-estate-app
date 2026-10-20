@@ -8,10 +8,8 @@ abstract final class AppSpacing {
   static const double lg = 16;
   static const double xl = 24;
   static const double xxl = 32;
-  static const double xxxl = 40;
 }
 
 abstract final class AppInsets {
-  static const EdgeInsets screen = EdgeInsets.all(AppSpacing.lg);
   static const EdgeInsets card = EdgeInsets.all(AppSpacing.lg);
 }
