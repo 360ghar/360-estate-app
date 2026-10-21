@@ -55,7 +55,9 @@ class AppAvatar extends StatelessWidget {
           fontWeight: FontWeight.w700,
           fontSize: d * 0.38,
           height: 1,
-          color: context.colors.onPrimaryContainer,
+          color: backgroundColor == null
+              ? context.colors.onPrimaryContainer
+              : (fill.computeLuminance() < 0.5 ? Colors.white : Colors.black87),
         ),
       ),
     );
@@ -91,6 +93,7 @@ class AppAvatar extends StatelessWidget {
       label: name,
       image: url != null && url.isNotEmpty,
       button: onTap != null,
+      onTap: onTap,
       excludeSemantics: true,
       child: avatar,
     );

@@ -12,6 +12,7 @@ extension FailureLocalization on Failure {
         message,
         fields,
       ),
+      OwnerRequiredFailure() => l10n.ownerScopeNeedOwnerBody,
       // The server's message is the actionable part for these.
       UnauthorizedFailure(:final message) ||
       NotFoundFailure(:final message) ||

@@ -429,7 +429,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     routes: [
                       GoRoute(
                         path: 'upload',
-                        builder: (context, state) => const DocumentUploadPage(),
+                        builder: (context, state) => DocumentUploadPage(
+                          propertyId: int.tryParse(
+                            state.uri.queryParameters['propertyId'] ?? '',
+                          ),
+                        ),
                       ),
                     ],
                   ),

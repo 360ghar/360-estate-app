@@ -1098,5 +1098,7 @@
   "reportsRowUntil": "{date} तक",
   "reportsRowLeaseEnds": "लीज़ {date} को खत्म होगी",
   "mapUnsupported": "इस डिवाइस पर नक्शा उपलब्ध नहीं है।",
-  "mapOpenInBrowser": "ब्राउज़र में खोलें"
+  "mapOpenInBrowser": "ब्राउज़र में खोलें",
+  "leaseFormAmountInvalid": "शून्य या उससे अधिक राशि दर्ज करें।",
+  "expenseFormPropertyUnavailable": "संपत्तियाँ लोड नहीं हो सकीं। फिर से कोशिश करें।"
 }

@@ -28,7 +28,7 @@ All pairs below were checked with WCAG 2.1. Text needs at least 4.5:1, and UI bo
 | surface | `#F4F8F7` | `#0E1413` | Page background (teal-tinted off-white; green-black in dark) |
 | surfaceContainerLowest | `#FFFFFF` | `#0A0F0E` | Cards on the page |
 | surfaceContainerLow | `#EDF3F1` | `#121A19` | Grouped rows |
-| surfaceContainer | `#E7EEEC` | `#172120` | Nav bar, input fill |
+| surfaceContainer | `#E7EEEC` | `#172120` | Nav bar |
 | surfaceContainerHigh | `#E1E9E7` | `#1F2A28` | Pressed rows, sheets |
 | surfaceContainerHighest | `#DAE3E1` | `#263230` | Skeletons |
 | onSurface (ink) | `#10201E` | `#E2EBE9` | Body and headings |

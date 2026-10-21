@@ -1,3 +1,4 @@
+import 'package:estate_app/app/router/routes.dart';
 import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/design_system/app_text_styles.dart';
@@ -9,6 +10,7 @@ import 'package:estate_app/core/presentation/widgets/app_list_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_loading_shimmer.dart';
 import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_status_badge.dart';
+import 'package:estate_app/core/presentation/widgets/feedback.dart';
 import 'package:estate_app/core/presentation/widgets/motion.dart';
 import 'package:estate_app/core/utils/dates.dart';
 import 'package:estate_app/core/utils/money.dart';
@@ -33,6 +35,7 @@ import 'package:estate_app/features/tasks/tasks_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Reloads [provider] and waits for it, for pull to refresh. A failure shows
 /// in the list itself, so it is not rethrown here.
@@ -393,6 +396,19 @@ class PropertyMaintenanceTab extends ConsumerWidget {
   }
 }
 
+Future<void> _openDocument(BuildContext context, String? url) async {
+  final l10n = context.l10n;
+  final uri = Uri.tryParse(url ?? '');
+  if (uri == null || !uri.hasScheme) {
+    context.showSnack(l10n.documentsNoAccess);
+    return;
+  }
+  final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+  if (!launched && context.mounted) {
+    context.showSnack(l10n.documentsOpenFailed);
+  }
+}
+
 class PropertyDocumentsTab extends ConsumerWidget {
   const PropertyDocumentsTab({super.key, required this.propertyId});
 
@@ -411,7 +427,7 @@ class PropertyDocumentsTab extends ConsumerWidget {
         title: l10n.propertyNoDocumentsTitle,
         message: l10n.propertyNoDocumentsBody,
         action: l10n.propertyUploadDocument,
-        route: '/more/documents/upload',
+        route: '${Routes.documentsUpload}?propertyId=$propertyId',
       ),
       row: (doc) => AppListCard(
         title: doc.title ?? l10n.propertyTabDocuments,
@@ -420,6 +436,8 @@ class PropertyDocumentsTab extends ConsumerWidget {
           if (doc.createdAt != null)
             l10n.propertyUploadedOn(shortDate(context, doc.createdAt!)),
         ],
+        // `file_url` is the signed link, null for a viewer who may not open it.
+        onTap: () => _openDocument(context, doc.fileUrl),
       ),
     );
   }

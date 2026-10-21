@@ -12,12 +12,7 @@ class AppSectionCard extends StatelessWidget {
     this.icon,
     this.iconColor,
     this.trailing,
-    this.contentPadding = const EdgeInsets.fromLTRB(
-      AppSpacing.lg,
-      AppSpacing.sm,
-      AppSpacing.lg,
-      AppSpacing.lg,
-    ),
+    this.contentPadding,
     this.children = const [],
     this.child,
   });
@@ -26,7 +21,10 @@ class AppSectionCard extends StatelessWidget {
   final IconData? icon;
   final Color? iconColor;
   final Widget? trailing;
-  final EdgeInsetsGeometry contentPadding;
+
+  /// Null: all sides [AppSpacing.lg] without a title, and a tighter top under
+  /// a title.
+  final EdgeInsetsGeometry? contentPadding;
   final List<Widget> children;
   final Widget? child;
 
@@ -75,9 +73,16 @@ class AppSectionCard extends StatelessWidget {
               ),
             ),
           Padding(
-            padding: title == null
-                ? const EdgeInsets.all(AppSpacing.lg)
-                : contentPadding,
+            padding:
+                contentPadding ??
+                (title == null
+                    ? const EdgeInsets.all(AppSpacing.lg)
+                    : const EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        AppSpacing.sm,
+                        AppSpacing.lg,
+                        AppSpacing.lg,
+                      )),
             child:
                 child ??
                 Column(

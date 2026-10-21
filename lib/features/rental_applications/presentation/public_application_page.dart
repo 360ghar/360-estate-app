@@ -61,8 +61,13 @@ class _PublicApplicationPageState extends ConsumerState<PublicApplicationPage> {
         ApplicationFieldType.boolean => {
           field.key: _values[field.key] as bool? ?? false,
         },
+        // A select without options is shown as a text field: use its text.
         ApplicationFieldType.select => {
-          if (_values[field.key] case final String v when v.isNotEmpty)
+          if ((_values[field.key] is String &&
+                      (_values[field.key]! as String).isNotEmpty
+                  ? _values[field.key]! as String
+                  : _controllerFor(field).text.trim())
+              case final String v when v.isNotEmpty)
             field.key: v,
         },
         ApplicationFieldType.date => {

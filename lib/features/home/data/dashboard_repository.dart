@@ -30,13 +30,19 @@ class DashboardRepository {
   Future<DashboardOverview> fetchOverview() async {
     final cached = _cache.get<DashboardOverview>(_overviewKey);
     if (cached != null) return cached;
+    final generation = _cache.generation;
     final response = await _client.get<dynamic>(
       ApiPaths.dashboardOverview,
       ownerScoped: true,
     );
     final overview = DashboardOverview.fromJson(unwrapMap(response.data));
     if (isCacheable(response)) {
-      _cache.set(_overviewKey, overview, ttl: _cacheTtl);
+      _cache.set(
+        _overviewKey,
+        overview,
+        ttl: _cacheTtl,
+        generation: generation,
+      );
     }
     return overview;
   }
@@ -45,6 +51,7 @@ class DashboardRepository {
   Future<List<DashboardActivityItem>> fetchActivity() async {
     final cached = _cache.get<List<DashboardActivityItem>>(_activityKey);
     if (cached != null) return cached;
+    final generation = _cache.generation;
     final response = await _client.get<dynamic>(
       ApiPaths.dashboardActivity,
       ownerScoped: true,
@@ -55,7 +62,7 @@ class DashboardRepository {
         .map(DashboardActivityItem.fromJson)
         .toList();
     if (isCacheable(response)) {
-      _cache.set(_activityKey, items, ttl: _cacheTtl);
+      _cache.set(_activityKey, items, ttl: _cacheTtl, generation: generation);
     }
     return items;
   }

@@ -97,4 +97,29 @@ void main() {
       );
     });
   });
+
+  group('late responses', () {
+    test('a response that started before an owner switch is not stored', () {
+      final cache = CacheStore()..bindAccount('1');
+      final started = cache.generation;
+      // The agent picks another owner while the request is in flight.
+      cache.invalidateAll();
+      cache.set('k', 'old owner', ttl: ttl, generation: started);
+      expect(cache.get<String>('k'), isNull);
+    });
+
+    test('a response that started before sign-out is not stored', () {
+      final cache = CacheStore()..bindAccount('1');
+      final started = cache.generation;
+      cache.bindAccount('2');
+      cache.set('k', 'account 1', ttl: ttl, generation: started);
+      expect(cache.get<String>('k'), isNull);
+    });
+
+    test('a response in the same scope is stored', () {
+      final cache = CacheStore()..bindAccount('1');
+      cache.set('k', 'v', ttl: ttl, generation: cache.generation);
+      expect(cache.get<String>('k'), 'v');
+    });
+  });
 }

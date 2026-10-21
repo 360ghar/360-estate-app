@@ -201,6 +201,7 @@ class _PropertiesPageState extends ConsumerState<PropertiesPage> {
                     emptyTitle: emptyTitle,
                     emptyMessage: emptyMessage,
                     emptyAction: emptyAction,
+                    onLoadMoreRetry: controller.retryLoadMore,
                   )
                 : PagedListView<Property>(
                     state: filtered,

@@ -18,7 +18,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 class DocumentUploadPage extends ConsumerStatefulWidget {
-  const DocumentUploadPage({super.key});
+  const DocumentUploadPage({super.key, this.propertyId});
+
+  /// Set when the upload starts from a property: the document is linked to it.
+  final int? propertyId;
 
   @override
   ConsumerState<DocumentUploadPage> createState() => _DocumentUploadPageState();
@@ -46,7 +49,11 @@ class _DocumentUploadPageState extends ConsumerState<DocumentUploadPage> {
     // bytes via XFile.fromData instead of discarding the selection.
     final FilePickerResult? result;
     try {
-      result = await FilePicker.platform.pickFiles(withData: kIsWeb);
+      result = await FilePicker.platform.pickFiles(
+        withData: kIsWeb,
+        type: FileType.custom,
+        allowedExtensions: const ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'],
+      );
     } catch (_) {
       if (mounted) {
         setState(() => _fileError = context.l10n.documentUploadPickFailed);
@@ -97,13 +104,18 @@ class _DocumentUploadPageState extends ConsumerState<DocumentUploadPage> {
             file: file,
             title: title.isEmpty ? _fileName : title,
             documentType: _type,
+            propertyId: widget.propertyId,
           );
       ref
         ..invalidate(documentsListProvider)
         ..invalidate(documentsForPropertyProvider);
       if (!mounted) return;
       context.showSnack(l10n.documentUploadDone);
-      context.go('/more/documents');
+      context.go(
+        widget.propertyId == null
+            ? '/more/documents'
+            : '/properties/${widget.propertyId}',
+      );
     } catch (error) {
       if (!mounted) return;
       context.showSnack(

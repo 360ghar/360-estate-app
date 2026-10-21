@@ -39,6 +39,7 @@ class _QuestionEditorState extends State<QuestionEditor> {
         .split(',')
         .map((o) => o.trim())
         .where((o) => o.isNotEmpty)
+        .toSet()
         .toList();
     final isChoice = _type == ApplicationFieldType.select;
     setState(() {

@@ -26,6 +26,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     } catch (_) {
       // Not critical: the gate asks again on the next launch.
     }
+    // The router still holds the user on /onboarding until the gate opens.
+    ref.read(authControllerProvider.notifier).finishOnboarding();
     if (mounted) context.go(location);
   }
 

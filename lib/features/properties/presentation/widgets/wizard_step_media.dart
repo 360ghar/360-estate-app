@@ -5,6 +5,7 @@ import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/widgets/motion.dart';
 import 'package:estate_app/features/properties/presentation/property_wizard_data.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 /// Step 5: photos and floor plans. They upload when the property is saved.
@@ -146,7 +147,8 @@ class _Thumb extends StatelessWidget {
   Widget build(BuildContext context) {
     final uri = Uri.tryParse(url);
     final fallback = ColoredBox(color: context.colors.surfaceContainerHigh);
-    final image = uri != null && uri.scheme == 'file'
+    // Image.file does not exist on web; a picked file is shown by its URL.
+    final image = !kIsWeb && uri != null && uri.scheme == 'file'
         ? Image.file(
             File.fromUri(uri),
             fit: BoxFit.cover,

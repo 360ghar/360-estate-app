@@ -34,6 +34,7 @@ class PropertiesRepositoryImpl implements PropertiesRepository {
         '${cursor ?? Page.nullCursorCacheKey}:limit=$limit';
     final cached = _cache.get<Page<Property>>(cacheKey);
     if (cached != null) return cached;
+    final generation = _cache.generation;
 
     final response = await _client.get<dynamic>(
       ApiPaths.properties,
@@ -55,7 +56,9 @@ class PropertiesRepositoryImpl implements PropertiesRepository {
       hasMore: raw.hasMore,
       nextCursor: raw.nextCursor,
     );
-    if (isCacheable(response)) _cache.set(cacheKey, result, ttl: _cacheTtl);
+    if (isCacheable(response)) {
+      _cache.set(cacheKey, result, ttl: _cacheTtl, generation: generation);
+    }
     return result;
   }
 

@@ -52,7 +52,10 @@ class StateScrollView extends StatelessWidget {
         ConstrainedBox(
           constraints: BoxConstraints(
             minHeight: constraints.maxHeight.isFinite
-                ? constraints.maxHeight - AppSpacing.xxl
+                ? (constraints.maxHeight - AppSpacing.xxl).clamp(
+                    0,
+                    double.infinity,
+                  )
                 : 0,
           ),
           child: Center(child: child),

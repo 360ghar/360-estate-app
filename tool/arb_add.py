@@ -1,5 +1,6 @@
 """Adds strings to lib/l10n/arb/app_en.arb and app_hi.arb, then regenerates
-AppLocalizations. Safe to run from several shells at once (it takes a lock).
+AppLocalizations. Safe to run from several shells at once (it takes a lock
+directory, which works on every platform).
 
 Usage: python3 tool/arb_add.py strings.json
 
@@ -7,22 +8,51 @@ strings.json maps a key to [english, hindi] or to
 {"en": ..., "hi": ..., "placeholders": {"name": {"type": "String"}}}.
 A key that already exists keeps its text (a different text is reported).
 """
-import fcntl
 import json
+import os
 import subprocess
 import sys
+import time
+from contextlib import contextmanager
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 ARB = ROOT / 'lib' / 'l10n' / 'arb'
 
 
+LOCK = ROOT / '.dart_tool' / 'arb_add.lock'
+
+
+@contextmanager
+def locked():
+    """mkdir is atomic on every platform: whoever creates the directory holds
+    the lock."""
+    LOCK.parent.mkdir(parents=True, exist_ok=True)
+    if LOCK.is_file():  # left by the old flock version
+        LOCK.unlink()
+    deadline = time.time() + 120
+    while True:
+        try:
+            os.mkdir(LOCK)
+            break
+        except FileExistsError:
+            if time.time() > deadline:
+                raise SystemExit(f'lock {LOCK} is held; remove it if stale')
+            time.sleep(0.2)
+    try:
+        yield
+    finally:
+        os.rmdir(LOCK)
+
+
 def main(path):
-    new = json.loads(Path(path).read_text())
-    with open(ROOT / '.dart_tool' / 'arb_add.lock', 'w') as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX)
+    new = json.loads(Path(path).read_text(encoding='utf-8'))
+    with locked():
         files = {lang: ARB / f'app_{lang}.arb' for lang in ('en', 'hi')}
-        data = {lang: json.loads(f.read_text()) for lang, f in files.items()}
+        data = {
+            lang: json.loads(f.read_text(encoding='utf-8'))
+            for lang, f in files.items()
+        }
         for key, value in new.items():
             if isinstance(value, list):
                 value = {'en': value[0], 'hi': value[1]}
@@ -35,7 +65,10 @@ def main(path):
             if 'placeholders' in value:
                 data['en'][f'@{key}'] = {'placeholders': value['placeholders']}
         for lang, f in files.items():
-            f.write_text(json.dumps(data[lang], ensure_ascii=False, indent=2) + '\n')
+            f.write_text(
+                json.dumps(data[lang], ensure_ascii=False, indent=2) + '\n',
+                encoding='utf-8',
+            )
         subprocess.run(['flutter', 'gen-l10n'], cwd=ROOT, check=True,
                        stdout=subprocess.DEVNULL)
 

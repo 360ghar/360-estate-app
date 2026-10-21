@@ -212,10 +212,7 @@ class _ExpenseRow extends StatelessWidget {
           ? title
           : category?.text(l10n) ?? l10n.expensesUntitled,
       subtitle: expense.propertyName,
-      facts: [
-        ?category?.text(l10n),
-        if (date != null) shortDate(context, date),
-      ],
+      facts: [?category?.text(l10n), if (date != null) dateOnly(context, date)],
       trailing: Text(
         rupees(expense.amount ?? 0),
         style: AppTextStyles.currencySmall.copyWith(

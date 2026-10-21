@@ -305,7 +305,6 @@ class AuthPhoneField extends StatelessWidget {
       autofillHints: const [AutofillHints.telephoneNumberNational],
       inputFormatters: [
         FilteringTextInputFormatter.digitsOnly,
-        LengthLimitingTextInputFormatter(10),
         const AuthPhoneNumberFormatter(),
       ],
       validator: (value) =>
@@ -332,7 +331,9 @@ class AuthPhoneNumberFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    final digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+    final all = newValue.text.replaceAll(RegExp(r'\D'), '');
+    // Ten digits at most, counted after the grouping space is removed.
+    final digits = all.length > 10 ? all.substring(0, 10) : all;
     final buffer = StringBuffer();
     for (var i = 0; i < digits.length; i++) {
       if (i == 5) buffer.write(' ');
@@ -349,7 +350,8 @@ class AuthPhoneNumberFormatter extends TextInputFormatter {
     final before = newValue.text
         .substring(0, selection.baseOffset.clamp(0, newValue.text.length))
         .replaceAll(RegExp(r'\D'), '')
-        .length;
+        .length
+        .clamp(0, digits.length);
     final offset = before + (before > 5 ? 1 : 0);
     return TextEditingValue(
       text: text,

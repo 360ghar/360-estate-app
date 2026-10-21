@@ -148,7 +148,7 @@ class _OutstandingLine extends StatelessWidget {
   Widget build(BuildContext context) {
     final error = context.colors.error;
     return InkWell(
-      onTap: () => context.go('/collections?status=overdue'),
+      onTap: () => context.go('/collections'),
       borderRadius: AppRadii.sm,
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 48),

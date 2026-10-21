@@ -8,8 +8,8 @@ Verdicts: **Pass**, **Fixed** (fixed in this audit), **Accepted** (a deliberate 
 
 | Law point | Verdict | Evidence |
 |---|---|---|
-| Icon pack look, redrawn line icons | Accepted | Material Symbols Rounded, bare, one style. A custom icon set is out of scope. |
-| Em dashes | Pass | 0 in `lib/` and the ARB files. `l10n_parity_test.dart` fails on one. |
+| Icon pack look, redrawn line icons | Accepted | Flutter Material Icons, bare, outlined when idle and rounded in places. Material Symbols Rounded is the target pack and is not adopted yet. A custom icon set is out of scope. |
+| Em dashes | Pass | 0 in `lib/` and the ARB files. `l10n_parity_test.dart` fails the build if one appears. |
 | Pill / eyebrow badge, kicker over heading | Fixed | The last kicker (property name over the public application title) moved into the muted facts line. |
 | Banned fonts (Inter, Space Grotesk, Sora, Syne, Archivo, Fraunces, Cormorant, Didones, Google shelf) | Pass | Uncut Sans (self-hosted, SIL OFL, not on Google Fonts) for display, system font for body. `google_fonts` removed. |
 | Glowy pill buttons, hover boop, card hover-lift | Pass | 0 `StadiumBorder`, 0 `BoxShadow`. Buttons use radius 10 and a ripple. |
@@ -57,7 +57,7 @@ Verdicts: **Pass**, **Fixed** (fixed in this audit), **Accepted** (a deliberate 
 | Bespoke silhouette | The perforated receipt edge on payment, rent and auth cards. |
 | Character display face | Uncut Sans with `ss04` (single-storey a) for headings and amounts, tabular figures. |
 | Treated nav | Flush bar with a sliding indicator, localized labels, capped text scale. |
-| Real specifics | Indian rupee grouping, exact paise, Hindi throughout. |
+| Real specifics | Indian rupee grouping, exact paise, Hindi for every string except the English-only gaps listed below. |
 
 ## Fixed in this audit
 

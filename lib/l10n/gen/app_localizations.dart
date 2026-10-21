@@ -6654,6 +6654,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open in browser'**
   String get mapOpenInBrowser;
+
+  /// No description provided for @leaseFormAmountInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an amount of zero or more.'**
+  String get leaseFormAmountInvalid;
+
+  /// No description provided for @expenseFormPropertyUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The properties could not be loaded. Try again.'**
+  String get expenseFormPropertyUnavailable;
 }
 
 class _AppLocalizationsDelegate

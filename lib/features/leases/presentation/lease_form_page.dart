@@ -102,12 +102,27 @@ class _LeaseFormPageState extends ConsumerState<LeaseFormPage> {
       // The rent and the deposit start from the property's values.
       if (property == null) return;
       if (_rent.text.trim().isEmpty && property.monthlyRent != null) {
-        _rent.text = property.monthlyRent!.toStringAsFixed(0);
+        _rent.text = _plain(property.monthlyRent!);
       }
       if (_deposit.text.trim().isEmpty && property.securityDeposit != null) {
-        _deposit.text = property.securityDeposit!.toStringAsFixed(0);
+        _deposit.text = _plain(property.securityDeposit!);
       }
     });
+  }
+
+  /// 12000.0 shows as 12000, 12000.5 keeps its decimals.
+  String _plain(double amount) => amount == amount.roundToDouble()
+      ? amount.toStringAsFixed(0)
+      : amount.toString();
+
+  /// An optional amount: blank is fine, anything else must be zero or more.
+  String? _optionalAmount(String? value) {
+    final text = value?.trim() ?? '';
+    if (text.isEmpty) return null;
+    final parsed = double.tryParse(text);
+    return parsed == null || parsed < 0
+        ? context.l10n.leaseFormAmountInvalid
+        : null;
   }
 
   String? _wholeNumber(String? value, {required int min, required int max}) {
@@ -343,6 +358,7 @@ class _LeaseFormPageState extends ConsumerState<LeaseFormPage> {
                             labelText: l10n.leaseFormDeposit,
                             prefixText: '₹ ',
                           ),
+                          validator: _optionalAmount,
                         ),
                       ],
                     ),
@@ -392,6 +408,7 @@ class _LeaseFormPageState extends ConsumerState<LeaseFormPage> {
                               labelText: l10n.leaseFormLateFeeFlat,
                               prefixText: '₹ ',
                             ),
+                            validator: _optionalAmount,
                           ),
                           TextFormField(
                             controller: _lateFeePercent,

@@ -118,11 +118,20 @@ Future<LeaseRenewRequest?> showRenewDialog(BuildContext context, Lease lease) {
                     setState(() => error = l10n.leaseEndAfterStart);
                     return;
                   }
+                  // Blank keeps the current rent; anything else must be a
+                  // positive amount, not silently dropped.
+                  final rentText = rent.text.trim();
+                  final newRent = double.tryParse(rentText);
+                  if (rentText.isNotEmpty &&
+                      (newRent == null || newRent <= 0)) {
+                    setState(() => error = l10n.leaseFormRentInvalid);
+                    return;
+                  }
                   Navigator.of(dialogContext).pop(
                     LeaseRenewRequest(
                       startDate: start,
                       endDate: end,
-                      monthlyRent: double.tryParse(rent.text.trim()),
+                      monthlyRent: newRent,
                       makeActive: makeActive,
                     ),
                   );

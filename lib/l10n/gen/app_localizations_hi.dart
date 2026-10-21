@@ -3626,4 +3626,11 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get mapOpenInBrowser => 'ब्राउज़र में खोलें';
+
+  @override
+  String get leaseFormAmountInvalid => 'शून्य या उससे अधिक राशि दर्ज करें।';
+
+  @override
+  String get expenseFormPropertyUnavailable =>
+      'संपत्तियाँ लोड नहीं हो सकीं। फिर से कोशिश करें।';
 }

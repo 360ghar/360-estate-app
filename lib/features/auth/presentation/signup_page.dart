@@ -32,7 +32,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
 
   String? get _locked {
     final raw = widget.identifier?.trim();
-    return raw == null || raw.isEmpty ? null : normalizePhone(raw);
+    if (raw == null || raw.isEmpty) return null;
+    // A malformed value from the link is not locked: the user can correct it.
+    final phone = normalizePhone(raw);
+    return isValidPhone(phone) ? phone : null;
   }
 
   @override
@@ -46,6 +49,8 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   }
 
   Future<void> _submit() async {
+    // The keyboard action can fire again while the first sign-up is pending.
+    if (ref.read(authControllerProvider).isBusy) return;
     final valid = _formKey.currentState?.validate() ?? false;
     setState(() => _showTermsError = !_termsAccepted);
     if (!valid || !_termsAccepted) return;

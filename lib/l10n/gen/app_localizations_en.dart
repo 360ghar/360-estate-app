@@ -3649,4 +3649,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mapOpenInBrowser => 'Open in browser';
+
+  @override
+  String get leaseFormAmountInvalid => 'Enter an amount of zero or more.';
+
+  @override
+  String get expenseFormPropertyUnavailable =>
+      'The properties could not be loaded. Try again.';
 }

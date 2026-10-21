@@ -85,7 +85,7 @@ class ChargeRow extends StatelessWidget {
             ),
         ],
       ),
-      onTap: isOpen
+      onTap: isOpen && row.id != null
           ? () => context.go('/collections/payments/new?chargeId=${row.id}')
           : null,
     );

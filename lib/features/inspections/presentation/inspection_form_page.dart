@@ -218,7 +218,11 @@ class _LeasePicker extends ConsumerWidget {
       children: [
         properties.when(
           loading: () => const LinearProgressIndicator(),
-          error: (error, _) => Text(userFacingMessage(error), style: muted),
+          error: (error, _) => _LoadError(
+            message: userFacingMessage(error),
+            style: muted,
+            onRetry: () => ref.invalidate(propertiesListProvider),
+          ),
           data: (list) => DropdownButtonFormField<int>(
             initialValue: list.any((p) => p.id == propertyId)
                 ? propertyId
@@ -244,7 +248,13 @@ class _LeasePicker extends ConsumerWidget {
         else
           leases.when(
             loading: () => const LinearProgressIndicator(),
-            error: (error, _) => Text(userFacingMessage(error), style: muted),
+            error: (error, _) => _LoadError(
+              message: userFacingMessage(error),
+              style: muted,
+              onRetry: () => ref.invalidate(
+                leasesListProvider(LeaseListFilter(propertyId: property)),
+              ),
+            ),
             data: (list) => list.isEmpty
                 ? Row(
                     children: [
@@ -292,4 +302,25 @@ class _LeasePicker extends ConsumerWidget {
         ? lease.displayName
         : '${lease.displayName} · $status';
   }
+}
+
+/// A failed load with a retry, so the form is not left unusable.
+class _LoadError extends StatelessWidget {
+  const _LoadError({
+    required this.message,
+    required this.style,
+    required this.onRetry,
+  });
+
+  final String message;
+  final TextStyle? style;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Expanded(child: Text(message, style: style)),
+      TextButton(onPressed: onRetry, child: Text(context.l10n.commonRetry)),
+    ],
+  );
 }

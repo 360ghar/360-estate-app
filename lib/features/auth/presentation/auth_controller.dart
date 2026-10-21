@@ -840,6 +840,13 @@ class AuthController extends StateNotifier<AuthState> {
     );
   }
 
+  /// The onboarding screen is done. Opens the app; the gate asks again on the
+  /// next launch if the backend did not record it.
+  void finishOnboarding() {
+    if (state.status != AuthStatus.needsOnboarding) return;
+    state = state.copyWith(status: AuthStatus.authenticated);
+  }
+
   Future<void> logout() async {
     await _repository.logout();
     await onLogoutClear?.call();

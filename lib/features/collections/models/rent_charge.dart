@@ -59,7 +59,8 @@ extension RentChargeWithTotalsX on RentChargeWithTotals {
   DateTime? get dueDate => charge.dueDate;
 
   /// The whole amount due for this charge: the rent and the assessed late fee.
-  double get totalDue => amountDueTotal ?? charge.amountDue ?? 0;
+  double get totalDue =>
+      amountDueTotal ?? (charge.amountDue ?? 0) + (charge.lateFeeAssessed ?? 0);
 
   double get paid => amountPaidTotal ?? 0;
 

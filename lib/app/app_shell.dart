@@ -65,11 +65,13 @@ class _AppShellState extends State<AppShell> {
         body: widget.navigationShell,
         bottomNavigationBar: Stack(
           children: [
-            // Tab labels stop growing at 1.15x, as on iOS, so five labels
-            // keep one line each at the largest text sizes.
-            MediaQuery.withClampedTextScaling(
-              maxScaleFactor: 1.15,
-              child: NavigationBar(
+            // The system text size is kept. When it is large, only the
+            // selected tab shows its label, so five labels never overflow.
+            Builder(
+              builder: (context) => NavigationBar(
+                labelBehavior: MediaQuery.textScalerOf(context).scale(1) > 1.3
+                    ? NavigationDestinationLabelBehavior.onlyShowSelected
+                    : NavigationDestinationLabelBehavior.alwaysShow,
                 selectedIndex: index,
                 onDestinationSelected: _onTap,
                 destinations: [

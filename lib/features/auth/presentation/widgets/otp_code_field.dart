@@ -51,7 +51,11 @@ class _OtpCodeFieldState extends State<OtpCodeField> {
         code != old.incomingCode &&
         RegExp('^\\d{${widget.length}}\$').hasMatch(code)) {
       _controller.text = code;
-      _onChanged(code);
+      // The parent is rebuilding: report the code after this frame, not
+      // during it (the callbacks call setState).
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _onChanged(code);
+      });
     }
   }
 

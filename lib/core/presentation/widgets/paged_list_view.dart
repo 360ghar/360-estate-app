@@ -101,7 +101,7 @@ class PagedListView<T> extends StatelessWidget {
             final i = index - lead;
             if (i >= state.items.length) {
               if (showLoadMoreError) {
-                return _LoadMoreError(onRetry: onLoadMoreRetry);
+                return LoadMoreError(onRetry: onLoadMoreRetry);
               }
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
@@ -125,8 +125,9 @@ class PagedListView<T> extends StatelessWidget {
   }
 }
 
-class _LoadMoreError extends StatelessWidget {
-  const _LoadMoreError({this.onRetry});
+/// The row that replaces the spinner when the next page failed to load.
+class LoadMoreError extends StatelessWidget {
+  const LoadMoreError({super.key, this.onRetry});
 
   final VoidCallback? onRetry;
 

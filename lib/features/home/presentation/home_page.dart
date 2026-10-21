@@ -44,6 +44,7 @@ class HomePage extends ConsumerWidget {
         onRefresh: () async {
           reloadOverview();
           reloadActivity();
+          ref.read(rentRepositoryProvider).clearCache();
           ref.invalidate(allRentChargesProvider);
           await ref
               .read(dashboardOverviewProvider.future)

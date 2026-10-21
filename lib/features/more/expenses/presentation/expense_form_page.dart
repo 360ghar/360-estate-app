@@ -79,7 +79,10 @@ class _ExpenseFormPageState extends ConsumerState<ExpenseFormPage> {
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final propertyId = _propertyId;
-    if (propertyId == null) return;
+    if (propertyId == null) {
+      context.showSnack(context.l10n.expenseFormPropertyUnavailable);
+      return;
+    }
     setState(() => _isSaving = true);
     try {
       final payload = ExpensePayload(

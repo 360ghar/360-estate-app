@@ -99,7 +99,10 @@ class _RecordPaymentPageState extends ConsumerState<RecordPaymentPage> {
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final chargeId = _chargeId;
-    if (chargeId == null) return;
+    if (chargeId == null) {
+      context.showSnack(context.l10n.paymentChargeRequired);
+      return;
+    }
     setState(() => _isSaving = true);
     try {
       await ref

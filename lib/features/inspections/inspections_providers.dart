@@ -96,13 +96,18 @@ class InspectionTemplatesNotifier
     final legacy = _prefs.getString(_legacyTemplatesKey);
     if (legacy == null) return;
     state = InspectionTemplate.decodeList(legacy);
-    unawaited(_persist().then((_) => _prefs.remove(_legacyTemplatesKey)));
+    // The old copy goes only after the new one is written.
+    unawaited(
+      _persist().then((saved) async {
+        if (saved) await _prefs.remove(_legacyTemplatesKey);
+      }),
+    );
   }
 
-  Future<void> _persist() async {
+  Future<bool> _persist() async {
     final key = _key;
-    if (key == null) return;
-    await _prefs.setString(key, InspectionTemplate.encodeList(state));
+    if (key == null) return false;
+    return _prefs.setString(key, InspectionTemplate.encodeList(state));
   }
 
   Future<void> addTemplate(InspectionTemplate template) {

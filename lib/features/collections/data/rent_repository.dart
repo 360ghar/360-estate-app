@@ -1,4 +1,6 @@
+import 'package:dio/dio.dart' show Response;
 import 'package:estate_app/core/api/wire_enums.dart';
+import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/core/network/api_paths.dart';
 import 'package:estate_app/core/network/cache_control.dart';
@@ -73,18 +75,29 @@ class RentRepository {
         'lease=$leaseId:${cursor ?? Page.nullCursorCacheKey}:limit=$limit';
     final cached = _cache.get<Page<RentChargeWithTotals>>(cacheKey);
     if (cached != null) return cached;
+    final generation = _cache.generation;
 
-    final response = await _client.get<dynamic>(
-      ApiPaths.rentCharges,
-      ownerScoped: true,
-      queryParameters: {
-        if (status != null) 'status': status.wire,
-        if (propertyId != null) 'property_id': propertyId,
-        if (leaseId != null) 'lease_id': leaseId,
-        if (cursor != null) 'cursor': cursor,
-        'limit': limit,
-      },
-    );
+    final Response<dynamic> response;
+    try {
+      response = await _client.get<dynamic>(
+        ApiPaths.rentCharges,
+        ownerScoped: true,
+        queryParameters: {
+          if (status != null) 'status': status.wire,
+          if (propertyId != null) 'property_id': propertyId,
+          if (leaseId != null) 'lease_id': leaseId,
+          if (cursor != null) 'cursor': cursor,
+          'limit': limit,
+        },
+      );
+    } on NotFoundFailure {
+      // No charges exist yet: an empty page, not an error.
+      return Page<RentChargeWithTotals>(
+        items: const <RentChargeWithTotals>[],
+        limit: limit,
+        hasMore: false,
+      );
+    }
     final raw = unwrapPage(response.data);
     final result = Page<RentChargeWithTotals>(
       items: raw.items
@@ -96,7 +109,9 @@ class RentRepository {
       nextCursor: raw.nextCursor,
       total: raw.total,
     );
-    if (isCacheable(response)) _cache.set(cacheKey, result, ttl: _cacheTtl);
+    if (isCacheable(response)) {
+      _cache.set(cacheKey, result, ttl: _cacheTtl, generation: generation);
+    }
     return result;
   }
 
@@ -128,6 +143,9 @@ class RentRepository {
     _invalidateAfterWrite();
     return RentChargeGenerateResult.fromJson(unwrapMap(response.data));
   }
+
+  /// Drops the cached charge pages so the next read goes to the backend.
+  void clearCache() => _cache.invalidatePrefix(_cachePrefix);
 
   /// Charges and payments feed the Home KPIs (for example
   /// `outstanding_rent_total`) and the activity feed, so both caches go.

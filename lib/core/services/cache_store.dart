@@ -23,6 +23,13 @@ class CacheStore {
 
   String _account = '';
 
+  int _generation = 0;
+
+  /// Bumped whenever entries are dropped or the account changes. A caller
+  /// reads it before a request and passes it to [set]: a response that
+  /// arrives after the bump belongs to the old scope and is not stored.
+  int get generation => _generation;
+
   /// The bound account id, or an empty string when nobody is signed in.
   String get account => _account;
 
@@ -32,6 +39,7 @@ class CacheStore {
     final next = accountId ?? '';
     if (next == _account) return;
     _entries.clear();
+    _generation++;
     _account = next;
   }
 
@@ -50,7 +58,8 @@ class CacheStore {
     return null;
   }
 
-  void set<T>(String key, T value, {required Duration ttl}) {
+  void set<T>(String key, T value, {required Duration ttl, int? generation}) {
+    if (generation != null && generation != _generation) return;
     _entries[_scoped(key)] = _CacheEntry<Object?>(
       value: value,
       expiresAt: DateTime.now().add(ttl),
@@ -59,10 +68,12 @@ class CacheStore {
   }
 
   void invalidate(String key) {
+    _generation++;
     _entries.remove(_scoped(key));
   }
 
   void invalidatePrefix(String prefix) {
+    _generation++;
     final scopedPrefix = _scoped(prefix);
     _entries.removeWhere((key, _) => key.startsWith(scopedPrefix));
   }
@@ -74,6 +85,7 @@ class CacheStore {
 
   /// Drops every entry of every account and unbinds the account.
   void clear() {
+    _generation++;
     _entries.clear();
     _account = '';
   }

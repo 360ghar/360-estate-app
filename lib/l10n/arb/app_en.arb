@@ -1764,5 +1764,7 @@
     }
   },
   "mapUnsupported": "The map is not available on this device.",
-  "mapOpenInBrowser": "Open in browser"
+  "mapOpenInBrowser": "Open in browser",
+  "leaseFormAmountInvalid": "Enter an amount of zero or more.",
+  "expenseFormPropertyUnavailable": "The properties could not be loaded. Try again."
 }

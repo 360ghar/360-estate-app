@@ -72,7 +72,9 @@ extension LeaseX on Lease {
 
   /// The lease ended: expired (the backend's daily job sets it), or its end
   /// date has passed while it is still shown as active.
-  bool get isExpired => status == LeaseStatus.expired;
+  bool get isExpired =>
+      status == LeaseStatus.expired ||
+      (isOccupying && (daysUntilEnd(DateTime.now()) ?? 0) < 0);
 
   /// Whole days from [today] to the end date. Negative after the end date.
   int? daysUntilEnd(DateTime today) {

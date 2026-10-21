@@ -106,7 +106,13 @@ class AppStatusBadge extends StatelessWidget {
         ),
       );
     }
-    return Semantics(label: text, excludeSemantics: true, child: badge);
+    return Semantics(
+      label: text,
+      button: onTap != null,
+      onTap: onTap,
+      excludeSemantics: true,
+      child: badge,
+    );
   }
 }
 
@@ -115,7 +121,11 @@ class AppStatusBadge extends StatelessWidget {
   final colors = context.colors;
   final palette = context.palette;
   return switch (type) {
-    AppStatusType.success => (palette.success, palette.successContainer),
+    // onSuccessContainer, not success: the pair must reach text contrast.
+    AppStatusType.success => (
+      palette.onSuccessContainer,
+      palette.successContainer,
+    ),
     AppStatusType.warning => (palette.warning, palette.warningContainer),
     AppStatusType.danger => (colors.error, colors.errorContainer),
     AppStatusType.info => (colors.secondary, colors.secondaryContainer),

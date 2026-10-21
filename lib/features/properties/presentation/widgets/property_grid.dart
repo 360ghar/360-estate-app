@@ -6,6 +6,7 @@ import 'package:estate_app/core/presentation/widgets/app_empty_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_loading_shimmer.dart';
 import 'package:estate_app/core/presentation/widgets/motion.dart';
+import 'package:estate_app/core/presentation/widgets/paged_list_view.dart';
 import 'package:estate_app/features/properties/models/property.dart';
 import 'package:estate_app/features/properties/presentation/widgets/property_cards.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,7 @@ class PropertyGrid extends StatelessWidget {
     required this.emptyTitle,
     required this.emptyMessage,
     this.emptyAction,
+    this.onLoadMoreRetry,
   });
 
   final PagedListState<Property> state;
@@ -32,6 +34,7 @@ class PropertyGrid extends StatelessWidget {
   final String emptyTitle;
   final String emptyMessage;
   final Widget? emptyAction;
+  final VoidCallback? onLoadMoreRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +110,13 @@ class PropertyGrid extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (state.loadMoreError != null && !state.isLoadingMore)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 96),
+                      child: LoadMoreError(onRetry: onLoadMoreRetry),
+                    ),
+                  ),
                 if (state.isLoadingMore)
                   const SliverToBoxAdapter(
                     child: Padding(
