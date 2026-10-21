@@ -9,8 +9,10 @@ import 'package:estate_app/core/pagination/paged_list_controller.dart'
 /// all rows (a picker, a total, a lookup). Screens that scroll use
 /// `PagedListController` instead.
 ///
-/// Stops early, without an error, if the backend repeats a cursor or after
-/// [maxPages] pages, so a faulty server cannot loop the app.
+/// Stops, without an error, if the backend repeats a cursor. Throws a
+/// [StateError] when [maxPages] pages are read and more remain, so a faulty
+/// server cannot loop the app and a caller never gets a partial list as if it
+/// were complete. [maxPages] must be at least one.
 Future<List<T>> fetchAllPages<T>(
   PageFetcher<T> fetchPage, {
   int limit = kMaxPageLimit,

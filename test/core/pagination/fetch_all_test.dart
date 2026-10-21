@@ -36,6 +36,34 @@ void main() {
       expect(calls.every((c) => c.limit == kMaxPageLimit), isTrue);
     });
 
+    test('throws when more than maxPages pages remain', () async {
+      var calls = 0;
+      await expectLater(
+        fetchAllPages<int>(({required cursor, required limit}) async {
+          calls++;
+          return Page<int>(
+            items: [calls],
+            limit: 100,
+            hasMore: true,
+            nextCursor: 'c$calls',
+          );
+        }, maxPages: 3),
+        throwsStateError,
+      );
+      expect(calls, 3);
+    });
+
+    test('rejects a maxPages below one', () async {
+      await expectLater(
+        fetchAllPages<int>(
+          ({required cursor, required limit}) async =>
+              const Page<int>(items: [], limit: 100, hasMore: false),
+          maxPages: 0,
+        ),
+        throwsArgumentError,
+      );
+    });
+
     test('stops when the server repeats a cursor', () async {
       var calls = 0;
       final all = await fetchAllPages<int>(({
