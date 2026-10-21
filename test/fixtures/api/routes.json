@@ -100,10 +100,6 @@
       }
     }
   },
-  "GET /bugs/{bug_id}": {
-    "body": null,
-    "query": {}
-  },
   "GET /notifications/me": {
     "body": null,
     "query": {

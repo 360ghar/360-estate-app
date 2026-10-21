@@ -25,12 +25,13 @@ schemas only: no app start-up, no database, no network.
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
 APP = Path(__file__).resolve().parents[1]
 # The estate repo is github/360ghar_archived/360-estate-app. The backend is github/360ghar/360ghar-backend.
-BACKEND = APP.parents[1] / "360ghar" / "360ghar-backend"
+BACKEND = Path(os.environ.get("GHAR_BACKEND_DIR") or APP.parents[1] / "360ghar" / "360ghar-backend")
 OUT = APP / "test" / "fixtures" / "api"
 sys.path.insert(0, str(BACKEND))
 
