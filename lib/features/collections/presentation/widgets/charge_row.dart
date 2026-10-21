@@ -47,7 +47,7 @@ class ChargeRow extends StatelessWidget {
     final dueDate = row.dueDate;
     final daysLate = dueDate == null || !isOpen
         ? 0
-        : DateTime.now().difference(dueDate).inDays;
+        : _daysBetween(dueDate, DateTime.now());
     final amount = isOpen ? row.balance : row.totalDue;
 
     return AppListCard(
@@ -113,4 +113,12 @@ class ChargeRow extends StatelessWidget {
     if (await launchUrl(Uri.parse('sms:?body=$message'))) return;
     if (context.mounted) context.showSnack(l10n.collectionsNoMessagingApp);
   }
+}
+
+/// Whole calendar days from [from] to [to], both read as the local dates the
+/// user sees (not 24-hour periods).
+int _daysBetween(DateTime from, DateTime to) {
+  final a = DateTime.utc(from.year, from.month, from.day);
+  final b = DateTime.utc(to.year, to.month, to.day);
+  return b.difference(a).inDays;
 }

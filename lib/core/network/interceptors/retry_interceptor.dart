@@ -88,7 +88,12 @@ final class RetryInterceptor extends Interceptor {
       options.extra[RequestIdKeys.attempt] = attempt + 1;
 
       var delay = _backoff(attempt);
-      final retryAfter = DioFailureMapper.retryAfterSeconds(err.response);
+      // Retry-After is honored for 429 and 503 only; a transient 500 with the
+      // header must not delay the retry.
+      final status = err.response?.statusCode;
+      final retryAfter = status == 429 || status == 503
+          ? DioFailureMapper.retryAfterSeconds(err.response)
+          : null;
       if (retryAfter != null) {
         final wait = Duration(seconds: retryAfter);
         if (wait > maxRetryAfter) {

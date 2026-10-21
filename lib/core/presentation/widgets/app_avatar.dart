@@ -90,7 +90,7 @@ class AppAvatar extends StatelessWidget {
       );
     }
     return Semantics(
-      label: name,
+      label: name ?? initials,
       image: url != null && url.isNotEmpty,
       button: onTap != null,
       onTap: onTap,

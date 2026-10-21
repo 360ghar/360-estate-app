@@ -6,8 +6,19 @@ String _locale(BuildContext context) =>
 
 /// 1 Oct 2026, in the app language. The spaces do not break, so a date
 /// never wraps across two lines.
-String shortDate(BuildContext context, DateTime date) =>
-    DateFormat('d\u00A0MMM\u00A0y', _locale(context)).format(date.toLocal());
+String shortDate(BuildContext context, DateTime date) => DateFormat(
+  'd\u00A0MMM\u00A0y',
+  _locale(context),
+).format(_isDateOnly(date) ? date : date.toLocal());
+
+/// A date-only value is read as midnight UTC. Converting it to local time
+/// would show the day before west of UTC.
+bool _isDateOnly(DateTime date) =>
+    date.isUtc &&
+    date.hour == 0 &&
+    date.minute == 0 &&
+    date.second == 0 &&
+    date.millisecond == 0;
 
 /// 1 Oct 2026 for a date-only value (`YYYY-MM-DD`, read as midnight UTC).
 /// It is not converted to local time: west of UTC that would show the day

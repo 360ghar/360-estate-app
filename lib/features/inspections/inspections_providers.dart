@@ -107,7 +107,13 @@ class InspectionTemplatesNotifier
   Future<bool> _persist() async {
     final key = _key;
     if (key == null) return false;
-    return _prefs.setString(key, InspectionTemplate.encodeList(state));
+    final saved = await _prefs.setString(
+      key,
+      InspectionTemplate.encodeList(state),
+    );
+    // Once this account's list is saved, the old global copy is not needed.
+    if (saved) await _prefs.remove(_legacyTemplatesKey);
+    return saved;
   }
 
   Future<void> addTemplate(InspectionTemplate template) {

@@ -225,6 +225,7 @@ class _ChargesLedger extends StatelessWidget {
             Semantics(
               button: true,
               label: l10n.homeStripSemantics(paid, month.length),
+              onTap: () => context.go('/collections'),
               excludeSemantics: true,
               child: InkWell(
                 onTap: () => context.go('/collections'),

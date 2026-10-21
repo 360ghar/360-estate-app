@@ -10,8 +10,9 @@ Future<DateTime?> _pickDay(BuildContext context, DateTime initial) =>
     showDatePicker(
       context: context,
       initialDate: initial,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2040),
+      // The bounds always contain the date shown, also an old or far lease.
+      firstDate: DateTime(initial.year < 2020 ? initial.year : 2020),
+      lastDate: DateTime(initial.year > 2040 ? initial.year : 2040),
     );
 
 /// A date the user taps to change, inside a dialog.

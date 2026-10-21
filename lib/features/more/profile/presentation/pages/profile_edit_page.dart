@@ -234,7 +234,10 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
         imageUrl: _avatarUrl,
         name: _fullNameController.text,
         size: AppAvatarSize.xl,
-        onTap: _showPhotoOptions,
+        // A photo picked during a save would be discarded when the page pops.
+        onTap: _isSaving || ref.read(authControllerProvider).isBusy
+            ? null
+            : _showPhotoOptions,
       );
     }
     return Semantics(

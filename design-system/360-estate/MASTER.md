@@ -14,7 +14,7 @@ Source of truth for every screen. A file in `design-system/360-estate/pages/<pag
 
 ## Colour
 
-All pairs below were checked with WCAG 2.1. Text needs at least 4.5:1, and UI boundaries need at least 3:1. The lowest text pair is `primary` on `surface` in light mode at 5.11:1.
+All pairs below were checked with WCAG 2.1. Text needs at least 4.5:1, and UI boundaries need at least 3:1. `outlineVariant` is for dividers only; borders of controls use `outline`. The lowest text pair is `primary` on `surface` in light mode at 5.11:1.
 
 | Role | Light | Dark | Use |
 |---|---|---|---|
@@ -26,7 +26,7 @@ All pairs below were checked with WCAG 2.1. Text needs at least 4.5:1, and UI bo
 | secondaryContainer | `#D9E6E3` | `#304C48` | Tonal button, neutral badge |
 | onSecondaryContainer | `#16302C` | `#CDE7E2` | Text on secondaryContainer |
 | surface | `#F4F8F7` | `#0E1413` | Page background (teal-tinted off-white; green-black in dark) |
-| surfaceContainerLowest | `#FFFFFF` | `#0A0F0E` | Cards on the page |
+| surfaceContainerLowest | `#FFFFFF` | `#0A0F0E` | Page-level lowest surface (cards use `AppPalette.card`: `#FFFFFF` light, `#151D1C` dark) |
 | surfaceContainerLow | `#EDF3F1` | `#121A19` | Grouped rows |
 | surfaceContainer | `#E7EEEC` | `#172120` | Nav bar |
 | surfaceContainerHigh | `#E1E9E7` | `#1F2A28` | Pressed rows, sheets |

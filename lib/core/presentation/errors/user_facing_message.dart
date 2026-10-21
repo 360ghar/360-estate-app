@@ -17,7 +17,11 @@ String userFacingMessage(
       for (final entry in error.fields.entries)
         '${entry.key.replaceAll('_', ' ')}: ${entry.value}',
     ];
-    return '${error.message}\n${lines.join('\n')}';
+    final text = '${error.message}\n${lines.join('\n')}';
+    // A long field list must not fill the screen.
+    return text.length <= 400
+        ? text
+        : '${String.fromCharCodes(text.runes.take(400))}…';
   }
   // A 429 or 503 may say when to try again (`Retry-After`).
   if (error is ApiFailure && error.error.retryAfterSeconds != null) {

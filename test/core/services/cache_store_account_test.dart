@@ -108,7 +108,7 @@ void main() {
       expect(cache.get<String>('k'), isNull);
     });
 
-    test('a response that started before sign-out is not stored', () {
+    test('a response that started before an account switch is not stored', () {
       final cache = CacheStore()..bindAccount('1');
       final started = cache.generation;
       cache.bindAccount('2');

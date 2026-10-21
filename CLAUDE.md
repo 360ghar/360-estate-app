@@ -153,7 +153,7 @@ Each feature is feature-first (presentation + `*_providers.dart`); some are clea
 - **Tenants, documents, expenses, reports** live under `more/` (data, models, providers and pages together).
 - **`more`** — "More" tab container + sub-modules (`documents`, `expenses`, `reports`, `tenants`, `profile`).
 - **`notifications`**, **`settings`** (theme/locale/notif/privacy/legal/delete-account).
-- Every page has a `GoRoute` except the Auth success page. What the app still does not do is listed in `docs/unimplemented-features.md`.
+- Every page has a `GoRoute`. What the app still does not do is listed in `docs/unimplemented-features.md`.
 
 ## Core Providers (`core/providers.dart`)
 

@@ -95,7 +95,8 @@ class AnswerField extends StatelessWidget {
           validator: (v) {
             final text = (v ?? '').trim();
             if (text.isEmpty) return requiredCheck(text);
-            return num.tryParse(text) == null
+            final number = num.tryParse(text);
+            return number == null || !number.isFinite
                 ? l10n.publicApplyNumberInvalid
                 : null;
           },

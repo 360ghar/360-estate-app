@@ -38,12 +38,13 @@ class _RiseInState extends State<RiseIn> with SingleTickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_controller.isAnimating || _controller.isCompleted) return;
+    // Reduced motion wins, also while the entrance runs.
     if (reduceMotion(context)) {
       _controller.value = 1;
-    } else {
-      _controller.forward();
+      return;
     }
+    if (_controller.isAnimating || _controller.isCompleted) return;
+    _controller.forward();
   }
 
   @override

@@ -101,7 +101,7 @@ final class MaintenanceRequest {
       estimatedCost: parseDouble(json['estimated_cost']),
       actualCost: parseDouble(json['actual_cost']),
       scheduledFor: parseDateTime(json['scheduled_for']),
-      completedAt: parseDateTime(json['completed_at']),
+      completedAt: parseDateTime(json['completed_at'] ?? json['closed_at']),
       completionNotes: parseString(json['completion_notes']),
       createdAt: parseDateTime(json['created_at']),
       updatedAt: parseDateTime(json['updated_at']),

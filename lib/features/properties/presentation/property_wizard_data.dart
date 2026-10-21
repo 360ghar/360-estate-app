@@ -83,6 +83,10 @@ class PropertyWizardData {
   List<String> _baselineImages = const [];
   List<String> _baselineFloorPlans = const [];
 
+  /// Records the field values as saved and leaves the photo baselines alone,
+  /// so a photo removed in the same save is still sent by [mediaPatch].
+  void markFieldsSaved() => _baseline = _fields();
+
   /// Records the current values as the saved state. A later [toPatchBody] sends
   /// only what changed after this point.
   void markSaved({List<String>? savedImages, List<String>? savedFloorPlans}) {

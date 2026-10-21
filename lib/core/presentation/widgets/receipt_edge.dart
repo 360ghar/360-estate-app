@@ -34,7 +34,7 @@ class ReceiptEdgeBorder extends ShapeBorder {
       ..lineTo(rect.right - r, rect.top)
       ..arcToPoint(Offset(rect.right, rect.top + r), radius: Radius.circular(r))
       ..lineTo(rect.right, rect.bottom);
-    final count = (rect.width / pitch).floor();
+    final count = pitch > 0 ? (rect.width / pitch).floor() : 0;
     if (count > 0) {
       final step = rect.width / count;
       for (var i = 0; i < count; i++) {

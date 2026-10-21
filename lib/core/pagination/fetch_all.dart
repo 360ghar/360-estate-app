@@ -17,6 +17,7 @@ Future<List<T>> fetchAllPages<T>(
   int maxPages = 200,
 }) async {
   assert(limit >= 1 && limit <= kMaxPageLimit);
+  if (maxPages < 1) throw ArgumentError.value(maxPages, 'maxPages');
   final all = <T>[];
   final seen = <String>{};
   String? cursor;
@@ -24,8 +25,9 @@ Future<List<T>> fetchAllPages<T>(
     final page = await fetchPage(cursor: cursor, limit: limit);
     all.addAll(page.items);
     final next = page.nextCursor;
-    if (!page.hasMore || next == null || !seen.add(next)) break;
+    if (!page.hasMore || next == null || !seen.add(next)) return all;
     cursor = next;
   }
-  return all;
+  // Callers treat the result as complete, so a partial list is an error.
+  throw StateError('More than $maxPages pages: the list is not complete.');
 }

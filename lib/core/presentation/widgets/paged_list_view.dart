@@ -50,6 +50,12 @@ class PagedListView<T> extends StatelessWidget {
 
   bool _onScroll(ScrollNotification notification) {
     if (state.isLoadingMore || !state.hasMore) return false;
+    // Only a drag or a fling toward the end loads more. A pull-to-refresh on
+    // a short list also reaches "the end" and must not start a page request.
+    if (notification is! ScrollUpdateNotification ||
+        (notification.scrollDelta ?? 0) <= 0) {
+      return false;
+    }
     if (notification.metrics.pixels >=
         notification.metrics.maxScrollExtent - 200) {
       onLoadMore();

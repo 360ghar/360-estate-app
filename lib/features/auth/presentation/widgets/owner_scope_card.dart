@@ -142,7 +142,9 @@ class OwnerScopeCard extends ConsumerWidget {
         ),
       ),
     );
-    if (picked == null) return;
+    if (picked == null || !context.mounted) return;
+    // The session may have changed while the dialog was open.
+    if (ref.read(authControllerProvider).user?.id != userId) return;
 
     final prefs = ref.read(appPreferencesProvider);
     final key = ownerPrefKey(userId);

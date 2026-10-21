@@ -1,14 +1,8 @@
 # Unimplemented / stub / no-op features in 360 Estate
 
-Placeholders and gaps in the `360-estate-app` client, as of the contract pass (October 2026). None of them calls the backend.
+Placeholders and gaps in the `360-estate-app` client, as of the contract pass (October 2026). None of the production code paths calls the backend for them; a debug build can call one route by hand (see Push registration).
 
-## Pages with no route
-
-These pages exist and compile. No `GoRoute` and no widget opens them.
-
-| Page | File | State |
-| --- | --- | --- |
-| Auth success | `lib/features/auth/presentation/widgets/auth_success_page.dart` | Not used. |
+Every page has a route.
 
 ## Flows that are not wired
 

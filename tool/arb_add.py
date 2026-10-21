@@ -1,6 +1,6 @@
 """Adds strings to lib/l10n/arb/app_en.arb and app_hi.arb, then regenerates
-AppLocalizations. Safe to run from several shells at once (it takes a lock
-directory, which works on every platform).
+AppLocalizations. Safe to run from several shells at once (it takes a lock:
+flock on POSIX, a lock directory on Windows).
 
 Usage: python3 tool/arb_add.py strings.json
 
@@ -25,11 +25,19 @@ LOCK = ROOT / '.dart_tool' / 'arb_add.lock'
 
 @contextmanager
 def locked():
-    """mkdir is atomic on every platform: whoever creates the directory holds
-    the lock."""
+    """One writer at a time. POSIX uses flock, which the system releases when
+    the process dies for any reason. Windows has no fcntl, so it takes a lock
+    directory (mkdir is atomic)."""
     LOCK.parent.mkdir(parents=True, exist_ok=True)
-    if LOCK.is_file():  # left by the old flock version
-        LOCK.unlink()
+    try:
+        import fcntl
+    except ImportError:
+        fcntl = None
+    if fcntl is not None:
+        with open(LOCK.with_suffix('.flock'), 'w') as handle:
+            fcntl.flock(handle, fcntl.LOCK_EX)
+            yield
+        return
     deadline = time.time() + 120
     while True:
         try:

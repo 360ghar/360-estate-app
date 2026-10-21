@@ -475,7 +475,7 @@ class PropertyInspectionsTab extends ConsumerWidget {
         onTap: inspection.id == null
             ? null
             : () => context.go('/more/inspections/${inspection.id}'),
-        title: inspection.typeLabel,
+        title: inspectionTitle(l10n, inspection),
         facts: [
           if (inspection.conductedAt != null)
             l10n.propertyConductedOn(

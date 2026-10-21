@@ -178,11 +178,17 @@ class _PropertyFormPageState extends ConsumerState<PropertyFormPage> {
         final body = data.toPatchBody();
         if (body.isNotEmpty) {
           await repository.update(currentId, body);
-          data.markSaved();
+          data.markFieldsSaved();
         }
       }
 
-      // Upload the new pictures, then send the lists of URLs.
+      // Upload the new pictures, then send the lists of URLs. A removed
+      // picture must not leave its uploaded URL for a later pick of the same
+      // file name.
+      _uploadedByKey.removeWhere(
+        (key, _) =>
+            !data.images.contains(key) && !data.floorPlans.contains(key),
+      );
       var failedUploads = 0;
       final propertyId = _savedId;
       if (propertyId != null) {

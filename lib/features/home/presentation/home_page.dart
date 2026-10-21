@@ -46,9 +46,21 @@ class HomePage extends ConsumerWidget {
           reloadActivity();
           ref.read(rentRepositoryProvider).clearCache();
           ref.invalidate(allRentChargesProvider);
-          await ref
-              .read(dashboardOverviewProvider.future)
-              .catchError((_) => const DashboardOverview());
+          // Wait for the whole page; one failed section does not stop the rest.
+          await Future.wait([
+            ref
+                .read(dashboardOverviewProvider.future)
+                .then<Object?>((value) => value)
+                .catchError((_) => null),
+            ref
+                .read(dashboardActivityProvider.future)
+                .then<Object?>((value) => value)
+                .catchError((_) => null),
+            ref
+                .read(allRentChargesProvider.future)
+                .then<Object?>((value) => value)
+                .catchError((_) => null),
+          ]);
         },
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
