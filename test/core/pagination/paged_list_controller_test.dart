@@ -49,7 +49,7 @@ void main() {
   });
 
   test(
-    'loadInitial failure surfaces as state.error and stops pagination',
+    'loadInitial failure surfaces as state.error and keeps retry possible',
     () async {
       final controller = PagedListController<int>(
         fetchPage: ({required cursor, required limit}) async {
@@ -58,10 +58,44 @@ void main() {
       );
       await controller.loadInitial();
       expect(controller.state.error, isA<NetworkFailure>());
-      expect(controller.state.hasMore, isFalse);
+      expect(controller.state.hasMore, isTrue);
       expect(controller.state.isLoading, isFalse);
     },
   );
+
+  test('retryInitial reloads after a loadInitial failure', () async {
+    var calls = 0;
+    final controller = PagedListController<int>(
+      fetchPage: ({required cursor, required limit}) async {
+        calls++;
+        // The constructor fires an unawaited loadInitial, so the explicit
+        // loadInitial below is a no-op while it is in flight: only the
+        // first fetch fails, the retry succeeds.
+        if (calls == 1) throw const NetworkFailure('offline');
+        return page([1]);
+      },
+    );
+    await controller.loadInitial();
+    expect(controller.state.error, isA<NetworkFailure>());
+    expect(controller.state.hasMore, isTrue);
+    await controller.retryInitial();
+    expect(controller.state.items, [1]);
+    expect(controller.state.error, isNull);
+  });
+
+  test('retryInitial is a no-op when there is no error', () async {
+    var calls = 0;
+    final controller = PagedListController<int>(
+      fetchPage: ({required cursor, required limit}) async {
+        calls++;
+        return page([1]);
+      },
+    );
+    await controller.loadInitial();
+    final callsAfterLoad = calls;
+    await controller.retryInitial();
+    expect(calls, callsAfterLoad);
+  });
 
   test('non-Failure errors are wrapped (not silently dropped)', () async {
     final controller = PagedListController<int>(

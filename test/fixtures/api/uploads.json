@@ -1,0 +1,11 @@
+{
+  "upload_result": {
+    "content_type": "image/jpeg",
+    "file_path": "ghar/uploads/7/abc",
+    "file_size": 20480,
+    "file_type": "image",
+    "media": null,
+    "original_filename": "front.jpg",
+    "public_url": "https://res.example.com/ghar/uploads/7/abc.jpg"
+  }
+}

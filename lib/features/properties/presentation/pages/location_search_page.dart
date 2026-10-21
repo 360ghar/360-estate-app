@@ -1,9 +1,10 @@
 import 'dart:async';
 
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
-import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
-import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
+import 'package:estate_app/core/presentation/widgets/app_empty_view.dart';
+import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
+import 'package:estate_app/core/presentation/widgets/feedback.dart';
 import 'package:estate_app/core/services/google_places_service.dart';
 import 'package:estate_app/features/properties/data/models/location_result.dart';
 import 'package:flutter/material.dart';
@@ -11,132 +12,97 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 
-final _placeSuggestionsProvider =
-    FutureProvider.autoDispose.family<List<PlaceSuggestion>, String>((ref, query) async {
-  if (query.trim().length < 2) return const [];
-  final service = ref.read(googlePlacesServiceProvider);
-  return service.getPlaceSuggestions(query);
-});
+final _placeSuggestionsProvider = FutureProvider.autoDispose
+    .family<List<PlaceSuggestion>, String>((ref, query) async {
+      if (query.trim().length < 2) return const [];
+      return ref.read(googlePlacesServiceProvider).getPlaceSuggestions(query);
+    });
 
+/// Finds a place by name, or takes the phone's position, and returns it to
+/// the screen that opened this one.
 class LocationSearchPage extends ConsumerStatefulWidget {
   const LocationSearchPage({super.key});
 
   @override
-  ConsumerState<LocationSearchPage> createState() =>
-      _LocationSearchPageState();
+  ConsumerState<LocationSearchPage> createState() => _LocationSearchPageState();
 }
 
 class _LocationSearchPageState extends ConsumerState<LocationSearchPage> {
   final _searchController = TextEditingController();
-  final _focusNode = FocusNode();
   String _query = '';
   bool _locating = false;
   bool _selectingPlace = false;
-  Timer? _debounceTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    _searchController.addListener(_onSearchChanged);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus();
-    });
-  }
-
-  void _onSearchChanged() {
-    final text = _searchController.text;
-    _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
-      if (mounted && _query != text) {
-        setState(() {
-          _query = text;
-        });
-      }
-    });
-  }
+  Timer? _debounce;
 
   @override
   void dispose() {
-    _debounceTimer?.cancel();
+    _debounce?.cancel();
     _searchController.dispose();
-    _focusNode.dispose();
     super.dispose();
   }
 
+  void _onChanged(String text) {
+    setState(() {}); // The clear button follows the text.
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      if (mounted && _query != text) setState(() => _query = text);
+    });
+  }
+
+  void _clear() {
+    _debounce?.cancel();
+    _searchController.clear();
+    setState(() => _query = '');
+  }
+
   Future<void> _useCurrentLocation() async {
+    final l10n = context.l10n;
     setState(() => _locating = true);
     try {
-      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
+      if (!await Geolocator.isLocationServiceEnabled()) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Location services are disabled. Please enable them.'),
-              action: SnackBarAction(
-                label: 'Settings',
-                onPressed: () => Geolocator.openLocationSettings(),
-              ),
-              duration: const Duration(seconds: 5),
-            ),
+          context.showSnack(
+            l10n.locationServicesOff,
+            actionLabel: l10n.locationSettings,
+            onAction: Geolocator.openLocationSettings,
           );
         }
         return;
       }
-
       var permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Location permission is required to use this feature.'),
-              ),
-            );
-          }
-          return;
-        }
       }
-
+      if (permission == LocationPermission.denied) {
+        if (mounted) context.showSnack(l10n.locationPermissionNeeded);
+        return;
+      }
       if (permission == LocationPermission.deniedForever) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text(
-                'Location permission was permanently denied. Please enable it in settings.',
-              ),
-              action: SnackBarAction(
-                label: 'Settings',
-                onPressed: () => Geolocator.openAppSettings(),
-              ),
-              duration: const Duration(seconds: 5),
-            ),
+          context.showSnack(
+            l10n.locationPermissionBlocked,
+            actionLabel: l10n.locationSettings,
+            onAction: Geolocator.openAppSettings,
           );
         }
         return;
       }
-
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.medium,
           timeLimit: Duration(seconds: 15),
         ),
       );
-
       if (!mounted) return;
-
-      final result = LocationResult(
-        lat: position.latitude,
-        lng: position.longitude,
-        name: 'Current Location',
+      context.pop<LocationResult>(
+        LocationResult(
+          lat: position.latitude,
+          lng: position.longitude,
+          name: l10n.locationCurrentName,
+        ),
       );
-      context.pop<LocationResult>(result);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to get location: $e')),
-        );
-      }
+    } catch (_) {
+      if (mounted) context.showSnack(l10n.locationFailed);
     } finally {
       if (mounted) setState(() => _locating = false);
     }
@@ -145,29 +111,19 @@ class _LocationSearchPageState extends ConsumerState<LocationSearchPage> {
   Future<void> _selectPlace(PlaceSuggestion suggestion) async {
     setState(() => _selectingPlace = true);
     try {
-      final service = ref.read(googlePlacesServiceProvider);
-      final details = await service.getPlaceDetails(suggestion.placeId);
+      final details = await ref
+          .read(googlePlacesServiceProvider)
+          .getPlaceDetails(suggestion.placeId);
+      if (!mounted) return;
       if (details == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not get location details.')),
-          );
-        }
+        context.showSnack(context.l10n.locationDetailsFailed);
         return;
       }
-      if (!mounted) return;
-      final result = LocationResult(
-        lat: details.lat,
-        lng: details.lng,
-        name: details.name,
+      context.pop<LocationResult>(
+        LocationResult(lat: details.lat, lng: details.lng, name: details.name),
       );
-      context.pop<LocationResult>(result);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
+    } catch (_) {
+      if (mounted) context.showSnack(context.l10n.locationDetailsFailed);
     } finally {
       if (mounted) setState(() => _selectingPlace = false);
     }
@@ -175,219 +131,105 @@ class _LocationSearchPageState extends ConsumerState<LocationSearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final suggestionsAsync = _query.trim().length >= 2
+    final l10n = context.l10n;
+    final colors = context.colors;
+    final searching = _query.trim().length >= 2;
+    final suggestions = searching
         ? ref.watch(_placeSuggestionsProvider(_query))
         : null;
 
-    return AppScaffold(
-      appBar: AppBar(
-        title: const Text('Search Location'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+    final Widget results;
+    if (_selectingPlace) {
+      results = const Center(child: CircularProgressIndicator());
+    } else if (suggestions == null) {
+      results = AppEmptyView(
+        icon: Icons.travel_explore_rounded,
+        title: l10n.locationIdleTitle,
+        message: l10n.locationIdleBody,
+      );
+    } else {
+      results = suggestions.when(
+        loading: () => const Align(
+          alignment: Alignment.topCenter,
+          child: LinearProgressIndicator(),
         ),
-      ),
-      padding: EdgeInsets.zero,
+        error: (_, _) => AppErrorView(
+          title: l10n.locationSearchFailed,
+          message: l10n.commonLoadFailedBody,
+          onRetry: () => ref.invalidate(_placeSuggestionsProvider(_query)),
+        ),
+        data: (items) => items.isEmpty
+            ? AppEmptyView(
+                icon: Icons.location_off_outlined,
+                title: l10n.locationNoResultsTitle,
+                message: l10n.locationNoResultsBody,
+              )
+            : ListView.separated(
+                padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+                itemCount: items.length,
+                separatorBuilder: (_, _) =>
+                    const Divider(indent: 56, endIndent: AppSpacing.lg),
+                itemBuilder: (context, i) {
+                  final s = items[i];
+                  return ListTile(
+                    leading: const Icon(Icons.place_outlined),
+                    title: Text(s.mainText),
+                    subtitle: s.secondaryText.isEmpty
+                        ? null
+                        : Text(s.secondaryText),
+                    onTap: () => _selectPlace(s),
+                  );
+                },
+              ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.locationSearchTitle)),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg,
-              AppSpacing.md,
+              AppSpacing.sm,
               AppSpacing.lg,
               AppSpacing.sm,
             ),
             child: TextField(
               controller: _searchController,
-              focusNode: _focusNode,
+              autofocus: true,
+              textInputAction: TextInputAction.search,
+              onChanged: _onChanged,
               decoration: InputDecoration(
-                hintText: 'Search city or area...',
-                prefixIcon: const Icon(Icons.search_rounded, size: 20),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear_rounded, size: 18),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() => _query = '');
-                        },
-                      )
-                    : null,
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
-              ),
-              onChanged: (_) => setState(() {}),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-            ),
-            child: InkWell(
-              onTap: _locating ? null : _useCurrentLocation,
-              borderRadius: AppRadii.lg,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: AppSpacing.md,
-                ),
-                child: Row(
-                  children: [
-                    _locating
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Icon(
-                            Icons.my_location_outlined,
-                            color: theme.colorScheme.primary,
-                          ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Text(
-                        _locating ? 'Detecting location...' : 'Use current location',
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
+                hintText: l10n.locationSearchHint,
+                prefixIcon: const Icon(Icons.search_rounded),
+                suffixIcon: _searchController.text.isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: l10n.commonClearSearch,
+                        icon: const Icon(Icons.close_rounded),
+                        onPressed: _clear,
                       ),
-                    ),
-                    Icon(
-                      Icons.chevron_right,
-                      color: AppColors.textTertiary,
-                    ),
-                  ],
-                ),
               ),
             ),
           ),
-          const Divider(height: 1),
-          if (_selectingPlace)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-              child: Center(
-                child: SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-            )
-          else if (suggestionsAsync != null)
-            suggestionsAsync.when(
-              data: (suggestions) {
-                if (suggestions.isEmpty) {
-                  return Expanded(
-                    child: Center(
-                      child: Text(
-                        'No locations found',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  );
-                }
-                return Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                      vertical: AppSpacing.sm,
-                    ),
-                    itemCount: suggestions.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 4),
-                    itemBuilder: (context, index) {
-                      final suggestion = suggestions[index];
-                      return InkWell(
-                        onTap: _selectingPlace
-                            ? null
-                            : () => _selectPlace(suggestion),
-                        borderRadius: AppRadii.lg,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: AppSpacing.md,
-                            horizontal: AppSpacing.sm,
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.location_on_outlined,
-                                color: theme.colorScheme.primary,
-                                size: 22,
-                              ),
-                              const SizedBox(width: AppSpacing.md),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      suggestion.mainText,
-                                      style: theme.textTheme.bodyLarge?.copyWith(
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    if (suggestion.secondaryText.isNotEmpty)
-                                      Text(
-                                        suggestion.secondaryText,
-                                        style: theme.textTheme.bodySmall?.copyWith(
-                                          color: AppColors.textSecondary,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                  ],
-                                ),
-                              ),
-                              Icon(
-                                Icons.chevron_right,
-                                color: AppColors.textTertiary,
-                                size: 20,
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
-              loading: () => const Padding(
-                padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-                child: Center(
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
+          ListTile(
+            enabled: !_locating,
+            leading: Icon(Icons.my_location_rounded, color: colors.primary),
+            title: Text(
+              _locating ? l10n.locationDetecting : l10n.locationUseCurrent,
+              style: context.text.titleSmall?.copyWith(color: colors.primary),
+            ),
+            trailing: _locating
+                ? const SizedBox.square(
+                    dimension: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
-              ),
-              error: (_, _) => Expanded(
-                child: Center(
-                  child: Text(
-                    'Error searching locations',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ),
-              ),
-            )
-          else
-            Expanded(
-              child: Center(
-                child: Text(
-                  'Type to search for a location',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ),
-            ),
+                  )
+                : null,
+            onTap: _useCurrentLocation,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Expanded(child: results),
         ],
       ),
     );

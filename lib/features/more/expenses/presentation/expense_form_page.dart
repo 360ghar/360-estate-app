@@ -1,52 +1,23 @@
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
-import 'package:estate_app/core/presentation/design_system/app_radii.dart';
+import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/design_system/app_text_styles.dart';
-import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/errors/user_facing_message.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
+import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
+import 'package:estate_app/core/presentation/widgets/app_loading_shimmer.dart';
 import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
+import 'package:estate_app/core/presentation/widgets/feedback.dart';
+import 'package:estate_app/core/utils/dates.dart';
 import 'package:estate_app/features/more/expenses/data/expenses_repository.dart';
 import 'package:estate_app/features/more/expenses/expenses_providers.dart';
 import 'package:estate_app/features/more/expenses/models/expense.dart';
+import 'package:estate_app/features/more/expenses/presentation/expense_category_visual.dart';
+import 'package:estate_app/features/properties/models/property.dart';
+import 'package:estate_app/features/properties/properties_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-
-const _expenseCategories = [
-  'Repairs',
-  'Utilities',
-  'Tax',
-  'Insurance',
-  'Staff',
-  'Legal',
-  'Furniture',
-  'Travel',
-  'Other',
-];
-
-const _categoryIcons = {
-  'Repairs': Icons.build_rounded,
-  'Utilities': Icons.bolt_rounded,
-  'Tax': Icons.account_balance_rounded,
-  'Insurance': Icons.shield_rounded,
-  'Staff': Icons.people_rounded,
-  'Legal': Icons.gavel_rounded,
-  'Furniture': Icons.chair_rounded,
-  'Travel': Icons.directions_car_rounded,
-  'Other': Icons.receipt_long_rounded,
-};
-
-const _categoryColors = {
-  'Repairs': Color(0xFFF59E0B),
-  'Utilities': Color(0xFF3B82F6),
-  'Tax': Color(0xFF8B5CF6),
-  'Insurance': Color(0xFF0284C7),
-  'Staff': Color(0xFF059669),
-  'Legal': Color(0xFFDC2626),
-  'Furniture': Color(0xFF14B8A6),
-  'Travel': Color(0xFF6366F1),
-  'Other': Color(0xFF6B7280),
-};
 
 class ExpenseFormPage extends ConsumerStatefulWidget {
   const ExpenseFormPage({super.key, this.expenseId});
@@ -62,11 +33,14 @@ class _ExpenseFormPageState extends ConsumerState<ExpenseFormPage> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
-  String _selectedCategory = _expenseCategories.last;
+  ExpenseCategory _category = ExpenseCategory.other;
+  int? _propertyId;
   DateTime _date = DateTime.now();
 
   bool _initialized = false;
   bool _isSaving = false;
+
+  bool get _isEdit => widget.expenseId != null;
 
   @override
   void dispose() {
@@ -78,19 +52,18 @@ class _ExpenseFormPageState extends ConsumerState<ExpenseFormPage> {
 
   void _populate(Expense expense) {
     if (_initialized) return;
+    _initialized = true;
     _titleController.text = expense.title ?? '';
-    _amountController.text = expense.amount?.toString() ?? '';
+    final amount = expense.amount;
+    _amountController.text = amount == null
+        ? ''
+        : amount == amount.roundToDouble()
+        ? amount.toStringAsFixed(0)
+        : amount.toString();
     _notesController.text = expense.notes ?? '';
     _date = expense.date ?? _date;
-    // Try to match category
-    if (expense.category != null) {
-      final match = _expenseCategories.firstWhere(
-        (c) => c.toLowerCase() == expense.category!.toLowerCase(),
-        orElse: () => _expenseCategories.last,
-      );
-      _selectedCategory = match;
-    }
-    _initialized = true;
+    _category = expense.category ?? ExpenseCategory.other;
+    _propertyId = expense.propertyId;
   }
 
   Future<void> _pickDate() async {
@@ -100,226 +73,268 @@ class _ExpenseFormPageState extends ConsumerState<ExpenseFormPage> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
       initialDate: _date,
     );
-    if (picked != null) {
-      setState(() => _date = picked);
-    }
+    if (picked != null) setState(() => _date = picked);
   }
 
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+    final propertyId = _propertyId;
+    if (propertyId == null) {
+      context.showSnack(context.l10n.expenseFormPropertyUnavailable);
+      return;
+    }
     setState(() => _isSaving = true);
-
     try {
       final payload = ExpensePayload(
-        title: _titleController.text.trim(),
+        propertyId: propertyId,
+        title: _titleController.text,
         amount: double.parse(_amountController.text.trim()),
         date: _date,
-        category: _selectedCategory,
-        notes: _notesController.text.trim(),
+        category: _category,
+        notes: _notesController.text,
       );
-
       final repository = ref.read(expensesRepositoryProvider);
-      if (widget.expenseId == null) {
+      final expenseId = int.tryParse(widget.expenseId ?? '');
+      if (!_isEdit) {
         await repository.create(payload);
-      } else {
-        await repository.update(widget.expenseId!, payload);
+      } else if (expenseId != null) {
+        await repository.update(expenseId, payload);
       }
-
-      ref.invalidate(expensesListProvider);
-
-      if (mounted) {
-        context.go('/more/expenses');
-      }
-    } catch (error) {
+      ref
+        ..invalidate(expensesListProvider)
+        ..invalidate(expensesForPropertyProvider);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
+      context.showSnack(context.l10n.expenseFormSaved);
+      context.go('/more/expenses');
+    } catch (error) {
+      if (mounted) context.showSnack(userFacingMessage(error));
     } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isEdit = widget.expenseId != null;
-    final expensesAsync = isEdit ? ref.watch(expensesListProvider) : null;
+    final l10n = context.l10n;
+    final title = Text(
+      _isEdit ? l10n.expenseFormEditTitle : l10n.expenseFormNewTitle,
+    );
 
-    if (expensesAsync != null) {
-      expensesAsync.whenData((items) {
-        final match = items.firstWhere(
-          (item) => item.id?.toString() == widget.expenseId,
-          orElse: () => const Expense(),
+    if (_isEdit && !_initialized) {
+      final expenses = ref.watch(expensesListProvider);
+      final body = expenses.when(
+        loading: () => const AppLoadingShimmer(itemCount: 3, itemHeight: 140),
+        error: (error, _) => AppErrorView(
+          title: l10n.commonLoadFailedTitle,
+          message: userFacingMessage(error),
+          onRetry: () => ref.invalidate(expensesListProvider),
+        ),
+        data: (items) {
+          final match = items.where(
+            (e) => e.id?.toString() == widget.expenseId,
+          );
+          if (match.isEmpty) {
+            return AppErrorView(
+              title: l10n.commonLoadFailedTitle,
+              message: l10n.expenseFormNotFound,
+            );
+          }
+          _populate(match.first);
+          return null;
+        },
+      );
+      if (body != null) {
+        return Scaffold(
+          appBar: AppBar(title: title),
+          body: body,
         );
-        if (match.id != null) {
-          _populate(match);
-        }
-      });
+      }
     }
 
-    final scheme = Theme.of(context).colorScheme;
-    final dateLabel = DateFormat('dd MMM yyyy').format(_date);
-
-    return AppScaffold(
-      appBar: AppBar(title: Text(isEdit ? 'Edit expense' : 'New expense')),
-      scrollable: true,
+    return Scaffold(
+      appBar: AppBar(title: title),
       body: Form(
         key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.sm,
+            AppSpacing.lg,
+            AppSpacing.xxl,
+          ),
           children: [
-            // Prominent amount field
             AppSectionCard(
-              title: 'Amount',
-              icon: Icons.currency_rupee_rounded,
-              iconColor: AppColors.success,
+              title: l10n.expenseFormDetails,
               children: [
                 TextFormField(
                   controller: _amountController,
-                  keyboardType: TextInputType.number,
-                  style: AppTextStyles.currencyLarge.copyWith(
-                    color: scheme.onSurface,
+                  autofocus: !_isEdit,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
                   ),
-                  textAlign: TextAlign.center,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                  ],
+                  textInputAction: TextInputAction.next,
+                  style: AppTextStyles.currencyMedium.copyWith(
+                    color: context.colors.onSurface,
+                  ),
                   decoration: InputDecoration(
-                    hintText: '0',
-                    hintStyle: AppTextStyles.currencyLarge.copyWith(
-                      color: AppColors.textDisabled,
-                    ),
-                    prefixText: '\u20B9 ',
-                    prefixStyle: AppTextStyles.currencyLarge.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: AppSpacing.lg,
+                    labelText: l10n.expenseFormAmount,
+                    prefixText: '₹ ',
+                    prefixStyle: AppTextStyles.currencyMedium.copyWith(
+                      color: context.colors.onSurfaceVariant,
                     ),
                   ),
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: (value) {
-                    final parsed = double.tryParse(value ?? '');
-                    if (parsed == null || parsed <= 0) {
-                      return 'Enter a valid amount.';
-                    }
-                    return null;
+                    final parsed = double.tryParse(value?.trim() ?? '');
+                    return parsed == null || parsed <= 0
+                        ? l10n.expenseFormAmountError
+                        : null;
                   },
                 ),
-              ],
-            ),
-
-            const SizedBox(height: AppSpacing.lg),
-
-            // Details section
-            AppSectionCard(
-              title: 'Details',
-              icon: Icons.info_outline_rounded,
-              children: [
+                const SizedBox(height: AppSpacing.lg),
+                _PropertyField(
+                  value: _propertyId,
+                  onChanged: (value) => setState(() => _propertyId = value),
+                ),
+                const SizedBox(height: AppSpacing.lg),
                 TextFormField(
                   controller: _titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Expense title',
-                    hintText: 'e.g. Plumbing repair',
+                  textInputAction: TextInputAction.next,
+                  textCapitalization: TextCapitalization.sentences,
+                  maxLength: 200,
+                  decoration: InputDecoration(
+                    labelText: l10n.expenseFormTitleLabel,
+                    hintText: l10n.expenseFormTitleHint,
+                    helperText: l10n.expenseFormNotesHelper,
                   ),
-                  validator: (value) =>
-                      value == null || value.trim().isEmpty
-                          ? 'Enter a title.'
-                          : null,
                 ),
-                const SizedBox(height: AppSpacing.lg),
-
-                // Date picker
-                InkWell(
-                  borderRadius: AppRadii.md,
-                  onTap: _pickDate,
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Date',
-                      suffixIcon: Icon(Icons.calendar_today_rounded, size: 20),
+                const SizedBox(height: AppSpacing.sm),
+                Semantics(
+                  button: true,
+                  child: InkWell(
+                    onTap: _pickDate,
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: l10n.expenseFormDate,
+                        suffixIcon: const Icon(Icons.calendar_today_outlined),
+                      ),
+                      child: Text(shortDate(context, _date)),
                     ),
-                    child: Text(dateLabel),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-
                 TextFormField(
                   controller: _notesController,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Notes',
-                    hintText: 'Optional notes about this expense',
+                  minLines: 2,
+                  maxLines: 5,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: InputDecoration(
+                    labelText: l10n.expenseFormNotes,
+                    helperText: l10n.expenseFormNotesHelper,
                     alignLabelWithHint: true,
                   ),
                 ),
               ],
             ),
-
-            const SizedBox(height: AppSpacing.lg),
-
-            // Category section with icon chips
+            const SizedBox(height: AppSpacing.md),
             AppSectionCard(
-              title: 'Category',
-              icon: Icons.category_rounded,
+              title: l10n.expenseFormCategory,
               children: [
                 Wrap(
                   spacing: AppSpacing.sm,
                   runSpacing: AppSpacing.sm,
-                  children: _expenseCategories.map((cat) {
-                    final isSelected = _selectedCategory == cat;
-                    final color = _categoryColors[cat] ?? AppColors.textSecondary;
-                    final icon = _categoryIcons[cat] ?? Icons.receipt_long_rounded;
-
-                    return ChoiceChip(
-                      label: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            icon,
-                            size: 16,
-                            color: isSelected ? scheme.onPrimary : color,
-                          ),
-                          const SizedBox(width: AppSpacing.xs),
-                          Text(cat),
-                        ],
+                  children: [
+                    for (final c in ExpenseCategory.values)
+                      ChoiceChip(
+                        avatar: Icon(c.icon, size: 18),
+                        label: Text(c.text(l10n)),
+                        selected: _category == c,
+                        showCheckmark: false,
+                        onSelected: (_) => setState(() => _category = c),
                       ),
-                      selected: isSelected,
-                      onSelected: (_) =>
-                          setState(() => _selectedCategory = cat),
-                      selectedColor: color,
-                      labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : null,
-                      ),
-                    );
-                  }).toList(),
+                  ],
                 ),
               ],
             ),
-
             const SizedBox(height: AppSpacing.xl),
-
-            // Save button
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: FilledButton(
-                onPressed: _isSaving ? null : _save,
-                child: _isSaving
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Text(isEdit ? 'Save changes' : 'Create expense'),
-              ),
+            FilledButton(
+              onPressed: _isSaving ? null : _save,
+              child: _isSaving
+                  ? SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        semanticsLabel: l10n.commonLoading,
+                      ),
+                    )
+                  : Text(
+                      _isEdit ? l10n.expenseFormSave : l10n.expenseFormCreate,
+                    ),
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+/// The property picker. The backend requires a property for every expense.
+class _PropertyField extends ConsumerWidget {
+  const _PropertyField({required this.value, required this.onChanged});
+
+  final int? value;
+  final ValueChanged<int?> onChanged;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    return ref
+        .watch(propertiesListProvider)
+        .when(
+          loading: () => const LinearProgressIndicator(),
+          error: (error, _) => Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.expenseFormPropertiesFailed,
+                  style: context.text.bodyMedium?.copyWith(
+                    color: context.colors.error,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () => ref.invalidate(propertiesListProvider),
+                child: Text(l10n.commonRetry),
+              ),
+            ],
+          ),
+          data: (properties) {
+            final choices = [
+              for (final p in properties)
+                if (p.id != null) p,
+            ];
+            return DropdownButtonFormField<int>(
+              // A new key rebuilds the field when an edit loads its property
+              // after the picker is on screen.
+              key: ValueKey('property-$value'),
+              initialValue: choices.any((p) => p.id == value) ? value : null,
+              isExpanded: true,
+              decoration: InputDecoration(labelText: l10n.expenseFormProperty),
+              items: [
+                for (final p in choices)
+                  DropdownMenuItem<int>(
+                    value: p.id,
+                    child: Text(p.displayName, overflow: TextOverflow.ellipsis),
+                  ),
+              ],
+              onChanged: onChanged,
+              validator: (v) =>
+                  v == null ? l10n.expenseFormPropertyError : null,
+            );
+          },
+        );
   }
 }

@@ -1,201 +1,99 @@
+import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/core/network/api_client.dart';
+import 'package:estate_app/core/network/api_paths.dart';
+import 'package:estate_app/core/network/cache_control.dart';
 import 'package:estate_app/core/network/response_parser.dart';
+import 'package:estate_app/core/pagination/fetch_all.dart';
 import 'package:estate_app/core/pagination/page.dart';
 import 'package:estate_app/core/services/cache_store.dart';
 import 'package:estate_app/features/properties/domain/repositories/properties_repository.dart';
 import 'package:estate_app/features/properties/models/property.dart';
 
 class PropertiesRepositoryImpl implements PropertiesRepository {
-  PropertiesRepositoryImpl(
-    this._client,
-    this._cache, {
-    String cacheScope = 'global',
-  }) : _cacheScope = cacheScope;
+  PropertiesRepositoryImpl(this._client, this._cache);
 
   final ApiClient _client;
+
+  /// Account-scoped by the store itself (see `CacheStore.bindAccount`).
   final CacheStore _cache;
-  final String _cacheScope;
   static const _cacheTtl = Duration(minutes: 5);
+  static const _cachePrefix = 'properties:';
 
   @override
   Future<Page<Property>> listPage({
     required String? cursor,
     required int limit,
+    OccupancyFilter? occupancy,
+    String? q,
   }) async {
-    final cursorPart = cursor == null
-        ? Page.nullCursorCacheKey
-        : 'cursor=$cursor';
-    final cacheKey = 'properties:$_cacheScope:$cursorPart:limit=$limit';
-    final cached = _cache
-        .get<({List<Property> items, String? nextCursor, bool hasMore})>(
-          cacheKey,
-        );
-    if (cached != null) {
-      return Page(
-        items: cached.items,
-        limit: limit,
-        hasMore: cached.hasMore,
-        nextCursor: cached.nextCursor,
-      );
-    }
+    final search = q?.trim();
+    final hasSearch = search != null && search.isNotEmpty;
+    final cacheKey =
+        '$_cachePrefix${occupancy?.wire ?? 'all'}:'
+        'q=${hasSearch ? search : ''}:'
+        '${cursor ?? Page.nullCursorCacheKey}:limit=$limit';
+    final cached = _cache.get<Page<Property>>(cacheKey);
+    if (cached != null) return cached;
+    final generation = _cache.generation;
 
     final response = await _client.get<dynamic>(
-      '/pm/properties',
-      queryParameters: {if (cursor != null) 'cursor': cursor, 'limit': limit},
+      ApiPaths.properties,
+      ownerScoped: true,
+      queryParameters: {
+        if (cursor != null) 'cursor': cursor,
+        'limit': limit,
+        if (occupancy != null) 'occupancy': occupancy.wire,
+        if (hasSearch) 'q': search,
+      },
     );
-    final baseUrl = _client.dio.options.baseUrl;
-    final page = unwrapPage(response.data);
-    final items = page.items
-        .whereType<Map<String, dynamic>>()
-        .map((item) => _normalizePropertyJson(item, baseUrl: baseUrl))
-        .map(Property.fromJson)
-        .toList();
-    _cache.set(cacheKey, (
-      items: items,
-      nextCursor: page.nextCursor,
-      hasMore: page.hasMore,
-    ), ttl: _cacheTtl);
-    return Page(
-      items: items,
+    final raw = unwrapPage(response.data);
+    final result = Page<Property>(
+      items: raw.items
+          .whereType<Map<String, dynamic>>()
+          .map(Property.fromJson)
+          .toList(),
       limit: limit,
-      hasMore: page.hasMore,
-      nextCursor: page.nextCursor,
+      hasMore: raw.hasMore,
+      nextCursor: raw.nextCursor,
+    );
+    if (isCacheable(response)) {
+      _cache.set(cacheKey, result, ttl: _cacheTtl, generation: generation);
+    }
+    return result;
+  }
+
+  @override
+  Future<List<Property>> listAll() {
+    return fetchAllPages<Property>(
+      ({required cursor, required limit}) =>
+          listPage(cursor: cursor, limit: limit),
     );
   }
 
-  /// List all properties (up to limit)
   @override
-  Future<List<Property>> list({int limit = 200}) async {
-    final page = await listPage(cursor: null, limit: limit);
-    return page.items;
+  Future<PropertyDetail> fetch(String id) async {
+    final response = await _client.get<dynamic>('${ApiPaths.properties}/$id');
+    return PropertyDetail.fromJson(unwrapMap(response.data));
   }
 
   @override
-  Future<Property> fetch(String id) async {
-    final response = await _client.get<dynamic>('/pm/properties/$id');
-    final data = _normalizePropertyJson(
-      unwrapMap(response.data),
-      baseUrl: _client.dio.options.baseUrl,
-    );
-    return Property.fromJson(data);
-  }
-
-  @override
-  Future<Property> create(PropertyPayload payload) async {
+  Future<Property> create(Map<String, dynamic> body) async {
     final response = await _client.post<dynamic>(
-      '/pm/properties',
-      data: payload.toJson(),
+      ApiPaths.properties,
+      data: body,
+      ownerScoped: true,
     );
-    final data = _normalizePropertyJson(
-      unwrapMap(response.data),
-      baseUrl: _client.dio.options.baseUrl,
-    );
-    _cache.invalidatePrefix('properties:$_cacheScope:');
-    return Property.fromJson(data);
+    _cache.invalidatePrefix(_cachePrefix);
+    return Property.fromJson(unwrapMap(response.data));
   }
 
   @override
-  Future<Property> update(String id, PropertyPayload payload) async {
+  Future<Property> update(String id, Map<String, dynamic> body) async {
     final response = await _client.patch<dynamic>(
-      '/pm/properties/$id',
-      data: payload.toJson(),
+      '${ApiPaths.properties}/$id',
+      data: body,
     );
-    final data = _normalizePropertyJson(
-      unwrapMap(response.data),
-      baseUrl: _client.dio.options.baseUrl,
-    );
-    _cache.invalidatePrefix('properties:$_cacheScope:');
-    return Property.fromJson(data);
+    _cache.invalidatePrefix(_cachePrefix);
+    return Property.fromJson(unwrapMap(response.data));
   }
-
-  @override
-  Future<void> delete(String id) async {
-    await _client.delete<dynamic>('/pm/properties/$id');
-    _cache.invalidatePrefix('properties:$_cacheScope:');
-  }
-}
-
-Map<String, dynamic> _normalizePropertyJson(
-  Map<String, dynamic> json, {
-  String? baseUrl,
-}) {
-  final normalized = Map<String, dynamic>.from(json);
-
-  final rawName =
-      normalized['name'] ??
-      normalized['property_name'] ??
-      normalized['title'] ??
-      normalized['property_title'];
-  if (rawName != null) {
-    final name = rawName.toString().trim();
-    if (name.isNotEmpty) {
-      normalized['name'] ??= name;
-      normalized['property_name'] ??= name;
-    }
-  }
-
-  final images = <String>{};
-  void addImages(dynamic value) {
-    if (value == null) return;
-    if (value is String) {
-      final normalizedUrl = _normalizeImageUrl(value, baseUrl: baseUrl);
-      if (normalizedUrl != null) images.add(normalizedUrl);
-      return;
-    }
-    if (value is List) {
-      for (final entry in value) {
-        addImages(entry);
-      }
-      return;
-    }
-    if (value is Map<String, dynamic>) {
-      final url =
-          value['url'] ??
-          value['image_url'] ??
-          value['image'] ??
-          value['imageUrl'] ??
-          value['thumbnail'] ??
-          value['path'] ??
-          value['file_url'] ??
-          value['fileUrl'] ??
-          value['secure_url'];
-      if (url is String) {
-        final normalizedUrl = _normalizeImageUrl(url, baseUrl: baseUrl);
-        if (normalizedUrl != null) images.add(normalizedUrl);
-      }
-    }
-  }
-
-  addImages(normalized['images']);
-  addImages(normalized['image']);
-  addImages(normalized['photo']);
-  addImages(normalized['photo_url']);
-  addImages(normalized['cover_image']);
-  addImages(normalized['coverImage']);
-  addImages(normalized['thumbnail']);
-  addImages(normalized['image_url']);
-  addImages(normalized['imageUrl']);
-  addImages(normalized['main_image']);
-  if (images.isNotEmpty) {
-    normalized['images'] = images.toList();
-  }
-
-  return normalized;
-}
-
-String? _normalizeImageUrl(String? raw, {String? baseUrl}) {
-  final trimmed = raw?.trim();
-  if (trimmed == null || trimmed.isEmpty) return null;
-
-  final uri = Uri.tryParse(trimmed);
-  if (uri == null) return null;
-  if (uri.hasScheme) return trimmed;
-
-  final base = baseUrl?.trim();
-  if (base == null || base.isEmpty) return trimmed;
-  final normalizedBase = base.endsWith('/') ? base : '$base/';
-  final baseUri = Uri.tryParse(normalizedBase);
-  if (baseUri == null) return trimmed;
-
-  return baseUri.resolveUri(uri).toString();
 }

@@ -9,9 +9,9 @@ part of 'application_form.dart';
 _$ApplicationFormFieldImpl _$$ApplicationFormFieldImplFromJson(
   Map<String, dynamic> json,
 ) => _$ApplicationFormFieldImpl(
-  id: parseInt(json['id']),
+  id: json['id'] as String?,
   label: json['label'] as String?,
-  fieldType: json['field_type'] as String?,
+  fieldType: ApplicationFieldType.fromJson(json['field_type']),
   isRequired: json['is_required'] as bool?,
   options: (json['options'] as List<dynamic>?)
       ?.map((e) => e as String)
@@ -23,7 +23,7 @@ Map<String, dynamic> _$$ApplicationFormFieldImplToJson(
 ) => <String, dynamic>{
   'id': instance.id,
   'label': instance.label,
-  'field_type': instance.fieldType,
+  'field_type': ApplicationFieldType.toJsonValue(instance.fieldType),
   'is_required': instance.isRequired,
   'options': instance.options,
 };
@@ -39,7 +39,10 @@ _$ApplicationFormImpl _$$ApplicationFormImplFromJson(
   description: json['description'] as String?,
   slug: json['slug'] as String?,
   isActive: json['is_active'] as bool?,
-  fields: _fieldsFromJson(json['custom_fields']),
+  applicationFeeAmount: parseDouble(json['application_fee_amount']),
+  fields: (json['custom_fields'] as List<dynamic>?)
+      ?.map((e) => ApplicationFormField.fromJson(e as Map<String, dynamic>))
+      .toList(),
   createdAt: parseDateTime(json['created_at']),
   expiresAt: parseDateTime(json['expires_at']),
 );
@@ -55,6 +58,7 @@ Map<String, dynamic> _$$ApplicationFormImplToJson(
   'description': instance.description,
   'slug': instance.slug,
   'is_active': instance.isActive,
+  'application_fee_amount': instance.applicationFeeAmount,
   'custom_fields': instance.fields,
   'created_at': instance.createdAt?.toIso8601String(),
   'expires_at': instance.expiresAt?.toIso8601String(),

@@ -6,11 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// Mirrors the web mapper (`mapSupabaseAuthError`) so estate, web, and viewer
 /// show the same messages for invalid credentials, unverified accounts, rate
 /// limits, OTP failures, and network errors.
-enum AuthErrorContext {
-  login,
-  otp,
-  forgotPassword,
-}
+enum AuthErrorContext { login, otp, forgotPassword }
 
 const String kAuthErrorFallback = 'Something went wrong. Please try again.';
 
@@ -153,8 +149,5 @@ ValidationFailure failureFromAuthException(
   AuthException e, {
   AuthErrorContext context = AuthErrorContext.login,
 }) {
-  return ValidationFailure(
-    mapSupabaseAuthError(e, context: context),
-    cause: e,
-  );
+  return ValidationFailure(mapSupabaseAuthError(e, context: context), cause: e);
 }

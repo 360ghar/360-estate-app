@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:estate_app/app/app_shell.dart';
+import 'package:estate_app/app/router/guards.dart';
 import 'package:estate_app/app/router/routes.dart';
 import 'package:estate_app/core/config/constants.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
@@ -20,6 +21,7 @@ import 'package:estate_app/features/collections/presentation/record_payment_page
 import 'package:estate_app/features/home/presentation/home_page.dart';
 import 'package:estate_app/features/inspections/presentation/inspection_detail_page.dart';
 import 'package:estate_app/features/inspections/presentation/inspection_form_page.dart';
+import 'package:estate_app/features/inspections/presentation/inspection_templates_page.dart';
 import 'package:estate_app/features/inspections/presentation/inspections_page.dart';
 import 'package:estate_app/features/leases/presentation/lease_detail_page.dart';
 import 'package:estate_app/features/leases/presentation/lease_form_page.dart';
@@ -73,106 +75,55 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     refreshListenable: GoRouterRefreshStream(authController.stream),
     redirect: (context, state) {
       final authState = ref.read(authControllerProvider);
-      final isChecking = authState.status == AuthStatus.checking;
-      final isLoggedIn = authState.isLoggedIn;
-      final needsPhone = authState.status == AuthStatus.needsPhone;
-      final needsPassword = authState.status == AuthStatus.needsPassword;
-      final needsProfileCompletion =
-          authState.status == AuthStatus.needsProfileCompletion;
-      final needsOnboarding = authState.status == AuthStatus.needsOnboarding;
       final location = state.uri.path;
-
+      final isChecking = authState.status == AuthStatus.checking;
+      // Only consume the pending deep link when it can actually replay.
+      // consumePendingPath is destructive: consuming while auth state is
+      // still resolving, on an auth route, or during the mandatory
+      // set-password step would drop the link before it can be served.
       final isSplash = location == '/splash';
-      final isAddPhone = location == '/add-phone';
-      final isSetPassword = location == '/set-password';
-      final isProfileCompletion = location == '/profile-completion';
-      final isOnboarding = location == '/onboarding';
       final isAuthRoute =
           location == '/enter-phone' ||
           location == '/login' ||
           location == '/otp' ||
           location == '/signup' ||
-          isAddPhone ||
-          isSetPassword ||
-          isProfileCompletion ||
-          isOnboarding;
+          location == '/add-phone' ||
+          location == '/set-password' ||
+          location == '/profile-completion' ||
+          location == '/onboarding';
       final isPublicRoute =
           location.startsWith('/public') || location.startsWith('/legal/');
-      final isApplicationsRoute = location.startsWith('/more/applications');
-
-      if (isPublicRoute) {
-        if (!flags.enablePublicApplications) {
-          if (!isLoggedIn) return '/enter-phone';
-          return '/home';
-        }
-        return null;
+      String? pending;
+      if (authState.isLoggedIn &&
+          authState.gateRoute == null &&
+          !isSplash &&
+          !isAuthRoute &&
+          !isPublicRoute) {
+        pending = ref.read(deepLinkServiceProvider).consumePendingPath();
+        if (pending == location) pending = null;
       }
-
-      if (isChecking) {
-        return isSplash ? null : '/splash';
-      }
-
-      // Replay any pending deep link captured during cold start once the
-      // user is authenticated and the splash has been processed.
-      if (isLoggedIn && !isSplash && !isAuthRoute) {
-        final pending = ref.read(deepLinkServiceProvider).consumePendingPath();
-        if (pending != null && pending != location) {
-          return pending;
-        }
-      }
-
-      if (!isLoggedIn) {
-        // Protected deep links are stored as pending paths by DeepLinkService
-        // and replayed after login; here we always gate behind auth so
-        // unauthenticated users never render a protected route.
-        return isAuthRoute ? null : '/enter-phone';
-      }
-
-      // Mandatory set-password step (req 6): an OTP-verified account with no
-      // password must set one before reaching the app. Non-skippable.
-      if (needsPassword) {
-        return isSetPassword ? null : '/set-password';
-      }
-
-      // Post-Google passwordless users without a phone get the skippable
-      // add-phone interstitial before reaching the app shell.
-      if (needsPhone) {
-        return isAddPhone ? null : '/add-phone';
-      }
-
-      // Profile completion gate: mandatory fields (full_name, date_of_birth)
-      // must be filled before reaching the app.
-      if (needsProfileCompletion) {
-        return isProfileCompletion ? null : '/profile-completion';
-      }
-
-      // App onboarding gate: app-specific onboarding must be completed.
-      if (needsOnboarding) {
-        return isOnboarding ? null : '/onboarding';
-      }
-
-      if (!flags.enableApplicationsModule && isApplicationsRoute) {
-        return '/more';
-      }
-
-      if (isLoggedIn && (isAuthRoute || isSplash)) {
-        return '/home';
-      }
-
-      return null;
+      return resolveRedirect(
+        location: location,
+        isChecking: isChecking,
+        isLoggedIn: authState.isLoggedIn,
+        gateRoute: authState.gateRoute,
+        enablePublicApplications: flags.enablePublicApplications,
+        enableApplicationsModule: flags.enableApplicationsModule,
+        pendingPath: pending,
+      );
     },
     routes: [
       GoRoute(
         path: Routes.publicPrivacyPolicy,
         builder: (context, state) => LegalContentPage(
-          title: context.l10n?.privacyPolicy ?? 'Privacy Policy',
+          title: context.l10n.legalPrivacyPolicy,
           url: kPrivacyPolicyUrl,
         ),
       ),
       GoRoute(
         path: Routes.publicTermsOfService,
         builder: (context, state) => LegalContentPage(
-          title: context.l10n?.termsOfService ?? 'Terms of Service',
+          title: context.l10n.legalTerms,
           url: kTermsOfServiceUrl,
         ),
       ),
@@ -406,12 +357,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'leases',
                     builder: (context, state) {
-                      final propertyId =
-                          state.uri.queryParameters['propertyId'];
-                      final tenantId = state.uri.queryParameters['tenantId'];
+                      final query = state.uri.queryParameters;
                       return LeasesPage(
-                        propertyId: propertyId,
-                        tenantId: tenantId,
+                        propertyId: int.tryParse(query['propertyId'] ?? ''),
+                        tenantUserId: int.tryParse(query['tenantUserId'] ?? ''),
                       );
                     },
                     routes: [
@@ -431,18 +380,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'inspections',
                     builder: (context, state) {
-                      final propertyId =
-                          state.uri.queryParameters['propertyId'];
-                      final tenantId = state.uri.queryParameters['tenantId'];
+                      final query = state.uri.queryParameters;
                       return InspectionsPage(
-                        propertyId: propertyId,
-                        tenantId: tenantId,
+                        propertyId: int.tryParse(query['propertyId'] ?? ''),
+                        leaseId: int.tryParse(query['leaseId'] ?? ''),
                       );
                     },
                     routes: [
                       GoRoute(
                         path: 'new',
                         builder: (context, state) => const InspectionFormPage(),
+                      ),
+                      // Before ':id', so 'templates' is not read as an id.
+                      GoRoute(
+                        path: 'templates',
+                        builder: (context, state) =>
+                            const InspectionTemplatesPage(),
                       ),
                       GoRoute(
                         path: ':id',
@@ -476,7 +429,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     routes: [
                       GoRoute(
                         path: 'upload',
-                        builder: (context, state) => const DocumentUploadPage(),
+                        builder: (context, state) => DocumentUploadPage(
+                          propertyId: int.tryParse(
+                            state.uri.queryParameters['propertyId'] ?? '',
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -534,18 +491,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                           GoRoute(
                             path: 'privacy-policy',
                             builder: (context, state) => LegalContentPage(
-                              title:
-                                  context.l10n?.privacyPolicy ??
-                                  'Privacy Policy',
+                              title: context.l10n.legalPrivacyPolicy,
                               url: kPrivacyPolicyUrl,
                             ),
                           ),
                           GoRoute(
                             path: 'terms-of-service',
                             builder: (context, state) => LegalContentPage(
-                              title:
-                                  context.l10n?.termsOfService ??
-                                  'Terms of Service',
+                              title: context.l10n.legalTerms,
                               url: kTermsOfServiceUrl,
                             ),
                           ),
@@ -582,15 +535,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 /// Used to make GoRouter aware of authentication state changes.
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
-    notifyOnStreamChange();
-    _subscription = stream.asBroadcastStream().listen(
-      (dynamic _) => notifyListeners(),
-    );
+    _subscription = stream.listen((dynamic _) => notifyListeners());
   }
 
   late final StreamSubscription<dynamic> _subscription;
-
-  void notifyOnStreamChange() => notifyListeners();
 
   @override
   void dispose() {

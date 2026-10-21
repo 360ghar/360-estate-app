@@ -1,13 +1,11 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
-import 'package:estate_app/core/presentation/design_system/app_radii.dart';
-import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
-import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/widgets/app_avatar.dart';
 import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
+import 'package:estate_app/core/presentation/widgets/feedback.dart';
 import 'package:estate_app/features/auth/data/auth_repository.dart';
 import 'package:estate_app/features/auth/models/user_profile.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
@@ -16,7 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
-/// Profile edit page with photo upload capability
+/// Change your name, phone and photo. The email is shown, not edited here.
 class ProfileEditPage extends ConsumerStatefulWidget {
   const ProfileEditPage({super.key});
 
@@ -30,20 +28,18 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
 
-  File? _selectedImage;
+  XFile? _selectedImage;
+
+  /// Preview bytes for [_selectedImage], read once on pick: reading inline
+  /// would re-read the file and flicker the preview on every rebuild.
+  Future<Uint8List>? _avatarBytes;
   String? _avatarUrl;
-  final bool _isUploading = false;
   bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
-    _initFromProfile();
-  }
-
-  void _initFromProfile() {
-    final authState = ref.read(authControllerProvider);
-    final profile = authState.user;
+    final profile = ref.read(authControllerProvider).user;
     if (profile != null) {
       _fullNameController.text = profile.fullName ?? profile.displayName;
       _emailController.text = profile.email ?? '';
@@ -62,322 +58,166 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
 
   Future<void> _pickImage(ImageSource source) async {
     Navigator.pop(context);
-
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(
+    final picked = await ImagePicker().pickImage(
       source: source,
       maxWidth: 1024,
       maxHeight: 1024,
       imageQuality: 85,
     );
-
-    if (pickedFile != null) {
-      setState(() {
-        _selectedImage = File(pickedFile.path);
-      });
-    }
+    if (picked == null) return;
+    setState(() {
+      // Keep the XFile: a dart:io File breaks web builds.
+      _selectedImage = picked;
+      _avatarBytes = picked.readAsBytes();
+    });
   }
 
-  void _showImageSourceDialog() {
-    unawaited(showModalBottomSheet<void>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+  void _showPhotoOptions() {
+    final l10n = context.l10n;
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        builder: (sheetContext) => SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
-                  borderRadius: AppRadii.pill,
-                ),
-              ),
               ListTile(
-                leading: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF3B82F6).withValues(alpha: 0.08),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.camera_alt, color: Color(0xFF3B82F6), size: 20),
-                ),
-                title: Text(context.l10n?.takePhoto ?? 'Take Photo'),
+                leading: const Icon(Icons.photo_camera_outlined),
+                title: Text(l10n.profileTakePhoto),
                 onTap: () => _pickImage(ImageSource.camera),
               ),
               ListTile(
-                leading: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF8B5CF6).withValues(alpha: 0.08),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.photo_library, color: Color(0xFF8B5CF6), size: 20),
-                ),
-                title: Text(context.l10n?.chooseFromGallery ?? 'Choose from Gallery'),
+                leading: const Icon(Icons.photo_library_outlined),
+                title: Text(l10n.profileChoosePhoto),
                 onTap: () => _pickImage(ImageSource.gallery),
               ),
-              if (_avatarUrl != null || _selectedImage != null)
+              // The backend cannot delete a stored photo, so only a photo that
+              // is picked but not saved yet can be removed.
+              if (_selectedImage != null)
                 ListTile(
-                  leading: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: AppColors.danger.withValues(alpha: 0.08),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.delete, color: AppColors.danger, size: 20),
-                  ),
-                  title: Text(
-                    context.l10n?.removePhoto ?? 'Remove Photo',
-                    style: const TextStyle(color: AppColors.danger),
-                  ),
+                  iconColor: context.colors.error,
+                  textColor: context.colors.error,
+                  leading: const Icon(Icons.delete_outline_rounded),
+                  title: Text(l10n.profileRemovePhoto),
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.pop(sheetContext);
                     setState(() {
                       _selectedImage = null;
-                      _avatarUrl = null;
+                      _avatarBytes = null;
                     });
                   },
                 ),
+              const SizedBox(height: AppSpacing.sm),
             ],
           ),
         ),
       ),
-    ));
+    );
   }
 
-  Future<void> _saveProfile() async {
+  Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-
+    FocusScope.of(context).unfocus();
     setState(() => _isSaving = true);
-
+    final controller = ref.read(authControllerProvider.notifier);
     try {
-      // First upload photo if selected
-      String? finalAvatarUrl = _avatarUrl;
+      // The photo has its own route; the profile save carries no photo and
+      // no email.
       if (_selectedImage != null) {
-        final uploadedUrl = await ref
-            .read(authControllerProvider.notifier)
-            .uploadProfilePhoto(_selectedImage!);
-        finalAvatarUrl = uploadedUrl;
+        await controller.uploadProfilePhoto(_selectedImage!);
       }
-
-      // Then update profile
-      await ref.read(authControllerProvider.notifier).updateProfile(
-            UserProfileUpdate(
-              fullName: _fullNameController.text.trim(),
-              email: _emailController.text.trim().isEmpty
-                  ? null
-                  : _emailController.text.trim(),
-              phone: _phoneController.text.trim().isEmpty
-                  ? null
-                  : _phoneController.text.trim(),
-              avatarUrl: finalAvatarUrl,
-            ),
-          );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n?.profileSaved ?? 'Profile saved successfully'),
-          ),
-        );
-        context.pop();
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n?.saveFailed ?? 'Failed to save profile'),
-            backgroundColor: AppColors.danger,
-          ),
-        );
-      }
+      final phone = _phoneController.text.trim();
+      await controller.updateProfile(
+        UserProfileUpdate(
+          fullName: _fullNameController.text.trim(),
+          phone: phone.isEmpty ? null : phone,
+        ),
+      );
+      if (!mounted) return;
+      context.showSnack(context.l10n.profileSavedShort);
+      context.pop();
+    } catch (_) {
+      if (mounted) context.showSnack(context.l10n.profileSaveFailed);
     } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authControllerProvider);
-    final isBusy = authState.isBusy || _isSaving || _isUploading;
-    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final busy = _isSaving || ref.watch(authControllerProvider).isBusy;
 
-    return AppScaffold(
-      appBar: AppBar(
-        title: Text(context.l10n?.editProfile ?? 'Edit Profile'),
-        actions: [
-          if (isBusy)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            )
-          else
-            TextButton(
-              onPressed: _saveProfile,
-              child: Text(context.l10n?.commonSave ?? 'Save'),
-            ),
-        ],
-      ),
-      scrollable: true,
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.profileEditAction)),
       body: Form(
         key: _formKey,
-        child: Column(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.xxl,
+          ),
           children: [
-            const SizedBox(height: AppSpacing.md),
-
-            // Photo section with camera overlay
+            Center(child: _photo()),
             Center(
-              child: GestureDetector(
-                onTap: _showImageSourceDialog,
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: AppShadows.md,
-                  ),
-                  child: Stack(
-                    children: [
-                      Container(
-                        width: 110,
-                        height: 110,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: theme.colorScheme.surface,
-                            width: 4,
-                          ),
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              AppColors.primary,
-                              AppColors.primaryLight,
-                            ],
-                          ),
-                        ),
-                        child: _buildAvatarContent(),
-                      ),
-                      Positioned(
-                        bottom: 2,
-                        right: 2,
-                        child: Container(
-                          width: 34,
-                          height: 34,
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.primary,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: theme.colorScheme.surface,
-                              width: 3,
-                            ),
-                            boxShadow: AppShadows.sm,
-                          ),
-                          child: Icon(
-                            Icons.camera_alt,
-                            size: 16,
-                            color: theme.colorScheme.onPrimary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              child: TextButton.icon(
+                onPressed: busy ? null : _showPhotoOptions,
+                icon: const Icon(Icons.photo_camera_outlined, size: 18),
+                label: Text(l10n.profileChangePhoto),
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              context.l10n?.tapToChangePhoto ?? 'Tap to change photo',
-              style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-            ),
-
-            const SizedBox(height: AppSpacing.xl),
-
-            // Personal details section
+            const SizedBox(height: AppSpacing.lg),
             AppSectionCard(
-              title: 'Personal Details',
-              icon: Icons.person_outline,
-              iconColor: const Color(0xFF3B82F6),
+              title: l10n.profileDetailsTitle,
               children: [
+                const SizedBox(height: AppSpacing.sm),
                 TextFormField(
                   controller: _fullNameController,
-                  decoration: InputDecoration(
-                    labelText: context.l10n?.fullNameLabel ?? 'Full Name',
-                    prefixIcon: const Icon(Icons.person_outline),
-                  ),
+                  decoration: InputDecoration(labelText: l10n.profileName),
                   textCapitalization: TextCapitalization.words,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return context.l10n?.validationNameRequired ?? 'Name is required';
-                    }
-                    return null;
-                  },
+                  textInputAction: TextInputAction.next,
+                  autofillHints: const [AutofillHints.name],
+                  validator: (value) => value == null || value.trim().isEmpty
+                      ? l10n.validationNameRequired
+                      : null,
                 ),
-                const SizedBox(height: AppSpacing.md),
-
-                TextFormField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: context.l10n?.emailLabel ?? 'Email',
-                    prefixIcon: const Icon(Icons.email_outlined),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value != null &&
-                        value.trim().isNotEmpty &&
-                        !value.contains('@')) {
-                      return context.l10n?.validationEmailInvalid ?? 'Invalid email';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: AppSpacing.md),
-
+                const SizedBox(height: AppSpacing.lg),
                 TextFormField(
                   controller: _phoneController,
-                  decoration: InputDecoration(
-                    labelText: context.l10n?.phoneNumberLabel ?? 'Phone Number',
-                    prefixIcon: const Icon(Icons.phone_outlined),
-                  ),
+                  decoration: InputDecoration(labelText: l10n.profilePhone),
                   keyboardType: TextInputType.phone,
+                  textInputAction: TextInputAction.done,
+                  autofillHints: const [AutofillHints.telephoneNumber],
+                  onFieldSubmitted: (_) => busy ? null : _save(),
                   validator: (value) {
-                    if (value != null &&
-                        value.trim().isNotEmpty &&
-                        value.length < 10) {
-                      return context.l10n?.validationPhoneTooShort ??
-                          'Phone number is too short';
-                    }
-                    return null;
+                    final v = value?.trim() ?? '';
+                    return v.isNotEmpty && v.length < 10
+                        ? l10n.validationPhoneTooShort
+                        : null;
                   },
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                TextFormField(
+                  controller: _emailController,
+                  enabled: false,
+                  decoration: InputDecoration(
+                    labelText: l10n.profileEmail,
+                    helperText: l10n.profileEmailHelper,
+                  ),
                 ),
               ],
             ),
-
             const SizedBox(height: AppSpacing.xl),
-
-            // Save button
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: isBusy ? null : _saveProfile,
-                child: Text(context.l10n?.commonSave ?? 'Save Changes'),
-              ),
+            FilledButton(
+              onPressed: busy ? null : _save,
+              child: busy
+                  ? const SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(l10n.commonSave),
             ),
           ],
         ),
@@ -385,44 +225,33 @@ class _ProfileEditPageState extends ConsumerState<ProfileEditPage> {
     );
   }
 
-  Widget _buildAvatarContent() {
-    if (_selectedImage != null) {
-      return ClipOval(
-        child: Image.file(
-          _selectedImage!,
-          fit: BoxFit.cover,
-        ),
+  /// The photo to save: the one just picked, else the stored one, else
+  /// initials.
+  Widget _photo() {
+    final bytes = _avatarBytes;
+    if (bytes == null) {
+      return AppAvatar(
+        imageUrl: _avatarUrl,
+        name: _fullNameController.text,
+        size: AppAvatarSize.xl,
+        // A photo picked during a save would be discarded when the page pops.
+        onTap: _isSaving || ref.read(authControllerProvider).isBusy
+            ? null
+            : _showPhotoOptions,
       );
     }
-
-    if (_avatarUrl != null && _avatarUrl!.isNotEmpty) {
-      return ClipOval(
-        child: Image.network(
-          _avatarUrl!,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _buildFallbackAvatar();
-          },
-        ),
-      );
-    }
-
-    return _buildFallbackAvatar();
-  }
-
-  Widget _buildFallbackAvatar() {
-    final initial = (_fullNameController.text.isNotEmpty
-            ? _fullNameController.text[0]
-            : '?')
-        .toUpperCase();
-
-    return Center(
-      child: Text(
-        initial,
-        style: const TextStyle(
-          fontSize: 36,
-          fontWeight: FontWeight.w600,
-          color: Colors.white,
+    return Semantics(
+      image: true,
+      label: _fullNameController.text,
+      child: ClipOval(
+        child: SizedBox.square(
+          dimension: 72,
+          child: FutureBuilder<Uint8List>(
+            future: bytes,
+            builder: (context, snapshot) => snapshot.hasData
+                ? Image.memory(snapshot.data!, fit: BoxFit.cover)
+                : ColoredBox(color: context.colors.primaryContainer),
+          ),
         ),
       ),
     );

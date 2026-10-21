@@ -1,0 +1,213 @@
+{
+  "detail": {
+    "answers": {
+      "pets": false
+    },
+    "applicant_email": null,
+    "applicant_full_name": "Karan Mehta",
+    "applicant_phone": null,
+    "application_data": {
+      "notes": "Need parking"
+    },
+    "created_at": "2026-10-01T10:15:02Z",
+    "decided_by_user_id": 7,
+    "decision_at": "2026-10-02T08:00:00Z",
+    "decision_notes": "Welcome",
+    "emergency_contacts": null,
+    "form_id": 41,
+    "id": 301,
+    "owner_id": 7,
+    "property_address": null,
+    "property_id": 1,
+    "property_name": null,
+    "status": "approved",
+    "submitted_at": "2026-10-01T10:15:02Z",
+    "updated_at": null
+  },
+  "form": {
+    "application_fee_amount": null,
+    "config": null,
+    "created_at": "2026-10-01T10:15:02Z",
+    "custom_fields": [
+      {
+        "field_type": "boolean",
+        "id": "pets",
+        "is_required": false,
+        "label": "Do you have pets?",
+        "options": null
+      }
+    ],
+    "description": null,
+    "expires_at": null,
+    "id": 41,
+    "is_active": true,
+    "owner_id": 7,
+    "property_address": null,
+    "property_id": 1,
+    "property_name": null,
+    "required_document_types": null,
+    "slug": "sector-51-abc",
+    "title": "Apply for Sector 51",
+    "updated_at": null
+  },
+  "forms_page": {
+    "has_more": false,
+    "items": [
+      {
+        "application_fee_amount": 500.0,
+        "config": null,
+        "created_at": "2026-10-01T10:15:02Z",
+        "custom_fields": [
+          {
+            "field_type": "boolean",
+            "id": "pets",
+            "is_required": true,
+            "label": "Do you have pets?",
+            "options": null
+          },
+          {
+            "field_type": "date",
+            "id": "move_in",
+            "is_required": false,
+            "label": "Move in date",
+            "options": null
+          },
+          {
+            "field_type": "select",
+            "id": "job",
+            "is_required": true,
+            "label": "Occupation",
+            "options": [
+              "Salaried",
+              "Self employed"
+            ]
+          }
+        ],
+        "description": "Two bedroom flat.",
+        "expires_at": "2026-12-31T18:29:59Z",
+        "id": 41,
+        "is_active": true,
+        "owner_id": 7,
+        "property_address": "Tower 1, Sector 51, Gurugram",
+        "property_id": 1,
+        "property_name": "2 BHK Sector 51",
+        "required_document_types": null,
+        "slug": "sector-51-abc",
+        "title": "Apply for Sector 51",
+        "updated_at": null
+      },
+      {
+        "application_fee_amount": null,
+        "config": null,
+        "created_at": "2026-10-01T10:15:02Z",
+        "custom_fields": null,
+        "description": null,
+        "expires_at": null,
+        "id": 42,
+        "is_active": false,
+        "owner_id": 7,
+        "property_address": null,
+        "property_id": null,
+        "property_name": null,
+        "required_document_types": null,
+        "slug": "general-xyz",
+        "title": "General form",
+        "updated_at": null
+      }
+    ],
+    "limit": 20,
+    "next_cursor": null,
+    "total": null
+  },
+  "inbox_page": {
+    "has_more": true,
+    "items": [
+      {
+        "answers": {
+          "job": "Salaried",
+          "pets": true
+        },
+        "applicant_email": "karan@example.com",
+        "applicant_full_name": "Karan Mehta",
+        "applicant_phone": "+919822223333",
+        "application_data": {
+          "notes": "Need parking"
+        },
+        "created_at": "2026-10-01T10:15:02Z",
+        "decided_by_user_id": null,
+        "decision_at": null,
+        "decision_notes": null,
+        "emergency_contacts": null,
+        "form_id": 41,
+        "id": 301,
+        "owner_id": 7,
+        "property_address": "Tower 1, Sector 51, Gurugram",
+        "property_id": 1,
+        "property_name": "2 BHK Sector 51",
+        "status": "applicant",
+        "submitted_at": "2026-10-01T10:15:02Z",
+        "updated_at": null
+      },
+      {
+        "answers": null,
+        "applicant_email": null,
+        "applicant_full_name": "Isha Rao",
+        "applicant_phone": null,
+        "application_data": null,
+        "created_at": "2026-10-01T10:15:02Z",
+        "decided_by_user_id": 7,
+        "decision_at": "2026-10-02T08:00:00Z",
+        "decision_notes": "Income proof missing",
+        "emergency_contacts": null,
+        "form_id": 41,
+        "id": 302,
+        "owner_id": 7,
+        "property_address": null,
+        "property_id": 1,
+        "property_name": null,
+        "status": "rejected",
+        "submitted_at": "2026-10-01T10:15:02Z",
+        "updated_at": null
+      }
+    ],
+    "limit": 20,
+    "next_cursor": "eyJrIjpbMzAyXSwiZiI6ImFiYyJ9",
+    "total": null
+  },
+  "public_form": {
+    "application_fee_amount": 500.0,
+    "config": null,
+    "custom_fields": [
+      {
+        "field_type": "boolean",
+        "id": "pets",
+        "is_required": true,
+        "label": "Do you have pets?",
+        "options": null
+      },
+      {
+        "field_type": "select",
+        "id": "job",
+        "is_required": false,
+        "label": "Occupation",
+        "options": [
+          "Salaried",
+          "Other"
+        ]
+      }
+    ],
+    "description": "Two bedroom flat.",
+    "expires_at": "2026-12-31T18:29:59Z",
+    "property_address": "Tower 1, Sector 51, Gurugram",
+    "property_id": 1,
+    "property_name": "2 BHK Sector 51",
+    "required_document_types": null,
+    "slug": "sector-51-abc",
+    "title": "Apply for Sector 51"
+  },
+  "submitted": {
+    "id": 301,
+    "status": "applicant",
+    "submitted_at": "2026-10-01T10:15:02Z"
+  }
+}

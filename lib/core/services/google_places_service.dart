@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:estate_app/core/errors/failure.dart';
+import 'package:estate_app/core/network/dio_failure_mapper.dart';
 import 'package:estate_app/core/providers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,15 +44,18 @@ final googlePlacesServiceProvider = Provider<GooglePlacesService>((ref) {
 });
 
 final class GooglePlacesService {
-  GooglePlacesService({required this.apiKey});
+  GooglePlacesService({required this.apiKey, Dio? dio})
+    : _dio =
+          dio ??
+          Dio(
+            BaseOptions(
+              connectTimeout: const Duration(seconds: 10),
+              receiveTimeout: const Duration(seconds: 10),
+            ),
+          );
 
   final String apiKey;
-  final _dio = Dio(
-    BaseOptions(
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
-    ),
-  );
+  final Dio _dio;
 
   Timer? _debounceTimer;
 
@@ -80,9 +85,17 @@ final class GooglePlacesService {
         queryParameters: queryParameters,
       );
 
-      final body = response.data is Map<String, dynamic>
-          ? response.data as Map<String, dynamic>
-          : json.decode(response.data.toString()) as Map<String, dynamic>;
+      // Typed as dynamic: Dio's generic lies at runtime when the server
+      // returns plain text, so check before re-parsing.
+      final dynamic raw = response.data;
+      final Map<String, dynamic> body;
+      if (raw is Map<String, dynamic>) {
+        body = raw;
+      } else if (raw is Map) {
+        body = Map<String, dynamic>.from(raw);
+      } else {
+        body = json.decode(raw.toString()) as Map<String, dynamic>;
+      }
       final status = body['status'] as String? ?? '';
 
       if (status != 'OK') {
@@ -106,6 +119,12 @@ final class GooglePlacesService {
       if (kDebugMode) {
         debugPrint('GooglePlaces: autocomplete error: ${e.message}');
       }
+      // ZERO_RESULTS and other API statuses return [].
+      // No connectivity check here: a timeout on a slow-but-online network
+      // must not surface as "no internet". Offline detection stays in
+      // ApiClient, which consults NetworkInfo before labeling a failure.
+      final failure = const DioFailureMapper().map(e, isOffline: false);
+      if (failure is NetworkFailure) throw failure;
       return const [];
     } catch (e) {
       if (kDebugMode) {
@@ -128,9 +147,17 @@ final class GooglePlacesService {
         },
       );
 
-      final body = response.data is Map<String, dynamic>
-          ? response.data as Map<String, dynamic>
-          : json.decode(response.data.toString()) as Map<String, dynamic>;
+      // Typed as dynamic: Dio's generic lies at runtime when the server
+      // returns plain text, so check before re-parsing.
+      final dynamic raw = response.data;
+      final Map<String, dynamic> body;
+      if (raw is Map<String, dynamic>) {
+        body = raw;
+      } else if (raw is Map) {
+        body = Map<String, dynamic>.from(raw);
+      } else {
+        body = json.decode(raw.toString()) as Map<String, dynamic>;
+      }
       final status = body['status'] as String? ?? '';
 
       if (status != 'OK') {
@@ -184,6 +211,11 @@ final class GooglePlacesService {
       if (kDebugMode) {
         debugPrint('GooglePlaces: details error: ${e.message}');
       }
+      // No connectivity check here: a timeout on a slow-but-online network
+      // must not surface as "no internet". Offline detection stays in
+      // ApiClient, which consults NetworkInfo before labeling a failure.
+      final failure = const DioFailureMapper().map(e, isOffline: false);
+      if (failure is NetworkFailure) throw failure;
       return null;
     } catch (e) {
       if (kDebugMode) {

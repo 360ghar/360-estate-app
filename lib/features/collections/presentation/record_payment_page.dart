@@ -1,18 +1,27 @@
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
-import 'package:estate_app/core/presentation/design_system/app_radii.dart';
+import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
-import 'package:estate_app/core/presentation/widgets/app_card.dart';
-import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/design_system/app_text_styles.dart';
+import 'package:estate_app/core/presentation/errors/user_facing_message.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
+import 'package:estate_app/core/presentation/widgets/feedback.dart';
+import 'package:estate_app/core/presentation/widgets/submit_bar.dart';
+import 'package:estate_app/core/utils/dates.dart';
+import 'package:estate_app/core/utils/money.dart';
 import 'package:estate_app/features/collections/collections_providers.dart';
 import 'package:estate_app/features/collections/data/rent_repository.dart';
-import 'package:estate_app/features/more/tenants/models/tenant.dart';
-import 'package:estate_app/features/more/tenants/tenants_providers.dart';
+import 'package:estate_app/features/collections/models/rent_charge.dart';
+import 'package:estate_app/features/collections/presentation/rent_status_text.dart';
+import 'package:estate_app/features/collections/presentation/widgets/charge_receipt.dart';
+import 'package:estate_app/features/home/home_providers.dart';
+import 'package:estate_app/features/leases/leases_providers.dart';
+import 'package:estate_app/features/properties/properties_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
+/// Records money received against one open rent charge.
 class RecordPaymentPage extends ConsumerStatefulWidget {
   const RecordPaymentPage({super.key, this.chargeId});
 
@@ -26,23 +35,34 @@ class _RecordPaymentPageState extends ConsumerState<RecordPaymentPage> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
+  final _dateController = TextEditingController();
 
-  Tenant? _selectedTenant;
+  /// The charge the payment is for. The route can preselect it (`chargeId`).
+  int? _chargeId;
   DateTime _paidAt = DateTime.now();
-  String _method = 'Cash';
+  PaymentMethod _method = PaymentMethod.cash;
   bool _isSaving = false;
 
-  static const _paymentMethods = [
-    _PaymentMethodOption('Cash', Icons.payments_outlined),
-    _PaymentMethodOption('UPI', Icons.qr_code_2_outlined),
-    _PaymentMethodOption('Bank Transfer', Icons.account_balance_outlined),
-    _PaymentMethodOption('Cheque', Icons.description_outlined),
-  ];
+  /// The amount is filled once from a charge the route preselected.
+  bool _amountPrefilled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _chargeId = int.tryParse(widget.chargeId ?? '');
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _dateController.text = shortDate(context, _paidAt);
+  }
 
   @override
   void dispose() {
     _amountController.dispose();
     _notesController.dispose();
+    _dateController.dispose();
     super.dispose();
   }
 
@@ -53,372 +73,297 @@ class _RecordPaymentPageState extends ConsumerState<RecordPaymentPage> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
       initialDate: _paidAt,
     );
-    if (picked != null) {
-      setState(() => _paidAt = picked);
-    }
+    if (picked == null || !mounted) return;
+    // `paid_at` is an instant. The picker gives local midnight, which is the
+    // evening before in UTC. Keep the clock time for today and use local noon
+    // for another day, so the UTC date stays the date the user picked.
+    final now = DateTime.now();
+    final isToday = DateUtils.isSameDay(picked, now);
+    setState(() {
+      _paidAt = isToday
+          ? now
+          : DateTime(picked.year, picked.month, picked.day, 12);
+      _dateController.text = shortDate(context, _paidAt);
+    });
+  }
+
+  /// Chooses a charge and fills the amount with its balance.
+  void _selectCharge(RentChargeWithTotals? row) {
+    setState(() {
+      _amountPrefilled = true;
+      _chargeId = row?.id;
+      if (row != null) _amountController.text = row.balance.toStringAsFixed(2);
+    });
   }
 
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    if (_selectedTenant == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Select a tenant.')),
-      );
+    final chargeId = _chargeId;
+    if (chargeId == null) {
+      context.showSnack(context.l10n.paymentChargeRequired);
       return;
     }
-
     setState(() => _isSaving = true);
-
     try {
-      final request = RentPaymentRequest(
-        tenantId: _selectedTenant!.id?.toString() ?? '',
-        amount: double.parse(_amountController.text.trim()),
-        paidAt: _paidAt,
-        method: _method,
-        notes: _notesController.text.trim(),
-      );
-      await ref.read(rentRepositoryProvider).recordPayment(request);
-      ref.invalidate(rentChargesProvider);
-      ref.invalidate(rentChargesPagedProvider);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Payment recorded.')),
-        );
-        context.go('/collections');
-      }
-    } catch (error) {
+      await ref
+          .read(rentRepositoryProvider)
+          .recordPayment(
+            RentPaymentRequest(
+              chargeId: chargeId,
+              amountPaid: double.parse(_amountController.text.trim()),
+              paidAt: _paidAt,
+              paymentMethod: _method,
+              notes: _notesController.text,
+            ),
+          );
+      ref
+        ..invalidate(allRentChargesProvider)
+        ..invalidate(unpaidRentChargesProvider)
+        ..invalidate(rentChargesPagedProvider)
+        ..invalidate(rentChargesForPropertyProvider)
+        ..invalidate(dashboardOverviewProvider)
+        ..invalidate(dashboardActivityProvider);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
+      context.showSnack(context.l10n.paymentRecorded);
+      context.go('/collections');
+    } catch (error) {
+      // A 400 such as "exceeds outstanding balance" carries the backend text.
+      if (mounted) context.showSnack(userFacingMessage(error));
     } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final tenantsAsync = ref.watch(tenantsListProvider);
-    final dateLabel = DateFormat('dd MMM yyyy').format(_paidAt);
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = context.l10n;
+    final chargesAsync = ref.watch(unpaidRentChargesProvider);
+    final tenants = ref.watch(leaseTenantNamesProvider).valueOrNull;
+    final properties = ref.watch(propertyTitlesProvider).valueOrNull;
+    final charges = chargesAsync.valueOrNull ?? const <RentChargeWithTotals>[];
+    final selected = charges.where((r) => r.id == _chargeId).firstOrNull;
 
-    return AppScaffold(
-      appBar: AppBar(title: const Text('Record Payment')),
-      scrollable: true,
+    String tenantOf(RentChargeWithTotals row) =>
+        tenants?[row.charge.leaseId] ??
+        l10n.commonLeaseNumber('${row.charge.leaseId ?? '-'}');
+    String propertyOf(RentChargeWithTotals row) =>
+        properties?[row.charge.propertyId] ??
+        l10n.commonPropertyNumber('${row.charge.propertyId ?? '-'}');
+
+    // A charge preselected by the route (the row tap) starts with its balance.
+    if (selected != null && !_amountPrefilled) {
+      _amountPrefilled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _amountController.text.isEmpty) {
+          _amountController.text = selected.balance.toStringAsFixed(2);
+        }
+      });
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.paymentTitle)),
       body: Form(
         key: _formKey,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Charge summary card at top (if charge ID provided)
-            if (widget.chargeId != null) ...[
-              AppCard(
-                variant: AppCardVariant.tinted,
-                tintColor: scheme.primary,
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Row(
+            Expanded(
+              // Every field stays built, so the form validates all of them.
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: scheme.primary.withValues(alpha: isDark ? 0.2 : 0.1),
-                        borderRadius: AppRadii.sm,
-                      ),
-                      child: Icon(
-                        Icons.receipt_long_outlined,
-                        size: 20,
-                        color: scheme.primary,
+                    AppSectionCard(
+                      child: chargesAsync.when(
+                        loading: () => const LinearProgressIndicator(),
+                        error: (error, _) => Row(
+                          children: [
+                            Expanded(child: Text(userFacingMessage(error))),
+                            TextButton(
+                              onPressed: () =>
+                                  ref.invalidate(allRentChargesProvider),
+                              child: Text(l10n.commonRetry),
+                            ),
+                          ],
+                        ),
+                        data: (charges) => charges.isEmpty
+                            ? Text(
+                                l10n.paymentNoCharges,
+                                style: context.text.bodyMedium?.copyWith(
+                                  color: context.colors.onSurfaceVariant,
+                                ),
+                              )
+                            : DropdownButtonFormField<RentChargeWithTotals>(
+                                initialValue: selected,
+                                isExpanded: true,
+                                decoration: InputDecoration(
+                                  labelText: l10n.paymentChargeLabel,
+                                ),
+                                selectedItemBuilder: (context) => [
+                                  for (final row in charges)
+                                    Text(
+                                      '${tenantOf(row)}  \u00B7  '
+                                      '${propertyOf(row)}',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                ],
+                                items: [
+                                  for (final row in charges)
+                                    DropdownMenuItem(
+                                      value: row,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: AppSpacing.sm,
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              '${tenantOf(row)}  \u00B7  '
+                                              '${propertyOf(row)}',
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            Text(
+                                              [
+                                                l10n.paymentOwed(
+                                                  rupees(row.balance),
+                                                ),
+                                                if (row.dueDate != null)
+                                                  l10n.paymentDueShort(
+                                                    shortDate(
+                                                      context,
+                                                      row.dueDate!,
+                                                    ),
+                                                  ),
+                                              ].join('  \u00B7  '),
+                                              style: context.text.bodySmall
+                                                  ?.copyWith(
+                                                    color: context
+                                                        .colors
+                                                        .onSurfaceVariant,
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                                onChanged: _selectCharge,
+                                validator: (value) => value == null
+                                    ? l10n.paymentChargeRequired
+                                    : null,
+                              ),
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Paying for Charge',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Charge #${widget.chargeId}',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                    if (selected != null) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      ChargeReceipt(
+                        row: selected,
+                        tenant: tenantOf(selected),
+                        property: propertyOf(selected),
                       ),
+                    ],
+                    const SizedBox(height: AppSpacing.md),
+                    AppSectionCard(
+                      title: l10n.paymentDetailsSection,
+                      children: [
+                        TextFormField(
+                          controller: _amountController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[0-9.]'),
+                            ),
+                          ],
+                          textInputAction: TextInputAction.next,
+                          style: AppTextStyles.currencyMedium.copyWith(
+                            color: context.colors.onSurface,
+                          ),
+                          decoration: InputDecoration(
+                            labelText: l10n.paymentAmountLabel,
+                            prefixText: '₹ ',
+                            prefixStyle: AppTextStyles.currencyMedium.copyWith(
+                              color: context.colors.onSurfaceVariant,
+                            ),
+                            helperText: selected == null
+                                ? null
+                                : l10n.paymentAmountHelper,
+                          ),
+                          validator: (value) {
+                            final parsed = double.tryParse(value?.trim() ?? '');
+                            if (parsed == null || parsed <= 0) {
+                              return l10n.paymentAmountInvalid;
+                            }
+                            // Two decimals of slack: the field shows paise.
+                            if (selected != null &&
+                                parsed > selected.balance + 0.005) {
+                              return l10n.paymentAmountTooHigh(
+                                rupees(selected.balance),
+                              );
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        Text(
+                          l10n.paymentMethodLabel,
+                          style: context.text.bodyMedium?.copyWith(
+                            color: context.colors.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Wrap(
+                          spacing: AppSpacing.sm,
+                          runSpacing: AppSpacing.sm,
+                          children: [
+                            for (final method in PaymentMethod.values)
+                              ChoiceChip(
+                                label: Text(method.text(l10n)),
+                                selected: _method == method,
+                                onSelected: (_) =>
+                                    setState(() => _method = method),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        TextFormField(
+                          controller: _dateController,
+                          readOnly: true,
+                          onTap: _pickDate,
+                          decoration: InputDecoration(
+                            labelText: l10n.paymentDateLabel,
+                            suffixIcon: const Icon(Icons.event_outlined),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        TextFormField(
+                          controller: _notesController,
+                          minLines: 2,
+                          maxLines: 4,
+                          textCapitalization: TextCapitalization.sentences,
+                          decoration: InputDecoration(
+                            labelText: l10n.paymentNotesLabel,
+                            alignLabelWithHint: true,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
-            ],
-
-            // Amount section - prominent display
-            AppSectionCard(
-              title: 'Payment Amount',
-              icon: Icons.currency_rupee_outlined,
-              iconColor: AppColors.success,
-              contentPadding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.lg,
-              ),
-              child: TextFormField(
-                controller: _amountController,
-                keyboardType: TextInputType.number,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  fontFeatures: const [FontFeature.tabularFigures()],
-                  color: AppColors.success,
-                ),
-                decoration: InputDecoration(
-                  hintText: '0',
-                  hintStyle: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textTertiary,
-                  ),
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.only(left: 12),
-                    child: Text(
-                      '\u20B9',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.success,
-                      ),
-                    ),
-                  ),
-                  prefixIconConstraints: const BoxConstraints(
-                    minWidth: 40,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: AppRadii.lg,
-                    borderSide: BorderSide(
-                      color: AppColors.success.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: AppRadii.lg,
-                    borderSide: BorderSide(
-                      color: AppColors.success,
-                      width: 2,
-                    ),
-                  ),
-                  filled: true,
-                  fillColor: AppColors.success.withValues(alpha: isDark ? 0.08 : 0.04),
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.lg,
-                    horizontal: AppSpacing.md,
-                  ),
-                ),
-                validator: (value) {
-                  final parsed = double.tryParse(value ?? '');
-                  if (parsed == null || parsed <= 0) {
-                    return 'Enter a valid amount.';
-                  }
-                  return null;
-                },
-              ),
             ),
-            const SizedBox(height: AppSpacing.lg),
-
-            // Payment details section
-            AppSectionCard(
-              title: 'Payment Details',
-              icon: Icons.info_outline,
-              children: [
-                // Tenant dropdown
-                tenantsAsync.when(
-                  data: (tenants) {
-                    return DropdownButtonFormField<Tenant>(
-                      initialValue: _selectedTenant,
-                      items: tenants
-                          .map(
-                            (tenant) => DropdownMenuItem(
-                              value: tenant,
-                              child: Text(tenant.displayName),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (value) =>
-                          setState(() => _selectedTenant = value),
-                      decoration: const InputDecoration(
-                        labelText: 'Tenant',
-                        prefixIcon: Icon(Icons.person_outline, size: 20),
-                      ),
-                      validator: (value) =>
-                          value == null ? 'Select a tenant.' : null,
-                    );
-                  },
-                  loading: () => const LinearProgressIndicator(),
-                  error: (error, _) => Text('Failed to load tenants: $error'),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-
-                // Payment method selector
-                Text(
-                  'Payment Method',
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                _PaymentMethodSelector(
-                  methods: _paymentMethods,
-                  selected: _method,
-                  onChanged: (value) => setState(() => _method = value),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-
-                // Payment date
-                InkWell(
-                  onTap: _pickDate,
-                  borderRadius: AppRadii.md,
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Payment Date',
-                      prefixIcon: Icon(Icons.calendar_today_outlined, size: 20),
-                      suffixIcon: Icon(Icons.edit_outlined, size: 18),
-                    ),
-                    child: Text(dateLabel),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-
-                // Notes
-                TextFormField(
-                  controller: _notesController,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    labelText: 'Notes (optional)',
-                    prefixIcon: Padding(
-                      padding: EdgeInsets.only(bottom: 40),
-                      child: Icon(Icons.note_outlined, size: 20),
-                    ),
-                    alignLabelWithHint: true,
-                  ),
-                ),
-              ],
+            SubmitBar(
+              label: l10n.homeRecordPayment,
+              busy: _isSaving,
+              onPressed: _submit,
             ),
-            const SizedBox(height: AppSpacing.xl),
-
-            // Submit button
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: FilledButton.icon(
-                onPressed: _isSaving ? null : _submit,
-                icon: _isSaving
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.check_circle_outline),
-                label: Text(
-                  _isSaving ? 'Saving...' : 'Record Payment',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
           ],
         ),
       ),
-    );
-  }
-}
-
-/// Payment method data.
-class _PaymentMethodOption {
-  final String label;
-  final IconData icon;
-
-  const _PaymentMethodOption(this.label, this.icon);
-}
-
-/// Styled payment method selector as a row of selectable chips.
-class _PaymentMethodSelector extends StatelessWidget {
-  const _PaymentMethodSelector({
-    required this.methods,
-    required this.selected,
-    required this.onChanged,
-  });
-
-  final List<_PaymentMethodOption> methods;
-  final String selected;
-  final ValueChanged<String> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Wrap(
-      spacing: AppSpacing.sm,
-      runSpacing: AppSpacing.sm,
-      children: methods.map((method) {
-        final isSelected = method.label == selected;
-        return Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => onChanged(method.label),
-            borderRadius: AppRadii.md,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.sm,
-              ),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? scheme.primary.withValues(alpha: isDark ? 0.15 : 0.08)
-                    : Colors.transparent,
-                borderRadius: AppRadii.md,
-                border: Border.all(
-                  color: isSelected
-                      ? scheme.primary
-                      : (isDark ? AppColors.darkCardBorder : AppColors.cardBorder),
-                  width: isSelected ? 1.5 : 1,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    method.icon,
-                    size: 18,
-                    color: isSelected ? scheme.primary : AppColors.textSecondary,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    method.label,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: isSelected ? scheme.primary : AppColors.textSecondary,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      }).toList(),
     );
   }
 }

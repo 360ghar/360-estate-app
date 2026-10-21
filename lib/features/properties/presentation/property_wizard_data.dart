@@ -1,229 +1,217 @@
-import 'package:estate_app/features/properties/domain/repositories/properties_repository.dart';
+import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/features/properties/models/property.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 
-/// Data model for property wizard form state.
+/// Form state of the property wizard. The steps edit the fields in place.
+///
+/// The request bodies use the backend names (`ManagedPropertyCreate` and
+/// `ManagedPropertyUpdate`): `title`, `description`, `property_type`,
+/// `monthly_rent`, `full_address`, `area_sqft`, `bedrooms`, `bathrooms`,
+/// `balconies`, `amenity_ids`, `latitude`, `longitude`, `payment_due_day`,
+/// `grace_period_days`, `management_status`.
 class PropertyWizardData {
-  // Step 1: Basic Details
-  String? name;
-  String? type;
-  String? managementStatus;
-  String? notes;
+  PropertyWizardData();
+
+  /// Populate from an existing property (edit).
+  factory PropertyWizardData.fromProperty(Property property) {
+    final data = PropertyWizardData()
+      ..name = property.title ?? ''
+      ..type = property.propertyType
+      // A property saved with a status the app does not know keeps no choice.
+      ..status = property.managementStatus ?? ManagedPropertyStatus.active
+      ..description = property.description ?? ''
+      ..address = property.fullAddress ?? ''
+      ..city = property.city ?? ''
+      ..state = property.state ?? ''
+      ..pincode = property.pincode ?? ''
+      ..latitude = property.latitude
+      ..longitude = property.longitude
+      ..areaSqft = property.areaSqft
+      ..bedrooms = property.bedrooms
+      ..bathrooms = property.bathrooms
+      ..balconies = property.balconies
+      ..ageOfProperty = property.ageOfProperty
+      ..amenityIds = {
+        for (final amenity in property.amenities ?? const <PropertyAmenity>[])
+          if (amenity.id != null) amenity.id!,
+      }
+      ..monthlyRent = property.monthlyRent ?? property.basePrice
+      ..securityDeposit = property.securityDeposit
+      ..paymentDueDay = property.paymentDueDay ?? 1
+      ..gracePeriodDays = property.gracePeriodDays ?? 5
+      ..images = property.imageUrls
+      ..floorPlans = property.floorPlanUrls;
+    return data..markSaved();
+  }
+
+  // Step 1: Basic details
+  String name = '';
+  PropertyType? type;
+  ManagedPropertyStatus status = ManagedPropertyStatus.active;
+  String description = '';
 
   // Step 2: Location
-  String? address;
-  String? city;
-  String? state;
-  String? pincode;
+  String address = '';
+  String city = '';
+  String state = '';
+  String pincode = '';
+  double? latitude;
+  double? longitude;
+
+  /// The place the user picked on the location screen, for display only.
+  String? locationName;
 
   // Step 3: Specifications
-  int? unitCount;
-  double? floorAreaSqft;
-  int? bedroomCount;
-  int? bathroomCount;
-  int? balconyCount;
-  int? yearBuilt;
-  List<String>? amenities;
+  double? areaSqft;
+  int? bedrooms;
+  int? bathrooms;
+  int? balconies;
+  int? ageOfProperty;
+  Set<int> amenityIds = <int>{};
 
-  // Step 4: Financial & Management
-  double? monthlyRentInr;
-  int? paymentDueDay;
-  double? marketValue;
-  String? assignedManagerId;
-  String? propertyTaxId;
-  String? insurancePolicy;
-  String? hoaInfo;
+  // Step 4: Rent
+  double? monthlyRent;
+  double? securityDeposit;
+  int paymentDueDay = 1;
+  int gracePeriodDays = 5;
 
-  // Step 5: Media (URLs after upload)
-  List<String> images;
-  List<String> floorPlans;
+  // Step 5: Media. Stored URLs, plus `file:` URIs of pictures not uploaded yet.
+  List<String> images = [];
+  List<String> floorPlans = [];
 
-  PropertyWizardData({
-    this.name,
-    this.type,
-    this.managementStatus = 'active',
-    this.notes,
-    this.address,
-    this.city,
-    this.state,
-    this.pincode,
-    this.unitCount,
-    this.floorAreaSqft,
-    this.bedroomCount,
-    this.bathroomCount,
-    this.balconyCount,
-    this.yearBuilt,
-    this.amenities,
-    this.monthlyRentInr,
-    this.paymentDueDay = 1,
-    this.marketValue,
-    this.assignedManagerId,
-    this.propertyTaxId,
-    this.insurancePolicy,
-    this.hoaInfo,
-    List<String>? images,
-    List<String>? floorPlans,
-  })  : images = images ?? [],
-        floorPlans = floorPlans ?? [];
+  Map<String, dynamic>? _baseline;
+  List<String> _baselineImages = const [];
+  List<String> _baselineFloorPlans = const [];
 
-  /// Populate from existing Property.
-  factory PropertyWizardData.fromProperty(Property property) {
-    return PropertyWizardData(
-      name: property.name ?? property.propertyName,
-      type: property.type,
-      managementStatus: property.managementStatus ?? 'active',
-      notes: property.notes,
-      address: property.address,
-      city: property.city,
-      state: property.state,
-      pincode: property.pincode,
-      unitCount: property.unitCount,
-      floorAreaSqft: property.floorAreaSqft,
-      bedroomCount: property.bedroomCount,
-      bathroomCount: property.bathroomCount,
-      balconyCount: property.balconyCount,
-      yearBuilt: property.yearBuilt,
-      amenities: property.amenities,
-      monthlyRentInr: property.monthlyRentInr,
-      paymentDueDay: property.paymentDueDay ?? 1,
-      marketValue: property.marketValue,
-      assignedManagerId: property.assignedManagerId?.toString(),
-      propertyTaxId: property.propertyTaxId,
-      insurancePolicy: property.insurancePolicy,
-      hoaInfo: property.hoaInfo,
-      images: property.images ?? [],
-      floorPlans: property.floorPlans ?? [],
-    );
+  /// Records the field values as saved and leaves the photo baselines alone,
+  /// so a photo removed in the same save is still sent by [mediaPatch].
+  void markFieldsSaved() => _baseline = _fields();
+
+  /// Records the current values as the saved state. A later [toPatchBody] sends
+  /// only what changed after this point.
+  void markSaved({List<String>? savedImages, List<String>? savedFloorPlans}) {
+    _baseline = _fields();
+    _baselineImages = List<String>.of(savedImages ?? remoteImages);
+    _baselineFloorPlans = List<String>.of(savedFloorPlans ?? remoteFloorPlans);
   }
 
-  /// Convert to PropertyPayload for API submission.
-  PropertyPayload toPayload() {
-    return PropertyPayload(
-      name: name?.trim() ?? '',
-      address: address?.trim(),
-      city: city?.trim(),
-      state: state?.trim(),
-      pincode: pincode?.trim(),
-      unitCount: unitCount,
-      type: type,
-      floorAreaSqft: floorAreaSqft,
-      bedroomCount: bedroomCount,
-      bathroomCount: bathroomCount,
-      balconyCount: balconyCount,
-      monthlyRentInr: monthlyRentInr,
-      paymentDueDay: paymentDueDay ?? 1,
-      managementStatus: managementStatus ?? 'active',
-      notes: notes?.trim(),
-      images: images.isEmpty ? null : images,
-      floorPlans: floorPlans.isEmpty ? null : floorPlans,
-      marketValue: marketValue,
-      amenities: amenities?.isEmpty ?? true
-          ? null
-          : amenities,
-      yearBuilt: yearBuilt,
-      propertyTaxId: propertyTaxId?.trim(),
-      insurancePolicy: insurancePolicy?.trim(),
-      hoaInfo: hoaInfo?.trim(),
-      assignedManagerId: int.tryParse(assignedManagerId ?? ''),
-    );
+  static bool isLocalFile(String url) {
+    final uri = Uri.tryParse(url);
+    return uri != null && uri.scheme == 'file';
   }
 
-  /// Validate step 1 (Basic Details).
-  String? validateStep1() {
-    if (name == null || name!.trim().isEmpty) {
-      return 'Please enter a property name';
-    }
-    if (type == null || type!.trim().isEmpty) {
-      return 'Please select a property type';
-    }
-    return null;
+  List<String> get remoteImages =>
+      images.where((u) => !isLocalFile(u)).toList();
+  List<String> get remoteFloorPlans =>
+      floorPlans.where((u) => !isLocalFile(u)).toList();
+
+  static String? _text(String value) {
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
   }
 
-  /// Validate step 2 (Location).
-  String? validateStep2() {
-    if (city == null || city!.trim().isEmpty) {
-      return 'Please enter a city';
-    }
-    return null;
-  }
-
-  /// Step 3 has no required fields.
-  String? validateStep3() => null;
-
-  /// Step 4 requires base price.
-  String? validateStep4() {
-    if (monthlyRentInr == null && marketValue == null) {
-      return 'Please enter a base price';
-    }
-    return null;
-  }
-
-  /// Step 5 has no required fields.
-  String? validateStep5() => null;
-
-  /// Check if a step is valid.
-  String? validateStep(int step) {
-    return switch (step) {
-      1 => validateStep1(),
-      2 => validateStep2(),
-      3 => validateStep3(),
-      4 => validateStep4(),
-      5 => validateStep5(),
-      _ => null,
+  /// Every editable field by wire name. A cleared optional field is null.
+  Map<String, dynamic> _fields() {
+    return {
+      'title': name.trim(),
+      'description': _text(description),
+      'property_type': type?.wire,
+      // A managed property is a rental. `base_price` is the rent.
+      'purpose': PropertyPurpose.rent.wire,
+      'base_price': monthlyRent,
+      'monthly_rent': monthlyRent,
+      'security_deposit': securityDeposit,
+      'management_status': status.wire,
+      'payment_due_day': paymentDueDay,
+      'grace_period_days': gracePeriodDays,
+      'full_address': _text(address),
+      'city': _text(city),
+      'state': _text(state),
+      'pincode': _text(pincode),
+      'latitude': latitude,
+      'longitude': longitude,
+      'area_sqft': areaSqft,
+      'bedrooms': bedrooms,
+      'bathrooms': bathrooms,
+      'balconies': balconies,
+      'age_of_property': ageOfProperty,
+      'amenity_ids': (amenityIds.toList()..sort()),
     };
   }
 
-  /// Create a copy with updated fields.
-  PropertyWizardData copyWith({
-    String? name,
-    String? type,
-    String? managementStatus,
-    String? notes,
-    String? address,
-    String? city,
-    String? state,
-    String? pincode,
-    int? unitCount,
-    double? floorAreaSqft,
-    int? bedroomCount,
-    int? bathroomCount,
-    int? balconyCount,
-    int? yearBuilt,
-    List<String>? amenities,
-    double? monthlyRentInr,
-    int? paymentDueDay,
-    double? marketValue,
-    String? assignedManagerId,
-    String? propertyTaxId,
-    String? insurancePolicy,
-    String? hoaInfo,
-    List<String>? images,
-    List<String>? floorPlans,
-  }) {
-    return PropertyWizardData(
-      name: name ?? this.name,
-      type: type ?? this.type,
-      managementStatus: managementStatus ?? this.managementStatus,
-      notes: notes ?? this.notes,
-      address: address ?? this.address,
-      city: city ?? this.city,
-      state: state ?? this.state,
-      pincode: pincode ?? this.pincode,
-      unitCount: unitCount ?? this.unitCount,
-      floorAreaSqft: floorAreaSqft ?? this.floorAreaSqft,
-      bedroomCount: bedroomCount ?? this.bedroomCount,
-      bathroomCount: bathroomCount ?? this.bathroomCount,
-      balconyCount: balconyCount ?? this.balconyCount,
-      yearBuilt: yearBuilt ?? this.yearBuilt,
-      amenities: amenities ?? this.amenities,
-      monthlyRentInr: monthlyRentInr ?? this.monthlyRentInr,
-      paymentDueDay: paymentDueDay ?? this.paymentDueDay,
-      marketValue: marketValue ?? this.marketValue,
-      assignedManagerId: assignedManagerId ?? this.assignedManagerId,
-      propertyTaxId: propertyTaxId ?? this.propertyTaxId,
-      insurancePolicy: insurancePolicy ?? this.insurancePolicy,
-      hoaInfo: hoaInfo ?? this.hoaInfo,
-      images: images ?? this.images,
-      floorPlans: floorPlans ?? this.floorPlans,
-    );
+  /// The `POST /pm/properties` body (`ManagedPropertyCreate`): set fields only.
+  /// An agent's `owner_id` is added by the API client.
+  Map<String, dynamic> toCreateBody() {
+    return {
+      for (final entry in _fields().entries)
+        if (entry.value != null) entry.key: entry.value,
+    };
   }
+
+  /// The `PATCH /pm/properties/{id}` body (`ManagedPropertyUpdate`): only the
+  /// keys that changed since [markSaved]. A cleared optional field is sent as
+  /// an explicit null. Without a saved state every set field is sent.
+  Map<String, dynamic> toPatchBody() {
+    final baseline = _baseline;
+    final body = <String, dynamic>{};
+    for (final entry in _fields().entries) {
+      if (baseline != null && _same(entry.value, baseline[entry.key])) {
+        continue;
+      }
+      if (baseline == null && entry.value == null) continue;
+      body[entry.key] = entry.value;
+    }
+    // The point is built only when both coordinates are present.
+    if (body.containsKey('latitude') || body.containsKey('longitude')) {
+      if (latitude != null && longitude != null) {
+        body['latitude'] = latitude;
+        body['longitude'] = longitude;
+      } else if (latitude == null && longitude == null) {
+        // Both cleared: the explicit nulls stay.
+      } else {
+        body.remove('latitude');
+        body.remove('longitude');
+      }
+    }
+    return body;
+  }
+
+  /// The media keys of the PATCH: `images` replaces the photos and
+  /// `floor_plans` replaces the floor plans. A key is present only when its
+  /// list differs from the saved list.
+  Map<String, dynamic> mediaPatch({
+    required List<String> photoUrls,
+    required List<String> floorPlanUrls,
+  }) {
+    return {
+      if (!listEquals(photoUrls, _baselineImages)) 'images': photoUrls,
+      if (!listEquals(floorPlanUrls, _baselineFloorPlans))
+        'floor_plans': floorPlanUrls,
+    };
+  }
+
+  static bool _same(Object? a, Object? b) {
+    if (a is List && b is List) return listEquals<Object?>(a, b);
+    return a == b;
+  }
+
+  /// What blocks [step] (1 to 5). The screen shows each issue under its
+  /// field. Step 4: the due day is 1 to 28 and the grace period 0 to 365 (the
+  /// backend refuses other values).
+  List<WizardIssue> issues(int step) => switch (step) {
+    1 => [
+      if (name.trim().isEmpty) WizardIssue.name,
+      if (type == null) WizardIssue.type,
+    ],
+    2 => [if (city.trim().isEmpty) WizardIssue.city],
+    4 => [
+      if (monthlyRent == null || monthlyRent! <= 0) WizardIssue.rent,
+      if (paymentDueDay < 1 || paymentDueDay > 28) WizardIssue.dueDay,
+      if (gracePeriodDays < 0 || gracePeriodDays > 365) WizardIssue.grace,
+    ],
+    _ => const [],
+  };
 }
+
+/// A field the wizard cannot move past.
+enum WizardIssue { name, type, city, rent, dueDay, grace }

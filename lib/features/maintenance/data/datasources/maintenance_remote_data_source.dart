@@ -1,26 +1,24 @@
+import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/core/network/api_client.dart';
+import 'package:estate_app/core/network/api_paths.dart';
 import 'package:estate_app/core/network/response_parser.dart';
 import 'package:estate_app/core/pagination/page.dart';
-import 'package:estate_app/features/maintenance/data/models/maintenance_request_dto.dart';
+import 'package:estate_app/features/maintenance/domain/entities/maintenance_request.dart';
 
 abstract interface class MaintenanceRemoteDataSource {
-  Future<Page<MaintenanceRequestDto>> getRequests({
+  Future<Page<MaintenanceRequest>> getRequests({
     required String? cursor,
     required int limit,
     int? propertyId,
-    String? status,
-    String? priority,
-    String? category,
+    MaintenanceRequestStatus? status,
   });
 
-  Future<MaintenanceRequestDto> getRequestById(int id);
+  Future<MaintenanceRequest> createRequest(Map<String, dynamic> data);
 
-  Future<MaintenanceRequestDto> createRequest(Map<String, dynamic> data);
-
-  Future<MaintenanceRequestDto> updateRequest(
-      int id, Map<String, dynamic> updates);
-
-  Future<void> updateStatus(int id, String status);
+  Future<MaintenanceRequest> updateRequest(
+    int id,
+    Map<String, dynamic> updates,
+  );
 }
 
 final class ApiMaintenanceRemoteDataSource
@@ -30,36 +28,29 @@ final class ApiMaintenanceRemoteDataSource
   final ApiClient _apiClient;
 
   @override
-  Future<Page<MaintenanceRequestDto>> getRequests({
+  Future<Page<MaintenanceRequest>> getRequests({
     required String? cursor,
     required int limit,
     int? propertyId,
-    String? status,
-    String? priority,
-    String? category,
+    MaintenanceRequestStatus? status,
   }) async {
-    final queryParams = <String, dynamic>{
-      'limit': limit,
-      if (cursor != null) 'cursor': cursor,
-      if (propertyId != null) 'property_id': propertyId,
-      if (status != null) 'request_status': status,
-      if (priority != null) 'priority': priority,
-      if (category != null) 'category': category,
-    };
-
     final response = await _apiClient.get<dynamic>(
-      '/pm/maintenance/requests',
-      queryParameters: queryParams,
+      ApiPaths.maintenanceRequests,
+      ownerScoped: true,
+      queryParameters: {
+        'limit': limit,
+        if (cursor != null) 'cursor': cursor,
+        if (propertyId != null) 'property_id': propertyId,
+        if (status != null) 'request_status': status.wire,
+      },
     );
 
     final page = unwrapPage(response.data);
-    final items = page.items
-        .whereType<Map<String, dynamic>>()
-        .map(MaintenanceRequestDto.fromJson)
-        .toList();
-
-    return Page<MaintenanceRequestDto>(
-      items: items,
+    return Page<MaintenanceRequest>(
+      items: page.items
+          .whereType<Map<String, dynamic>>()
+          .map(MaintenanceRequest.fromJson)
+          .toList(),
       limit: limit,
       hasMore: page.hasMore,
       nextCursor: page.nextCursor,
@@ -67,40 +58,23 @@ final class ApiMaintenanceRemoteDataSource
   }
 
   @override
-  Future<MaintenanceRequestDto> getRequestById(int id) async {
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      '/pm/maintenance/requests/$id',
-    );
-
-    return MaintenanceRequestDto.fromJson(response.data!);
-  }
-
-  @override
-  Future<MaintenanceRequestDto> createRequest(Map<String, dynamic> data) async {
-    final response = await _apiClient.post<Map<String, dynamic>>(
-      '/pm/maintenance/requests',
+  Future<MaintenanceRequest> createRequest(Map<String, dynamic> data) async {
+    final response = await _apiClient.post<dynamic>(
+      ApiPaths.maintenanceRequests,
       data: data,
     );
-
-    return MaintenanceRequestDto.fromJson(response.data!);
+    return MaintenanceRequest.fromJson(unwrapMap(response.data));
   }
 
   @override
-  Future<MaintenanceRequestDto> updateRequest(
-      int id, Map<String, dynamic> updates) async {
-    final response = await _apiClient.patch<Map<String, dynamic>>(
-      '/pm/maintenance/requests/$id',
+  Future<MaintenanceRequest> updateRequest(
+    int id,
+    Map<String, dynamic> updates,
+  ) async {
+    final response = await _apiClient.patch<dynamic>(
+      ApiPaths.maintenanceRequest(id),
       data: updates,
     );
-
-    return MaintenanceRequestDto.fromJson(response.data!);
-  }
-
-  @override
-  Future<void> updateStatus(int id, String status) async {
-    await _apiClient.patch<void>(
-      '/pm/maintenance/requests/$id',
-      data: {'request_status': status},
-    );
+    return MaintenanceRequest.fromJson(unwrapMap(response.data));
   }
 }

@@ -1,246 +1,152 @@
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
-import 'package:estate_app/core/presentation/design_system/app_radii.dart';
-import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
+import 'package:estate_app/app/router/routes.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:estate_app/core/presentation/errors/user_facing_message.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/widgets/app_empty_view.dart';
 import 'package:estate_app/core/presentation/widgets/app_error_view.dart';
+import 'package:estate_app/core/presentation/widgets/app_list_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_loading_shimmer.dart';
-import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
 import 'package:estate_app/core/presentation/widgets/app_status_badge.dart';
+import 'package:estate_app/core/presentation/widgets/motion.dart';
+import 'package:estate_app/core/utils/dates.dart';
 import 'package:estate_app/features/inspections/inspections_providers.dart';
 import 'package:estate_app/features/inspections/models/inspection.dart';
-import 'package:estate_app/features/inspections/presentation/inspection_templates_page.dart';
+import 'package:estate_app/features/inspections/presentation/inspection_text.dart';
+import 'package:estate_app/features/properties/properties_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 class InspectionsPage extends ConsumerWidget {
-  const InspectionsPage({super.key, this.propertyId, this.tenantId});
+  const InspectionsPage({super.key, this.propertyId, this.leaseId});
 
-  final String? propertyId;
-  final String? tenantId;
+  final int? propertyId;
+  final int? leaseId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final inspectionsAsync = ref.watch(
-      inspectionsListProvider(
-        InspectionListFilter(propertyId: propertyId, tenantId: tenantId),
-      ),
+    final l10n = context.l10n;
+    final filter = InspectionListFilter(
+      propertyId: propertyId,
+      leaseId: leaseId,
     );
+    final inspections = ref.watch(inspectionsListProvider(filter));
+    final propertyTitles =
+        ref.watch(propertyTitlesProvider).valueOrNull ?? const <int, String>{};
+    final isEmpty = inspections.valueOrNull?.isEmpty ?? false;
 
-    return AppScaffold(
+    Future<void> refresh() async {
+      ref.invalidate(inspectionsListProvider(filter));
+      await ref
+          .read(inspectionsListProvider(filter).future)
+          .catchError((_) => const <Inspection>[]);
+    }
+
+    void create() => context.go(Routes.inspectionsNew);
+
+    return Scaffold(
       appBar: AppBar(
-        title: const Text('Inspections'),
+        title: Text(l10n.inspectionsTitle),
         actions: [
           IconButton(
-            icon: const Icon(Icons.fact_check_outlined),
-            tooltip: 'Templates',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const InspectionTemplatesPage(),
-                ),
-              );
-            },
+            tooltip: l10n.inspectionsTemplatesAction,
+            icon: const Icon(Icons.checklist_rounded),
+            onPressed: () => context.go(Routes.inspectionTemplates),
           ),
         ],
       ),
-      padding: EdgeInsets.zero,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/more/inspections/new'),
-        icon: const Icon(Icons.playlist_add),
-        label: const Text('New inspection'),
-      ),
-      body: inspectionsAsync.when(
-        data: (inspections) {
-          if (inspections.isEmpty) {
-            return const AppEmptyView(
-              title: 'No inspections yet',
-              message: 'Create a checklist to start an inspection.',
-            );
-          }
-          return ListView.separated(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            itemCount: inspections.length,
-            separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
-            itemBuilder: (context, index) {
-              return _InspectionTile(inspection: inspections[index]);
-            },
-          );
-        },
+      // The empty state carries the same action, so the button is not shown
+      // twice.
+      floatingActionButton: isEmpty
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: create,
+              icon: const Icon(Icons.add_rounded),
+              label: Text(l10n.inspectionsNew),
+            ),
+      body: inspections.when(
         loading: () => const AppLoadingShimmer(),
-        error: (error, _) => AppErrorView(
-          title: 'Unable to load inspections',
-          message: error.toString(),
-          onRetry: () => ref.invalidate(inspectionsListProvider),
-          retryLabel: 'Try again',
+        error: (error, _) => RefreshIndicator(
+          onRefresh: refresh,
+          child: StateScrollView(
+            child: AppErrorView(
+              title: l10n.commonLoadFailedTitle,
+              message: userFacingMessage(error),
+              onRetry: () => ref.invalidate(inspectionsListProvider(filter)),
+            ),
+          ),
+        ),
+        data: (items) => RefreshIndicator(
+          onRefresh: refresh,
+          child: items.isEmpty
+              ? StateScrollView(
+                  child: AppEmptyView(
+                    title: l10n.inspectionsEmptyTitle,
+                    message: l10n.inspectionsEmptyBody,
+                    icon: Icons.fact_check_outlined,
+                    action: FilledButton.icon(
+                      onPressed: create,
+                      icon: const Icon(Icons.add_rounded),
+                      label: Text(l10n.inspectionsNew),
+                    ),
+                  ),
+                )
+              : ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  // Room under the last row for the floating button.
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.sm,
+                    AppSpacing.lg,
+                    96,
+                  ),
+                  itemCount: items.length,
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(height: AppSpacing.md),
+                  itemBuilder: (context, index) => RiseIn(
+                    index: index,
+                    child: _InspectionRow(
+                      inspection: items[index],
+                      propertyTitle: propertyTitles[items[index].propertyId],
+                    ),
+                  ),
+                ),
         ),
       ),
     );
   }
 }
 
-class _InspectionTile extends StatelessWidget {
-  const _InspectionTile({required this.inspection});
+class _InspectionRow extends StatelessWidget {
+  const _InspectionRow({required this.inspection, this.propertyTitle});
 
   final Inspection inspection;
-
-  String _formatDate(DateTime? date) {
-    if (date == null) return 'Not scheduled';
-    return DateFormat('d MMM yyyy').format(date);
-  }
-
-  Color _statusBorderColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'completed':
-      case 'signed':
-        return AppColors.success;
-      case 'in_progress':
-      case 'in progress':
-        return AppColors.warning;
-      case 'cancelled':
-      case 'canceled':
-        return AppColors.danger;
-      case 'scheduled':
-        return AppColors.info;
-      case 'open':
-      default:
-        return AppColors.accent;
-    }
-  }
-
-  AppStatusType _statusType(String status) {
-    switch (status.toLowerCase()) {
-      case 'completed':
-      case 'signed':
-        return AppStatusType.success;
-      case 'in_progress':
-      case 'in progress':
-        return AppStatusType.warning;
-      case 'cancelled':
-      case 'canceled':
-        return AppStatusType.danger;
-      case 'scheduled':
-        return AppStatusType.info;
-      case 'open':
-      default:
-        return AppStatusType.neutral;
-    }
-  }
+  final String? propertyTitle;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final scheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final status = inspection.status ?? 'Open';
-    final scheduled = _formatDate(inspection.scheduledAt);
-    final borderColor = _statusBorderColor(status);
-
-    return GestureDetector(
-      onTap: () => context.go('/more/inspections/${inspection.id}'),
-      child: Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: scheme.surface,
-          borderRadius: AppRadii.lg,
-          border: Border.all(
-            color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
-            width: 0.5,
-          ),
-          boxShadow: AppShadows.cardResting,
-        ),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Colored left border
-              Container(
-                width: 4,
-                decoration: BoxDecoration(
-                  color: borderColor,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(AppRadii.lgValue),
-                    bottomLeft: Radius.circular(AppRadii.lgValue),
-                  ),
-                ),
-              ),
-              // Content
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Top row: name + chevron
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              inspection.displayName,
-                              style: textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          Icon(
-                            Icons.chevron_right,
-                            size: 20,
-                            color: AppColors.textTertiary,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      // Property name (if title is different from property)
-                      if (inspection.propertyName != null &&
-                          inspection.title != null &&
-                          inspection.propertyName != inspection.title)
-                        Padding(
-                          padding:
-                              const EdgeInsets.only(bottom: AppSpacing.sm),
-                          child: Text(
-                            inspection.title!,
-                            style: textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      // Bottom row: date + badges
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_today_outlined,
-                            size: 14,
-                            color: AppColors.textTertiary,
-                          ),
-                          const SizedBox(width: AppSpacing.xs),
-                          Text(
-                            scheduled,
-                            style: textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          const Spacer(),
-                          AppStatusBadge(
-                            label: status,
-                            type: _statusType(status),
-                            variant: AppStatusVariant.subtle,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+    final l10n = context.l10n;
+    final state = inspection.signState;
+    final conducted = inspection.conductedAt;
+    final id = inspection.id;
+    return AppListCard(
+      leading: ExcludeSemantics(
+        child: Icon(
+          inspection.inspectionType?.icon ?? Icons.fact_check_outlined,
+          color: context.colors.onSurfaceVariant,
         ),
       ),
+      title: inspectionTitle(l10n, inspection),
+      subtitle: propertyTitle,
+      facts: [
+        conducted == null
+            ? l10n.inspectionsDateNotSet
+            : shortDate(context, conducted),
+      ],
+      status: AppStatusBadge(label: state.text(l10n), type: state.statusType),
+      onTap: id == null
+          ? null
+          : () => context.go(Routes.inspectionDetail('$id')),
     );
   }
 }

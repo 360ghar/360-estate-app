@@ -1,4 +1,5 @@
 import 'package:estate_app/core/providers.dart';
+import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:estate_app/features/more/reports/data/reports_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,15 +25,15 @@ class ReportRequest {
 }
 
 final reportsRepositoryProvider = Provider<ReportsRepository>((ref) {
+  ref.watch(accountScopeProvider);
   return ReportsRepository(ref.read(apiClientProvider));
 });
 
-final reportProvider = FutureProvider.family<ReportResult, ReportRequest>(
-  (ref, request) {
-    return ref.read(reportsRepositoryProvider).fetchReport(
-          request.type,
-          from: request.from,
-          to: request.to,
-        );
-  },
-);
+final reportProvider = FutureProvider.family<ReportResult, ReportRequest>((
+  ref,
+  request,
+) {
+  return ref
+      .watch(reportsRepositoryProvider)
+      .fetchReport(request.type, from: request.from, to: request.to);
+});

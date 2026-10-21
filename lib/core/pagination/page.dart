@@ -1,3 +1,7 @@
+/// Largest `limit` the backend accepts on a list route. A larger value gives a
+/// 422. Read a longer list by following `next_cursor` (see `fetchAllPages`).
+const int kMaxPageLimit = 100;
+
 final class Page<T> {
   const Page({
     required this.items,

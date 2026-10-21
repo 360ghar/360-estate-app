@@ -1,122 +1,102 @@
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:flutter/material.dart';
 
-/// A shared search bar with optional filter chips and filter button.
-///
-/// Extracts the repeated search + filter pattern used across list pages.
-///
-/// Example:
-/// ```dart
-/// AppSearchBar(
-///   hintText: 'Search properties...',
-///   onChanged: (value) => setState(() => _query = value),
-///   filterChips: [
-///     FilterChip(label: Text('All'), onSelected: (_) {}),
-///     FilterChip(label: Text('Active'), onSelected: (_) {}),
-///   ],
-/// )
-/// ```
-class AppSearchBar extends StatelessWidget {
+/// A search field with an optional filter button and a row of filter chips
+/// under it.
+class AppSearchBar extends StatefulWidget {
   const AppSearchBar({
     super.key,
-    this.hintText = 'Search...',
+    required this.hintText,
     this.controller,
     this.onChanged,
     this.onFilterTap,
     this.filterChips,
-    this.padding = const EdgeInsets.symmetric(
-      horizontal: AppSpacing.lg,
-      vertical: AppSpacing.sm,
+    this.padding = const EdgeInsets.fromLTRB(
+      AppSpacing.lg,
+      AppSpacing.sm,
+      AppSpacing.lg,
+      AppSpacing.sm,
     ),
   });
 
-  /// Placeholder text for the search field
   final String hintText;
-
-  /// Text controller for the search field
   final TextEditingController? controller;
-
-  /// Called when search text changes
   final ValueChanged<String>? onChanged;
-
-  /// Called when filter button is tapped (shown only if non-null)
   final VoidCallback? onFilterTap;
-
-  /// Optional filter chips displayed below the search field
   final List<Widget>? filterChips;
-
-  /// Outer padding
   final EdgeInsetsGeometry padding;
 
   @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+  State<AppSearchBar> createState() => _AppSearchBarState();
+}
 
+class _AppSearchBarState extends State<AppSearchBar> {
+  TextEditingController? _own;
+  TextEditingController get _controller =>
+      widget.controller ?? (_own ??= TextEditingController());
+
+  @override
+  void dispose() {
+    _own?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final chips = widget.filterChips ?? const <Widget>[];
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: padding,
+          padding: widget.padding,
           child: Row(
             children: [
               Expanded(
-                child: TextField(
-                  controller: controller,
-                  onChanged: onChanged,
-                  decoration: InputDecoration(
-                    hintText: hintText,
-                    prefixIcon: Icon(
-                      Icons.search_rounded,
-                      color: scheme.onSurfaceVariant,
-                      size: 20,
-                    ),
-                    suffixIcon: controller != null &&
-                            controller!.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear_rounded, size: 18),
-                            onPressed: () {
-                              controller!.clear();
-                              onChanged?.call('');
-                            },
-                          )
-                        : null,
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
+                child: ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _controller,
+                  builder: (context, value, _) => TextField(
+                    controller: _controller,
+                    onChanged: widget.onChanged,
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      hintText: widget.hintText,
+                      prefixIcon: const Icon(Icons.search_rounded),
+                      suffixIcon: value.text.isEmpty
+                          ? null
+                          : IconButton(
+                              tooltip: context.l10n.commonClearSearch,
+                              icon: const Icon(Icons.close_rounded),
+                              onPressed: () {
+                                _controller.clear();
+                                widget.onChanged?.call('');
+                              },
+                            ),
                     ),
                   ),
                 ),
               ),
-              if (onFilterTap != null) ...[
+              if (widget.onFilterTap != null) ...[
                 const SizedBox(width: AppSpacing.sm),
-                IconButton.outlined(
-                  onPressed: onFilterTap,
-                  icon: const Icon(Icons.tune_rounded, size: 20),
-                  style: IconButton.styleFrom(
-                    side: BorderSide(color: scheme.outline),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
+                IconButton.filledTonal(
+                  tooltip: context.l10n.commonFilters,
+                  onPressed: widget.onFilterTap,
+                  icon: const Icon(Icons.tune_rounded),
                 ),
               ],
             ],
           ),
         ),
-        if (filterChips != null && filterChips!.isNotEmpty)
+        if (chips.isNotEmpty)
           SizedBox(
-            height: 44,
+            height: 48,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
-                vertical: AppSpacing.xs,
-              ),
-              itemCount: filterChips!.length,
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              itemCount: chips.length,
               separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
-              itemBuilder: (_, index) => filterChips![index],
+              itemBuilder: (_, i) => Center(child: chips[i]),
             ),
           ),
       ],

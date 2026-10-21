@@ -1,22 +1,35 @@
-import 'dart:io';
-
+import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
+import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/core/network/api_client.dart';
+import 'package:estate_app/core/network/api_paths.dart';
 import 'package:estate_app/core/network/response_parser.dart';
-
-enum UploadTarget { general, documents }
+import 'package:flutter/foundation.dart';
 
 /// Maximum accepted upload size. The avatar path enforces 5MB
 /// (`AuthRepository.uploadProfilePhoto`); document uploads are capped here so
 /// a single oversized file cannot exhaust memory/timeouts on the wire.
 const int kMaxUploadBytes = 25 * 1024 * 1024; // 25 MB
 
-class UploadResult {
-  const UploadResult({this.url, this.data});
+/// Maximum accepted avatar/profile-photo size (5 MB).
+const int kMaxAvatarBytes = 5 * 1024 * 1024; // 5 MB
 
-  final String? url;
-  final Map<String, dynamic>? data;
+/// The result of `POST /upload` (`UploadResult`). `publicUrl` is the file URL.
+class UploadResult {
+  const UploadResult({required this.publicUrl, this.filePath});
+
+  factory UploadResult.fromJson(Map<String, dynamic> json) {
+    final url = json['public_url'];
+    if (url is! String || url.isEmpty) {
+      throw const UnknownFailure('Upload succeeded but no URL returned.');
+    }
+    final path = json['file_path'];
+    return UploadResult(publicUrl: url, filePath: path is String ? path : null);
+  }
+
+  final String publicUrl;
+  final String? filePath;
 }
 
 class FileUploadService {
@@ -24,99 +37,106 @@ class FileUploadService {
 
   final ApiClient _client;
 
-  Future<UploadResult> uploadFile({
-    required File file,
-    UploadTarget target = UploadTarget.documents,
-    String? title,
-    String? type,
-    int? propertyId,
-    int? leaseId,
-    ProgressCallback? onSendProgress,
-    int maxBytes = kMaxUploadBytes,
-  }) async {
+  /// Shared basename helper: last path segment. Web-safe on purpose: split
+  /// on both `/` and `\` instead of `Platform.pathSeparator` so web builds
+  /// (no dart:io Platform) resolve the same basename.
+  static String fileNameOf(String path) {
+    return path.split(RegExp(r'[/\\]')).last;
+  }
+
+  /// Validates a profile photo: an image type (or unknown mime type) and the
+  /// 5 MB avatar cap. Documents are not images, so they skip this check and
+  /// only enforce [kMaxUploadBytes].
+  ///
+  /// The `application/octet-stream` passthrough preserves the legacy
+  /// `AuthRepository.uploadProfilePhoto` behavior for unknown mime types.
+  static void validateImage({required int length, String? mimeType}) {
+    if (mimeType == null ||
+        (!mimeType.startsWith('image/') &&
+            mimeType != 'application/octet-stream')) {
+      throw const ValidationFailure(
+        'Invalid file type. Please select an image.',
+      );
+    }
+    if (length > kMaxAvatarBytes) {
+      throw const ValidationFailure('Image size must be less than 5MB');
+    }
+  }
+
+  /// Builds the multipart `file` part from a picker `XFile` (bytes-backed on
+  /// web, path-backed on IO). Streams from disk on IO so a 25MB file is not
+  /// held twice in RAM. No `dart:io` File, so web compiles.
+  Future<MultipartFile> _filePart(XFile file, int maxBytes) async {
     final length = await file.length();
     if (length > maxBytes) {
       throw ValidationFailure(
         'File is too large. Maximum size is ${(maxBytes / (1024 * 1024)).toStringAsFixed(0)}MB.',
       );
     }
-    final fileName = file.path.split(Platform.pathSeparator).last;
-    final trimmedTitle = title?.trim();
-    final trimmedType = type?.trim();
-    final formData = FormData.fromMap({
-      'file': await MultipartFile.fromFile(file.path, filename: fileName),
-      if (trimmedTitle != null && trimmedTitle.isNotEmpty)
-        'title': trimmedTitle,
-      if (trimmedType != null &&
-          trimmedType.isNotEmpty &&
-          target == UploadTarget.documents)
-        'document_type': trimmedType,
-      if (trimmedType != null &&
-          trimmedType.isNotEmpty &&
-          target == UploadTarget.general)
-        'type': trimmedType,
-      if (propertyId != null && target == UploadTarget.documents)
-        'property_id': propertyId.toString(),
-      if (leaseId != null && target == UploadTarget.documents)
-        'lease_id': leaseId.toString(),
-    });
+    final fileName = file.name.isNotEmpty
+        ? file.name
+        : FileUploadService.fileNameOf(file.path);
+    if (!kIsWeb && file.path.isNotEmpty) {
+      return MultipartFile.fromFile(file.path, filename: fileName);
+    }
+    return MultipartFile.fromBytes(
+      await file.readAsBytes(),
+      filename: fileName,
+    );
+  }
 
-    final path = target == UploadTarget.documents
-        ? '/pm/documents/upload'
-        : '/upload';
-    final response = await _client.upload<Map<String, dynamic>>(
-      path,
+  /// Uploads a picture that the app shows by URL, such as a property photo or
+  /// a floor plan, with `POST /upload` (`folder_type` generic, `visibility`
+  /// public). The URL goes in the property body (`images`, `floor_plans`).
+  /// The route refuses the property folder types: they need a property id.
+  Future<UploadResult> uploadPublicImage({
+    required XFile file,
+    ProgressCallback? onSendProgress,
+    int maxBytes = kMaxUploadBytes,
+  }) async {
+    final formData = FormData.fromMap({
+      'file': await _filePart(file, maxBytes),
+      'folder_type': StorageFolderType.generic.wire,
+      'visibility': TourVisibility.public.wire,
+    });
+    final response = await _client.upload<dynamic>(
+      ApiPaths.generalUpload,
       data: formData,
       onSendProgress: onSendProgress,
     );
-
-    final payload = unwrapData(response.data);
-    if (payload is String) {
-      return UploadResult(
-        url: _resolveUploadUrl(payload, baseUrl: _client.dio.options.baseUrl),
-      );
-    }
-    if (payload is Map<String, dynamic>) {
-      final url = _extractUrl(payload, baseUrl: _client.dio.options.baseUrl);
-      return UploadResult(url: url, data: payload);
-    }
-    return const UploadResult();
-  }
-}
-
-String? _extractUrl(Map<String, dynamic> payload, {String? baseUrl}) {
-  final candidates = [
-    payload['url'],
-    payload['file_url'],
-    payload['download_url'],
-    payload['path'],
-  ];
-  for (final value in candidates) {
-    if (value is String && value.trim().isNotEmpty) {
-      return _resolveUploadUrl(value, baseUrl: baseUrl);
-    }
+    return UploadResult.fromJson(unwrapMap(response.data));
   }
 
-  final data = payload['data'];
-  if (data is Map<String, dynamic>) {
-    return _extractUrl(data, baseUrl: baseUrl);
+  /// Uploads a document with `POST /pm/documents/upload` and returns the
+  /// created document (`Document`) as JSON. `document_type` is required. The
+  /// title defaults to the file name on the backend. The file is private.
+  Future<Map<String, dynamic>> uploadDocument({
+    required XFile file,
+    required DocumentType documentType,
+    String? title,
+    int? propertyId,
+    int? leaseId,
+    bool sharedWithTenant = false,
+    ProgressCallback? onSendProgress,
+    int maxBytes = kMaxUploadBytes,
+  }) async {
+    final trimmedTitle = title?.trim();
+    final formData = FormData.fromMap({
+      'file': await _filePart(file, maxBytes),
+      'document_type': documentType.wire,
+      // A blank title is not sent. The backend uses the file name.
+      if (trimmedTitle != null && trimmedTitle.isNotEmpty)
+        'title': trimmedTitle,
+      if (propertyId != null) 'property_id': propertyId.toString(),
+      if (leaseId != null) 'lease_id': leaseId.toString(),
+      if (sharedWithTenant) 'shared_with_tenant': 'true',
+    });
+    final response = await _client.upload<dynamic>(
+      ApiPaths.documentsUpload,
+      data: formData,
+      onSendProgress: onSendProgress,
+      ownerScoped: true,
+    );
+    return unwrapMap(response.data);
   }
-  return null;
-}
-
-String? _resolveUploadUrl(String? raw, {String? baseUrl}) {
-  final trimmed = raw?.trim();
-  if (trimmed == null || trimmed.isEmpty) return null;
-
-  final uri = Uri.tryParse(trimmed);
-  if (uri == null) return null;
-  if (uri.hasScheme) return trimmed;
-
-  final base = baseUrl?.trim();
-  if (base == null || base.isEmpty) return trimmed;
-  final normalizedBase = base.endsWith('/') ? base : '$base/';
-  final baseUri = Uri.tryParse(normalizedBase);
-  if (baseUri == null) return trimmed;
-
-  return baseUri.resolveUri(uri).toString();
 }

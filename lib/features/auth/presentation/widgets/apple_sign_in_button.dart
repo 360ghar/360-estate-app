@@ -1,3 +1,5 @@
+import 'package:estate_app/core/presentation/design_system/app_radii.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,9 +47,13 @@ class _AppleSignInButtonState extends ConsumerState<AppleSignInButton> {
           child: AbsorbPointer(
             absorbing: !canPress,
             child: SignInWithAppleButton(
-              height: 52,
-              borderRadius: const BorderRadius.all(Radius.circular(14)),
-              style: SignInWithAppleButtonStyle.white,
+              text: context.l10n.authContinueWithApple,
+              height: 48,
+              borderRadius: AppRadii.md,
+              // Apple's black button on light screens, white on dark ones.
+              style: Theme.of(context).brightness == Brightness.dark
+                  ? SignInWithAppleButtonStyle.white
+                  : SignInWithAppleButtonStyle.black,
               onPressed: () => _signIn(),
             ),
           ),

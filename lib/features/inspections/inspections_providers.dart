@@ -1,66 +1,119 @@
+import 'dart:async';
+
 import 'package:estate_app/core/logger/app_logger.dart';
 import 'package:estate_app/core/providers.dart';
 import 'package:estate_app/core/storage/app_preferences.dart';
+import 'package:estate_app/features/auth/presentation/auth_controller.dart';
 import 'package:estate_app/features/inspections/data/inspections_repository.dart';
 import 'package:estate_app/features/inspections/models/inspection.dart';
 import 'package:estate_app/features/inspections/models/inspection_template.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class InspectionListFilter {
-  const InspectionListFilter({this.propertyId, this.tenantId, this.status});
+  const InspectionListFilter({this.propertyId, this.leaseId});
 
-  final String? propertyId;
-  final String? tenantId;
-  final String? status;
+  final int? propertyId;
+  final int? leaseId;
+
+  @override
+  bool operator ==(Object other) =>
+      other is InspectionListFilter &&
+      other.propertyId == propertyId &&
+      other.leaseId == leaseId;
+
+  @override
+  int get hashCode => Object.hash(propertyId, leaseId);
 }
 
 final inspectionsRepositoryProvider = Provider<InspectionsRepository>((ref) {
+  ref.watch(accountScopeProvider);
   return InspectionsRepository(ref.read(apiClientProvider));
 });
 
+/// Every inspection that matches the filter (all pages).
 final inspectionsListProvider =
     FutureProvider.family<List<Inspection>, InspectionListFilter>(
-  (ref, filter) => ref.read(inspectionsRepositoryProvider).list(
-        propertyId: filter.propertyId,
-        tenantId: filter.tenantId,
-        status: filter.status,
-      ),
-);
+      (ref, filter) => ref
+          .watch(inspectionsRepositoryProvider)
+          .listAll(propertyId: filter.propertyId, leaseId: filter.leaseId),
+    );
 
-final inspectionDetailProvider = FutureProvider.family<Inspection, String>(
-  (ref, id) => ref.read(inspectionsRepositoryProvider).fetch(id),
+final inspectionDetailProvider = FutureProvider.family<Inspection, int>(
+  (ref, id) => ref.watch(inspectionsRepositoryProvider).fetch(id),
 );
 
 // --- Inspection Checklist Templates ---
 
-const _templatesPrefKey = 'inspection_templates';
+/// Pref key of the templates of one account. The templates live on the
+/// device, so each account has its own list and one account never reads
+/// another account's templates.
+String inspectionTemplatesKey(int userId) => 'inspection_templates_$userId';
 
-/// Provider for the list of locally-stored inspection checklist templates.
+/// The key of the single global list that older builds wrote.
+const _legacyTemplatesKey = 'inspection_templates';
+
+/// Provider for the list of locally-stored inspection checklist templates of
+/// the signed-in account. It is empty when nobody is signed in, and it is
+/// rebuilt when the account changes.
 final inspectionTemplatesProvider =
-    StateNotifierProvider<InspectionTemplatesNotifier, List<InspectionTemplate>>(
-  (ref) => InspectionTemplatesNotifier(ref.read(appPreferencesProvider)),
-);
+    StateNotifierProvider<
+      InspectionTemplatesNotifier,
+      List<InspectionTemplate>
+    >((ref) {
+      final userId = ref.watch(
+        authControllerProvider.select((state) => state.user?.id),
+      );
+      return InspectionTemplatesNotifier(
+        ref.read(appPreferencesProvider),
+        userId,
+      );
+    });
 
 class InspectionTemplatesNotifier
     extends StateNotifier<List<InspectionTemplate>> {
-  InspectionTemplatesNotifier(this._prefs)
-      : super(const []) {
+  InspectionTemplatesNotifier(this._prefs, int? userId)
+    : _key = userId == null ? null : inspectionTemplatesKey(userId),
+      super(const []) {
     _load();
   }
 
   final AppPreferences _prefs;
+
+  /// Null when nobody is signed in: nothing is read or written.
+  final String? _key;
   Future<void> _writeQueue = Future.value();
 
   void _load() {
-    final raw = _prefs.getString(_templatesPrefKey);
-    state = InspectionTemplate.decodeList(raw);
+    final key = _key;
+    if (key == null) return;
+    final own = _prefs.getString(key);
+    if (own != null) {
+      state = InspectionTemplate.decodeList(own);
+      return;
+    }
+    // One-time move of the old global list to the first account that opens
+    // it, then the global key is removed.
+    final legacy = _prefs.getString(_legacyTemplatesKey);
+    if (legacy == null) return;
+    state = InspectionTemplate.decodeList(legacy);
+    // The old copy goes only after the new one is written.
+    unawaited(
+      _persist().then((saved) async {
+        if (saved) await _prefs.remove(_legacyTemplatesKey);
+      }),
+    );
   }
 
-  Future<void> _persist() async {
-    await _prefs.setString(
-      _templatesPrefKey,
+  Future<bool> _persist() async {
+    final key = _key;
+    if (key == null) return false;
+    final saved = await _prefs.setString(
+      key,
       InspectionTemplate.encodeList(state),
     );
+    // Once this account's list is saved, the old global copy is not needed.
+    if (saved) await _prefs.remove(_legacyTemplatesKey);
+    return saved;
   }
 
   Future<void> addTemplate(InspectionTemplate template) {
@@ -85,18 +138,20 @@ class InspectionTemplatesNotifier
   }
 
   Future<void> _enqueueMutation(void Function() mutate) {
-    _writeQueue = _writeQueue.then((_) async {
-      mutate();
-      await _persist();
-    }).catchError((Object error, StackTrace stackTrace) {
-      // Recover from prior queue errors so subsequent mutations are not
-      // permanently blocked by a single persist failure.
-      AppLogger.w(
-        'InspectionTemplatesNotifier: persist failed',
-        error: error,
-        stackTrace: stackTrace,
-      );
-    });
+    _writeQueue = _writeQueue
+        .then((_) async {
+          mutate();
+          await _persist();
+        })
+        .catchError((Object error, StackTrace stackTrace) {
+          // Recover from prior queue errors so subsequent mutations are not
+          // permanently blocked by a single persist failure.
+          AppLogger.w(
+            'InspectionTemplatesNotifier: persist failed',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        });
     return _writeQueue;
   }
 }

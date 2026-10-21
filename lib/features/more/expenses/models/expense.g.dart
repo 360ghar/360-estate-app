@@ -9,21 +9,31 @@ part of 'expense.dart';
 _$ExpenseImpl _$$ExpenseImplFromJson(Map<String, dynamic> json) =>
     _$ExpenseImpl(
       id: parseInt(json['id']),
+      propertyId: parseInt(json['property_id']),
+      propertyName: json['property_name'] as String?,
+      ownerId: parseInt(json['owner_id']),
+      category: ExpenseCategory.fromJson(json['category']),
       title: json['title'] as String?,
       amount: parseDouble(json['amount']),
       date: parseDateTime(json['expense_date']),
-      category: json['category'] as String?,
+      description: json['description'] as String?,
       notes: json['notes'] as String?,
-      propertyName: json['property_name'] as String?,
+      receiptDocumentId: parseInt(json['receipt_document_id']),
+      createdAt: parseDateTime(json['created_at']),
     );
 
 Map<String, dynamic> _$$ExpenseImplToJson(_$ExpenseImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'property_id': instance.propertyId,
+      'property_name': instance.propertyName,
+      'owner_id': instance.ownerId,
+      'category': ExpenseCategory.toJsonValue(instance.category),
       'title': instance.title,
       'amount': instance.amount,
       'expense_date': instance.date?.toIso8601String(),
-      'category': instance.category,
+      'description': instance.description,
       'notes': instance.notes,
-      'property_name': instance.propertyName,
+      'receipt_document_id': instance.receiptDocumentId,
+      'created_at': instance.createdAt?.toIso8601String(),
     };

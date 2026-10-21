@@ -16,7 +16,7 @@ final class RefreshingAuthTokenProvider implements AuthTokenProvider {
   /// In-memory copy of the current access token.
   ///
   /// The secure storage is only written when the token actually changes
-  /// (fresh load or refresh) — previously every `getAccessToken()` call wrote
+  /// (fresh load or refresh): previously every `getAccessToken()` call wrote
   /// to the Keystore/Keychain, adding tens of ms of platform-channel latency
   /// to every HTTP request.
   String? _cachedToken;

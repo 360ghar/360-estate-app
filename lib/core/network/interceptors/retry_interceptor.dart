@@ -2,13 +2,23 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
+import 'package:estate_app/core/network/dio_failure_mapper.dart';
 import 'package:estate_app/core/network/interceptors/request_id_interceptor.dart';
 
+/// Retry policy: idempotent requests (GET/HEAD/OPTIONS) only, max 2 retries
+/// with exponential backoff (350ms base + jitter) on 408/429/500/502/503/504
+/// plus connection timeouts/errors. Never retries other 4xx/5xx, cancels,
+/// or non-idempotent verbs. A `Retry-After` header on a 429 or 503 is honoured:
+/// the retry waits at least that long, and a value above [maxRetryAfter] is not
+/// waited out (the error goes to the caller). Offline detection is deferred to ApiClient,
+/// which only pays the NetworkInfo platform-channel cost for timeouts,
+/// connection errors, and unknown failures.
 final class RetryInterceptor extends Interceptor {
   RetryInterceptor({
     required Dio dio,
     int maxRetries = 2,
     Duration baseDelay = const Duration(milliseconds: 350),
+    this.maxRetryAfter = const Duration(seconds: 10),
     Random? random,
   }) : _dio = dio,
        _maxRetries = maxRetries,
@@ -16,6 +26,9 @@ final class RetryInterceptor extends Interceptor {
        _random = random ?? Random.secure();
 
   final Dio _dio;
+
+  /// Longest `Retry-After` the interceptor waits for inside one request.
+  final Duration maxRetryAfter;
   final int _maxRetries;
   final Duration _baseDelay;
   final Random _random;
@@ -74,7 +87,21 @@ final class RetryInterceptor extends Interceptor {
 
       options.extra[RequestIdKeys.attempt] = attempt + 1;
 
-      final delay = _backoff(attempt);
+      var delay = _backoff(attempt);
+      // Retry-After is honored for 429 and 503 only; a transient 500 with the
+      // header must not delay the retry.
+      final status = err.response?.statusCode;
+      final retryAfter = status == 429 || status == 503
+          ? DioFailureMapper.retryAfterSeconds(err.response)
+          : null;
+      if (retryAfter != null) {
+        final wait = Duration(seconds: retryAfter);
+        if (wait > maxRetryAfter) {
+          handler.next(err);
+          return;
+        }
+        if (wait > delay) delay = wait;
+      }
       await Future<void>.delayed(delay);
 
       // The request may have been cancelled while we were backing off; do

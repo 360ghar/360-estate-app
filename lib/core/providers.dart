@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:estate_app/core/config/app_config.dart';
 import 'package:estate_app/core/crash_reporting/crash_reporter.dart';
 import 'package:estate_app/core/network/api_client.dart';
 import 'package:estate_app/core/network/auth_token_provider.dart';
 import 'package:estate_app/core/network/network_info.dart';
+import 'package:estate_app/core/network/owner_scope.dart';
 import 'package:estate_app/core/services/cache_store.dart';
 import 'package:estate_app/core/services/deep_link_service.dart';
 import 'package:estate_app/core/services/file_upload_service.dart';
@@ -32,13 +35,21 @@ final networkInfoProvider = Provider<NetworkInfo>((ref) => NetworkInfoImpl());
 final cacheStoreProvider = Provider<CacheStore>((ref) => CacheStore());
 
 final authTokenStorageProvider = Provider<AuthTokenStorage>((ref) {
-  return AuthTokenStorage(ref.read(secureStoreProvider));
+  final storage = AuthTokenStorage(ref.read(secureStoreProvider));
+  ref.onDispose(() {
+    unawaited(storage.dispose());
+  });
+  return storage;
 });
 
 final authTokenProvider = Provider<AuthTokenProvider>((ref) {
   final storage = ref.read(authTokenStorageProvider);
   return RefreshingAuthTokenProvider(storage);
 });
+
+/// Which owner the signed-in user acts for (see [OwnerScope]). Set when the
+/// account changes and when an agent picks an owner.
+final ownerScopeProvider = StateProvider<OwnerScope>((ref) => OwnerScope.none);
 
 final apiClientProvider = Provider<ApiClient>((ref) {
   final config = ref.read(appConfigProvider);
@@ -47,6 +58,8 @@ final apiClientProvider = Provider<ApiClient>((ref) {
     networkInfo: ref.read(networkInfoProvider),
     tokenProvider: ref.read(authTokenProvider),
     enableLogging: config.enableDebugLogs,
+    // Read at call time: the scope changes without rebuilding the client.
+    ownerScope: () => ref.read(ownerScopeProvider),
   );
 });
 

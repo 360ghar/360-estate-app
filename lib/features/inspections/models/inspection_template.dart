@@ -34,11 +34,11 @@ class InspectionTemplate {
   final String? description;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'items': items,
-        if (description != null) 'description': description,
-      };
+    'id': id,
+    'name': name,
+    'items': items,
+    if (description != null) 'description': description,
+  };
 
   factory InspectionTemplate.fromJson(Map<String, dynamic> json) {
     return InspectionTemplate(

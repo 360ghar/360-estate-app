@@ -1,65 +1,19 @@
 {
   "@@locale": "en",
   "appName": "360 Estate",
-
   "commonContinue": "Continue",
   "commonBack": "Back",
   "commonRetry": "Retry",
   "commonCancel": "Cancel",
   "commonSave": "Save",
-  "commonSearch": "Search",
   "commonSignOut": "Sign out",
-
   "errorSomethingWentWrong": "Something went wrong",
   "errorOfflineHint": "You appear to be offline. Check your connection and try again.",
   "errorMissingConfigTitle": "App configuration missing",
-  "errorMissingConfigBody": "Set SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY with --dart-define to enable authentication.",
-
-  "enterPhoneTitle": "Enter phone number",
-  "phoneNumberLabel": "Phone number",
-  "phoneNumberHint": "+91XXXXXXXXXX",
-  "validationPhoneRequired": "Phone number is required",
-  "validationPhoneInternational": "Use international format, e.g. +91...",
   "validationPhoneTooShort": "Phone number looks too short",
-
-  "loginTitle": "Login",
-  "signupTitle": "Sign up",
-  "passwordLabel": "Password",
-  "validationPasswordRequired": "Password is required",
-  "validationPasswordTooShort": "Password must be at least 6 characters",
   "signInCta": "Sign in",
   "createAccountCta": "Create account",
   "alreadyHaveAccountCta": "Already have an account?",
-  "authPhoneSummary": "Phone: {phone}",
-  "@authPhoneSummary": {
-    "placeholders": {
-      "phone": {
-        "type": "String"
-      }
-    }
-  },
-
-  "homeTitle": "Home",
-  "settingsTitle": "Settings",
-
-  "homeToday": "Today is {date}",
-  "@homeToday": {
-    "placeholders": {
-      "date": {
-        "type": "DateTime",
-        "format": "yMMMd"
-      }
-    }
-  },
-  "homeOutstandingRent": "Outstanding rent: {amount}",
-  "@homeOutstandingRent": {
-    "placeholders": {
-      "amount": {
-        "type": "String"
-      }
-    }
-  },
-
   "propertiesTitle": "Properties",
   "propertiesSearchHint": "Search properties",
   "propertiesCount": "{count, plural, =0{No properties} =1{1 property} other{{count} properties}}",
@@ -70,58 +24,17 @@
       }
     }
   },
-
   "themeSectionTitle": "Theme",
   "themeSystem": "System",
   "themeLight": "Light",
   "themeDark": "Dark",
-
-  "languageSectionTitle": "Language",
   "languageSystem": "System default",
-  "languageEnglish": "English",
-  "languageHindi": "Hindi",
-
   "emptyTitle": "Nothing here yet",
-  "emptyBody": "Try adjusting your filters or refresh.",
-
-  "publicApplicationTitle": "Application",
-  "publicApplicationSlug": "Public application: {slug}",
-  "@publicApplicationSlug": {
-    "placeholders": {
-      "slug": {
-        "type": "String"
-      }
-    }
-  },
-
-  "profileTitle": "Profile & Settings",
-  "editProfile": "Edit Profile",
-  "accountSection": "ACCOUNT",
-  "preferencesSection": "PREFERENCES",
-  "supportSection": "SUPPORT",
-  "aboutSection": "ABOUT",
-  "dangerZone": "DANGER ZONE",
   "changePassword": "Change Password",
-  "twoFactorAuth": "Two-Factor Authentication",
-  "notEnabled": "Not enabled",
-  "linkedAccounts": "Linked Accounts",
-  "appearance": "Appearance",
-  "themeLanguage": "Theme, Language",
   "notifications": "Notifications",
-  "manageAlerts": "Manage alerts",
-  "privacy": "Privacy",
-  "helpCenter": "Help Center",
-  "contactUs": "Contact Us",
-  "reportProblem": "Report a Problem",
-  "reportBug": "Report a Bug",
-  "reportBugSubtitle": "Found an issue? Let us know",
-  "requestFeature": "Request a Feature",
-  "requestFeatureSubtitle": "Suggest an improvement",
   "appVersion": "App Version",
   "termsOfService": "Terms of Service",
   "privacyPolicy": "Privacy Policy",
-  "deactivateAccount": "Deactivate Account",
-  "deleteAccount": "Delete Account",
   "deleteAccountConfirmLabel": "Type {word} to confirm",
   "@deleteAccountConfirmLabel": {
     "placeholders": {
@@ -130,144 +43,1728 @@
       }
     }
   },
-  "deleteAccountConfirmHint": "DELETE",
-  "signOutTitle": "Sign Out",
-  "signOutConfirm": "Are you sure you want to sign out?",
-  "deactivateConfirm": "Deactivating your account will temporarily disable it. You can reactivate by signing back in.",
-  "deactivateSuccess": "Account deactivated",
-  "deactivate": "Deactivate",
   "deleteAccountWarning": "This action cannot be undone. All your data will be permanently deleted.",
   "deleteAccountEmailSent": "Email app opened. Please send the message to complete your request.",
   "deleteAccountSuccess": "Your account has been deleted successfully.",
   "deleteAccountManualFallback": "Could not open your email app. Please email info@360ghar.com with subject \"Account Deletion Request\".",
-  "dangerZone": "Danger Zone",
-  "privacyPolicyDescription": "View our privacy practices",
-  "termsOfServiceDescription": "Read our terms and conditions",
   "delete": "Delete",
-  "featureComingSoon": "This feature is coming soon",
-  "enterPasswordConfirm": "Enter password to confirm",
-
-  "notificationsSection": "Notifications",
-  "notificationPreferences": "Notification Preferences",
-  "storageSection": "Storage & Data",
   "clearCache": "Clear Cache",
-  "clearCacheConfirm": "Are you sure you want to clear the app cache?",
-  "cacheCleared": "Cache cleared successfully",
-  "downloadMyData": "Download My Data",
-  "downloadDataConfirm": "Your data will be prepared and sent to your email. This may take a few minutes.",
-  "dataDownloadStarted": "Data export started. Check your email shortly.",
-  "commonConfirm": "Clear",
-  "commonRequest": "Request",
   "themeMode": "Theme Mode",
   "language": "Language",
-
-  "tapToChangePhoto": "Tap to change photo",
-  "takePhoto": "Take Photo",
-  "chooseFromGallery": "Choose from Gallery",
-  "removePhoto": "Remove Photo",
-  "fullNameLabel": "Full Name",
-  "emailLabel": "Email Address",
-  "phoneNumberLabel": "Phone Number",
   "validationNameRequired": "Name is required",
   "validationEmailRequired": "Email is required",
   "validationEmailInvalid": "Invalid email",
-  "profileSaved": "Profile saved successfully",
-  "saveFailed": "Failed to save profile",
-
-  "currentPassword": "Current Password",
   "newPassword": "New Password",
-  "confirmNewPassword": "Confirm New Password",
-  "passwordChanged": "Password changed successfully",
-  "passwordChangeFailed": "Failed to change password",
-  "passwordChangeInfo": "Enter your current password and a new password to update your credentials.",
   "validationCurrentPasswordRequired": "Current password is required",
   "validationNewPasswordRequired": "New password is required",
   "validationConfirmPasswordRequired": "Please confirm your new password",
   "validationPasswordsDoNotMatch": "Passwords do not match",
-  "passwordRequirements": "Password Requirements:",
   "requirementMinLength": "At least 8 characters",
   "requirementUppercase": "At least one uppercase letter",
   "requirementLowercase": "At least one lowercase letter",
   "requirementNumber": "At least one number",
-
-  "pushNotifications": "Push Notifications",
-  "enablePushNotifications": "Enable Push Notifications",
-  "pushNotificationsDesc": "Receive notifications on your device",
-  "alertTypes": "Alert Types",
-  "rentReminders": "Rent Due Reminders",
   "rentRemindersDesc": "Get reminded before rent is due",
-  "paymentAlerts": "Payment Received Alerts",
   "paymentAlertsDesc": "Know when payments are received",
-  "leaseExpiryAlerts": "Lease Expiry Alerts",
   "leaseExpiryAlertsDesc": "Get notified before leases expire",
-  "maintenanceAlerts": "Maintenance Updates",
   "maintenanceAlertsDesc": "Updates on maintenance requests",
-  "inspectionReminders": "Inspection Reminders",
   "inspectionRemindersDesc": "Reminders for upcoming inspections",
-  "emailNotifications": "Email Notifications",
-  "marketingEmails": "Marketing Emails",
   "marketingEmailsDesc": "Receive updates and promotional content",
-  "quietHours": "Quiet Hours",
-  "enableQuietHours": "Enable Quiet Hours",
-  "quietHoursDesc": "Mute notifications during specific hours",
-  "quietHoursStart": "Start Time",
-  "quietHoursEnd": "End Time",
-  "errorLoadingSettings": "Error loading settings",
-
   "privacySettings": "Privacy Settings",
-  "profileVisibilitySection": "Profile Visibility",
-  "visibilityPublic": "Public",
-  "visibilityPublicDesc": "Anyone can see your profile",
-  "visibilityContacts": "Contacts Only",
-  "visibilityContactsDesc": "Only your contacts can see your profile",
-  "visibilityPrivate": "Private",
-  "visibilityPrivateDesc": "Only you can see your profile",
-  "phoneVisibilitySection": "Phone Number Visibility",
-  "emailVisibilitySection": "Email Visibility",
-  "dataAnalyticsSection": "Data & Analytics",
-  "analyticsTitle": "Analytics",
-  "analyticsDesc": "Help improve the app by sharing usage data",
-  "crashReporting": "Crash Reporting",
-  "crashReportingDesc": "Automatically report crashes to help us fix bugs",
-  "dataManagementSection": "Data Management",
-  "downloadDataDesc": "Get a copy of all your data",
-  "clearActivityDesc": "Clear your recent activity",
-
-  "searchHelp": "Search for help...",
-  "quickLinks": "Quick Links",
-  "gettingStarted": "Getting Started",
-  "propertyManagement": "Properties",
-  "paymentsCollections": "Payments",
   "leases": "Leases",
   "maintenance": "Maintenance",
-  "faq": "Frequently Asked Questions",
-  "stillNeedHelp": "Still need help?",
-  "contactSupportDesc": "Our support team is here to assist you",
-  "contactUsBtn": "Contact Us",
-  "yourName": "Your Name",
   "category": "Category",
-  "subject": "Subject",
   "message": "Message",
   "validationSubjectRequired": "Subject is required",
   "validationMessageRequired": "Message is required",
   "validationMessageTooShort": "Please provide more details (at least 10 characters)",
-  "sendRequest": "Send Request",
-  "supportRequestSent": "Support request sent successfully",
-  "orEmailUs": "Or email us directly at support@360estate.app",
-
   "about": "About",
-  "tagline": "Complete Property Management Solution",
   "version": "Version",
   "legal": "Legal",
-  "licenses": "Licenses",
   "website": "Website",
-  "contactSupport": "Contact Support",
-  "followUs": "Follow Us",
-  "madeWithLove": "Made with ❤️ for property managers",
-  "allRightsReserved": "All rights reserved.",
-  "couldNotLaunchUrl": "Could not launch URL",
-  "support": "Support",
   "howCanWeHelp": "How can we help?",
   "supportResponseTime": "We typically respond within 24 hours",
-  "privacySection": "Privacy"
+  "commonLoadFailedTitle": "Couldn't load this",
+  "commonLoadFailedBody": "Check your connection, then try again.",
+  "commonLoadMoreFailed": "Couldn't load more.",
+  "commonLoading": "Loading",
+  "commonClearSearch": "Clear search",
+  "commonFilters": "Filters",
+  "navHome": "Home",
+  "navProperties": "Properties",
+  "navCollections": "Collections",
+  "navTasks": "Tasks",
+  "navMore": "More",
+  "navPressBackToExit": "Press back again to exit",
+  "homeGreetingMorning": "Good morning",
+  "homeGreetingAfternoon": "Good afternoon",
+  "homeGreetingEvening": "Good evening",
+  "homeRentCardTitle": "{month} rent",
+  "@homeRentCardTitle": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "homeCollectedThisMonth": "Collected this month",
+  "homeVsLastMonth": "{change} vs last month",
+  "@homeVsLastMonth": {
+    "placeholders": {
+      "change": {
+        "type": "String"
+      }
+    }
+  },
+  "homeRentOutstanding": "{amount} rent outstanding",
+  "@homeRentOutstanding": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeRecordPayment": "Record payment",
+  "homeViewAll": "View all",
+  "homeChargesEmpty": "No rent charges for {month} yet.",
+  "@homeChargesEmpty": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "homeChargesFailed": "Couldn't load this month's charges.",
+  "homeUpcomingExpenses": "Upcoming expenses {amount}",
+  "@homeUpcomingExpenses": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "homeStripSemantics": "{paid} of {total} rent charges paid this month. Opens collections.",
+  "@homeStripSemantics": {
+    "placeholders": {
+      "paid": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "homePortfolioTitle": "Portfolio",
+  "homePropertiesLabel": "Properties",
+  "homeOccupancyLabel": "Occupancy",
+  "homeOccupied": "Occupied",
+  "homeVacant": "Vacant",
+  "homeUnderMaintenance": "Under maintenance",
+  "homeAddProperty": "Add property",
+  "homeActivityTitle": "Recent activity",
+  "homeActivityEmptyTitle": "No activity yet",
+  "homeActivityEmptyBody": "Payments, tasks and lease changes show up here.",
+  "homeEmptyTitle": "Start with your first property",
+  "homeEmptyBody": "Add a property, then record rent as it comes in.",
+  "rentStatusDue": "Due",
+  "rentStatusPartlyPaid": "Partly paid",
+  "rentStatusPaid": "Paid",
+  "rentStatusOverdue": "Overdue",
+  "rentStatusWaived": "Waived",
+  "tenantsTitle": "Tenants",
+  "tenantsSearchHint": "Search name, phone or property",
+  "tenantsFilterAll": "All",
+  "tenantsStatusActive": "Active",
+  "tenantsStatusVacated": "Vacated",
+  "tenantsStatusUnknown": "Status unknown",
+  "tenantsNoProperty": "No property linked",
+  "tenantsActiveLeases": "{count, plural, =1{1 active lease} other{{count} active leases}}",
+  "@tenantsActiveLeases": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tenantsEmptyTitle": "No tenants yet",
+  "tenantsEmptyBody": "A tenant shows up here once you add them to a lease.",
+  "tenantsNewLease": "New lease",
+  "tenantsNoMatchTitle": "No tenants match",
+  "tenantsNoMatchBody": "Try another name or filter.",
+  "tenantDetailTitle": "Tenant",
+  "tenantDetailInvalidLink": "This tenant link is not valid.",
+  "tenantDetailContact": "Contact",
+  "tenantDetailPhone": "Phone",
+  "tenantDetailEmail": "Email",
+  "tenantDetailNotAdded": "Not added",
+  "tenantDetailCall": "Call {name}",
+  "@tenantDetailCall": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tenantDetailWrite": "Email {name}",
+  "@tenantDetailWrite": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "tenantDetailLeases": "Leases",
+  "tenantDetailNoLeases": "No leases yet.",
+  "tenantDetailAllLeases": "All leases of this tenant",
+  "tenantDetailInspections": "Inspections",
+  "tenantDetailInspectionsHint": "Of the current lease",
+  "tenantDetailInspectionsNone": "Needs a lease first",
+  "tenantDetailOpenEnded": "No end date",
+  "tenantLeaseDraft": "Draft",
+  "tenantLeasePendingSignature": "Pending signature",
+  "tenantLeaseActive": "Active",
+  "tenantLeaseExpiringSoon": "Expiring soon",
+  "tenantLeaseExpired": "Expired",
+  "tenantLeaseTerminated": "Terminated",
+  "tenantLeaseRenewed": "Renewed",
+  "expensesTitle": "Expenses",
+  "expensesAdd": "Add expense",
+  "expensesSearchHint": "Search title, category or property",
+  "expensesSpentIn": "Spent in {month}",
+  "@expensesSpentIn": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "expensesCountThisMonth": "{count, plural, =0{No expenses this month} =1{1 expense this month} other{{count} expenses this month}}",
+  "@expensesCountThisMonth": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "expensesEmptyTitle": "No expenses yet",
+  "expensesEmptyBody": "Record repairs, bills and taxes to see where the money goes.",
+  "expensesNoMatchTitle": "No expenses match",
+  "expensesNoMatchBody": "Try another search or category.",
+  "expensesUntitled": "Expense",
+  "expensesCategoryMaintenance": "Maintenance",
+  "expensesCategoryRepairs": "Repairs",
+  "expensesCategoryInsurance": "Insurance",
+  "expensesCategoryPropertyTax": "Property tax",
+  "expensesCategoryHoa": "HOA",
+  "expensesCategoryUtilities": "Utilities",
+  "expensesCategoryMarketing": "Marketing",
+  "expensesCategoryLegal": "Legal",
+  "expensesCategoryOther": "Other",
+  "expenseFormNewTitle": "New expense",
+  "expenseFormEditTitle": "Edit expense",
+  "expenseFormAmount": "Amount",
+  "expenseFormAmountError": "Enter an amount above zero.",
+  "expenseFormDate": "Date",
+  "expenseFormProperty": "Property",
+  "expenseFormPropertyError": "Choose a property.",
+  "expenseFormPropertiesFailed": "Couldn't load your properties.",
+  "expenseFormTitleLabel": "Expense title",
+  "expenseFormTitleHint": "For example, plumbing repair",
+  "expenseFormCategory": "Category",
+  "expenseFormNotes": "Notes",
+  "expenseFormNotesHelper": "Optional",
+  "expenseFormDetails": "Details",
+  "expenseFormCreate": "Create expense",
+  "expenseFormSave": "Save changes",
+  "expenseFormSaved": "Expense saved.",
+  "expenseFormNotFound": "This expense was not found.",
+  "documentsTitle": "Documents",
+  "documentsUpload": "Upload",
+  "documentsSearchHint": "Search title or type",
+  "documentsEmptyTitle": "No documents yet",
+  "documentsEmptyBody": "Upload lease agreements, ID proofs and receipts to keep them in one place.",
+  "documentsNoMatchTitle": "No documents match",
+  "documentsNoMatchBody": "Try another search or type.",
+  "documentsUntitled": "Document",
+  "documentsSharedWithTenant": "Shared with tenant",
+  "documentsNoAccess": "You can't open this file.",
+  "documentsOpenFailed": "Couldn't open this file.",
+  "documentsLocked": "No access",
+  "documentTypeLeaseAgreement": "Lease agreement",
+  "documentTypeIdProof": "ID proof",
+  "documentTypeAddressProof": "Address proof",
+  "documentTypeIncomeProof": "Income proof",
+  "documentTypeInspectionReport": "Inspection report",
+  "documentTypeReceipt": "Receipt",
+  "documentTypeInvoice": "Invoice",
+  "documentTypePropertyDeed": "Property deed",
+  "documentTypeInsurancePolicy": "Insurance policy",
+  "documentTypeOther": "Other",
+  "documentUploadTitle": "Upload document",
+  "documentUploadChoose": "Choose a file",
+  "documentUploadChange": "Choose another file",
+  "documentUploadLimits": "PDF, image or document, up to 25 MB",
+  "documentUploadNoFile": "Choose a file to upload.",
+  "documentUploadTooLarge": "This file is over 25 MB. Choose a smaller one.",
+  "documentUploadPickFailed": "Could not open the file picker. Try again.",
+  "documentUploadRemoveFile": "Remove file",
+  "documentUploadDetails": "Details",
+  "documentUploadTitleLabel": "Title",
+  "documentUploadTitleHelper": "Leave blank to use the file name.",
+  "documentUploadType": "Type",
+  "documentUploadSubmit": "Upload document",
+  "documentUploadUploading": "Uploading",
+  "documentUploadDone": "Document uploaded.",
+  "reportsTitle": "Reports",
+  "reportsTypeRentRoll": "Rent roll",
+  "reportsTypeIncome": "Income",
+  "reportsTypeExpenses": "Expenses",
+  "reportsTypePnl": "Profit and loss",
+  "reportsTypeOccupancy": "Occupancy",
+  "reportsTypeMaintenance": "Maintenance",
+  "reportsAboutRentRoll": "Rent of every property and whether it is let.",
+  "reportsAboutIncome": "Rent collected in the period.",
+  "reportsAboutExpenses": "Money spent in the period.",
+  "reportsAboutPnl": "Income less expenses in the period.",
+  "reportsAboutOccupancy": "How many properties are let or vacant.",
+  "reportsAboutMaintenance": "How many maintenance requests came in.",
+  "reportsFrom": "From",
+  "reportsTo": "To",
+  "reportsAnyDate": "Any date",
+  "reportsClearDate": "Clear date",
+  "reportsEmptyTitle": "Nothing to report",
+  "reportsEmptyBody": "This report has no data for the period you chose.",
+  "reportsBarsSummary": "{count, plural, =1{1 line} other{{count} lines}}. Highest: {label}, {amount}.",
+  "@reportsBarsSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsExportCsv": "Share as CSV",
+  "reportDrilldownTitle": "Report line",
+  "reportDrilldownShare": "{percent} of {total}",
+  "@reportDrilldownShare": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "reportDrilldownRanking": "All lines, largest first",
+  "reportDrilldownNoAmounts": "This report has no amounts to compare.",
+  "tenantsNoMatchLoaded": "None of the tenants loaded so far match.",
+  "tenantsLoadMore": "Load more tenants",
+  "propertiesFilterAll": "All",
+  "propertiesFilterActive": "Active",
+  "propertiesFilterOccupied": "Occupied",
+  "propertiesFilterVacant": "Vacant",
+  "propertiesFilterPg": "PG",
+  "propertiesFilterFlat": "Flat",
+  "propertiesViewList": "List",
+  "propertiesViewGrid": "Grid",
+  "propertiesSearchByLocation": "Search by location",
+  "propertiesClearLocation": "Remove location filter",
+  "propertiesEmptyTitle": "No properties yet",
+  "propertiesEmptyBody": "Add your first property to start tracking rent.",
+  "propertiesNoResultsTitle": "No properties match",
+  "propertiesNoResultsBody": "Try another search or filter.",
+  "propertiesNoMatchYetBody": "None of the loaded properties match. Load more to keep looking.",
+  "propertiesLoadMore": "Load more",
+  "propertiesPerMonth": "per month",
+  "propertyTypeHouse": "House",
+  "propertyTypeApartment": "Apartment",
+  "propertyTypeBuilderFloor": "Builder floor",
+  "propertyTypeRoom": "Room",
+  "propertyTypeVilla": "Villa",
+  "propertyTypePlot": "Plot",
+  "propertyTypeCondo": "Condo",
+  "propertyTypePenthouse": "Penthouse",
+  "propertyTypeStudio": "Studio",
+  "propertyTypeLoft": "Loft",
+  "propertyTypePg": "PG",
+  "propertyTypeFlatmate": "Flatmate",
+  "propertyTypeOffice": "Office",
+  "propertyTypeShop": "Shop",
+  "propertyTypeWarehouse": "Warehouse",
+  "propertyStatusDraft": "Draft",
+  "propertyStatusActive": "Active",
+  "propertyStatusArchived": "Archived",
+  "propertyFallbackName": "Property",
+  "propertyDetailTitle": "Property details",
+  "propertyEdit": "Edit property",
+  "propertyShowOnMap": "Show on map",
+  "propertyMoreActions": "More actions",
+  "propertyArchive": "Archive property",
+  "propertyArchiveConfirmTitle": "Archive this property?",
+  "propertyArchiveConfirmBody": "It leaves the active list and keeps its history. You can make it active again from Edit.",
+  "propertyArchiveAction": "Archive",
+  "propertyArchived": "Property archived",
+  "propertyArchiveFailed": "Couldn't archive: {reason}",
+  "@propertyArchiveFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyDepositValue": "Deposit {amount}",
+  "@propertyDepositValue": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyCreateLease": "Create lease",
+  "propertyTabOverview": "Overview",
+  "propertyTabLease": "Lease",
+  "propertyTabRent": "Rent",
+  "propertyTabExpenses": "Expenses",
+  "propertyTabMaintenance": "Maintenance",
+  "propertyTabDocuments": "Documents",
+  "propertyTabInspections": "Inspections",
+  "propertyPhotos": "Photos",
+  "propertyFloorPlans": "Floor plans",
+  "propertyPhotoLabel": "Photo {index} of {total}",
+  "@propertyPhotoLabel": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "propertySpecs": "Specifications",
+  "propertyTypeField": "Property type",
+  "propertyFloorArea": "Floor area",
+  "propertyAreaValue": "{area} sq ft",
+  "@propertyAreaValue": {
+    "placeholders": {
+      "area": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyBedrooms": "Bedrooms",
+  "propertyBathrooms": "Bathrooms",
+  "propertyBalconies": "Balconies",
+  "propertyAge": "Age",
+  "propertyYears": "{count, plural, =1{1 year} other{{count} years}}",
+  "@propertyYears": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "propertyDays": "{count, plural, =1{1 day} other{{count} days}}",
+  "@propertyDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "propertyAmenities": "Amenities",
+  "propertyRentTerms": "Rent and collection",
+  "propertyMonthlyRent": "Monthly rent",
+  "propertySecurityDeposit": "Security deposit",
+  "propertyDueDayNewLeases": "Due day (new leases)",
+  "propertyDueDayValue": "Day {day}",
+  "@propertyDueDayValue": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "propertyGraceNewLeases": "Grace period (new leases)",
+  "propertyDescription": "Description",
+  "propertyCurrentLease": "Current lease",
+  "propertyLeaseTenant": "Tenant",
+  "propertyLeaseStart": "Start",
+  "propertyLeaseEnd": "End",
+  "propertyLeaseRent": "Rent",
+  "propertyLeaseEndsIn": "Ends in",
+  "propertyLeaseEndsToday": "Today",
+  "propertyNoLeaseTitle": "No lease yet",
+  "propertyNoLeaseBody": "Create a lease to start collecting rent here.",
+  "propertyNoRentTitle": "No rent charges",
+  "propertyNoRentBody": "Charges for this property show up here once a lease is active.",
+  "propertyOpenCollections": "Open collections",
+  "propertyChargeBalance": "Balance {amount}",
+  "@propertyChargeBalance": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyChargeLateFee": "Late fee {amount}",
+  "@propertyChargeLateFee": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyChargeDue": "Due {date}",
+  "@propertyChargeDue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyLeaseNumber": "Lease #{id}",
+  "@propertyLeaseNumber": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyNoExpensesTitle": "No expenses",
+  "propertyNoExpensesBody": "Expenses you log for this property show up here.",
+  "propertyAddExpense": "Add expense",
+  "propertyNoMaintenanceTitle": "No maintenance requests",
+  "propertyNoMaintenanceBody": "Requests and repairs for this property show up here.",
+  "propertyNewTask": "New task",
+  "propertyNoDocumentsTitle": "No documents",
+  "propertyNoDocumentsBody": "Agreements, receipts and IDs for this property show up here.",
+  "propertyUploadDocument": "Upload document",
+  "propertyNoInspectionsTitle": "No inspections",
+  "propertyNoInspectionsBody": "Move-in and move-out checks for this property show up here.",
+  "propertyNewInspection": "New inspection",
+  "propertyCreatedOn": "Created {date}",
+  "@propertyCreatedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyUploadedOn": "Uploaded {date}",
+  "@propertyUploadedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyConductedOn": "Conducted {date}",
+  "@propertyConductedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyNew": "New property",
+  "propertyStepBasics": "Basics",
+  "propertyStepLocation": "Location",
+  "propertyStepCounter": "Step {step} of {total}",
+  "@propertyStepCounter": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "propertyNext": "Next",
+  "propertyCreate": "Create property",
+  "propertySaveChanges": "Save changes",
+  "propertyNameLabel": "Property name *",
+  "propertyNameHint": "For example, Green Valley PG",
+  "propertyTypeLabel": "Property type *",
+  "propertyStatusLabel": "Management status",
+  "propertyDescriptionHint": "Rooms, rules, anything a tenant should know",
+  "propertySetMapLocation": "Set map location",
+  "propertyChangeMapLocation": "Change map location",
+  "propertyClearMapLocation": "Remove map location",
+  "propertyAddressLabel": "Address line",
+  "propertyAddressHint": "House, street, area",
+  "propertyCityLabel": "City *",
+  "propertyCityHint": "For example, Pune",
+  "propertyStateLabel": "State",
+  "propertyPincodeLabel": "PIN code",
+  "propertyAreaLabel": "Floor area (sq ft)",
+  "propertyAgeLabel": "Age (years)",
+  "propertyAmenitiesFailed": "Couldn't load amenities.",
+  "propertyRentLabel": "Monthly rent (₹) *",
+  "propertyDepositLabel": "Security deposit (₹)",
+  "propertyDueDayLabel": "Payment due day",
+  "propertyDueDayHelper": "1 to 28",
+  "propertyGraceLabel": "Grace period (days)",
+  "propertyGraceHelper": "0 to 365",
+  "propertyRentTermsNote": "New leases start with these values. A late fee is charged once, after the grace period, when the lease has one.",
+  "propertyAddPhotos": "Add photos",
+  "propertyAddFloorPlans": "Add floor plans",
+  "propertyMediaCount": "{count} of {max} added",
+  "@propertyMediaCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "propertyRemoveMedia": "Remove",
+  "propertyMediaLimit": "You can add up to {max}.",
+  "@propertyMediaLimit": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "propertyErrorName": "Enter a property name",
+  "propertyErrorType": "Choose a property type",
+  "propertyErrorCity": "Enter a city",
+  "propertyErrorRent": "Enter the monthly rent",
+  "propertyErrorDueDay": "Use a day from 1 to 28",
+  "propertyErrorGrace": "Use 0 to 365 days",
+  "propertyCreated": "Property created",
+  "propertyUpdated": "Property saved",
+  "propertySaveFailed": "Couldn't save: {reason}",
+  "@propertySaveFailed": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyUploadsFailed": "{count, plural, =1{1 file did not upload} other{{count} files did not upload}}. Save again to retry.",
+  "@propertyUploadsFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "propertyDiscardTitle": "Discard changes?",
+  "propertyDiscardBody": "Your changes on this form are not saved yet.",
+  "propertyDiscard": "Discard",
+  "locationSearchTitle": "Search location",
+  "locationSearchHint": "City, area or landmark",
+  "locationUseCurrent": "Use current location",
+  "locationDetecting": "Finding your location",
+  "locationCurrentName": "Current location",
+  "locationServicesOff": "Location services are off. Turn them on to use this.",
+  "locationSettings": "Settings",
+  "locationPermissionNeeded": "Allow location access to use your current location.",
+  "locationPermissionBlocked": "Location access is blocked. Allow it in Settings.",
+  "locationFailed": "Couldn't find your location.",
+  "locationDetailsFailed": "Couldn't open that place. Try another one.",
+  "locationIdleTitle": "Find a place",
+  "locationIdleBody": "Type at least two letters of a city, area or landmark.",
+  "locationNoResultsTitle": "No places found",
+  "locationNoResultsBody": "Check the spelling or try a nearby area.",
+  "locationSearchFailed": "Couldn't search places.",
+  "mapZoomIn": "Zoom in",
+  "mapZoomOut": "Zoom out",
+  "tenantDetailPeriod": "{start} to {end}",
+  "@tenantDetailPeriod": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "tenantDetailSince": "Since {start}",
+  "@tenantDetailSince": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      }
+    }
+  },
+  "commonPropertyNumber": "Property #{id}",
+  "@commonPropertyNumber": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "commonLeaseNumber": "Lease #{id}",
+  "@commonLeaseNumber": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "commonNotSet": "Not set",
+  "commonNone": "None",
+  "commonSaving": "Saving",
+  "commonClearFilters": "Clear filters",
+  "commonClearDate": "Clear date",
+  "commonAll": "All",
+  "collectionsTitle": "Collections",
+  "collectionsGenerate": "Generate this month's charges",
+  "collectionsGenerateShort": "Generate charges",
+  "collectionsGenerated": "{created} charges created, {skipped} skipped.",
+  "@collectionsGenerated": {
+    "placeholders": {
+      "created": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "collectionsCollected": "Collected",
+  "collectionsCollectedShare": "{percent}% of billed rent collected",
+  "@collectionsCollectedShare": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "collectionsTotalsFailed": "Couldn't load the totals.",
+  "collectionsEmptyDue": "Nothing is due",
+  "collectionsEmptyDueBody": "Generate this month's charges to start collecting rent.",
+  "collectionsEmptyPartial": "No partly paid charges",
+  "collectionsEmptyOverdue": "Nothing is overdue",
+  "collectionsEmptyPaid": "No paid charges yet",
+  "collectionsEmptyWaived": "No waived charges",
+  "collectionsEmptyBody": "Charges show up here as their status changes.",
+  "collectionsDueOn": "Due {date}",
+  "@collectionsDueOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "collectionsNoDueDate": "No due date",
+  "collectionsPaidOf": "{paid} of {total} paid",
+  "@collectionsPaidOf": {
+    "placeholders": {
+      "paid": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "collectionsLateFee": "Late fee {amount}",
+  "@collectionsLateFee": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "collectionsDaysOverdue": "{count, plural, =1{1 day overdue} other{{count} days overdue}}",
+  "@collectionsDaysOverdue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "collectionsRemind": "Send a reminder",
+  "collectionsReminderMessage": "Hi {tenant}, a reminder that your rent of {amount} for {property} is due on {date}. Thank you.",
+  "@collectionsReminderMessage": {
+    "placeholders": {
+      "tenant": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "property": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "collectionsSoon": "soon",
+  "collectionsNoMessagingApp": "No messaging app is available to send the reminder.",
+  "paymentTitle": "Record payment",
+  "paymentChargeLabel": "Charge",
+  "paymentChargeRequired": "Choose the charge this payment is for.",
+  "paymentNoCharges": "No charge is waiting for a payment.",
+  "paymentOwed": "{amount} owed",
+  "@paymentOwed": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentBilled": "Billed",
+  "paymentPaidSoFar": "Paid so far",
+  "paymentBalance": "Balance",
+  "paymentDetailsSection": "Payment",
+  "paymentAmountLabel": "Amount received",
+  "paymentAmountHelper": "Starts at what the tenant still owes.",
+  "paymentAmountInvalid": "Enter an amount above zero.",
+  "paymentAmountTooHigh": "Enter at most {amount}, the balance of this charge.",
+  "@paymentAmountTooHigh": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "paymentMethodLabel": "Payment method",
+  "paymentMethodCash": "Cash",
+  "paymentMethodUpi": "UPI",
+  "paymentMethodBankTransfer": "Bank transfer",
+  "paymentMethodCheque": "Cheque",
+  "paymentMethodOnline": "Online",
+  "paymentMethodOther": "Other",
+  "paymentDateLabel": "Date received",
+  "paymentNotesLabel": "Notes (optional)",
+  "paymentRecorded": "Payment recorded.",
+  "tasksTitle": "Tasks",
+  "tasksNew": "New task",
+  "tasksViewList": "List",
+  "tasksViewBoard": "Board",
+  "tasksFilterOpen": "Open",
+  "tasksFilterInProgress": "In progress",
+  "tasksFilterDone": "Done",
+  "tasksEmptyTitle": "No tasks yet",
+  "tasksEmptyBody": "Report a repair or a chore and track it here.",
+  "tasksEmptyFilteredTitle": "No tasks here",
+  "tasksEmptyFilteredBody": "Nothing matches this filter.",
+  "tasksReportedOn": "Reported {date}",
+  "@tasksReportedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "tasksVisitOn": "Visit {date}",
+  "@tasksVisitOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "tasksLoadMore": "Load more",
+  "taskStatusOpen": "Open",
+  "taskStatusInReview": "In review",
+  "taskStatusInProgress": "In progress",
+  "taskStatusResolved": "Resolved",
+  "taskStatusClosed": "Closed",
+  "taskUrgencyLow": "Low",
+  "taskUrgencyMedium": "Medium",
+  "taskUrgencyHigh": "High",
+  "taskUrgencyEmergency": "Emergency",
+  "taskCategoryPlumbing": "Plumbing",
+  "taskCategoryElectrical": "Electrical",
+  "taskCategoryHvac": "HVAC",
+  "taskCategoryAppliance": "Appliance",
+  "taskCategoryStructural": "Structural",
+  "taskCategoryPestControl": "Pest control",
+  "taskCategoryCleaning": "Cleaning",
+  "taskCategoryOther": "Other",
+  "taskCreateTitle": "New task",
+  "taskSectionDetails": "What needs doing",
+  "taskTitleLabel": "Title",
+  "taskTitleHint": "Fix the leaking kitchen tap",
+  "taskTitleRequired": "Enter a title.",
+  "taskTitleTooShort": "Use at least 3 characters.",
+  "taskDescriptionLabel": "Description",
+  "taskDescriptionHint": "What is wrong, and where?",
+  "taskSectionCategory": "Category",
+  "taskPropertyLabel": "Property",
+  "taskPropertyRequired": "Choose a property.",
+  "taskNoProperties": "Add a property before you create tasks.",
+  "taskAddProperty": "Add property",
+  "taskLeaseLabel": "Lease (optional)",
+  "taskNoLease": "No lease",
+  "taskSectionUrgency": "Urgency",
+  "taskSectionCost": "Cost and visit",
+  "taskCostLabel": "Estimated cost (optional)",
+  "taskCostInvalid": "Enter 0 or more.",
+  "taskVisitLabel": "Visit date (optional)",
+  "taskAssignTo": "Assign to {name}",
+  "@taskAssignTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "taskAssignHelp": "Your agent handles this request.",
+  "taskCreate": "Create task",
+  "taskCreated": "Task created.",
+  "taskDetailTitle": "Task",
+  "taskNotFoundTitle": "Task not found",
+  "taskNotFoundBody": "It may have been removed. Go back to the list.",
+  "taskInvalidId": "This link does not point to a task.",
+  "taskGoBack": "Back to tasks",
+  "taskSectionInfo": "Details",
+  "taskCategoryLabel": "Category",
+  "taskTenantLabel": "Tenant",
+  "taskEstimatedCost": "Estimated cost",
+  "taskScheduledFor": "Visit",
+  "taskAssignedAgent": "Agent",
+  "taskAgentNumber": "Agent #{id}",
+  "@taskAgentNumber": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "taskReported": "Reported",
+  "taskSectionUpdate": "Update",
+  "taskStatusLabel": "Status",
+  "taskUrgencyLabel": "Urgency",
+  "taskNotesLabel": "Completion notes",
+  "taskNotesHint": "What was done, and by whom",
+  "taskSave": "Save changes",
+  "taskNothingToSave": "Nothing changed.",
+  "taskUpdated": "Task updated.",
+  "taskProgressSemantics": "Step {step} of 4: {label}",
+  "@taskProgressSemantics": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "leasesTitle": "Leases",
+  "leasesNew": "New lease",
+  "leasesSearchHint": "Search tenant or property",
+  "leasesFilterActive": "Active",
+  "leasesFilterExpiring": "Expiring soon",
+  "leasesFilterUpcoming": "Upcoming",
+  "leasesFilterEnded": "Ended",
+  "leasesEmptyTitle": "No leases yet",
+  "leasesEmptyBody": "Create a lease to start collecting rent.",
+  "leasesNoMatchTitle": "No leases match",
+  "leasesNoMatchBody": "Try another name or filter.",
+  "leasesTerm": "{start} to {end}",
+  "@leasesTerm": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "leasesEndsToday": "Ends today",
+  "leasesEndsIn": "{count, plural, =1{Ends in 1 day} other{Ends in {count} days}}",
+  "@leasesEndsIn": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "leaseStatusDraft": "Draft",
+  "leaseStatusPendingSignature": "Pending signature",
+  "leaseStatusActive": "Active",
+  "leaseStatusExpiringSoon": "Expiring soon",
+  "leaseStatusExpired": "Expired",
+  "leaseStatusTerminated": "Terminated",
+  "leaseStatusRenewed": "Renewed",
+  "authEntryHeadline": "Rent, tenants and repairs in one ledger.",
+  "authEntrySubtitle": "Sign in, or create your account.",
+  "authIdentifierLabel": "Email or phone number",
+  "authIdentifierHint": "you@example.com or 98765 43210",
+  "authIdentifierRequired": "Enter your email or phone number.",
+  "authIdentifierInvalid": "Enter a valid email or phone number.",
+  "authCodeHelper": "We send a verification code if you have no password.",
+  "authUseMyNumber": "Use my number",
+  "authLastUsedGoogle": "Last time you used Google.",
+  "authLastUsedApple": "Last time you used Apple.",
+  "authLastUsedEmail": "Last time you used {masked}.",
+  "@authLastUsedEmail": {
+    "placeholders": {
+      "masked": {
+        "type": "String"
+      }
+    }
+  },
+  "authOrContinueWith": "or continue with",
+  "authContinueWithGoogle": "Continue with Google",
+  "authTermsSentence": "By continuing, you agree to the {terms} and the {privacy}.",
+  "@authTermsSentence": {
+    "placeholders": {
+      "terms": {
+        "type": "String"
+      },
+      "privacy": {
+        "type": "String"
+      }
+    }
+  },
+  "authAgreeTerms": "I agree to the {terms} and the {privacy}.",
+  "@authAgreeTerms": {
+    "placeholders": {
+      "terms": {
+        "type": "String"
+      },
+      "privacy": {
+        "type": "String"
+      }
+    }
+  },
+  "authAcceptTerms": "Accept the terms to continue.",
+  "authUnverifiedNotice": "Your account is not verified yet. Enter the code we sent, or ask for a new one.",
+  "authCheckFailed": "We couldn't check your account. Try again.",
+  "authNoAccount": "No account uses this email or phone. Check it, or create an account.",
+  "authLoginTitle": "Welcome back",
+  "authLoginSubtitle": "Enter your password to sign in.",
+  "authChange": "Change",
+  "authEmail": "Email",
+  "authPhone": "Phone number",
+  "authPhoneHint": "98765 43210",
+  "authPhoneInvalid": "Enter a valid 10-digit phone number.",
+  "authPassword": "Password",
+  "authPasswordInvalid": "Enter your password. It has at least 6 characters.",
+  "authShowPassword": "Show password",
+  "authHidePassword": "Hide password",
+  "authForgotPassword": "Forgot password?",
+  "authNewHere": "New here?",
+  "authResetTitle": "Reset password",
+  "authResetBody": "We send a code to this number. Then you set a new password.",
+  "authSendCode": "Send code",
+  "authSignupTitle": "Create your account",
+  "authSignupSubtitle": "A few details, then we verify your phone.",
+  "authFullName": "Full name",
+  "authFullNameRequired": "Enter your full name.",
+  "authEmailRequired": "Enter your email.",
+  "authEmailInvalid": "Enter a valid email address.",
+  "authNewPasswordHelper": "At least 6 characters.",
+  "authPasswordTooShort": "Use at least 6 characters.",
+  "authConfirmPassword": "Confirm password",
+  "authConfirmPasswordRequired": "Enter the password again.",
+  "authPasswordsDiffer": "The passwords do not match.",
+  "authVerifyPhoneTitle": "Verify your phone",
+  "authVerifyEmailTitle": "Verify your email",
+  "authCodeSentTo": "Enter the 6-digit code we sent to {destination}.",
+  "@authCodeSentTo": {
+    "placeholders": {
+      "destination": {
+        "type": "String"
+      }
+    }
+  },
+  "authCodeLabel": "Verification code",
+  "authVerify": "Verify",
+  "authDidNotGetCode": "Didn't get the code?",
+  "authResendCode": "Resend code",
+  "authResendIn": "Resend in {seconds}s",
+  "@authResendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "authSetPasswordTitle": "Set your password",
+  "authResetPasswordTitle": "Reset your password",
+  "authSetPasswordBody": "Create a password so you can sign in faster next time.",
+  "authResetPasswordBody": "Choose a new password for your account.",
+  "authPasswordFor": "For {account}",
+  "@authPasswordFor": {
+    "placeholders": {
+      "account": {
+        "type": "String"
+      }
+    }
+  },
+  "authNewPassword": "New password",
+  "authSetPasswordAction": "Set password and continue",
+  "authResetPasswordAction": "Reset password and continue",
+  "authUseDifferentAccount": "Use a different account",
+  "authLeaveTitle": "Set a password to continue",
+  "authLeaveBody": "A password is needed to finish signing in. Leaving signs you out.",
+  "authAddPhoneTitle": "Add your phone",
+  "authAddPhoneBody": "Optional. A verified number helps you recover your account and sign in faster.",
+  "authVerifyAndContinue": "Verify and continue",
+  "authChangeNumber": "Change number",
+  "authSkipForNow": "Skip for now",
+  "authProfileTitle": "A few more details",
+  "authProfileBody": "We need your full name and date of birth to continue.",
+  "authDateOfBirth": "Date of birth",
+  "authDateOfBirthHint": "Choose your date of birth",
+  "authDateOfBirthRequired": "Choose your date of birth.",
+  "authProfileSaveFailed": "We couldn't save your details. Try again.",
+  "authSplashTagline": "Property management, done right.",
+  "onboardingTitle": "Your ledger is ready",
+  "onboardingBody": "Start with one property. Then add tenants, record rent as it comes in, and track repairs, all in one place.",
+  "onboardingStepProperty": "Add a property",
+  "onboardingStepTenants": "Add tenants and leases",
+  "onboardingStepRent": "Record rent every month",
+  "onboardingAddProperty": "Add your first property",
+  "onboardingGoHome": "Go to home",
+  "configErrorBody": "The app was built without its settings. Add the missing values to .env, then rebuild and restart the app.",
+  "inspectionsTitle": "Inspections",
+  "inspectionsTemplatesAction": "Checklist templates",
+  "inspectionsNew": "New inspection",
+  "inspectionsEmptyTitle": "No inspections yet",
+  "inspectionsEmptyBody": "Record a move-in, move-out or routine check for a lease.",
+  "inspectionsItemTitle": "{type} inspection",
+  "@inspectionsItemTitle": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "inspectionsDateNotSet": "Date not set",
+  "inspectionTypeMoveIn": "Move-in",
+  "inspectionTypeMoveOut": "Move-out",
+  "inspectionTypeRoutine": "Routine",
+  "inspectionStateOpen": "Open",
+  "inspectionStateSignedByOwner": "Signed by owner",
+  "inspectionStateSignedByTenant": "Signed by tenant",
+  "inspectionStateSigned": "Signed",
+  "inspectionFormTitle": "New inspection",
+  "inspectionFormLeaseSection": "Lease",
+  "inspectionFormProperty": "Property",
+  "inspectionFormLease": "Lease",
+  "inspectionFormChooseProperty": "Choose a property.",
+  "inspectionFormChooseLease": "Choose a lease.",
+  "inspectionFormPickPropertyFirst": "Choose a property to see its leases.",
+  "inspectionFormNoLease": "This property has no lease yet.",
+  "inspectionFormAddLease": "Add a lease",
+  "inspectionFormDetailsSection": "Details",
+  "inspectionFormType": "Type",
+  "inspectionFormDate": "Date of inspection",
+  "inspectionFormToday": "Today",
+  "inspectionFormNotes": "Notes",
+  "inspectionFormNotesHelp": "Overall condition, meter readings, keys handed over.",
+  "inspectionFormChecklistSection": "Checklist",
+  "inspectionFormUseTemplate": "Use a template",
+  "inspectionFormAddItem": "Add a checklist item",
+  "inspectionFormAddItemButton": "Add item",
+  "inspectionFormRemoveItem": "Remove item",
+  "inspectionFormNoItems": "No items yet. Add your own, or start from a template.",
+  "inspectionFormTemplateSheetTitle": "Start from a template",
+  "inspectionFormTemplateAdded": "{count, plural, =1{1 item added} other{{count} items added}}",
+  "@inspectionFormTemplateAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inspectionFormCreate": "Create inspection",
+  "inspectionFormCreated": "Inspection created.",
+  "inspectionDetailTitle": "Inspection",
+  "inspectionDetailInvalidLink": "This inspection link is not valid.",
+  "inspectionDetailSignatures": "Signatures",
+  "inspectionDetailOwner": "Owner",
+  "inspectionDetailTenant": "Tenant",
+  "inspectionDetailNotSigned": "Not signed yet",
+  "inspectionDetailSignedOn": "Signed {date}",
+  "@inspectionDetailSignedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "inspectionDetailChecklistEmpty": "No checklist items.",
+  "inspectionDetailRequired": "Required",
+  "inspectionDetailSign": "Sign as owner",
+  "inspectionDetailSignTitle": "Sign this inspection?",
+  "inspectionDetailSignBody": "Your signature records that you agree with this checklist. You cannot undo it.",
+  "inspectionDetailSignConfirm": "Sign",
+  "inspectionDetailSigned": "Inspection signed.",
+  "inspectionItemPass": "Pass",
+  "inspectionItemFail": "Fail",
+  "inspectionItemAttention": "Needs attention",
+  "inspectionItemPending": "Pending",
+  "inspectionTemplatesTitle": "Checklist templates",
+  "inspectionTemplatesNew": "New template",
+  "inspectionTemplatesEmptyTitle": "No templates yet",
+  "inspectionTemplatesEmptyBody": "Save a checklist once and reuse it for every move-in, move-out or yearly check.",
+  "inspectionTemplatesItemCount": "{count, plural, =1{1 item} other{{count} items}}",
+  "@inspectionTemplatesItemCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inspectionTemplatesDelete": "Delete template",
+  "inspectionTemplatesDeleteTitle": "Delete this template?",
+  "inspectionTemplatesDeleteBody": "\"{name}\" is removed from this device. Inspections already created keep their checklist.",
+  "@inspectionTemplatesDeleteBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "inspectionTemplatesName": "Template name",
+  "inspectionTemplatesNameHint": "For example, Move-in checklist",
+  "inspectionTemplatesNameRequired": "Enter a name.",
+  "inspectionTemplatesDescription": "Description (optional)",
+  "inspectionTemplatesItems": "Checklist items",
+  "inspectionTemplatesItemsHelp": "One item per line.",
+  "inspectionTemplatesItemsRequired": "Add at least one item.",
+  "inspectionTemplatesCreate": "Create",
+  "applicationsTitle": "Applications",
+  "applicationsTabInbox": "Inbox",
+  "applicationsTabForms": "Forms",
+  "applicationsNewForm": "New form",
+  "applicationsInboxEmptyTitle": "No applications yet",
+  "applicationsInboxEmptyBody": "Share a form link. Applications from tenants arrive here.",
+  "applicationsFormsEmptyTitle": "No forms yet",
+  "applicationsFormsEmptyBody": "Create a form for a property and share its link with people who want to rent.",
+  "applicationsActive": "Active",
+  "applicationsInactive": "Inactive",
+  "applicationsStatusApplicant": "Awaiting decision",
+  "applicationsStatusApproved": "Approved",
+  "applicationsStatusRejected": "Rejected",
+  "applicationsStatusUnknown": "Unknown",
+  "applicationsQuestionCount": "{count, plural, =0{No questions} =1{1 question} other{{count} questions}}",
+  "@applicationsQuestionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "applicationsExpires": "Closes {date}",
+  "@applicationsExpires": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "applicationsNoExpiry": "No closing date",
+  "applicationsFee": "{amount} fee",
+  "@applicationsFee": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "applicationsCopyLink": "Copy link",
+  "applicationsLinkCopied": "Link copied.",
+  "applicationsSubmittedOn": "Applied {date}",
+  "@applicationsSubmittedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "applicationsApplicant": "Applicant",
+  "applicationFormDefaultTitle": "Application form",
+  "applicationFormDetailTitle": "Application form",
+  "applicationFormInvalidLink": "This form link is not valid.",
+  "applicationFormShareSection": "Share link",
+  "applicationFormShareHelp": "Send this link to people who want to rent. It opens the form on any phone.",
+  "applicationFormNoLink": "This form has no public link yet.",
+  "applicationFormShare": "Share",
+  "applicationFormPreview": "Preview",
+  "applicationFormQuestionsSection": "Questions",
+  "applicationFormStandardQuestions": "Every applicant also gives their name, phone and email.",
+  "applicationFormNoQuestions": "No extra questions.",
+  "applicationFormRequired": "Required",
+  "applicationFormCreateTitle": "New application form",
+  "applicationFormDetailsSection": "Form details",
+  "applicationFormProperty": "Property",
+  "applicationFormChooseProperty": "Choose a property.",
+  "applicationFormTitleLabel": "Form title",
+  "applicationFormTitleHint": "For example, 2 BHK in Sector 51",
+  "applicationFormTitleRequired": "Enter a form title.",
+  "applicationFormDescription": "Description (optional)",
+  "applicationFormDescriptionHelp": "Shown at the top of the form.",
+  "applicationFormCloses": "Closing date (optional)",
+  "applicationFormClearDate": "Clear date",
+  "applicationFormAccepting": "Accept applications",
+  "applicationFormAcceptingHelp": "Turn off to stop new applications.",
+  "applicationFormQuestionLabel": "Question",
+  "applicationFormQuestionHint": "For example, Do you have pets?",
+  "applicationFormQuestionRequired": "Type the question first.",
+  "applicationFormAnswerType": "Answer type",
+  "applicationFormOptions": "Choices",
+  "applicationFormOptionsHelp": "Separate choices with commas.",
+  "applicationFormOptionsRequired": "Add at least one choice.",
+  "applicationFormRequiredAnswer": "Answer required",
+  "applicationFormAddQuestion": "Add question",
+  "applicationFormRemoveQuestion": "Remove question",
+  "applicationFormCreate": "Create form",
+  "applicationFormCreated": "Form created.",
+  "applicationFieldText": "Short answer",
+  "applicationFieldTextarea": "Long answer",
+  "applicationFieldNumber": "Number",
+  "applicationFieldDate": "Date",
+  "applicationFieldBoolean": "Yes or no",
+  "applicationFieldSelect": "Choice",
+  "applicationDetailTitle": "Application",
+  "applicationDetailInvalidLink": "This application link is not valid.",
+  "applicationDetailPhone": "Phone",
+  "applicationDetailEmail": "Email",
+  "applicationDetailNotGiven": "Not given",
+  "applicationDetailCall": "Call",
+  "applicationDetailWrite": "Send email",
+  "applicationDetailAnswers": "Answers",
+  "applicationDetailNoAnswers": "No extra answers.",
+  "applicationDetailApplicantNote": "Note from the applicant",
+  "applicationDetailYes": "Yes",
+  "applicationDetailNo": "No",
+  "applicationDetailDecision": "Decision",
+  "applicationDetailDecidedOn": "Decided {date}",
+  "@applicationDetailDecidedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "applicationDetailYourDecision": "Your decision",
+  "applicationDetailDecisionHelp": "The applicant is not told automatically. Call them after you decide.",
+  "applicationDetailApprove": "Approve",
+  "applicationDetailReject": "Reject",
+  "applicationDetailApproveTitle": "Approve this application?",
+  "applicationDetailRejectTitle": "Reject this application?",
+  "applicationDetailDecisionNotes": "Notes (optional)",
+  "applicationDetailDecisionNotesHelp": "Only you see these notes.",
+  "applicationDetailApproved": "Application approved.",
+  "applicationDetailRejected": "Application rejected.",
+  "publicApplyTitle": "Apply to rent",
+  "publicApplyIntro": "Fill in your details. The owner reviews every application and contacts you.",
+  "publicApplyFee": "Application fee {amount}",
+  "@publicApplyFee": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "publicApplyAboutYou": "About you",
+  "publicApplyName": "Full name",
+  "publicApplyNameRequired": "Enter your name.",
+  "publicApplyPhone": "Phone number",
+  "publicApplyPhoneRequired": "Enter your phone number.",
+  "publicApplyPhoneInvalid": "Enter a 10-digit phone number.",
+  "publicApplyEmail": "Email",
+  "publicApplyEmailRequired": "Enter your email.",
+  "publicApplyEmailInvalid": "Enter an email like name@example.com.",
+  "publicApplyQuestions": "A few questions",
+  "publicApplyRequiredNote": "Questions marked * need an answer.",
+  "publicApplyAnswerRequired": "Answer this question.",
+  "publicApplyNumberInvalid": "Enter a number.",
+  "publicApplyChoose": "Choose one",
+  "publicApplyNotes": "Anything else? (optional)",
+  "publicApplyNotesHelp": "Move-in date, who will live with you, parking needs.",
+  "publicApplySubmit": "Submit application",
+  "publicApplyClosedTitle": "Applications are closed",
+  "publicApplyClosedBody": "This form is not taking applications right now.",
+  "publicApplySentTitle": "Application sent",
+  "publicApplySentBody": "The owner now has your details.",
+  "publicApplySentNext": "What happens next",
+  "publicApplySentStep1": "The owner reviews your application.",
+  "publicApplySentStep2": "They contact you on the phone number you gave.",
+  "publicApplySentStep3": "You can close this page now.",
+  "publicApplySignIn": "Sign in to 360 Estate",
+  "leaseLateFeeFlat": "{amount} flat",
+  "@leaseLateFeeFlat": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "leaseLateFeePercent": "{percent}% of the rent",
+  "@leaseLateFeePercent": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "leaseDetailTitle": "Lease",
+  "leaseMonthlyRent": "Monthly rent",
+  "leaseDeposit": "Security deposit",
+  "leaseEndsTodayNotice": "This lease ends today. Renew it or let it end.",
+  "leaseEndsInNotice": "{count, plural, =1{This lease ends tomorrow. Renew it or let it end.} other{This lease ends in {count} days. Renew it or let it end.}}",
+  "@leaseEndsInNotice": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "leaseExpiredNotice": "This lease ended on {date}.",
+  "@leaseExpiredNotice": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "leaseSectionTerm": "Term",
+  "leaseStart": "Start",
+  "leaseEnd": "End",
+  "leaseTermElapsed": "{percent}% of the term has passed",
+  "@leaseTermElapsed": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "leaseSectionTenant": "Tenant",
+  "leaseName": "Name",
+  "leasePhone": "Phone",
+  "leaseEmail": "Email",
+  "leaseCallTenant": "Call the tenant",
+  "leaseSectionCollection": "Rent collection",
+  "leaseDueDay": "Due day",
+  "leaseDueDayValue": "Day {day} of each month",
+  "@leaseDueDayValue": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "leaseGracePeriod": "Grace period",
+  "leaseGraceValue": "{count, plural, =1{1 day} other{{count} days}}",
+  "@leaseGraceValue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "leaseLateFee": "Late fee",
+  "leaseLateFeeRule": "The late fee is charged once, after the grace period.",
+  "leaseTerminatedOn": "Ended on",
+  "leaseReason": "Reason",
+  "leaseSectionDocument": "Signed lease",
+  "leaseDocumentMissing": "No signed copy yet. Upload the PDF.",
+  "leaseDocumentPresent": "The signed PDF is on file.",
+  "leaseUploadPdf": "Upload PDF",
+  "leaseReplacePdf": "Replace PDF",
+  "leaseViewSigned": "View signed lease",
+  "leaseUploaded": "Signed lease uploaded.",
+  "leaseOpenFailed": "Couldn't open the document.",
+  "leaseRenew": "Renew",
+  "leaseTerminate": "Terminate",
+  "leaseRenewTitle": "Renew lease",
+  "leaseNewStart": "New start date",
+  "leaseNewEnd": "New end date",
+  "leaseNewRent": "New monthly rent",
+  "leaseNewRentHelper": "Leave blank to keep the current rent.",
+  "leaseStartActive": "Start as active",
+  "leaseEndAfterStart": "The end date must be after the start date.",
+  "leaseRenewed": "Lease renewed.",
+  "leaseTerminateTitle": "Terminate lease",
+  "leaseTerminateBody": "The tenant moves out on this date. This cannot be undone.",
+  "leaseTerminationDate": "Termination date",
+  "leaseTerminated": "Lease terminated.",
+  "leaseFormTitle": "New lease",
+  "leaseFormSectionParties": "Property and tenant",
+  "leaseFormProperty": "Property *",
+  "leaseFormPropertyRequired": "Choose a property.",
+  "leaseFormPropertiesFailed": "Couldn't load your properties.",
+  "leaseFormTenantName": "Tenant name",
+  "leaseFormTenantPhone": "Tenant phone",
+  "leaseFormTenantEmail": "Tenant email",
+  "leaseFormTenantUserId": "Tenant user ID (optional)",
+  "leaseFormTenantUserIdHelper": "The tenant's account ID, if the tenant has one.",
+  "leaseFormSectionTerm": "Term and status",
+  "leaseFormStart": "Start date *",
+  "leaseFormEnd": "End date *",
+  "leaseFormDateRequired": "Pick a date.",
+  "leaseFormStatus": "Status",
+  "leaseFormSectionRent": "Rent",
+  "leaseFormRent": "Monthly rent *",
+  "leaseFormRentInvalid": "Enter a monthly rent above zero.",
+  "leaseFormDeposit": "Security deposit",
+  "leaseFormFromProperty": "Filled from the property. Change it if this lease differs.",
+  "leaseFormSectionRules": "Rent collection rules",
+  "leaseFormRulesHelp": "Blank fields take the property's values. A flat late fee wins over a percentage.",
+  "leaseFormDueDay": "Due day",
+  "leaseFormGraceDays": "Grace days",
+  "leaseFormLateFeeFlat": "Late fee (flat)",
+  "leaseFormLateFeePercent": "Late fee (%)",
+  "leaseFormRange": "Enter a whole number from {min} to {max}.",
+  "@leaseFormRange": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "leaseFormPercentRange": "Enter 0 to 100.",
+  "leaseFormSectionClauses": "Special clauses",
+  "leaseFormClauses": "Special clauses (optional)",
+  "leaseFormClausesHint": "Any terms beyond rent and dates",
+  "leaseFormCreate": "Create lease",
+  "leaseFormCreated": "Lease created.",
+  "moreSectionManage": "Manage",
+  "moreSectionAccount": "Account",
+  "moreSectionSupport": "Support",
+  "moreApplications": "Rental applications",
+  "moreTenants": "Tenants",
+  "moreLeases": "Leases",
+  "moreInspections": "Inspections",
+  "moreExpenses": "Expenses",
+  "moreDocuments": "Documents",
+  "moreReports": "Reports",
+  "moreSettings": "Settings",
+  "moreChangePassword": "Change password",
+  "moreHelp": "Help center",
+  "moreContact": "Contact us",
+  "moreSignOutTitle": "Sign out?",
+  "moreSignOutBody": "You will need to sign in again to see your properties.",
+  "moreVersion": "360 Estate {version}",
+  "@moreVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "moreOpenProfile": "Open your profile",
+  "moreGuestName": "Your account",
+  "profilePageTitle": "Profile",
+  "profileEditAction": "Edit profile",
+  "profileDetailsTitle": "Your details",
+  "profileSecurityTitle": "Security",
+  "profileNotSet": "Not added",
+  "profileName": "Full name",
+  "profileEmail": "Email",
+  "profilePhone": "Phone",
+  "profileChangePhoto": "Change photo",
+  "profileTakePhoto": "Take a photo",
+  "profileChoosePhoto": "Choose from gallery",
+  "profileRemovePhoto": "Remove new photo",
+  "profileEmailHelper": "Email changes go through your sign-in settings.",
+  "profileSavedShort": "Profile saved",
+  "profileSaveFailed": "Couldn't save your profile. Try again.",
+  "passwordPageIntro": "Enter your current password, then choose a new one.",
+  "passwordShow": "Show password",
+  "passwordHide": "Hide password",
+  "passwordCurrentLabel": "Current password",
+  "passwordNewLabel": "New password",
+  "passwordRules": "Your new password needs",
+  "passwordTooShort8": "Use at least 8 characters.",
+  "passwordChangedShort": "Password changed",
+  "passwordChangeFailedShort": "Couldn't change your password. Try again.",
+  "passwordRuleMet": "Done",
+  "passwordRuleMissing": "Missing",
+  "settingsLanguageSystemDesc": "Follow the phone's language",
+  "settingsLanguageEnglish": "English",
+  "settingsLanguageHindi": "हिन्दी",
+  "settingsAlertsTitle": "Notifications and privacy",
+  "settingsNotificationPrefs": "Notification preferences",
+  "settingsPrivacy": "Privacy",
+  "settingsDeleteAccount": "Delete account",
+  "settingsDeleteAccountDesc": "Remove your account and its data",
+  "notifPrefsNote": "These choices are saved on this phone. Push alerts start once they are switched on for 360 Estate.",
+  "notifPrefsAllTitle": "Allow notifications",
+  "notifPrefsAllDesc": "Turn every alert below on or off",
+  "notifPrefsAlertsTitle": "Alerts",
+  "notifPrefsEmailTitle": "Email",
+  "notifPrefRent": "Rent due reminders",
+  "notifPrefPayments": "Payments received",
+  "notifPrefLeases": "Leases about to end",
+  "notifPrefMaintenance": "Repair updates",
+  "notifPrefInspections": "Inspection reminders",
+  "notifPrefMarketing": "News and offers",
+  "privacyDiagnosticsTitle": "Diagnostics",
+  "privacyCrashTitle": "Send crash reports",
+  "privacyCrashDesc": "Helps us find and fix bugs. Applies the next time you open the app.",
+  "legalPrivacyPolicy": "Privacy policy",
+  "legalTerms": "Terms of service",
+  "legalIntro": "The full text is on our website. It opens inside the app.",
+  "legalOpen": "Read it now",
+  "legalOpenFailed": "Couldn't open the page. Check your connection and try again.",
+  "deleteTitle": "Delete your account",
+  "deleteSubmit": "Delete my account",
+  "helpSearchHint": "Search questions",
+  "helpCatAll": "All",
+  "helpCatProperties": "Properties",
+  "helpCatRent": "Rent",
+  "helpCatLeases": "Leases",
+  "helpCatMaintenance": "Maintenance",
+  "helpCatAccount": "Account",
+  "helpQ1": "How do I add a property?",
+  "helpA1": "Open the Properties tab and tap Add property. Fill in the details, then save.",
+  "helpQ2": "How do I record a rent payment?",
+  "helpA2": "Tap Record payment on Home, or open Collections and pick the charge that was paid.",
+  "helpQ3": "How do I create a lease?",
+  "helpA3": "Go to More, then Leases, and tap the add button. Pick the property and tenant, then set the rent and dates.",
+  "helpQ4": "How do I run an inspection?",
+  "helpA4": "Go to More, then Inspections, and tap the add button. Pick the property and work through the checklist.",
+  "helpQ5": "How do I log a repair?",
+  "helpA5": "Open the Tasks tab and tap the add button. Describe the problem and pick the property.",
+  "helpQ6": "How do I change my name or photo?",
+  "helpA6": "Go to More, tap your name at the top, then tap Edit profile.",
+  "helpNoResultsTitle": "No answers match",
+  "helpNoResultsBody": "Try another word, or ask us directly.",
+  "helpStillStuckTitle": "Still stuck?",
+  "helpStillStuckBody": "Send us a message. We usually reply within a day.",
+  "contactTopic": "Topic",
+  "contactCatGeneral": "General",
+  "contactCatTechnical": "Something is broken",
+  "contactCatBilling": "Billing",
+  "contactCatFeature": "Feature idea",
+  "contactName": "Your name",
+  "contactSubject": "Subject",
+  "contactMessageTitle": "Your message",
+  "contactMessageHelper": "Tell us what happened and on which screen.",
+  "contactSend": "Send message",
+  "contactSent": "Message sent. We will reply by email.",
+  "contactEmailDirect": "Or email us at {email}",
+  "@contactEmailDirect": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutTagline": "Rent, tenants and repairs, kept in one ledger.",
+  "aboutVersion": "Version {version} ({build})",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutLicenses": "Open-source licences",
+  "aboutContactTitle": "Get in touch",
+  "aboutCopyright": "© {year} 360Ghar. All rights reserved.",
+  "@aboutCopyright": {
+    "placeholders": {
+      "year": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutMadeFor": "Made for property owners in India.",
+  "notifSignedOutTitle": "Sign in to see alerts",
+  "notifSignedOutBody": "Your notifications appear here after you sign in.",
+  "notifPushNote": "Push alerts are not switched on for this phone yet. Every alert still lands here.",
+  "notifEmptyTitle": "No notifications yet",
+  "notifEmptyBody": "Rent reminders, payments and repair updates show up here.",
+  "notifUnread": "New",
+  "notifDebugTitle": "Register a device token (debug)",
+  "notifDebugToken": "Device token",
+  "notifDebugPlatform": "Platform",
+  "notifDebugRegister": "Register",
+  "notifDebugTokenMissing": "Enter a device token.",
+  "notifDebugPlatformMissing": "Choose a platform.",
+  "notifDebugRegistered": "Device registered.",
+  "ownerScopeChooseTitle": "Choose an owner",
+  "ownerScopeAllTitle": "Showing every owner",
+  "ownerScopeManaging": "Managing owner #{id}",
+  "@ownerScopeManaging": {
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
+  },
+  "ownerScopeNeedOwnerBody": "Properties, leases and rent are listed per owner. Enter the owner id to start.",
+  "ownerScopeForOwnerBody": "Properties, leases, rent and reports are for this owner.",
+  "ownerScopeChoose": "Choose",
+  "ownerScopeChange": "Change",
+  "ownerScopeDialogTitle": "Owner to manage",
+  "ownerScopeIdLabel": "Owner id",
+  "ownerScopeIdError": "Enter the owner id.",
+  "ownerScopeShowAll": "Show all",
+  "authContinueWithApple": "Continue with Apple",
+  "propertyViewLease": "View lease",
+  "taskSectionWhere": "Property and lease",
+  "paymentDueShort": "due {date}",
+  "@paymentDueShort": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "propertyStepMedia": "Photos and floor plans",
+  "reportsRowTotalIncome": "Total income",
+  "reportsRowTotalExpenses": "Total expenses",
+  "reportsRowNetIncome": "Net income",
+  "reportsRowProperties": "Properties",
+  "reportsRowProperty": "Property",
+  "reportsRowOccupied": "Occupied",
+  "reportsRowVacant": "Vacant",
+  "reportsRowOccupancyRate": "Occupancy rate",
+  "reportsRowMaintenanceRequests": "Maintenance requests",
+  "reportsRowPeriod": "Period",
+  "reportsRowAllTime": "All time",
+  "reportsRowFrom": "From {date}",
+  "@reportsRowFrom": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsRowUntil": "Until {date}",
+  "@reportsRowUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reportsRowLeaseEnds": "Lease ends {date}",
+  "@reportsRowLeaseEnds": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "mapUnsupported": "The map is not available on this device.",
+  "mapOpenInBrowser": "Open in browser",
+  "leaseFormAmountInvalid": "Enter an amount of zero or more.",
+  "expenseFormPropertyUnavailable": "The properties could not be loaded. Try again."
 }

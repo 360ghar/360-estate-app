@@ -1,0 +1,40 @@
+{
+  "list_page": {
+    "has_more": true,
+    "items": [
+      {
+        "amount": 14250.75,
+        "category": "property_tax",
+        "created_at": "2026-10-01T10:15:02Z",
+        "description": null,
+        "expense_date": "2026-09-30",
+        "id": 81,
+        "notes": "Paid online",
+        "owner_id": 7,
+        "property_id": 1,
+        "property_name": "2 BHK Sector 51",
+        "receipt_document_id": null,
+        "title": "Q2 property tax",
+        "updated_at": null
+      },
+      {
+        "amount": 900.0,
+        "category": "repairs",
+        "created_at": "2026-10-01T10:15:02Z",
+        "description": null,
+        "expense_date": "2026-09-12",
+        "id": 82,
+        "notes": null,
+        "owner_id": 7,
+        "property_id": 2,
+        "property_name": null,
+        "receipt_document_id": null,
+        "title": null,
+        "updated_at": null
+      }
+    ],
+    "limit": 20,
+    "next_cursor": "eyJrIjpbODJdLCJmIjoiYWJjIn0",
+    "total": null
+  }
+}

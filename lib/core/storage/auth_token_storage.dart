@@ -13,15 +13,25 @@ final class AuthTokenStorage {
 
   Stream<String?> get onTokenChanged => _controller.stream;
 
+  bool get isClosed => _controller.isClosed;
+
+  Future<void> dispose() async {
+    await _controller.close();
+  }
+
   Future<String?> read() => _store.readString(_tokenKey);
 
   Future<void> save(String token) async {
     await _store.writeString(key: _tokenKey, value: token);
-    _controller.add(token);
+    if (!_controller.isClosed) {
+      _controller.add(token);
+    }
   }
 
   Future<void> clear() async {
     await _store.delete(_tokenKey);
-    _controller.add(null);
+    if (!_controller.isClosed) {
+      _controller.add(null);
+    }
   }
 }

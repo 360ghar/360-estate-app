@@ -1,0 +1,68 @@
+{
+  "bad_request": {
+    "error": {
+      "code": "BAD_REQUEST",
+      "details": {
+        "outstanding": "500.00"
+      },
+      "message": "Payment amount (900.00) exceeds outstanding balance (500.00)"
+    }
+  },
+  "forbidden": {
+    "error": {
+      "code": "USER_INACTIVE",
+      "details": {},
+      "message": "Account is inactive"
+    }
+  },
+  "invalid_cursor": {
+    "error": {
+      "code": "INVALID_CURSOR",
+      "details": {
+        "fields": []
+      },
+      "message": "Invalid cursor"
+    }
+  },
+  "not_found": {
+    "error": {
+      "code": "NOT_FOUND",
+      "details": {},
+      "message": "Lease not found"
+    }
+  },
+  "rate_limited": {
+    "error": {
+      "code": "RATE_LIMITED",
+      "details": {},
+      "message": "Too many requests"
+    }
+  },
+  "token_invalid": {
+    "error": {
+      "code": "TOKEN_INVALID",
+      "details": {},
+      "message": "Token has expired"
+    }
+  },
+  "validation": {
+    "error": {
+      "code": "VALIDATION_ERROR",
+      "details": {
+        "fields": [
+          {
+            "field": "body.monthly_rent",
+            "msg": "Input should be greater than 0",
+            "type": "greater_than"
+          },
+          {
+            "field": "body.start_date",
+            "msg": "Field required",
+            "type": "missing"
+          }
+        ]
+      },
+      "message": "Request validation failed"
+    }
+  }
+}

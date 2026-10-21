@@ -103,10 +103,19 @@ class DeepLinkService {
       _pendingPath = path;
       return;
     }
-    // Navigate immediately and clear the pending path so the same deep link
-    // is not replayed twice (once by router.go and again by the pending queue).
+    // Public paths render for anyone: navigate and clear so the link is not
+    // replayed twice (once by router.go and again by the pending queue).
+    if (path.startsWith('/public') || path.startsWith('/legal/')) {
+      router.go(path);
+      _pendingPath = null;
+      return;
+    }
+    // Protected paths may be bounced by the auth guard (login gate, splash
+    // while checking, mandatory set-password). Queue BEFORE navigating so
+    // the router redirect can replay the link after authentication; an
+    // in-flight guard redirect must not lose the destination.
+    _pendingPath = path;
     router.go(path);
-    _pendingPath = null;
   }
 
   /// Canonical public domain for all 360Ghar deep links. Single source of
@@ -157,6 +166,8 @@ class DeepLinkService {
   }
 
   static String? _mapEntity(String entity, String id) {
+    // Cap id length to bound router path / cache growth from hostile links.
+    if (id.isEmpty || id.length > 128) return null;
     switch (entity) {
       case 'apply':
         return '/public/applications/$id';

@@ -1,4 +1,6 @@
 import 'package:estate_app/core/network/api_client.dart';
+import 'package:estate_app/core/network/api_paths.dart';
+import 'package:estate_app/core/network/cache_control.dart';
 import 'package:estate_app/core/network/response_parser.dart';
 import 'package:estate_app/core/pagination/page.dart';
 import 'package:estate_app/core/services/cache_store.dart';
@@ -8,6 +10,9 @@ class TenantsRepository {
   TenantsRepository(this._client, this._cache);
 
   final ApiClient _client;
+
+  /// Account-scoped by the store itself (see `CacheStore.bindAccount`): sign-out
+  /// and an account switch drop every entry.
   final CacheStore _cache;
   static const _cacheTtl = Duration(minutes: 5);
 
@@ -17,49 +22,37 @@ class TenantsRepository {
   }) async {
     final cacheKey =
         'tenants:cursor=${cursor ?? Page.nullCursorCacheKey}:limit=$limit';
-    final cached = _cache
-        .get<({List<Tenant> items, String? nextCursor, bool hasMore})>(
-          cacheKey,
-        );
-    if (cached != null) {
-      return Page(
-        items: cached.items,
-        limit: limit,
-        hasMore: cached.hasMore,
-        nextCursor: cached.nextCursor,
-      );
-    }
+    final cached = _cache.get<Page<Tenant>>(cacheKey);
+    if (cached != null) return cached;
+    final generation = _cache.generation;
 
     final response = await _client.get<dynamic>(
-      '/pm/tenants',
+      ApiPaths.tenants,
+      ownerScoped: true,
       queryParameters: {if (cursor != null) 'cursor': cursor, 'limit': limit},
     );
-    final page = unwrapPage(response.data);
-    final data = page.items
-        .whereType<Map<String, dynamic>>()
-        .map(Tenant.fromJson)
-        .toList();
-    _cache.set(cacheKey, (
-      items: data,
-      nextCursor: page.nextCursor,
-      hasMore: page.hasMore,
-    ), ttl: _cacheTtl);
-    return Page(
-      items: data,
+    final raw = unwrapPage(response.data);
+    final result = Page<Tenant>(
+      items: raw.items
+          .whereType<Map<String, dynamic>>()
+          .map(Tenant.fromJson)
+          .toList(),
       limit: limit,
-      hasMore: page.hasMore,
-      nextCursor: page.nextCursor,
+      hasMore: raw.hasMore,
+      nextCursor: raw.nextCursor,
     );
+    if (isCacheable(response)) {
+      _cache.set(cacheKey, result, ttl: _cacheTtl, generation: generation);
+    }
+    return result;
   }
 
-  Future<List<Tenant>> list({int limit = 200}) async {
-    final page = await listPage(cursor: null, limit: limit);
-    return page.items;
-  }
-
-  Future<Tenant> fetch(String id) async {
-    final response = await _client.get<dynamic>('/pm/tenants/$id');
-    final data = unwrapMap(response.data);
-    return Tenant.fromJson(data);
+  /// A tenant by `user_id` (the id of the tenant's user account).
+  Future<Tenant> fetch(int userId) async {
+    final response = await _client.get<dynamic>(
+      ApiPaths.tenant(userId),
+      ownerScoped: true,
+    );
+    return Tenant.fromJson(unwrapMap(response.data));
   }
 }

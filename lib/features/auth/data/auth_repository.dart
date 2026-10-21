@@ -1,14 +1,18 @@
-import 'dart:io';
-
+import 'package:cross_file/cross_file.dart';
 import 'package:dio/dio.dart';
+import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/core/errors/failure.dart';
 import 'package:estate_app/core/network/api_client.dart';
+import 'package:estate_app/core/network/api_paths.dart';
 import 'package:estate_app/core/network/response_parser.dart';
+import 'package:estate_app/core/services/file_upload_service.dart';
 import 'package:estate_app/core/storage/auth_token_storage.dart';
+import 'package:estate_app/core/utils/parse.dart';
 import 'package:estate_app/core/utils/phone_utils.dart';
 import 'package:estate_app/features/auth/data/apple_sign_in_service.dart';
 import 'package:estate_app/features/auth/data/google_sign_in_service.dart';
 import 'package:estate_app/features/auth/data/supabase_auth_error_mapper.dart';
+import 'package:estate_app/features/auth/models/auth_gate_state.dart';
 import 'package:estate_app/features/auth/models/auth_method.dart';
 import 'package:estate_app/features/auth/models/user_profile.dart';
 import 'package:mime/mime.dart';
@@ -16,23 +20,16 @@ import 'package:mime/mime.dart';
 // MultipartFile used by uploadProfilePhoto resolves unambiguously.
 import 'package:supabase_flutter/supabase_flutter.dart' hide MultipartFile;
 
+/// The body of `PUT /users/profile`. The backend accepts `full_name`, `phone`,
+/// `date_of_birth` and a few settings keys, and refuses any other key with 422.
+/// There is no `email` (email changes go through Supabase), no `first_name` or
+/// `last_name`, and no `profile_image_url` (the photo goes through
+/// `POST /users/me/avatar`).
 class UserProfileUpdate {
-  const UserProfileUpdate({
-    this.fullName,
-    this.firstName,
-    this.lastName,
-    this.email,
-    this.phone,
-    this.avatarUrl,
-    this.dateOfBirth,
-  });
+  const UserProfileUpdate({this.fullName, this.phone, this.dateOfBirth});
 
   final String? fullName;
-  final String? firstName;
-  final String? lastName;
-  final String? email;
   final String? phone;
-  final String? avatarUrl;
   final DateTime? dateOfBirth;
 
   Map<String, dynamic> toJson() {
@@ -40,24 +37,12 @@ class UserProfileUpdate {
     if (fullName != null && fullName!.trim().isNotEmpty) {
       payload['full_name'] = fullName!.trim();
     }
-    if (firstName != null && firstName!.trim().isNotEmpty) {
-      payload['first_name'] = firstName!.trim();
-    }
-    if (lastName != null && lastName!.trim().isNotEmpty) {
-      payload['last_name'] = lastName!.trim();
-    }
-    if (email != null && email!.trim().isNotEmpty) {
-      payload['email'] = email!.trim();
-    }
     if (phone != null && phone!.trim().isNotEmpty) {
       payload['phone'] = phone!.trim();
     }
-    if (avatarUrl != null && avatarUrl!.trim().isNotEmpty) {
-      // Backend UserUpdate field is profile_image_url (not avatar_url).
-      payload['profile_image_url'] = avatarUrl!.trim();
-    }
     if (dateOfBirth != null) {
-      payload['date_of_birth'] = dateOfBirth!.toIso8601String();
+      // `date_of_birth` is a date, not a datetime.
+      payload['date_of_birth'] = toApiDateOnly(dateOfBirth);
     }
     return payload;
   }
@@ -115,24 +100,33 @@ class AuthRepository {
     }
     try {
       final response = await _client.post<dynamic>(
-        '/auth/identifier-status',
+        ApiPaths.identifierStatus,
         data: {'identifier': normalized},
       );
       final data = unwrapMap(response.data);
-      final channelRaw = (data['channel'] as String?)?.toLowerCase();
-      final nextStepRaw = (data['next_step'] as String?)?.toLowerCase();
+      final channel = IdentifierStatusChannel.fromJson(data['channel']);
+      final nextStep = IdentifierStatusNextStep.fromJson(data['next_step']);
+      if (nextStep == null) {
+        // An unknown next step is not guessed: the user cannot be routed.
+        throw const UnknownFailure(
+          'Unable to verify your account. Please try again.',
+        );
+      }
       return IdentifierStatus(
         exists: data['exists'] == true,
         verified: data['verified'] == true,
         hasPassword: data['has_password'] == true,
-        channel: channelRaw == 'email'
-            ? IdentifierChannel.email
-            : channelRaw == 'phone'
-            ? IdentifierChannel.phone
-            : (isEmail ? IdentifierChannel.email : IdentifierChannel.phone),
-        nextStep: nextStepRaw == 'password'
-            ? IdentifierNextStep.password
-            : IdentifierNextStep.otp,
+        // The channel is where the code goes. An unknown value falls back to
+        // the channel of what the user typed, not to a backend value.
+        channel: switch (channel) {
+          IdentifierStatusChannel.email => IdentifierChannel.email,
+          IdentifierStatusChannel.phone => IdentifierChannel.phone,
+          null => isEmail ? IdentifierChannel.email : IdentifierChannel.phone,
+        },
+        nextStep: switch (nextStep) {
+          IdentifierStatusNextStep.password => IdentifierNextStep.password,
+          IdentifierStatusNextStep.otp => IdentifierNextStep.otp,
+        },
       );
     } on Failure {
       rethrow;
@@ -149,7 +143,7 @@ class AuthRepository {
   Future<void> recordLastMethod(AuthMethod method) async {
     try {
       await _client.post<dynamic>(
-        '/auth/last-method',
+        ApiPaths.lastMethod,
         data: {'method': method.wireName},
       );
     } catch (_) {
@@ -157,24 +151,24 @@ class AuthRepository {
     }
   }
 
-  /// Fetches the auth gate state from the backend.
-  /// Returns a map with `stage`, `next_action`, and `missing_fields`.
-  Future<Map<String, dynamic>> getAuthGateState({String app = 'estate'}) async {
+  /// Fetches the auth gate state from the backend: `stage`, `next_action` and
+  /// `missing_fields`. An unknown `stage` reads as null.
+  Future<AuthGateState> getAuthGateState({AppKey app = AppKey.estate}) async {
     final response = await _client.get<dynamic>(
-      '/users/me/auth-state',
-      queryParameters: {'app': app},
+      ApiPaths.authState,
+      queryParameters: {'app': app.wire},
     );
-    return Map<String, dynamic>.from(response.data as Map);
+    return AuthGateState.fromJson(unwrapMap(response.data));
   }
 
   /// Marks the given app's onboarding as complete (sets
   /// `<app>_onboarding_completed = true` on the user). Best-effort: failures
   /// are swallowed so they never block entry to the app.
-  Future<void> completeOnboarding({String app = 'estate'}) async {
+  Future<void> completeOnboarding({AppKey app = AppKey.estate}) async {
     try {
       await _client.post<dynamic>(
-        '/users/me/onboarding',
-        queryParameters: {'app': app},
+        ApiPaths.onboarding,
+        queryParameters: {'app': app.wire},
       );
     } catch (_) {
       // Non-critical; ignore.
@@ -234,9 +228,9 @@ class AuthRepository {
       }
       await _tokenStorage.save(session.accessToken);
       final user = response.user ?? session.user;
-      return _fetchProfileWithFallback(user);
+      return await _fetchProfileWithFallback(user);
     } on GoogleSignInCancelled {
-      // User dismissed the native picker — do NOT fall back.
+      // User dismissed the native picker: do NOT fall back.
       rethrow;
     } catch (_) {
       // Any non-cancellation native failure (e.g. unprovisioned OAuth client /
@@ -313,7 +307,7 @@ class AuthRepository {
           // Non-critical; ignore.
         }
       }
-      return _fetchProfileWithFallback(user);
+      return await _fetchProfileWithFallback(user);
     } on AppleSignInCancelled {
       rethrow;
     } on Failure {
@@ -344,7 +338,7 @@ class AuthRepository {
       }
       await _tokenStorage.save(session.accessToken);
       final user = response.user ?? session.user;
-      return _fetchProfileWithFallback(user);
+      return await _fetchProfileWithFallback(user);
     } on AuthException catch (e) {
       throw failureFromAuthException(e);
     } catch (e) {
@@ -384,7 +378,7 @@ class AuthRepository {
       if (user == null) {
         throw const UnknownFailure('Sign up succeeded but user is missing');
       }
-      return _fetchProfileWithFallback(user);
+      return await _fetchProfileWithFallback(user);
     } on AuthException catch (e) {
       throw failureFromAuthException(e);
     } catch (e) {
@@ -440,7 +434,7 @@ class AuthRepository {
       }
       await _tokenStorage.save(session.accessToken);
       final user = response.user ?? session.user;
-      return _fetchProfileWithFallback(user);
+      return await _fetchProfileWithFallback(user);
     } on AuthException catch (e) {
       throw failureFromAuthException(e, context: AuthErrorContext.otp);
     } catch (e) {
@@ -500,7 +494,7 @@ class AuthRepository {
       }
       await _tokenStorage.save(session.accessToken);
       final user = response.user ?? session.user;
-      return _fetchProfileWithFallback(user);
+      return await _fetchProfileWithFallback(user);
     } on AuthException catch (e) {
       throw failureFromAuthException(e, context: AuthErrorContext.otp);
     }
@@ -526,7 +520,7 @@ class AuthRepository {
       }
       await _tokenStorage.save(session.accessToken);
       final user = response.user ?? session.user;
-      return _fetchProfileWithFallback(user);
+      return await _fetchProfileWithFallback(user);
     } on AuthException catch (e) {
       throw failureFromAuthException(e);
     } catch (e) {
@@ -604,7 +598,7 @@ class AuthRepository {
         await _tokenStorage.save(session.accessToken);
       }
       final user = response.user ?? session?.user;
-      return _fetchProfileWithFallback(user);
+      return await _fetchProfileWithFallback(user);
     } on AuthException catch (e) {
       throw failureFromAuthException(e, context: AuthErrorContext.otp);
     } catch (e) {
@@ -613,7 +607,7 @@ class AuthRepository {
   }
 
   Future<UserProfile> fetchProfile() async {
-    final response = await _client.get<dynamic>('/users/profile');
+    final response = await _client.get<dynamic>(ApiPaths.profile);
     final data = unwrapMap(response.data);
     return UserProfile.fromJson(data);
   }
@@ -633,7 +627,7 @@ class AuthRepository {
 
   Future<UserProfile> updateProfile(UserProfileUpdate update) async {
     final response = await _client.put<dynamic>(
-      '/users/profile',
+      ApiPaths.profile,
       data: update.toJson(),
     );
     final data = unwrapMap(response.data);
@@ -645,53 +639,39 @@ class AuthRepository {
     await _tokenStorage.clear();
   }
 
-  /// Upload profile photo via backend API (Cloudinary).
-  /// Returns the public URL of the uploaded image.
-  Future<String> uploadProfilePhoto(File imageFile) async {
-    try {
-      final user = _supabase.auth.currentUser;
-      if (user == null) {
-        throw const UnauthorizedFailure('User not authenticated');
-      }
-
-      final mimeType = lookupMimeType(imageFile.path);
-      if (mimeType == null ||
-          (!mimeType.startsWith('image/') &&
-              mimeType != 'application/octet-stream')) {
-        throw const ValidationFailure(
-          'Invalid file type. Please select an image.',
-        );
-      }
-
-      final fileSize = await imageFile.length();
-      if (fileSize > 5 * 1024 * 1024) {
-        throw const ValidationFailure('Image size must be less than 5MB');
-      }
-
-      final fileName = imageFile.path.split(Platform.pathSeparator).last;
-      final formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(
-          imageFile.path,
-          filename: fileName,
-        ),
-        'folder': 'avatars',
-        'visibility': 'public',
-      });
-
-      final response = await _client.upload<dynamic>('/upload', data: formData);
-
-      final data = response.data;
-      final imageUrl = data['public_url'] as String?;
-      if (imageUrl == null || imageUrl.isEmpty) {
-        throw const UnknownFailure('Upload succeeded but no URL returned.');
-      }
-      return imageUrl;
-    } on DioException catch (e) {
-      final detail = e.response?.data?['detail'] ?? e.message;
-      throw UnknownFailure('Failed to upload photo: $detail', cause: e);
-    } catch (e) {
-      throw UnknownFailure('Failed to upload photo', cause: e);
+  /// Uploads the profile photo with `POST /users/me/avatar` (multipart `file`).
+  /// The backend stores it and returns the updated profile, so one call sets
+  /// the photo. Web-safe: takes the `XFile` returned directly by
+  /// `image_picker`, no `dart:io` File. Validation strings and the 5MB avatar
+  /// cap are unchanged (via `FileUploadService.validateImage`).
+  Future<UserProfile> uploadProfilePhoto(XFile imageFile) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      throw const UnauthorizedFailure('User not authenticated');
     }
+
+    final mimeType = imageFile.mimeType ?? lookupMimeType(imageFile.path);
+    final fileSize = await imageFile.length();
+    FileUploadService.validateImage(length: fileSize, mimeType: mimeType);
+
+    final fileName = imageFile.name.isNotEmpty
+        ? imageFile.name
+        : FileUploadService.fileNameOf(imageFile.path);
+    final bytes = await imageFile.readAsBytes();
+    final formData = FormData.fromMap({
+      'file': MultipartFile.fromBytes(bytes, filename: fileName),
+    });
+
+    final response = await _client.upload<dynamic>(
+      ApiPaths.userAvatar,
+      data: formData,
+    );
+    final profile = UserProfile.fromJson(unwrapMap(response.data));
+    final imageUrl = profile.avatarUrl;
+    if (imageUrl == null || imageUrl.isEmpty) {
+      throw const UnknownFailure('Upload succeeded but no URL returned.');
+    }
+    return profile;
   }
 
   /// Change user password
@@ -734,30 +714,13 @@ class AuthRepository {
       throw UnknownFailure('Failed to change password', cause: e);
     }
   }
-
-  /// Update only the profile photo URL (after upload)
-  Future<UserProfile> updateProfilePhoto(String photoUrl) async {
-    try {
-      final response = await _client.put<dynamic>(
-        '/users/profile',
-        data: {'profile_image_url': photoUrl},
-      );
-      final data = unwrapMap(response.data);
-      return UserProfile.fromJson(data);
-    } catch (e) {
-      throw UnknownFailure('Failed to update profile photo', cause: e);
-    }
-  }
 }
 
 UserProfile _profileFromSupabase(User user) {
   final metadata = user.userMetadata ?? const <String, dynamic>{};
   return UserProfile(
     fullName: metadata['full_name'] as String?,
-    firstName: metadata['first_name'] as String?,
-    lastName: metadata['last_name'] as String?,
     phone: user.phone,
     email: user.email,
-    role: metadata['role'] as String?,
   );
 }

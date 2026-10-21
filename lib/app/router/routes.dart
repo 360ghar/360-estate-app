@@ -9,6 +9,10 @@ abstract final class Routes {
   static const login = '/login';
   static const signup = '/signup';
   static const otp = '/otp';
+  static const addPhone = '/add-phone';
+  static const setPassword = '/set-password';
+  static const profileCompletion = '/profile-completion';
+  static const onboarding = '/onboarding';
 
   // Public legal routes used before authentication (for sign-up consent).
   static const publicPrivacyPolicy = '/legal/privacy-policy';
@@ -49,6 +53,7 @@ abstract final class Routes {
 
   static const inspections = '/more/inspections';
   static const inspectionsNew = '/more/inspections/new';
+  static const inspectionTemplates = '/more/inspections/templates';
   static String inspectionDetail(String id) => '/more/inspections/$id';
 
   static const expenses = '/more/expenses';

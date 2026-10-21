@@ -1,0 +1,51 @@
+{
+  "download": {
+    "url": "https://res.example.com/signed/lease-2026.pdf?sig=abc"
+  },
+  "list_page": {
+    "has_more": true,
+    "items": [
+      {
+        "created_at": "2026-10-01T10:15:02Z",
+        "created_by_user_id": null,
+        "document_type": "lease_agreement",
+        "file_size": 120300,
+        "file_url": "https://res.example.com/signed/lease-2026.pdf",
+        "id": 91,
+        "lease_id": 31,
+        "maintenance_request_id": null,
+        "mime_type": "application/pdf",
+        "owner_id": 7,
+        "property_id": 1,
+        "rental_application_id": null,
+        "shared_with_agent": false,
+        "shared_with_tenant": true,
+        "title": "Lease 2026",
+        "updated_at": null,
+        "user_id": null
+      },
+      {
+        "created_at": "2026-10-01T10:15:02Z",
+        "created_by_user_id": null,
+        "document_type": "receipt",
+        "file_size": null,
+        "file_url": null,
+        "id": 92,
+        "lease_id": null,
+        "maintenance_request_id": null,
+        "mime_type": null,
+        "owner_id": 7,
+        "property_id": null,
+        "rental_application_id": null,
+        "shared_with_agent": false,
+        "shared_with_tenant": false,
+        "title": "Tax receipt",
+        "updated_at": null,
+        "user_id": null
+      }
+    ],
+    "limit": 20,
+    "next_cursor": "eyJrIjpbOTJdLCJmIjoiYWJjIn0",
+    "total": null
+  }
+}

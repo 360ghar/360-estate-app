@@ -20,6 +20,11 @@ analyzer:
     # @JsonKey on freezed factory params is a legitimate pattern; the
     # annotation is forwarded to the generated fields, not the constructor.
     invalid_annotation_target: ignore
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - windows/**
 
 linter:
   # The lint rules applied to this project can be customized in the

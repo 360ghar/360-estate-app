@@ -1,0 +1,77 @@
+{
+  "detail": {
+    "conducted_at": "2026-10-01T10:15:02Z",
+    "conducted_by_user_id": 7,
+    "created_at": "2026-10-01T10:15:02Z",
+    "id": 61,
+    "inspection_type": "move_out",
+    "lease_id": 31,
+    "overall_notes": null,
+    "owner_id": 7,
+    "owner_signature_document_id": null,
+    "property_id": 1,
+    "rooms_data": {
+      "items": [
+        {
+          "notes": "Scuffs",
+          "status": "fair",
+          "title": "Walls"
+        }
+      ]
+    },
+    "signed_by_owner_at": "2026-10-01T10:15:02Z",
+    "signed_by_tenant_at": "2026-10-01T10:15:02Z",
+    "tenant_signature_document_id": null,
+    "updated_at": null
+  },
+  "list_page": {
+    "has_more": false,
+    "items": [
+      {
+        "conducted_at": "2026-10-01T10:15:02Z",
+        "conducted_by_user_id": 7,
+        "created_at": "2026-10-01T10:15:02Z",
+        "id": 61,
+        "inspection_type": "move_in",
+        "lease_id": 31,
+        "overall_notes": "All good",
+        "owner_id": 7,
+        "owner_signature_document_id": null,
+        "property_id": 1,
+        "rooms_data": {
+          "items": [
+            {
+              "notes": null,
+              "status": "pass",
+              "title": "Front door lock"
+            }
+          ]
+        },
+        "signed_by_owner_at": null,
+        "signed_by_tenant_at": "2026-10-01T10:15:02Z",
+        "tenant_signature_document_id": null,
+        "updated_at": null
+      },
+      {
+        "conducted_at": "2026-10-02T08:00:00Z",
+        "conducted_by_user_id": 7,
+        "created_at": "2026-10-02T08:00:00Z",
+        "id": 62,
+        "inspection_type": "routine",
+        "lease_id": 31,
+        "overall_notes": null,
+        "owner_id": 7,
+        "owner_signature_document_id": null,
+        "property_id": 1,
+        "rooms_data": null,
+        "signed_by_owner_at": null,
+        "signed_by_tenant_at": null,
+        "tenant_signature_document_id": null,
+        "updated_at": null
+      }
+    ],
+    "limit": 20,
+    "next_cursor": null,
+    "total": null
+  }
+}

@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:estate_app/app/app.dart';
+import 'package:estate_app/app/config_error_page.dart';
+import 'package:estate_app/core/api/wire_log.dart';
 import 'package:estate_app/core/config/app_config.dart';
 import 'package:estate_app/core/config/env_loader.dart';
 import 'package:estate_app/core/crash_reporting/crash_reporter.dart';
@@ -21,8 +23,18 @@ Future<void> bootstrap() async {
 
       final envLoaded = await EnvLoader.load();
 
-      final config = AppConfig.fromEnvironment();
+      // fromEnvironment throws StateError on missing values (fresh checkout
+      // with an empty .env). Mount the config-error UI instead of dying
+      // before first frame in the zoned error handler.
+      late final AppConfig config;
+      try {
+        config = AppConfig.fromEnvironment();
+      } on StateError catch (e) {
+        runApp(ConfigErrorPage(message: e.message));
+        return;
+      }
       AppLogger.init(config);
+      wireLogSink = AppLogger.w;
       if (!envLoaded) {
         AppLogger.w(
           'No .env asset found; falling back to --dart-define values',
@@ -30,9 +42,15 @@ Future<void> bootstrap() async {
       }
 
       if (!config.isSupabaseConfigured) {
-        throw StateError(
-          'Missing SUPABASE_URL or SUPABASE_PUBLISHABLE_KEY for auth/session handling.',
+        runApp(
+          const ConfigErrorPage(
+            message:
+                'SUPABASE_URL or SUPABASE_PUBLISHABLE_KEY is empty.\n'
+                'Copy .env.example to .env and fill the values,\n'
+                'then restart the app.',
+          ),
         );
+        return;
       }
       await Supabase.initialize(
         url: config.supabaseUrl,

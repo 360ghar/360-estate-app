@@ -21,20 +21,22 @@ DashboardOverview _$DashboardOverviewFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$DashboardOverview {
-  @JsonKey(name: 'properties', fromJson: parseInt)
-  int? get propertiesCount => throw _privateConstructorUsedError;
-  @JsonKey(name: 'tenants', fromJson: parseInt)
-  int? get tenantsCount => throw _privateConstructorUsedError;
-  @JsonKey(name: 'charges_due', fromJson: parseInt)
-  int? get chargesDue => throw _privateConstructorUsedError;
-  @JsonKey(name: 'charges_overdue', fromJson: parseInt)
-  int? get chargesOverdue => throw _privateConstructorUsedError;
-  @JsonKey(name: 'maintenance_open', fromJson: parseInt)
-  int? get maintenanceOpen => throw _privateConstructorUsedError;
-  @JsonKey(name: 'rent_collected', fromJson: parseDouble)
-  double? get rentCollected => throw _privateConstructorUsedError;
-  @JsonKey(name: 'occupancy_rate', fromJson: parseDouble)
-  double? get occupancyRate => throw _privateConstructorUsedError;
+  @JsonKey(name: 'total_properties', fromJson: parseInt)
+  int? get totalProperties => throw _privateConstructorUsedError;
+  @JsonKey(name: 'occupied_properties', fromJson: parseInt)
+  int? get occupiedProperties => throw _privateConstructorUsedError;
+  @JsonKey(name: 'vacant_properties', fromJson: parseInt)
+  int? get vacantProperties => throw _privateConstructorUsedError;
+  @JsonKey(name: 'under_maintenance_properties', fromJson: parseInt)
+  int? get underMaintenanceProperties => throw _privateConstructorUsedError;
+  @JsonKey(name: 'monthly_revenue_current', fromJson: parseDouble)
+  double? get monthlyRevenueCurrent => throw _privateConstructorUsedError;
+  @JsonKey(name: 'monthly_revenue_previous', fromJson: parseDouble)
+  double? get monthlyRevenuePrevious => throw _privateConstructorUsedError;
+  @JsonKey(name: 'outstanding_rent_total', fromJson: parseDouble)
+  double? get outstandingRentTotal => throw _privateConstructorUsedError;
+  @JsonKey(name: 'upcoming_expenses_total', fromJson: parseDouble)
+  double? get upcomingExpensesTotal => throw _privateConstructorUsedError;
 
   /// Serializes this DashboardOverview to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -54,15 +56,21 @@ abstract class $DashboardOverviewCopyWith<$Res> {
   ) = _$DashboardOverviewCopyWithImpl<$Res, DashboardOverview>;
   @useResult
   $Res call({
-    @JsonKey(name: 'properties', fromJson: parseInt) int? propertiesCount,
-    @JsonKey(name: 'tenants', fromJson: parseInt) int? tenantsCount,
-    @JsonKey(name: 'charges_due', fromJson: parseInt) int? chargesDue,
-    @JsonKey(name: 'charges_overdue', fromJson: parseInt) int? chargesOverdue,
-    @JsonKey(name: 'maintenance_open', fromJson: parseInt) int? maintenanceOpen,
-    @JsonKey(name: 'rent_collected', fromJson: parseDouble)
-    double? rentCollected,
-    @JsonKey(name: 'occupancy_rate', fromJson: parseDouble)
-    double? occupancyRate,
+    @JsonKey(name: 'total_properties', fromJson: parseInt) int? totalProperties,
+    @JsonKey(name: 'occupied_properties', fromJson: parseInt)
+    int? occupiedProperties,
+    @JsonKey(name: 'vacant_properties', fromJson: parseInt)
+    int? vacantProperties,
+    @JsonKey(name: 'under_maintenance_properties', fromJson: parseInt)
+    int? underMaintenanceProperties,
+    @JsonKey(name: 'monthly_revenue_current', fromJson: parseDouble)
+    double? monthlyRevenueCurrent,
+    @JsonKey(name: 'monthly_revenue_previous', fromJson: parseDouble)
+    double? monthlyRevenuePrevious,
+    @JsonKey(name: 'outstanding_rent_total', fromJson: parseDouble)
+    double? outstandingRentTotal,
+    @JsonKey(name: 'upcoming_expenses_total', fromJson: parseDouble)
+    double? upcomingExpensesTotal,
   });
 }
 
@@ -81,43 +89,48 @@ class _$DashboardOverviewCopyWithImpl<$Res, $Val extends DashboardOverview>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? propertiesCount = freezed,
-    Object? tenantsCount = freezed,
-    Object? chargesDue = freezed,
-    Object? chargesOverdue = freezed,
-    Object? maintenanceOpen = freezed,
-    Object? rentCollected = freezed,
-    Object? occupancyRate = freezed,
+    Object? totalProperties = freezed,
+    Object? occupiedProperties = freezed,
+    Object? vacantProperties = freezed,
+    Object? underMaintenanceProperties = freezed,
+    Object? monthlyRevenueCurrent = freezed,
+    Object? monthlyRevenuePrevious = freezed,
+    Object? outstandingRentTotal = freezed,
+    Object? upcomingExpensesTotal = freezed,
   }) {
     return _then(
       _value.copyWith(
-            propertiesCount: freezed == propertiesCount
-                ? _value.propertiesCount
-                : propertiesCount // ignore: cast_nullable_to_non_nullable
+            totalProperties: freezed == totalProperties
+                ? _value.totalProperties
+                : totalProperties // ignore: cast_nullable_to_non_nullable
                       as int?,
-            tenantsCount: freezed == tenantsCount
-                ? _value.tenantsCount
-                : tenantsCount // ignore: cast_nullable_to_non_nullable
+            occupiedProperties: freezed == occupiedProperties
+                ? _value.occupiedProperties
+                : occupiedProperties // ignore: cast_nullable_to_non_nullable
                       as int?,
-            chargesDue: freezed == chargesDue
-                ? _value.chargesDue
-                : chargesDue // ignore: cast_nullable_to_non_nullable
+            vacantProperties: freezed == vacantProperties
+                ? _value.vacantProperties
+                : vacantProperties // ignore: cast_nullable_to_non_nullable
                       as int?,
-            chargesOverdue: freezed == chargesOverdue
-                ? _value.chargesOverdue
-                : chargesOverdue // ignore: cast_nullable_to_non_nullable
+            underMaintenanceProperties: freezed == underMaintenanceProperties
+                ? _value.underMaintenanceProperties
+                : underMaintenanceProperties // ignore: cast_nullable_to_non_nullable
                       as int?,
-            maintenanceOpen: freezed == maintenanceOpen
-                ? _value.maintenanceOpen
-                : maintenanceOpen // ignore: cast_nullable_to_non_nullable
-                      as int?,
-            rentCollected: freezed == rentCollected
-                ? _value.rentCollected
-                : rentCollected // ignore: cast_nullable_to_non_nullable
+            monthlyRevenueCurrent: freezed == monthlyRevenueCurrent
+                ? _value.monthlyRevenueCurrent
+                : monthlyRevenueCurrent // ignore: cast_nullable_to_non_nullable
                       as double?,
-            occupancyRate: freezed == occupancyRate
-                ? _value.occupancyRate
-                : occupancyRate // ignore: cast_nullable_to_non_nullable
+            monthlyRevenuePrevious: freezed == monthlyRevenuePrevious
+                ? _value.monthlyRevenuePrevious
+                : monthlyRevenuePrevious // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            outstandingRentTotal: freezed == outstandingRentTotal
+                ? _value.outstandingRentTotal
+                : outstandingRentTotal // ignore: cast_nullable_to_non_nullable
+                      as double?,
+            upcomingExpensesTotal: freezed == upcomingExpensesTotal
+                ? _value.upcomingExpensesTotal
+                : upcomingExpensesTotal // ignore: cast_nullable_to_non_nullable
                       as double?,
           )
           as $Val,
@@ -135,15 +148,21 @@ abstract class _$$DashboardOverviewImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    @JsonKey(name: 'properties', fromJson: parseInt) int? propertiesCount,
-    @JsonKey(name: 'tenants', fromJson: parseInt) int? tenantsCount,
-    @JsonKey(name: 'charges_due', fromJson: parseInt) int? chargesDue,
-    @JsonKey(name: 'charges_overdue', fromJson: parseInt) int? chargesOverdue,
-    @JsonKey(name: 'maintenance_open', fromJson: parseInt) int? maintenanceOpen,
-    @JsonKey(name: 'rent_collected', fromJson: parseDouble)
-    double? rentCollected,
-    @JsonKey(name: 'occupancy_rate', fromJson: parseDouble)
-    double? occupancyRate,
+    @JsonKey(name: 'total_properties', fromJson: parseInt) int? totalProperties,
+    @JsonKey(name: 'occupied_properties', fromJson: parseInt)
+    int? occupiedProperties,
+    @JsonKey(name: 'vacant_properties', fromJson: parseInt)
+    int? vacantProperties,
+    @JsonKey(name: 'under_maintenance_properties', fromJson: parseInt)
+    int? underMaintenanceProperties,
+    @JsonKey(name: 'monthly_revenue_current', fromJson: parseDouble)
+    double? monthlyRevenueCurrent,
+    @JsonKey(name: 'monthly_revenue_previous', fromJson: parseDouble)
+    double? monthlyRevenuePrevious,
+    @JsonKey(name: 'outstanding_rent_total', fromJson: parseDouble)
+    double? outstandingRentTotal,
+    @JsonKey(name: 'upcoming_expenses_total', fromJson: parseDouble)
+    double? upcomingExpensesTotal,
   });
 }
 
@@ -161,43 +180,48 @@ class __$$DashboardOverviewImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? propertiesCount = freezed,
-    Object? tenantsCount = freezed,
-    Object? chargesDue = freezed,
-    Object? chargesOverdue = freezed,
-    Object? maintenanceOpen = freezed,
-    Object? rentCollected = freezed,
-    Object? occupancyRate = freezed,
+    Object? totalProperties = freezed,
+    Object? occupiedProperties = freezed,
+    Object? vacantProperties = freezed,
+    Object? underMaintenanceProperties = freezed,
+    Object? monthlyRevenueCurrent = freezed,
+    Object? monthlyRevenuePrevious = freezed,
+    Object? outstandingRentTotal = freezed,
+    Object? upcomingExpensesTotal = freezed,
   }) {
     return _then(
       _$DashboardOverviewImpl(
-        propertiesCount: freezed == propertiesCount
-            ? _value.propertiesCount
-            : propertiesCount // ignore: cast_nullable_to_non_nullable
+        totalProperties: freezed == totalProperties
+            ? _value.totalProperties
+            : totalProperties // ignore: cast_nullable_to_non_nullable
                   as int?,
-        tenantsCount: freezed == tenantsCount
-            ? _value.tenantsCount
-            : tenantsCount // ignore: cast_nullable_to_non_nullable
+        occupiedProperties: freezed == occupiedProperties
+            ? _value.occupiedProperties
+            : occupiedProperties // ignore: cast_nullable_to_non_nullable
                   as int?,
-        chargesDue: freezed == chargesDue
-            ? _value.chargesDue
-            : chargesDue // ignore: cast_nullable_to_non_nullable
+        vacantProperties: freezed == vacantProperties
+            ? _value.vacantProperties
+            : vacantProperties // ignore: cast_nullable_to_non_nullable
                   as int?,
-        chargesOverdue: freezed == chargesOverdue
-            ? _value.chargesOverdue
-            : chargesOverdue // ignore: cast_nullable_to_non_nullable
+        underMaintenanceProperties: freezed == underMaintenanceProperties
+            ? _value.underMaintenanceProperties
+            : underMaintenanceProperties // ignore: cast_nullable_to_non_nullable
                   as int?,
-        maintenanceOpen: freezed == maintenanceOpen
-            ? _value.maintenanceOpen
-            : maintenanceOpen // ignore: cast_nullable_to_non_nullable
-                  as int?,
-        rentCollected: freezed == rentCollected
-            ? _value.rentCollected
-            : rentCollected // ignore: cast_nullable_to_non_nullable
+        monthlyRevenueCurrent: freezed == monthlyRevenueCurrent
+            ? _value.monthlyRevenueCurrent
+            : monthlyRevenueCurrent // ignore: cast_nullable_to_non_nullable
                   as double?,
-        occupancyRate: freezed == occupancyRate
-            ? _value.occupancyRate
-            : occupancyRate // ignore: cast_nullable_to_non_nullable
+        monthlyRevenuePrevious: freezed == monthlyRevenuePrevious
+            ? _value.monthlyRevenuePrevious
+            : monthlyRevenuePrevious // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        outstandingRentTotal: freezed == outstandingRentTotal
+            ? _value.outstandingRentTotal
+            : outstandingRentTotal // ignore: cast_nullable_to_non_nullable
+                  as double?,
+        upcomingExpensesTotal: freezed == upcomingExpensesTotal
+            ? _value.upcomingExpensesTotal
+            : upcomingExpensesTotal // ignore: cast_nullable_to_non_nullable
                   as double?,
       ),
     );
@@ -208,43 +232,54 @@ class __$$DashboardOverviewImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$DashboardOverviewImpl implements _DashboardOverview {
   const _$DashboardOverviewImpl({
-    @JsonKey(name: 'properties', fromJson: parseInt) this.propertiesCount,
-    @JsonKey(name: 'tenants', fromJson: parseInt) this.tenantsCount,
-    @JsonKey(name: 'charges_due', fromJson: parseInt) this.chargesDue,
-    @JsonKey(name: 'charges_overdue', fromJson: parseInt) this.chargesOverdue,
-    @JsonKey(name: 'maintenance_open', fromJson: parseInt) this.maintenanceOpen,
-    @JsonKey(name: 'rent_collected', fromJson: parseDouble) this.rentCollected,
-    @JsonKey(name: 'occupancy_rate', fromJson: parseDouble) this.occupancyRate,
+    @JsonKey(name: 'total_properties', fromJson: parseInt) this.totalProperties,
+    @JsonKey(name: 'occupied_properties', fromJson: parseInt)
+    this.occupiedProperties,
+    @JsonKey(name: 'vacant_properties', fromJson: parseInt)
+    this.vacantProperties,
+    @JsonKey(name: 'under_maintenance_properties', fromJson: parseInt)
+    this.underMaintenanceProperties,
+    @JsonKey(name: 'monthly_revenue_current', fromJson: parseDouble)
+    this.monthlyRevenueCurrent,
+    @JsonKey(name: 'monthly_revenue_previous', fromJson: parseDouble)
+    this.monthlyRevenuePrevious,
+    @JsonKey(name: 'outstanding_rent_total', fromJson: parseDouble)
+    this.outstandingRentTotal,
+    @JsonKey(name: 'upcoming_expenses_total', fromJson: parseDouble)
+    this.upcomingExpensesTotal,
   });
 
   factory _$DashboardOverviewImpl.fromJson(Map<String, dynamic> json) =>
       _$$DashboardOverviewImplFromJson(json);
 
   @override
-  @JsonKey(name: 'properties', fromJson: parseInt)
-  final int? propertiesCount;
+  @JsonKey(name: 'total_properties', fromJson: parseInt)
+  final int? totalProperties;
   @override
-  @JsonKey(name: 'tenants', fromJson: parseInt)
-  final int? tenantsCount;
+  @JsonKey(name: 'occupied_properties', fromJson: parseInt)
+  final int? occupiedProperties;
   @override
-  @JsonKey(name: 'charges_due', fromJson: parseInt)
-  final int? chargesDue;
+  @JsonKey(name: 'vacant_properties', fromJson: parseInt)
+  final int? vacantProperties;
   @override
-  @JsonKey(name: 'charges_overdue', fromJson: parseInt)
-  final int? chargesOverdue;
+  @JsonKey(name: 'under_maintenance_properties', fromJson: parseInt)
+  final int? underMaintenanceProperties;
   @override
-  @JsonKey(name: 'maintenance_open', fromJson: parseInt)
-  final int? maintenanceOpen;
+  @JsonKey(name: 'monthly_revenue_current', fromJson: parseDouble)
+  final double? monthlyRevenueCurrent;
   @override
-  @JsonKey(name: 'rent_collected', fromJson: parseDouble)
-  final double? rentCollected;
+  @JsonKey(name: 'monthly_revenue_previous', fromJson: parseDouble)
+  final double? monthlyRevenuePrevious;
   @override
-  @JsonKey(name: 'occupancy_rate', fromJson: parseDouble)
-  final double? occupancyRate;
+  @JsonKey(name: 'outstanding_rent_total', fromJson: parseDouble)
+  final double? outstandingRentTotal;
+  @override
+  @JsonKey(name: 'upcoming_expenses_total', fromJson: parseDouble)
+  final double? upcomingExpensesTotal;
 
   @override
   String toString() {
-    return 'DashboardOverview(propertiesCount: $propertiesCount, tenantsCount: $tenantsCount, chargesDue: $chargesDue, chargesOverdue: $chargesOverdue, maintenanceOpen: $maintenanceOpen, rentCollected: $rentCollected, occupancyRate: $occupancyRate)';
+    return 'DashboardOverview(totalProperties: $totalProperties, occupiedProperties: $occupiedProperties, vacantProperties: $vacantProperties, underMaintenanceProperties: $underMaintenanceProperties, monthlyRevenueCurrent: $monthlyRevenueCurrent, monthlyRevenuePrevious: $monthlyRevenuePrevious, outstandingRentTotal: $outstandingRentTotal, upcomingExpensesTotal: $upcomingExpensesTotal)';
   }
 
   @override
@@ -252,33 +287,40 @@ class _$DashboardOverviewImpl implements _DashboardOverview {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$DashboardOverviewImpl &&
-            (identical(other.propertiesCount, propertiesCount) ||
-                other.propertiesCount == propertiesCount) &&
-            (identical(other.tenantsCount, tenantsCount) ||
-                other.tenantsCount == tenantsCount) &&
-            (identical(other.chargesDue, chargesDue) ||
-                other.chargesDue == chargesDue) &&
-            (identical(other.chargesOverdue, chargesOverdue) ||
-                other.chargesOverdue == chargesOverdue) &&
-            (identical(other.maintenanceOpen, maintenanceOpen) ||
-                other.maintenanceOpen == maintenanceOpen) &&
-            (identical(other.rentCollected, rentCollected) ||
-                other.rentCollected == rentCollected) &&
-            (identical(other.occupancyRate, occupancyRate) ||
-                other.occupancyRate == occupancyRate));
+            (identical(other.totalProperties, totalProperties) ||
+                other.totalProperties == totalProperties) &&
+            (identical(other.occupiedProperties, occupiedProperties) ||
+                other.occupiedProperties == occupiedProperties) &&
+            (identical(other.vacantProperties, vacantProperties) ||
+                other.vacantProperties == vacantProperties) &&
+            (identical(
+                  other.underMaintenanceProperties,
+                  underMaintenanceProperties,
+                ) ||
+                other.underMaintenanceProperties ==
+                    underMaintenanceProperties) &&
+            (identical(other.monthlyRevenueCurrent, monthlyRevenueCurrent) ||
+                other.monthlyRevenueCurrent == monthlyRevenueCurrent) &&
+            (identical(other.monthlyRevenuePrevious, monthlyRevenuePrevious) ||
+                other.monthlyRevenuePrevious == monthlyRevenuePrevious) &&
+            (identical(other.outstandingRentTotal, outstandingRentTotal) ||
+                other.outstandingRentTotal == outstandingRentTotal) &&
+            (identical(other.upcomingExpensesTotal, upcomingExpensesTotal) ||
+                other.upcomingExpensesTotal == upcomingExpensesTotal));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode => Object.hash(
     runtimeType,
-    propertiesCount,
-    tenantsCount,
-    chargesDue,
-    chargesOverdue,
-    maintenanceOpen,
-    rentCollected,
-    occupancyRate,
+    totalProperties,
+    occupiedProperties,
+    vacantProperties,
+    underMaintenanceProperties,
+    monthlyRevenueCurrent,
+    monthlyRevenuePrevious,
+    outstandingRentTotal,
+    upcomingExpensesTotal,
   );
 
   /// Create a copy of DashboardOverview
@@ -300,43 +342,51 @@ class _$DashboardOverviewImpl implements _DashboardOverview {
 
 abstract class _DashboardOverview implements DashboardOverview {
   const factory _DashboardOverview({
-    @JsonKey(name: 'properties', fromJson: parseInt) final int? propertiesCount,
-    @JsonKey(name: 'tenants', fromJson: parseInt) final int? tenantsCount,
-    @JsonKey(name: 'charges_due', fromJson: parseInt) final int? chargesDue,
-    @JsonKey(name: 'charges_overdue', fromJson: parseInt)
-    final int? chargesOverdue,
-    @JsonKey(name: 'maintenance_open', fromJson: parseInt)
-    final int? maintenanceOpen,
-    @JsonKey(name: 'rent_collected', fromJson: parseDouble)
-    final double? rentCollected,
-    @JsonKey(name: 'occupancy_rate', fromJson: parseDouble)
-    final double? occupancyRate,
+    @JsonKey(name: 'total_properties', fromJson: parseInt)
+    final int? totalProperties,
+    @JsonKey(name: 'occupied_properties', fromJson: parseInt)
+    final int? occupiedProperties,
+    @JsonKey(name: 'vacant_properties', fromJson: parseInt)
+    final int? vacantProperties,
+    @JsonKey(name: 'under_maintenance_properties', fromJson: parseInt)
+    final int? underMaintenanceProperties,
+    @JsonKey(name: 'monthly_revenue_current', fromJson: parseDouble)
+    final double? monthlyRevenueCurrent,
+    @JsonKey(name: 'monthly_revenue_previous', fromJson: parseDouble)
+    final double? monthlyRevenuePrevious,
+    @JsonKey(name: 'outstanding_rent_total', fromJson: parseDouble)
+    final double? outstandingRentTotal,
+    @JsonKey(name: 'upcoming_expenses_total', fromJson: parseDouble)
+    final double? upcomingExpensesTotal,
   }) = _$DashboardOverviewImpl;
 
   factory _DashboardOverview.fromJson(Map<String, dynamic> json) =
       _$DashboardOverviewImpl.fromJson;
 
   @override
-  @JsonKey(name: 'properties', fromJson: parseInt)
-  int? get propertiesCount;
+  @JsonKey(name: 'total_properties', fromJson: parseInt)
+  int? get totalProperties;
   @override
-  @JsonKey(name: 'tenants', fromJson: parseInt)
-  int? get tenantsCount;
+  @JsonKey(name: 'occupied_properties', fromJson: parseInt)
+  int? get occupiedProperties;
   @override
-  @JsonKey(name: 'charges_due', fromJson: parseInt)
-  int? get chargesDue;
+  @JsonKey(name: 'vacant_properties', fromJson: parseInt)
+  int? get vacantProperties;
   @override
-  @JsonKey(name: 'charges_overdue', fromJson: parseInt)
-  int? get chargesOverdue;
+  @JsonKey(name: 'under_maintenance_properties', fromJson: parseInt)
+  int? get underMaintenanceProperties;
   @override
-  @JsonKey(name: 'maintenance_open', fromJson: parseInt)
-  int? get maintenanceOpen;
+  @JsonKey(name: 'monthly_revenue_current', fromJson: parseDouble)
+  double? get monthlyRevenueCurrent;
   @override
-  @JsonKey(name: 'rent_collected', fromJson: parseDouble)
-  double? get rentCollected;
+  @JsonKey(name: 'monthly_revenue_previous', fromJson: parseDouble)
+  double? get monthlyRevenuePrevious;
   @override
-  @JsonKey(name: 'occupancy_rate', fromJson: parseDouble)
-  double? get occupancyRate;
+  @JsonKey(name: 'outstanding_rent_total', fromJson: parseDouble)
+  double? get outstandingRentTotal;
+  @override
+  @JsonKey(name: 'upcoming_expenses_total', fromJson: parseDouble)
+  double? get upcomingExpensesTotal;
 
   /// Create a copy of DashboardOverview
   /// with the given fields replaced by the non-null parameter values.

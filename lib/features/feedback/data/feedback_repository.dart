@@ -1,4 +1,6 @@
+import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/core/network/api_client.dart';
+import 'package:estate_app/core/network/api_paths.dart';
 import 'package:estate_app/core/network/response_parser.dart';
 import 'package:estate_app/features/feedback/models/bug_report.dart';
 
@@ -8,7 +10,7 @@ class BugReportPayload {
     required this.title,
     required this.description,
     this.source = 'mobile',
-    this.severity = 'medium',
+    this.severity = BugSeverity.medium,
     this.stepsToReproduce,
     this.expectedBehavior,
     this.actualBehavior,
@@ -18,8 +20,8 @@ class BugReportPayload {
   });
 
   final String source;
-  final String bugType;
-  final String severity;
+  final BugType bugType;
+  final BugSeverity severity;
   final String title;
   final String description;
   final String? stepsToReproduce;
@@ -32,8 +34,8 @@ class BugReportPayload {
   Map<String, dynamic> toJson() {
     final payload = <String, dynamic>{
       'source': source,
-      'bug_type': bugType,
-      'severity': severity,
+      'bug_type': bugType.wire,
+      'severity': severity.wire,
       'title': title,
       'description': description,
     };
@@ -65,7 +67,10 @@ class FeedbackRepository {
   final ApiClient _client;
 
   Future<BugReport> submitBugReport(BugReportPayload payload) async {
-    final response = await _client.post<dynamic>('/bugs', data: payload.toJson());
+    final response = await _client.post<dynamic>(
+      ApiPaths.bugs,
+      data: payload.toJson(),
+    );
     final data = unwrapMap(response.data);
     return BugReport.fromJson(data);
   }

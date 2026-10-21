@@ -1,123 +1,195 @@
 import 'package:flutter/material.dart';
 
-/// Professional B2B SaaS color palette with navy/indigo primary.
-/// Optimized for enterprise property management with clear semantic usage.
+/// The 360 Estate palette: one teal family, ink, amber for "due" and red for
+/// "overdue". Values and contrast checks live in
+/// `design-system/360-estate/MASTER.md`.
+///
+/// Widgets read colours from the theme (`context.colors`, `context.palette`),
+/// so light and dark both work. The raw constants below feed the schemes.
 abstract final class AppColors {
-  // Primary - Navy/Indigo for enterprise trust
-  static const Color primary = Color(0xFF1E3A5F);
-  static const Color primaryDark = Color(0xFF152E4D);
-  static const Color primaryLight = Color(0xFF2A4A73);
-  static const Color primarySoft = Color(0xFFE8EDF4);
+  // Light.
+  static const Color primary = Color(0xFF0F766E);
+  static const Color primaryContainer = Color(0xFFCDE8E2);
+  static const Color onPrimaryContainer = Color(0xFF073B37);
+  static const Color secondary = Color(0xFF3D5A56);
+  static const Color secondaryContainer = Color(0xFFD9E6E3);
+  static const Color onSecondaryContainer = Color(0xFF16302C);
+  static const Color pageLight = Color(0xFFF4F8F7);
+  static const Color cardLight = Color(0xFFFFFFFF);
+  static const Color ink = Color(0xFF10201E);
+  static const Color inkVariant = Color(0xFF45524F);
+  static const Color outlineLight = Color(0xFF6F7E7B);
+  static const Color outlineVariantLight = Color(0xFFC6D2CF);
+  static const Color error = Color(0xFFB3261E);
+  static const Color errorContainer = Color(0xFFF9DEDC);
+  static const Color onErrorContainer = Color(0xFF5C0F0B);
+  static const Color warning = Color(0xFF8A5700);
+  static const Color warningContainer = Color(0xFFFBE7C2);
+  static const Color onWarningContainer = Color(0xFF3D2700);
 
-  // Accent
-  static const Color accent = Color(0xFF3B82F6);
+  // Dark: a green-black, never a blue one.
+  static const Color primaryDarkMode = Color(0xFF79D0C3);
+  static const Color onPrimaryDarkMode = Color(0xFF00382F);
+  static const Color primaryContainerDark = Color(0xFF0C4E48);
+  static const Color onPrimaryContainerDark = Color(0xFFC2EDE6);
+  static const Color secondaryDarkMode = Color(0xFFAFCAC5);
+  static const Color secondaryContainerDark = Color(0xFF304C48);
+  static const Color onSecondaryContainerDark = Color(0xFFCDE7E2);
+  static const Color pageDark = Color(0xFF0E1413);
+  static const Color cardDark = Color(0xFF151D1C);
+  static const Color inkDark = Color(0xFFE2EBE9);
+  static const Color inkVariantDark = Color(0xFFA8B7B4);
+  static const Color outlineDark = Color(0xFF869491);
+  static const Color outlineVariantDark = Color(0xFF3A4745);
+  static const Color errorDarkMode = Color(0xFFF2B8B5);
+  static const Color errorContainerDark = Color(0xFF7A1A15);
+  static const Color warningDarkMode = Color(0xFFEFC27A);
+  static const Color warningContainerDark = Color(0xFF4F3600);
 
-  // Semantic colors - used for status only, not decoration
-  static const Color success = Color(0xFF059669);      // Emerald - Paid, Completed
-  static const Color successLight = Color(0xFF34D399);
-  static const Color warning = Color(0xFFF59E0B);      // Amber - Due, Expiring
-  static const Color warningLight = Color(0xFFFBBF24);
-  static const Color danger = Color(0xFFDC2626);       // Red - Overdue, Critical
-  static const Color dangerLight = Color(0xFFF87171);
-  static const Color info = Color(0xFF0284C7);         // Sky - Information
-  static const Color infoLight = Color(0xFF38BDF8);
+  static ColorScheme lightScheme() => const ColorScheme(
+    brightness: Brightness.light,
+    primary: primary,
+    onPrimary: Colors.white,
+    primaryContainer: primaryContainer,
+    onPrimaryContainer: onPrimaryContainer,
+    secondary: secondary,
+    onSecondary: Colors.white,
+    secondaryContainer: secondaryContainer,
+    onSecondaryContainer: onSecondaryContainer,
+    tertiary: warning,
+    onTertiary: Colors.white,
+    tertiaryContainer: warningContainer,
+    onTertiaryContainer: onWarningContainer,
+    error: error,
+    onError: Colors.white,
+    errorContainer: errorContainer,
+    onErrorContainer: onErrorContainer,
+    surface: pageLight,
+    onSurface: ink,
+    onSurfaceVariant: inkVariant,
+    surfaceDim: Color(0xFFD4DEDB),
+    surfaceBright: pageLight,
+    surfaceContainerLowest: cardLight,
+    surfaceContainerLow: Color(0xFFEDF3F1),
+    surfaceContainer: Color(0xFFE7EEEC),
+    surfaceContainerHigh: Color(0xFFE1E9E7),
+    surfaceContainerHighest: Color(0xFFDAE3E1),
+    outline: outlineLight,
+    outlineVariant: outlineVariantLight,
+    inverseSurface: Color(0xFF253331),
+    onInverseSurface: Color(0xFFE9F1EF),
+    inversePrimary: primaryDarkMode,
+    shadow: Color(0xFF0B1A18),
+    scrim: Color(0xFF0B1A18),
+    surfaceTint: Colors.transparent,
+  );
 
-  // Gray scale for hierarchy
-  static const Color textPrimary = Color(0xFF111827);
-  static const Color textSecondary = Color(0xFF6B7280);
-  static const Color textTertiary = Color(0xFF9CA3AF);
-  static const Color textDisabled = Color(0xFFD1D5DB);
+  static ColorScheme darkScheme() => const ColorScheme(
+    brightness: Brightness.dark,
+    primary: primaryDarkMode,
+    onPrimary: onPrimaryDarkMode,
+    primaryContainer: primaryContainerDark,
+    onPrimaryContainer: onPrimaryContainerDark,
+    secondary: secondaryDarkMode,
+    onSecondary: Color(0xFF1C3532),
+    secondaryContainer: secondaryContainerDark,
+    onSecondaryContainer: onSecondaryContainerDark,
+    tertiary: warningDarkMode,
+    onTertiary: Color(0xFF3D2700),
+    tertiaryContainer: warningContainerDark,
+    onTertiaryContainer: warningContainer,
+    error: errorDarkMode,
+    onError: Color(0xFF601410),
+    errorContainer: errorContainerDark,
+    onErrorContainer: errorContainer,
+    surface: pageDark,
+    onSurface: inkDark,
+    onSurfaceVariant: inkVariantDark,
+    surfaceDim: pageDark,
+    surfaceBright: Color(0xFF2C3836),
+    surfaceContainerLowest: Color(0xFF0A0F0E),
+    surfaceContainerLow: Color(0xFF121A19),
+    surfaceContainer: Color(0xFF172120),
+    surfaceContainerHigh: Color(0xFF1F2A28),
+    surfaceContainerHighest: Color(0xFF263230),
+    outline: outlineDark,
+    outlineVariant: outlineVariantDark,
+    inverseSurface: inkDark,
+    onInverseSurface: Color(0xFF1B2624),
+    inversePrimary: primary,
+    shadow: Colors.black,
+    scrim: Colors.black,
+    surfaceTint: Colors.transparent,
+  );
+}
 
-  static const Color border = Color(0xFFE5E7EB);
-  static const Color borderLight = Color(0xFFF3F4F6);
-  static const Color divider = Color(0xFFE5E7EB);
+/// The colours Material 3 has no role for: the card surface (white on the
+/// tinted page in light, lifted off the green-black page in dark) and the
+/// success and warning states. Danger uses `colorScheme.error`; info uses
+/// `colorScheme.secondary`.
+@immutable
+class AppPalette extends ThemeExtension<AppPalette> {
+  const AppPalette({
+    required this.card,
+    required this.success,
+    required this.successContainer,
+    required this.onSuccessContainer,
+    required this.warning,
+    required this.warningContainer,
+    required this.onWarningContainer,
+  });
 
-  // Surfaces
-  static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceVariant = Color(0xFFF9FAFB);
-  static const Color surfaceSecondary = Color(0xFFF1F5F9);   // Nested/grouped content
-  static const Color surfaceTertiary = Color(0xFFE2E8F0);    // Pressed/hovered states
-  static const Color surfaceElevated = Color(0xFFFFFFFF);
-  static const Color accentSoft = Color(0xFFEFF6FF);          // Blue-tinted highlight bg
-  static const Color background = Color(0xFFF9FAFB);
-  static const Color backgroundDark = Color(0xFF111827);
+  static const light = AppPalette(
+    card: AppColors.cardLight,
+    success: AppColors.primary,
+    successContainer: AppColors.primaryContainer,
+    onSuccessContainer: AppColors.onPrimaryContainer,
+    warning: AppColors.warning,
+    warningContainer: AppColors.warningContainer,
+    onWarningContainer: AppColors.onWarningContainer,
+  );
 
-  // Gradient endpoints for primary gradient buttons/headers
-  static const Color primaryGradientStart = Color(0xFF1E3A5F);
-  static const Color primaryGradientEnd = Color(0xFF3B82F6);
+  static const dark = AppPalette(
+    card: AppColors.cardDark,
+    success: AppColors.primaryDarkMode,
+    successContainer: AppColors.primaryContainerDark,
+    onSuccessContainer: AppColors.onPrimaryContainerDark,
+    warning: AppColors.warningDarkMode,
+    warningContainer: AppColors.warningContainerDark,
+    onWarningContainer: AppColors.warningContainer,
+  );
 
-  // Card-specific border (lighter than general border)
-  static const Color cardBorder = Color(0xFFEDF0F3);
+  final Color card;
+  final Color success;
+  final Color successContainer;
+  final Color onSuccessContainer;
+  final Color warning;
+  final Color warningContainer;
+  final Color onWarningContainer;
 
-  // Dark mode colors
-  static const Color darkSurface = Color(0xFF1F2937);
-  static const Color darkSurfaceVariant = Color(0xFF374151);
-  static const Color darkSurfaceSecondary = Color(0xFF1A2332);  // Nested/grouped
-  static const Color darkSurfaceTertiary = Color(0xFF2D3B4E);   // Pressed/hovered
-  static const Color darkAccentSoft = Color(0xFF172554);         // Blue-tinted highlight
-  static const Color darkBackground = Color(0xFF111827);
-  static const Color darkBorder = Color(0xFF374151);
-  static const Color darkCardBorder = Color(0xFF2D3748);
+  @override
+  AppPalette copyWith({Color? card}) => AppPalette(
+    card: card ?? this.card,
+    success: success,
+    successContainer: successContainer,
+    onSuccessContainer: onSuccessContainer,
+    warning: warning,
+    warningContainer: warningContainer,
+    onWarningContainer: onWarningContainer,
+  );
 
-  static const Color darkTextPrimary = Color(0xFFF9FAFB);
-  static const Color darkTextSecondary = Color(0xFF9CA3AF);
-  static const Color darkTextTertiary = Color(0xFF6B7280);
-
-  // Legacy aliases for gradual migration
-  static const Color brand = primary;
-  static const Color brandDark = Color(0xFF152E4D);
-  static const Color brandSoft = primarySoft;
-  static const Color ink = textPrimary;
-  static const Color muted = textSecondary;
-  static const Color outline = border;
-  static const Color outlineVariant = borderLight;
-
-  static ColorScheme lightScheme() {
-    return ColorScheme.fromSeed(
-      seedColor: primary,
-      primary: primary,
-      onPrimary: Colors.white,
-      primaryContainer: primarySoft,
-      onPrimaryContainer: primaryDark,
-      secondary: accent,
-      onSecondary: Colors.white,
-      secondaryContainer: const Color(0xFFDBEAFE),
-      onSecondaryContainer: primaryDark,
-      tertiary: info,
-      onTertiary: Colors.white,
-      error: danger,
-      onError: Colors.white,
-      surface: surface,
-      onSurface: textPrimary,
-      surfaceContainerHighest: surfaceVariant,
-      onSurfaceVariant: textSecondary,
-      outline: border,
-      outlineVariant: borderLight,
-    );
-  }
-
-  static ColorScheme darkScheme() {
-    return ColorScheme.fromSeed(
-      seedColor: primaryLight,
-      brightness: Brightness.dark,
-      primary: primaryLight,
-      onPrimary: Colors.white,
-      primaryContainer: const Color(0xFF2A3B52),
-      onPrimaryContainer: primarySoft,
-      secondary: infoLight,
-      onSecondary: darkBackground,
-      secondaryContainer: darkSurfaceVariant,
-      onSecondaryContainer: primarySoft,
-      tertiary: infoLight,
-      onTertiary: darkBackground,
-      error: dangerLight,
-      onError: darkBackground,
-      surface: darkSurface,
-      onSurface: darkTextPrimary,
-      surfaceContainerHighest: darkSurfaceVariant,
-      onSurfaceVariant: darkTextSecondary,
-      outline: darkBorder,
-      outlineVariant: darkSurfaceVariant,
+  @override
+  AppPalette lerp(AppPalette? other, double t) {
+    if (other == null) return this;
+    Color mix(Color a, Color b) => Color.lerp(a, b, t)!;
+    return AppPalette(
+      card: mix(card, other.card),
+      success: mix(success, other.success),
+      successContainer: mix(successContainer, other.successContainer),
+      onSuccessContainer: mix(onSuccessContainer, other.onSuccessContainer),
+      warning: mix(warning, other.warning),
+      warningContainer: mix(warningContainer, other.warningContainer),
+      onWarningContainer: mix(onWarningContainer, other.onWarningContainer),
     );
   }
 }

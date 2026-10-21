@@ -1,16 +1,14 @@
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
-import 'package:estate_app/core/presentation/design_system/app_gradients.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
-import 'package:estate_app/core/presentation/design_system/app_shadows.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
 import 'package:estate_app/core/presentation/design_system/app_text_styles.dart';
-import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
+import 'package:estate_app/core/presentation/widgets/app_card.dart';
 import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
+import 'package:estate_app/core/utils/money.dart';
 import 'package:estate_app/features/more/reports/data/reports_repository.dart';
 import 'package:estate_app/features/more/reports/models/report_row.dart';
+import 'package:estate_app/features/more/reports/presentation/widgets/report_text.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:share_plus/share_plus.dart';
 
 class ReportDrilldownArgs {
   const ReportDrilldownArgs({required this.result, required this.row});
@@ -19,6 +17,8 @@ class ReportDrilldownArgs {
   final ReportRow row;
 }
 
+/// One line of a report: its amount, its share of the whole, and where it
+/// ranks among the other lines.
 class ReportDrilldownPage extends StatelessWidget {
   const ReportDrilldownPage({super.key, required this.args});
 
@@ -26,396 +26,171 @@ class ReportDrilldownPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rows = args.result.rows;
-    final total = _totalAmount(rows);
-    final rowAmount = args.row.amount ?? 0;
-    final percent = total > 0 ? (rowAmount / total) * 100 : null;
-    final formatter = NumberFormat.currency(symbol: '\u20B9', decimalDigits: 0);
+    final l10n = context.l10n;
+    final colors = context.colors;
+    final ranked = [
+      for (final r in args.result.rows)
+        if (r.amount != null) r,
+    ]..sort((a, b) => (b.amount ?? 0).compareTo(a.amount ?? 0));
+    final total = ranked.fold<double>(0, (t, r) => t + (r.amount ?? 0));
+    final amount = args.row.amount ?? 0;
+    final share = total > 0 ? amount / total : 0.0;
+    final detail = args.row.detailText(context.l10n);
 
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textTheme = Theme.of(context).textTheme;
-
-    return AppScaffold(
-      appBar: AppBar(
-        title: const Text('Report drilldown'),
-        actions: [
-          IconButton(
-            onPressed: () => _exportCsv(context, args.result),
-            icon: const Icon(Icons.ios_share_rounded),
-            tooltip: 'Export CSV',
-          ),
-        ],
-      ),
-      scrollable: true,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.reportDrilldownTitle)),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.sm,
+          AppSpacing.lg,
+          AppSpacing.xxl,
+        ),
         children: [
-          // KPI summary row
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            decoration: BoxDecoration(
-              gradient: AppGradients.primarySubtle,
-              color: isDark ? AppColors.darkAccentSoft : AppColors.accentSoft,
-              borderRadius: AppRadii.lg,
-              border: Border.all(
-                color: isDark ? AppColors.darkCardBorder : AppColors.cardBorder,
-                width: 0.5,
-              ),
-              boxShadow: AppShadows.cardResting,
-            ),
-            child: Row(
+          AppCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Selected item amount
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        args.row.label ?? 'Line item',
-                        style: textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        args.row.amount != null
-                            ? formatter.format(args.row.amount)
-                            : args.row.value ?? '-',
-                        style: AppTextStyles.currencyMedium.copyWith(
-                          color: scheme.primary,
-                        ),
-                      ),
-                    ],
+                Text(
+                  args.row.labelText(context.l10n),
+                  style: context.text.titleLarge,
+                ),
+                if (detail != null && detail.isNotEmpty)
+                  Text(
+                    detail,
+                    style: context.text.bodyMedium?.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  args.row.amount == null
+                      ? args.row.valueText(context.l10n) ?? '-'
+                      : rupees(amount),
+                  style: AppTextStyles.currencyLarge.copyWith(
+                    color: colors.onSurface,
                   ),
                 ),
-
-                // Divider
-                Container(
-                  width: 1,
-                  height: 48,
-                  color: isDark
-                      ? AppColors.darkCardBorder
-                      : AppColors.cardBorder,
-                ),
-
-                const SizedBox(width: AppSpacing.lg),
-
-                // Share of total
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Share of total',
-                        style: textTheme.labelSmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                if (total > 0) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  ExcludeSemantics(
+                    child: ClipRRect(
+                      borderRadius: AppRadii.xs,
+                      child: LinearProgressIndicator(
+                        value: share.clamp(0.0, 1.0),
+                        minHeight: 8,
                       ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        percent != null
-                            ? '${percent.toStringAsFixed(1)}%'
-                            : '-',
-                        style: AppTextStyles.currencyMedium.copyWith(
-                          color: scheme.onSurface,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-
-                // Total
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Total',
-                        style: textTheme.labelSmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        formatter.format(total),
-                        style: AppTextStyles.currencySmall.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    l10n.reportDrilldownShare(
+                      '${(share * 100).toStringAsFixed(1)}%',
+                      rupees(total),
+                    ),
+                    style: context.text.bodyMedium?.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
-
-          const SizedBox(height: AppSpacing.xl),
-
-          // Top contributors table
+          const SizedBox(height: AppSpacing.md),
           AppSectionCard(
-            title: 'Top contributors',
-            icon: Icons.leaderboard_rounded,
-            contentPadding: EdgeInsets.zero,
-            child: _TopContributorsTable(
-              rows: rows,
-              total: total,
-            ),
-          ),
-
-          const SizedBox(height: AppSpacing.lg),
-
-          // Automation hooks placeholder
-          AppSectionCard(
-            title: 'Automation hooks',
-            icon: Icons.auto_awesome_rounded,
-            iconColor: AppColors.warning,
+            title: l10n.reportDrilldownRanking,
+            contentPadding: const EdgeInsets.only(bottom: AppSpacing.sm),
             children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? AppColors.darkSurfaceSecondary
-                      : AppColors.surfaceSecondary,
-                  borderRadius: AppRadii.md,
+              if (ranked.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Text(l10n.reportDrilldownNoAmounts),
                 ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline_rounded,
-                      size: 18,
-                      color: AppColors.textSecondary,
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Text(
-                        'Export and automation triggers will be added in a later phase.',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ],
+              for (var i = 0; i < ranked.length; i++)
+                _RankRow(
+                  rank: i + 1,
+                  row: ranked[i],
+                  total: total,
+                  current: identical(ranked[i], args.row),
                 ),
-              ),
             ],
           ),
         ],
       ),
     );
-  }
-
-  double _totalAmount(List<ReportRow> rows) {
-    return rows.fold<double>(
-      0,
-      (total, row) => total + (row.amount ?? 0),
-    );
-  }
-
-  /// Exports the report result as a CSV string and shares it via the system
-  /// share sheet.
-  void _exportCsv(BuildContext context, ReportResult result) {
-    final buffer = StringBuffer();
-    buffer.writeln('Label,Amount,Value');
-    for (final row in result.rows) {
-      final label = _csvEscape(row.label ?? '');
-      final amount = row.amount?.toStringAsFixed(2) ?? '';
-      final value = _csvEscape(row.value ?? '');
-      buffer.writeln('$label,$amount,$value');
-    }
-    final csv = buffer.toString();
-    final reportName = result.type.name;
-    final dateStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
-
-    Share.share(csv, subject: '$reportName report ($dateStr)');
-  }
-
-  /// Escapes a string for CSV output (wraps in quotes if it contains commas,
-  /// quotes, or newlines). Prefixes risky leading characters to prevent
-  /// formula injection when opened in spreadsheet applications.
-  String _csvEscape(String value) {
-    var sanitized = value;
-    if (sanitized.isNotEmpty &&
-        (sanitized.startsWith('=') ||
-            sanitized.startsWith('+') ||
-            sanitized.startsWith('-') ||
-            sanitized.startsWith('@'))) {
-      sanitized = "'$sanitized";
-    }
-    if (sanitized.contains(',') ||
-        sanitized.contains('"') ||
-        sanitized.contains('\n') ||
-        sanitized.contains('\r')) {
-      return '"${sanitized.replaceAll('"', '""')}"';
-    }
-    return sanitized;
   }
 }
 
-/// Table of top contributors with alternating row backgrounds.
-class _TopContributorsTable extends StatelessWidget {
-  const _TopContributorsTable({
-    required this.rows,
+class _RankRow extends StatelessWidget {
+  const _RankRow({
+    required this.rank,
+    required this.row,
     required this.total,
+    required this.current,
   });
 
-  final List<ReportRow> rows;
+  final int rank;
+  final ReportRow row;
   final double total;
+  final bool current;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textTheme = Theme.of(context).textTheme;
-    final formatter = NumberFormat.currency(symbol: '\u20B9', decimalDigits: 0);
-
-    final ranked = rows
-        .where((row) => row.amount != null)
-        .toList()
-      ..sort((a, b) => (b.amount ?? 0).compareTo(a.amount ?? 0));
-
-    if (ranked.isEmpty) {
-      return Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Text(
-          'No numeric breakdown available.',
-          style: textTheme.bodySmall?.copyWith(
-            color: AppColors.textSecondary,
-          ),
+    final colors = context.colors;
+    final percent = total > 0
+        ? '${((row.amount ?? 0) / total * 100).toStringAsFixed(1)}%'
+        : '';
+    final ink = current ? colors.onPrimaryContainer : colors.onSurface;
+    final tabular = const [FontFeature.tabularFigures()];
+    return MergeSemantics(
+      child: Container(
+        color: current ? colors.primaryContainer : null,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
         ),
-      );
-    }
-
-    final display = ranked.take(6).toList();
-
-    return Column(
-      children: [
-        // Table header
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
-          decoration: BoxDecoration(
-            color: isDark
-                ? AppColors.darkSurfaceSecondary
-                : AppColors.surfaceSecondary,
-          ),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 28,
-                child: Text(
-                  '#',
-                  style: textTheme.labelSmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 28,
+              child: Text(
+                '$rank',
+                style: context.text.bodyMedium?.copyWith(
+                  color: current ? ink : colors.onSurfaceVariant,
+                  fontFeatures: tabular,
                 ),
               ),
-              Expanded(
-                child: Text(
-                  'Item',
-                  style: textTheme.labelSmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+            ),
+            Expanded(
+              child: Text(
+                row.labelText(context.l10n),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: context.text.bodyMedium?.copyWith(
+                  color: ink,
+                  fontWeight: current ? FontWeight.w700 : FontWeight.w500,
                 ),
               ),
-              SizedBox(
-                width: 100,
-                child: Text(
-                  'Amount',
-                  style: textTheme.labelSmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                  textAlign: TextAlign.right,
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Text(
+              rupees(row.amount ?? 0),
+              style: AppTextStyles.currencyXSmall.copyWith(color: ink),
+            ),
+            SizedBox(
+              width: 56,
+              child: Text(
+                percent,
+                textAlign: TextAlign.end,
+                style: context.text.bodySmall?.copyWith(
+                  color: current ? ink : colors.onSurfaceVariant,
+                  fontFeatures: tabular,
                 ),
               ),
-              const SizedBox(width: AppSpacing.md),
-              SizedBox(
-                width: 48,
-                child: Text(
-                  '%',
-                  style: textTheme.labelSmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                  textAlign: TextAlign.right,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-
-        // Data rows with alternating backgrounds
-        ...display.asMap().entries.map((entry) {
-          final index = entry.key;
-          final row = entry.value;
-          final isOdd = index.isOdd;
-          final pct = total > 0
-              ? ((row.amount ?? 0) / total * 100).toStringAsFixed(1)
-              : '-';
-
-          return Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
-            ),
-            color: isOdd
-                ? (isDark
-                    ? AppColors.darkSurfaceSecondary
-                    : AppColors.surfaceSecondary)
-                : Colors.transparent,
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 28,
-                  child: Text(
-                    '${index + 1}',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: AppColors.textTertiary,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    row.label ?? 'Item',
-                    style: textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                SizedBox(
-                  width: 100,
-                  child: Text(
-                    formatter.format(row.amount ?? 0),
-                    style: AppTextStyles.currencyXSmall.copyWith(
-                      color: scheme.onSurface,
-                    ),
-                    textAlign: TextAlign.right,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                SizedBox(
-                  width: 48,
-                  child: Text(
-                    '$pct%',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                    textAlign: TextAlign.right,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }),
-      ],
+      ),
     );
   }
 }

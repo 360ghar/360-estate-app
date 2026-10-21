@@ -86,13 +86,30 @@ final class AppConfig {
   bool get isProd => environment == AppEnvironment.prod;
 
   bool get isSupabaseConfigured =>
-      supabaseUrl.trim().isNotEmpty &&
-      supabasePublishableKey.trim().isNotEmpty;
+      supabaseUrl.trim().isNotEmpty && supabasePublishableKey.trim().isNotEmpty;
 
   /// Google Sign-In can only be attempted when at least the web client id is
   /// configured (required as the Android `serverClientId` and for Supabase to
   /// validate the ID token). The iOS client id is additionally required on iOS.
   bool get isGoogleSignInConfigured => googleWebClientId.trim().isNotEmpty;
+
+  static String _redactSecret(String value) {
+    final v = value.trim();
+    if (v.isEmpty) return '(empty)';
+    if (v.length <= 4) return '***';
+    return '${v.substring(0, 4)}***';
+  }
+
+  @override
+  String toString() =>
+      'AppConfig(environment: $environment, apiBaseUrl: $apiBaseUrl, '
+      'supabaseUrl: $supabaseUrl, '
+      'supabasePublishableKey: ${_redactSecret(supabasePublishableKey)}, '
+      'googlePlacesApiKey: ${_redactSecret(googlePlacesApiKey)}, '
+      'googleWebClientId: ${_redactSecret(googleWebClientId)}, '
+      'googleIosClientId: ${_redactSecret(googleIosClientId)}, '
+      'enableCrashReporting: $enableCrashReporting, '
+      'enableDebugLogs: $enableDebugLogs)';
 
   static AppEnvironment _parseEnv(String value) {
     switch (value.trim().toLowerCase()) {
@@ -184,8 +201,7 @@ final class AppConfig {
     // Base URL must include /api/v1 exactly once; call sites use bare paths
     // like /auth/... and /pm/....
     final apiBaseUrl = normalizeApiBaseUrl(apiBaseUrlRaw);
-    if (supabaseUrl.trim().isEmpty ||
-        supabasePublishableKey.trim().isEmpty) {
+    if (supabaseUrl.trim().isEmpty || supabasePublishableKey.trim().isEmpty) {
       throw StateError(
         'Missing SUPABASE_URL or SUPABASE_PUBLISHABLE_KEY configuration.',
       );

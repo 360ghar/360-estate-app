@@ -1,14 +1,27 @@
-import 'package:estate_app/core/presentation/design_system/app_colors.dart';
+import 'package:estate_app/app/router/routes.dart';
+import 'package:estate_app/core/api/wire_enums.dart';
 import 'package:estate_app/core/presentation/design_system/app_radii.dart';
 import 'package:estate_app/core/presentation/design_system/app_spacing.dart';
-import 'package:estate_app/core/presentation/widgets/app_scaffold.dart';
+import 'package:estate_app/core/presentation/errors/user_facing_message.dart';
+import 'package:estate_app/core/presentation/extensions/build_context_x.dart';
 import 'package:estate_app/core/presentation/widgets/app_section_card.dart';
+import 'package:estate_app/core/presentation/widgets/feedback.dart';
+import 'package:estate_app/core/utils/dates.dart';
 import 'package:estate_app/features/inspections/data/inspections_repository.dart';
 import 'package:estate_app/features/inspections/inspections_providers.dart';
+import 'package:estate_app/features/inspections/presentation/inspection_text.dart';
+import 'package:estate_app/features/inspections/presentation/widgets/checklist_editor.dart';
+import 'package:estate_app/features/leases/leases_providers.dart';
+import 'package:estate_app/features/leases/models/lease.dart';
+import 'package:estate_app/features/leases/presentation/lease_text.dart';
+import 'package:estate_app/features/properties/models/property.dart';
+import 'package:estate_app/features/properties/properties_providers.dart';
+import 'package:estate_app/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+/// A new inspection: which lease, what kind and when, and its checklist.
 class InspectionFormPage extends ConsumerStatefulWidget {
   const InspectionFormPage({super.key});
 
@@ -18,270 +31,296 @@ class InspectionFormPage extends ConsumerStatefulWidget {
 
 class _InspectionFormPageState extends ConsumerState<InspectionFormPage> {
   final _formKey = GlobalKey<FormState>();
-  final _propertyController = TextEditingController();
-  final _tenantController = TextEditingController();
-  final _titleController = TextEditingController();
-  final _scheduledController = TextEditingController();
-  final _itemController = TextEditingController();
+  final _notes = TextEditingController();
 
-  final List<String> _items = [];
-  bool _isSaving = false;
+  int? _propertyId;
+  int? _leaseId;
+  InspectionType _type = InspectionType.routine;
+  DateTime? _conductedOn;
+  List<String> _items = const [];
+  bool _saving = false;
 
   @override
   void dispose() {
-    _propertyController.dispose();
-    _tenantController.dispose();
-    _titleController.dispose();
-    _scheduledController.dispose();
-    _itemController.dispose();
+    _notes.dispose();
     super.dispose();
   }
 
-  void _addItem() {
-    final text = _itemController.text.trim();
-    if (text.isEmpty) return;
-    setState(() {
-      _items.add(text);
-      _itemController.clear();
-    });
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _conductedOn ?? now,
+      firstDate: DateTime(now.year - 2),
+      lastDate: DateTime(now.year + 1, 12, 31),
+    );
+    if (picked != null) setState(() => _conductedOn = picked);
   }
 
   Future<void> _submit() async {
+    final l10n = context.l10n;
     if (!(_formKey.currentState?.validate() ?? false)) return;
-    final scheduledAt = DateTime.tryParse(_scheduledController.text.trim());
-
-    setState(() => _isSaving = true);
+    final leaseId = _leaseId;
+    if (leaseId == null) {
+      // A property with no lease shows no lease field to validate.
+      context.showSnack(l10n.inspectionFormChooseLease);
+      return;
+    }
+    setState(() => _saving = true);
     try {
-      final request = InspectionCreateRequest(
-        propertyId: _propertyController.text.trim(),
-        tenantId: _tenantController.text.trim().isEmpty
-            ? null
-            : _tenantController.text.trim(),
-        title: _titleController.text.trim(),
-        scheduledAt: scheduledAt,
-        items: List<String>.from(_items),
-      );
-      await ref.read(inspectionsRepositoryProvider).create(request);
+      await ref
+          .read(inspectionsRepositoryProvider)
+          .create(
+            InspectionCreateRequest(
+              leaseId: leaseId,
+              inspectionType: _type,
+              conductedAt: _conductedOn,
+              overallNotes: _notes.text,
+              items: List<String>.from(_items),
+            ),
+          );
       ref.invalidate(inspectionsListProvider);
-      if (mounted) {
-        context.go('/more/inspections');
-      }
-    } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
+      context.showSnack(l10n.inspectionFormCreated);
+      context.go(Routes.inspections);
+    } catch (error) {
+      if (mounted) context.showSnack(userFacingMessage(error));
     } finally {
-      if (mounted) setState(() => _isSaving = false);
+      if (mounted) setState(() => _saving = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return AppScaffold(
-      appBar: AppBar(title: const Text('Create inspection')),
-      scrollable: true,
+    final l10n = context.l10n;
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.inspectionFormTitle)),
       body: Form(
         key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView(
+          padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
-            // Inspection Details Section
-            AppSectionCard(
-              title: 'Inspection Details',
-              icon: Icons.assignment_outlined,
-              iconColor: AppColors.primary,
-              children: [
-                TextFormField(
-                  controller: _titleController,
-                  decoration: const InputDecoration(
-                    labelText: 'Title',
-                    prefixIcon: Icon(Icons.title, size: 20),
-                  ),
-                  validator: (value) =>
-                      value == null || value.trim().isEmpty
-                          ? 'Enter a title.'
-                          : null,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                TextFormField(
-                  controller: _scheduledController,
-                  decoration: const InputDecoration(
-                    labelText: 'Scheduled date',
-                    hintText: 'YYYY-MM-DD',
-                    prefixIcon: Icon(Icons.calendar_today_outlined, size: 20),
-                  ),
-                ),
-              ],
+            _LeasePicker(
+              propertyId: _propertyId,
+              leaseId: _leaseId,
+              onProperty: (id) => setState(() {
+                _propertyId = id;
+                _leaseId = null;
+              }),
+              onLease: (id) => setState(() => _leaseId = id),
             ),
-            const SizedBox(height: AppSpacing.lg),
-
-            // Property Section
+            const SizedBox(height: AppSpacing.md),
             AppSectionCard(
-              title: 'Property',
-              icon: Icons.home_outlined,
-              iconColor: AppColors.info,
+              title: l10n.inspectionFormDetailsSection,
               children: [
-                TextFormField(
-                  controller: _propertyController,
-                  decoration: const InputDecoration(
-                    labelText: 'Property ID',
-                    prefixIcon: Icon(Icons.home_work_outlined, size: 20),
-                  ),
-                  validator: (value) =>
-                      value == null || value.trim().isEmpty
-                          ? 'Enter a property ID.'
-                          : null,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                TextFormField(
-                  controller: _tenantController,
-                  decoration: const InputDecoration(
-                    labelText: 'Tenant ID (optional)',
-                    prefixIcon: Icon(Icons.person_outline, size: 20),
+                Text(
+                  l10n.inspectionFormType,
+                  style: context.text.labelLarge?.copyWith(
+                    color: context.colors.onSurfaceVariant,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.lg),
-
-            // Checklist Items Section
-            AppSectionCard(
-              title: 'Checklist Items',
-              icon: Icons.checklist_outlined,
-              iconColor: AppColors.warning,
-              children: [
-                Row(
+                const SizedBox(height: AppSpacing.sm),
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
                   children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _itemController,
-                        decoration: const InputDecoration(
-                          labelText: 'Add checklist item',
-                          prefixIcon: Icon(Icons.add_task, size: 20),
-                        ),
-                        onFieldSubmitted: (_) => _addItem(),
+                    for (final type in InspectionType.values)
+                      ChoiceChip(
+                        label: Text(type.text(l10n)),
+                        selected: _type == type,
+                        onSelected: (_) => setState(() => _type = type),
                       ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    FilledButton.tonalIcon(
-                      onPressed: _addItem,
-                      icon: const Icon(Icons.add, size: 20),
-                      label: const Text('Add'),
-                    ),
                   ],
                 ),
-                if (_items.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.md),
-                  ..._items.asMap().entries.map(
-                    (entry) {
-                      final index = entry.key;
-                      final item = entry.value;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: isDark
-                                ? AppColors.darkSurfaceSecondary
-                                : AppColors.surfaceSecondary,
-                            borderRadius: AppRadii.md,
-                            border: Border.all(
-                              color: isDark
-                                  ? AppColors.darkCardBorder
-                                  : AppColors.cardBorder,
-                              width: 0.5,
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.md,
-                              vertical: AppSpacing.sm,
-                            ),
-                            child: Row(
-                              children: [
-                                // Numbered circle
-                                Container(
-                                  width: 24,
-                                  height: 24,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primary.withValues(
-                                      alpha: isDark ? 0.15 : 0.08,
-                                    ),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    '${index + 1}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.primary,
-                                        ),
-                                  ),
-                                ),
-                                const SizedBox(width: AppSpacing.sm),
-                                Expanded(
-                                  child: Text(
-                                    item,
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium,
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.remove_circle_outline,
-                                    color: AppColors.danger,
-                                    size: 20,
-                                  ),
-                                  onPressed: () {
-                                    setState(() => _items.removeAt(index));
-                                  },
-                                  tooltip: 'Remove item',
-                                  constraints: const BoxConstraints(
-                                    minWidth: 32,
-                                    minHeight: 32,
-                                  ),
-                                  padding: EdgeInsets.zero,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xl),
-
-            // Submit button
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: _isSaving ? null : _submit,
-                icon: _isSaving
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.check_circle_outline),
-                label: Text(_isSaving ? 'Creating...' : 'Create inspection'),
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.md,
+                const SizedBox(height: AppSpacing.lg),
+                InkWell(
+                  borderRadius: AppRadii.md,
+                  onTap: _pickDate,
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: l10n.inspectionFormDate,
+                      suffixIcon: const Icon(Icons.calendar_today_outlined),
+                    ),
+                    child: Text(
+                      _conductedOn == null
+                          ? l10n.inspectionFormToday
+                          : shortDate(context, _conductedOn!),
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(height: AppSpacing.lg),
+                TextFormField(
+                  controller: _notes,
+                  minLines: 3,
+                  maxLines: 6,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: InputDecoration(
+                    labelText: l10n.inspectionFormNotes,
+                    helperText: l10n.inspectionFormNotesHelp,
+                    alignLabelWithHint: true,
+                  ),
+                ),
+              ],
             ),
+            const SizedBox(height: AppSpacing.md),
+            ChecklistEditor(
+              items: _items,
+              onChanged: (items) => setState(() => _items = items),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            FilledButton.icon(
+              onPressed: _saving ? null : _submit,
+              icon: _saving
+                  ? const SizedBox.square(
+                      dimension: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : null,
+              label: Text(l10n.inspectionFormCreate),
+            ),
+            const SizedBox(height: AppSpacing.lg),
           ],
         ),
       ),
     );
   }
+}
+
+/// The inspection belongs to a lease: pick the property, then one of its
+/// leases.
+class _LeasePicker extends ConsumerWidget {
+  const _LeasePicker({
+    required this.propertyId,
+    required this.leaseId,
+    required this.onProperty,
+    required this.onLease,
+  });
+
+  final int? propertyId;
+  final int? leaseId;
+  final ValueChanged<int?> onProperty;
+  final ValueChanged<int?> onLease;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final muted = context.text.bodyMedium?.copyWith(
+      color: context.colors.onSurfaceVariant,
+    );
+    final properties = ref.watch(propertiesListProvider);
+    final property = propertyId;
+    final leases = property == null
+        ? null
+        : ref.watch(leasesListProvider(LeaseListFilter(propertyId: property)));
+
+    return AppSectionCard(
+      title: l10n.inspectionFormLeaseSection,
+      children: [
+        properties.when(
+          loading: () => const LinearProgressIndicator(),
+          error: (error, _) => _LoadError(
+            message: userFacingMessage(error),
+            style: muted,
+            onRetry: () => ref.invalidate(propertiesListProvider),
+          ),
+          data: (list) => DropdownButtonFormField<int>(
+            initialValue: list.any((p) => p.id == propertyId)
+                ? propertyId
+                : null,
+            isExpanded: true,
+            decoration: InputDecoration(labelText: l10n.inspectionFormProperty),
+            items: [
+              for (final p in list)
+                if (p.id != null)
+                  DropdownMenuItem<int>(
+                    value: p.id,
+                    child: Text(p.displayName, overflow: TextOverflow.ellipsis),
+                  ),
+            ],
+            onChanged: onProperty,
+            validator: (v) =>
+                v == null ? l10n.inspectionFormChooseProperty : null,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        if (leases == null)
+          Text(l10n.inspectionFormPickPropertyFirst, style: muted)
+        else
+          leases.when(
+            loading: () => const LinearProgressIndicator(),
+            error: (error, _) => _LoadError(
+              message: userFacingMessage(error),
+              style: muted,
+              onRetry: () => ref.invalidate(
+                leasesListProvider(LeaseListFilter(propertyId: property)),
+              ),
+            ),
+            data: (list) => list.isEmpty
+                ? Row(
+                    children: [
+                      Expanded(
+                        child: Text(l10n.inspectionFormNoLease, style: muted),
+                      ),
+                      TextButton(
+                        onPressed: () => context.go(Routes.leasesNew),
+                        child: Text(l10n.inspectionFormAddLease),
+                      ),
+                    ],
+                  )
+                : DropdownButtonFormField<int>(
+                    key: ValueKey('lease-$propertyId'),
+                    initialValue: list.any((l) => l.id == leaseId)
+                        ? leaseId
+                        : null,
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      labelText: l10n.inspectionFormLease,
+                    ),
+                    items: [
+                      for (final lease in list)
+                        if (lease.id != null)
+                          DropdownMenuItem<int>(
+                            value: lease.id,
+                            child: Text(
+                              _leaseLabel(l10n, lease),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                    ],
+                    onChanged: onLease,
+                    validator: (v) =>
+                        v == null ? l10n.inspectionFormChooseLease : null,
+                  ),
+          ),
+      ],
+    );
+  }
+
+  static String _leaseLabel(AppLocalizations l10n, Lease lease) {
+    final status = lease.status?.text(l10n) ?? '';
+    return status.isEmpty
+        ? lease.displayName
+        : '${lease.displayName} · $status';
+  }
+}
+
+/// A failed load with a retry, so the form is not left unusable.
+class _LoadError extends StatelessWidget {
+  const _LoadError({
+    required this.message,
+    required this.style,
+    required this.onRetry,
+  });
+
+  final String message;
+  final TextStyle? style;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      Expanded(child: Text(message, style: style)),
+      TextButton(onPressed: onRetry, child: Text(context.l10n.commonRetry)),
+    ],
+  );
 }
